@@ -8,7 +8,7 @@ import format = require("./formatValues");
 export const msgToBeSent = async(data: any, chain?: string, poolName?: string, eventFrom?: string) => {
 const allCollateralPrices:any = await getCollateralPrices()
 
-  console.log('allCollateralPrices', allCollateralPrices)
+  // console.log('allCollateralPrices', allCollateralPrices)
 
   let chainLink = "";
   let tvl = "";
@@ -20,8 +20,8 @@ const allCollateralPrices:any = await getCollateralPrices()
   const tvlApr = await tvlAprFn();
   const lpPoolValObj = await poolTokenVal();
 
-  console.log('lpPoolValObj', lpPoolValObj)
-  console.log('chain', chain)
+  // console.log('lpPoolValObj', lpPoolValObj)
+  // console.log('chain', chain)
 
   if (chain == "Polygon Mainnet") {
     chainLink = "https://polygonscan.com";
@@ -321,7 +321,16 @@ const allCollateralPrices:any = await getCollateralPrices()
     if(data.returnValues.deposit_type == '3')
       msg = `The locking period of MAHA token is extended for NFT till *${moment(
         data.returnValues.locktime * 1000).format("DD MMM YYYY")}* by [${eventUser}](${url})`
+  }
 
+  if(data.event == "Transfer" && eventFrom == 'mahaxnft'){
+    const  from = data.returnValues.from
+    const to = data.returnValues.to
+    eventVal = format.toDisplayNumber(data.returnValues.value)
+    url = `https://mumbai.polygonscan.com/address/${from}`
+    chainLink = 'https://mumbai.polygonscan.com'
+
+    msg = `An NFT is transferred from ${from} to ${to}`
   }
 
   let dots = "";

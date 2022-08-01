@@ -30,9 +30,10 @@ client.on("messageCreate", (msg) => {
   if (msg.content.toLowerCase() == "maha") msg.channel.send("DAO");
 });
 
+
 // const DISCORD_TOKEN = nconf.get('MAHA_DiscordClientToken') // for production
-// const DISCORD_TOKEN = nconf.get('Test_DISCORD_TOKEN') // for testing
-const DISCORD_TOKEN = nconf.get('TweetMentionDiscordClientToken')
+const DISCORD_TOKEN = nconf.get('Test_DISCORD_TOKEN') // for testing
+// const DISCORD_TOKEN = nconf.get('TweetMentionDiscordClientToken')
 
 client.login(DISCORD_TOKEN); //login bot using token
 
@@ -41,6 +42,7 @@ export const sendMessage = (channelName: any, messageMarkdown: string, tweet?: a
 
   let discordMsgEmbed: any
   if(tweet){
+
     console.log('if tweet')
     // client.user?.setUsername(user.screen_name)
     // client.user?.setAvatar(user.profile_image_url)
@@ -61,6 +63,7 @@ export const sendMessage = (channelName: any, messageMarkdown: string, tweet?: a
 
   }
   else{
+
     client.user?.setUsername('Maha')
 
     discordMsgEmbed = new MessageEmbed()

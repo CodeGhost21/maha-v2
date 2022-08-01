@@ -10,14 +10,14 @@ nconf.argv()
 // import quickswap from './src/bots/quickswap'
 // // import curvePolygon from './src/events/exchange/curvePolygon'
 // import troveManager from './src/bots/arthloans/troveManage'
-import { twitterMetions } from './bots/twitterMention';
+// import { twitterMetions } from './bots/twitterMention';
 // import fantomNotify from './src/bots/fantomNotify';
-// import mahaxNFT from './src/bots/gov/mahaxNFT'
+import mahaxNFT from './bots/gov/mahaxNFT'
 
 // At a time 13 connections can be open
 
-const mode = 'production'
-// const mode = 'staging'
+// const mode = 'production'
+const mode = 'staging'
 
 // borrowingOperations(mode) // 11 instances // opne, close, modify the loan
 // strategies(mode) // 2 instances //open and close positions
@@ -31,12 +31,12 @@ const mode = 'production'
 
 // troveManager(mode) // 8 instances // For Redeem and Liquidate
 
-// mahaxNFT(mode)
 // fantomNotify(mode)
 
 
 export const main = async () => {
-   twitterMetions(mode)
+  // twitterMetions(mode)
+  mahaxNFT(mode)
 }
 
 main()
