@@ -10,8 +10,8 @@ import { config } from '../../utils/config';
 export default function mahaxNFT(mode: string) {
 
   // const testweb3 = new Web3(nconf.get('TESTNET_MATIC'))
-  const web3 = new Web3(nconf.get("MAINNET_MATIC2"))
-
+  const web3 = new Web3(nconf.get("MAINNET_MATIC"))
+ 
   // const testcontract = new testweb3.eth.Contract(
   //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //   // @ts-ignore

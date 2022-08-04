@@ -323,15 +323,15 @@ const allCollateralPrices:any = await getCollateralPrices()
         data.returnValues.locktime * 1000).format("DD MMM YYYY")}* by [${eventUser}](${url})`
   }
 
-  if(data.event == "Transfer" && eventFrom == 'mahaxnft'){
-    const  from = data.returnValues.from
-    const to = data.returnValues.to
-    eventVal = format.toDisplayNumber(data.returnValues.value)
-    url = `https://mumbai.polygonscan.com/address/${from}`
-    chainLink = 'https://mumbai.polygonscan.com'
+  // if(data.event == "Transfer" && eventFrom == 'mahaxnft'){
+  //   const  from = data.returnValues.from
+  //   const to = data.returnValues.to
+  //   eventVal = format.toDisplayNumber(data.returnValues.value)
+  //   url = `https://mumbai.polygonscan.com/address/${from}`
+  //   chainLink = 'https://mumbai.polygonscan.com'
 
-    msg = `An NFT is transferred from ${from} to ${to}`
-  }
+  //   msg = `An NFT is transferred from ${from} to ${to}`
+  // }
 
   let dots = "";
   for (let i = 0; i < noOfTotalDots; i++) {

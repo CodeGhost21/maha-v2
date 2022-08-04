@@ -1,4 +1,4 @@
-import rp = require("request-promise");
+import rp from 'request-promise'
 
 export const getMahaPrice = async () => {
   const mahaToUsdPrice = await rp(

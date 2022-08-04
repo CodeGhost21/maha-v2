@@ -87,7 +87,7 @@ export const twitterMetions = async(mode: any) => {
             tweet)
         }
       else{
-        console.log('not includes hence do not send')
+        // console.log('not includes hence do not send')
       }
     })
 

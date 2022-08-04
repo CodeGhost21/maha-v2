@@ -3,23 +3,23 @@ import nconf from "nconf";
 nconf.argv()
    .env()
    .file({ file: './config.json' });
-// import borrowingOperations from './src/bots/arthloans/borrowingOperations';
+import borrowingOperations from './bots/arthloans/borrowingOperations';
 // import strategies from './src/bots/arthloans/strategies'
 // import farming from './src/bots/arthloans/farming'
 // import mahax from './src/bots/gov/mahax'
 // import quickswap from './src/bots/quickswap'
 // // import curvePolygon from './src/events/exchange/curvePolygon'
 // import troveManager from './src/bots/arthloans/troveManage'
-// import { twitterMetions } from './bots/twitterMention';
+import { twitterMetions } from './bots/twitterMention';
 // import fantomNotify from './src/bots/fantomNotify';
 import mahaxNFT from './bots/gov/mahaxNFT'
 
 // At a time 13 connections can be open
 
-// const mode = 'production'
-const mode = 'staging'
+const mode = 'production'
+// const mode = 'staging'
 
-// borrowingOperations(mode) // 11 instances // opne, close, modify the loan
+// borrowingOperations(mode) // 1 instances // opne, close, modify the loan
 // strategies(mode) // 2 instances //open and close positions
 
 // farming(mode) // 10 instances // Deposit/Stake, withdraw,claim
@@ -35,8 +35,9 @@ const mode = 'staging'
 
 
 export const main = async () => {
-  // twitterMetions(mode)
+  twitterMetions(mode)
   mahaxNFT(mode)
+  borrowingOperations(mode)
 }
 
 main()
