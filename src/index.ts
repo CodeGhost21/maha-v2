@@ -10,14 +10,14 @@ import borrowingOperations from './bots/arthloans/borrowingOperations';
 // import quickswap from './src/bots/quickswap'
 // // import curvePolygon from './src/events/exchange/curvePolygon'
 // import troveManager from './src/bots/arthloans/troveManage'
-import { twitterMetions } from './bots/twitterMention';
+// import { twitterMetions } from './bots/twitterMention';
 // import fantomNotify from './src/bots/fantomNotify';
 import mahaxNFT from './bots/gov/mahaxNFT'
 
 // At a time 13 connections can be open
 
-const mode = 'production'
-// const mode = 'staging'
+// const mode = 'production'
+const mode = 'staging'
 
 // borrowingOperations(mode) // 1 instances // opne, close, modify the loan
 // strategies(mode) // 2 instances //open and close positions
@@ -35,7 +35,7 @@ const mode = 'production'
 
 
 export const main = async () => {
-  twitterMetions(mode)
+  // twitterMetions(mode)
   mahaxNFT(mode)
   borrowingOperations(mode)
 }

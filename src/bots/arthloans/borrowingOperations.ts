@@ -11,17 +11,27 @@ import { config } from '../../utils/config';
 // For Create, Update, Close the loan
 
 const borrowingContracts = [
+  // {
+  //   chainName: 'Ethereum',
+  //   chainWss: nconf.get('MAINNET_ETH'),
+  //   contract: [
+  //     {
+  //       collName: "ETH",
+  //       collAdrs: "0xD3761E54826837B8bBd6eF0A278D5b647B807583"
+  //     }
+  //   ],
+
+  // },
   {
-    chainName: 'Ethereum',
-    chainWss: nconf.get('MAINNET_ETH'),
+    chainName: "BSC Testnet",
+    chainWss: nconf.get('TESTNET_BSC'),
     contract: [
       {
-        collName: "ETH",
-        collAdrs: "0xD3761E54826837B8bBd6eF0A278D5b647B807583"
+        collName: "BNB",
+        collAdrs: "0x7A90B087e746d98327d48D15163Fbbf1FFd4e4e6"
       }
-    ],
-
-  },
+    ]
+  }
 
 ]
 
@@ -57,6 +67,10 @@ const borrowingOperations = (mode: string) => {
           }
 
         })
+        .on("error", (err:any) => {
+          console.log("error borrowingOps", err)
+
+        });
     })
   })
 

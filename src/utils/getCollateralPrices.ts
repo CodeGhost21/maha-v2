@@ -20,7 +20,8 @@ export type CollateralKeys =
   | "BSCUSDT"
   | "WMATIC"
   | "WBNB"
-  | "FRAX";
+  | "FRAX"
+  | "BNB";
 
 export type ICollateralPrices = {
   [key in CollateralKeys]: number;
@@ -28,7 +29,7 @@ export type ICollateralPrices = {
 
 export const getCollateralPrices = async (): Promise<ICollateralPrices> => {
   const result = await CoinGeckoClient.simple.price({
-    ids: "bitcoin,ethereum,dai,tether,mahadao,arth,usd-coin,scallop,binance-usd,apeswap-finance,wmatic,wbnb,frax-share",
+    ids: "bitcoin,ethereum,dai,tether,mahadao,arth,usd-coin,scallop,binance-usd,apeswap-finance,wmatic,wbnb,frax-share,binancecoin",
     vs_currencies: "USD",
   });
 
@@ -50,6 +51,7 @@ export const getCollateralPrices = async (): Promise<ICollateralPrices> => {
     BSCUSDT: result.data.tether.usd,
     WMATIC: result.data.wmatic.usd,
     WBNB: result.data.wbnb.usd,
-    FRAX: result.data['frax-share'].usd
+    FRAX: result.data['frax-share'].usd,
+    BNB: result.data['binancecoin'].usd
   };
 };

@@ -2,7 +2,7 @@ import Numeral = require("numeral");
 import moment from 'moment'
 import {getCollateralPrices} from './getCollateralPrices'
 
-import {getMahaPrice, getArthToUSD, tvlAprFn, poolTokenVal} from "./api";
+import {getMahaPrice, getArthToUSD} from "./api";
 import format = require("./formatValues");
 
 export const msgToBeSent = async(data: any, chain?: string, poolName?: string, eventFrom?: string) => {
@@ -11,168 +11,29 @@ const allCollateralPrices:any = await getCollateralPrices()
   // console.log('allCollateralPrices', allCollateralPrices)
 
   let chainLink = "";
-  let tvl = "";
-  let apr = "";
   let msg = "";
   let poolLPVal = 1;
   let swapName = '';
-  // let mahaToken = ''
-  const tvlApr = await tvlAprFn();
-  const lpPoolValObj = await poolTokenVal();
-
-  // console.log('lpPoolValObj', lpPoolValObj)
-  // console.log('chain', chain)
 
   if (chain == "Polygon Mainnet") {
     chainLink = "https://polygonscan.com";
-    // mahaToken = "0xedd6ca8a4202d4a36611e2fff109648c4863ae19";
-    console.log('If Polygon Mainnet')
-    if (poolName == "ARTH.usd+3pool"){
-      poolLPVal = lpPoolValObj.arthUsdc3Polygon
-      tvl = tvlApr.polygon.tvl.arthu3pool.toLocaleString()
-      apr = tvlApr.polygon.apr.arthu3pool
-      swapName = "Polygon.Curve"
-    }
-    if (poolName === "ARTH/USDC LP"){
-      poolLPVal = lpPoolValObj.arthUsdcPolygon
-      tvl = tvlApr.polygon.tvl.arthUsdc.toLocaleString()
-      apr = ''
-      swapName = "QuickSwap";
-    }
-    if (poolName === "ARTH/MAHA LP"){
-      poolLPVal = lpPoolValObj.arthMahaPolygon
-      tvl = tvlApr.polygon.tvl.arthMaha.toLocaleString()
-      apr = tvlApr.polygon.apr.arthMaha
-      swapName = "QuickSwap";
-    }
-    if(poolName === "WETH"){
-      poolLPVal = allCollateralPrices.WETH.toLocaleString()
-      tvl = ''
-      apr = ''
-
-    }
-    if(poolName === "DAI"){
-      poolLPVal = allCollateralPrices.DAI.toLocaleString()
-      tvl = ''
-      apr = ''
-    }
-    if(poolName === "WMATIC"){
-      poolLPVal = allCollateralPrices.WMATIC.toLocaleString()
-      tvl = ''
-      apr = ''
-    }
-    if(poolName === "USDCUSDT-QLP-S"){
-      poolLPVal = 1
-      tvl = ''
-      apr = ''
-    }
-
   }
   if (chain == "BSC Mainnet") {
     chainLink = "https://bscscan.com";
-    // mahaToken = "0xCE86F7fcD3B40791F63B86C3ea3B8B355Ce2685b";
-    apr = tvlApr.bsc.apr;
-
-    if (poolName == "ARTH.usd+3eps"){
-      poolLPVal = lpPoolValObj.arthUsdc3Bsc
-      tvl = ''
-      apr = tvlApr.bsc.apr['arthu3eps-v2']
-      swapName = "Ellipsis"
-    }
-    if (poolName === "ARTH/BUSD LP"){
-      poolLPVal = lpPoolValObj.arthBusdBsc
-      tvl = tvlApr.bsc.tvl.arthBusd.toLocaleString()
-      apr = ''
-      swapName = "Pancakeswap"
-    }
-    if (poolName === "ARTH/MAHA LP"){
-      poolLPVal = lpPoolValObj.arthMahaBsc
-      tvl = tvlApr.bsc.tvl.arthMaha.toLocaleString()
-      apr = ''
-      swapName = "Pancakeswap"
-    }
-    if (poolName === "ARTH.usd+val3eps"){
-      poolLPVal = 1
-      tvl = tvlApr.bsc.tvl["arthu3valeps-v2"].toLocaleString()
-      apr = tvlApr.bsc.apr["arthu3valeps-v2"]
-      swapName = "Ellipsis"
-
-    }
-    if (poolName === "ARTH/MAHA Ape LP"){
-      poolLPVal = 1
-      tvl = tvlApr.bsc.tvl.arthMahaApe.toLocaleString()
-      apr = tvlApr.bsc.apr.arthMahaApe
-      swapName = "Apeswap"
-    }
-    if(poolName === 'ARTH.usd+3epx'){
-      poolLPVal = 1
-      tvl = tvlApr.bsc.apr['arthu3epx'].toLocaleString()
-      apr = ''
-      swapName = "Ellipsis"
-    }
-    if(poolName === 'ARTH.usd+val3EPS-Dot'){
-      poolLPVal = 1
-      tvl = tvlApr.bsc.apr['arthu3valdoteps'].toLocaleString()
-      apr = ''
-      swapName = "Ellipsis"
-    }
-    if (poolName === "MAHA"){
-      poolLPVal = allCollateralPrices.MAHA.toLocaleString()
-      tvl = ''
-      apr = ''
-    }
-    if (poolName === "WBNB"){
-      poolLPVal = allCollateralPrices.WBNB.toLocaleString()
-      tvl = ''
-      apr = ''
-    }
-    if (poolName === "BUSD"){
-      poolLPVal = allCollateralPrices.BUSD.toLocaleString()
-      tvl = ''
-      apr = ''
-    }
-    if (poolName === "BUSDUSDC-APE-LP-S"){
-      poolLPVal = 1
-      tvl = ''
-      apr = ''
-    }
-    if (poolName === "BUSDUSDT-APE-LP-S"){
-      poolLPVal = 1
-      tvl = ''
-      apr = ''
-    }
-  }
+  }``
   if(chain == "Ethereum"){
     chainLink = 'https://etherscan.io'
-
-    if(poolName === "MAHA/ETH SushiSwap"){
-      poolLPVal = 1
-      tvl = ''
-      apr = ''
-      swapName = ""
-    }
-    if(poolName === "FRAX/ARTH.usd Curve"){
-      poolLPVal = 1
-      tvl = ''
-      apr = ''
-      swapName = ""
-    }
-    if(poolName === 'WETH'){
-      poolLPVal = allCollateralPrices.WETH.toLocaleString()
-      tvl = ''
-      apr = ''
-    }
-    if(poolName === 'FXS'){
-      poolLPVal = allCollateralPrices.FRAX.toLocaleString()
-      tvl = ''
-      apr = ''
-    }
   }
   if(chain == 'Fantom Mainnet'){
     chainLink = "https://ftmscan.com"
-    poolLPVal = 1
-    tvl = ''
-    apr = ''
+  }
+
+  if(chain == "BSC Testnet"){
+    chainLink = "https://testnet.bscscan.com";
+  }
+
+  if(chain == "Rinkeby"){
+    chainLink = "https://rinkeby.etherscan.io";
   }
 
 
@@ -212,7 +73,7 @@ const allCollateralPrices:any = await getCollateralPrices()
     noOfTotalDots = Math.ceil(parseFloat(eventVal) / 100);
     msg = `Loan of *${eventVal}* Arth is taken by [${
       data.returnValues._borrower
-    }](https://polygonscan.com/address/${
+    }](${chainLink}/address/${
       data.returnValues._borrower
     }) with collateral of ${format.toDisplayNumber(
       data.returnValues._coll
@@ -225,7 +86,7 @@ const allCollateralPrices:any = await getCollateralPrices()
   }
   if (data.returnValues.operation == "1") {
     // not getting any values in this event
-    msg = `A Loan has been closed by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower})`;
+    msg = `A Loan has been closed by [${data.returnValues._borrower}](${chainLink}/address/${data.returnValues._borrower})`;
     poolValues = `
 *1 ${poolName}* = *$${allCollateralPrices[`${poolName}`]}*
 *1 ARTH* = *$${await getArthToUSD()}*
@@ -233,7 +94,7 @@ const allCollateralPrices:any = await getCollateralPrices()
   }
   if (data.returnValues.operation == "2") {
     // not getting any values in this event
-    msg = `A Loan has been modified by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower})`;
+    msg = `A Loan has been modified by [${data.returnValues._borrower}](${chainLink}/address/${data.returnValues._borrower})`;
     poolValues = `
 *1 ${poolName}* = *$${allCollateralPrices[`${poolName}`]}*
 *1 ARTH* = *$${await getArthToUSD()}*
@@ -308,8 +169,8 @@ const allCollateralPrices:any = await getCollateralPrices()
   if(data.event == "Deposit" && eventFrom == 'mahaxnft'){
     eventUser = data.returnValues.provider
     eventVal = format.toDisplayNumber(data.returnValues.value)
-    url = `https://mumbai.polygonscan.com/address/${eventUser}`
-    chainLink = 'https://mumbai.polygonscan.com'
+    url = `${chainLink}/address/${eventUser}`
+
     if(data.returnValues.deposit_type == '1'){
       noOfTotalDots = Math.ceil(Number(eventVal) / 100)
       msg = `*${eventVal}* MAHA tokens has been locked for NFT by [${eventUser}](${url})`
@@ -323,15 +184,22 @@ const allCollateralPrices:any = await getCollateralPrices()
         data.returnValues.locktime * 1000).format("DD MMM YYYY")}* by [${eventUser}](${url})`
   }
 
-  // if(data.event == "Transfer" && eventFrom == 'mahaxnft'){
-  //   const  from = data.returnValues.from
-  //   const to = data.returnValues.to
-  //   eventVal = format.toDisplayNumber(data.returnValues.value)
-  //   url = `https://mumbai.polygonscan.com/address/${from}`
-  //   chainLink = 'https://mumbai.polygonscan.com'
+  if(data.event == "Transfer" && eventFrom == 'mahaxnft' && data.returnValues.from !== '0x0000000000000000000000000000000000000000'){
+    const  from = data.returnValues.from
+    const to = data.returnValues.to
+    console.log('chainLink', chainLink)
+    const fromUrl = `${chainLink}/address/${from}`
+    const toUrl = `${chainLink}/address/${to}`
 
-  //   msg = `An NFT is transferred from ${from} to ${to}`
-  // }
+    msg = `An NFT is transferred from [${from}](${fromUrl}) to [${to}](${toUrl})`
+  }
+
+  if(data.event == "Withdraw" && eventFrom == 'mahaxnft'){
+    eventUser = data.returnValues.provider
+    url = `${chainLink}/address/${eventUser}`
+ 
+    msg = `An NFT is has been withdrawn by [${eventUser}](${url})`
+  }
 
   let dots = "";
   for (let i = 0; i < noOfTotalDots; i++) {
@@ -350,12 +218,9 @@ ${dots.length === 0 ?
 `${dots}
 `}${poolValues &&`
 ${poolValues}
-`}${tvl && `
-TVL in this pool: *$`+ tvl + `*`}${ apr === '' ? '' : `
-New APR: *` + Numeral(apr).format("0.000") +`%*`}
+`}
 
-[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})
-  `;
+[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})`;
 
   return msgToReturn;
 

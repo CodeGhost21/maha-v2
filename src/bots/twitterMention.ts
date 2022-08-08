@@ -43,7 +43,7 @@ export const twitterMetions = async(mode: any) => {
 
   whiteListedUsers = [...whiteListedUsers, '2170763245', '1038703148293124096'].filter((id: string) => id != '767252878209744896')
 
-  console.log('whiteListedUsers', whiteListedUsers)
+  // console.log('whiteListedUsers', whiteListedUsers)
 
 //  const streamFilter = await clientv1.filterStream(
 //     { track: trackWords,
