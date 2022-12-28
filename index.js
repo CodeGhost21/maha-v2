@@ -1,12 +1,21 @@
-const config = require("dotenv");
-const get = require("nconf");
+/**
+ * Entry Script
+ */
+require('dotenv').config()
 
-config();
-process.env.ROOT_PATH = __dirname;
 
-console.log("here", process.env.NODE_ENV === "production")
-if (get("NODE_ENV") === "production" || process.env.NODE_ENV === "production") {
-  require("./dist/index");
-} else {
-  require("./src/index");
+process.env.ROOT_PATH = __dirname
+
+// avoid loading asset files on the server-side
+require.extensions['.png'] = function () { }
+require.extensions['.sass'] = function () { }
+require.extensions['.css'] = function () { }
+require.extensions['.gif'] = function () { }
+
+
+if (process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'test') {
+  require('./dist/')
+  return
 }
+
+require('./server')
