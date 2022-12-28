@@ -61,8 +61,8 @@ clientTwitter.on("messageCreate", (msg) => {
 });
 
 
-// const DISCORD_TOKEN_MAHA = nconf.get('MAHA_DiscordClientToken') // for production
-const DISCORD_TOKEN_MAHA = nconf.get('Test_DISCORD_TOKEN') // for testing
+const DISCORD_TOKEN_MAHA = nconf.get('MAHA_DiscordClientToken') // for production
+// const DISCORD_TOKEN_MAHA = nconf.get('Test_DISCORD_TOKEN') // for testing
 const DISCORD_TOKEN_TWITTER = nconf.get('TweetMentionDiscordClientToken')
 
 clientMaha.login(DISCORD_TOKEN_MAHA); //login bot using token

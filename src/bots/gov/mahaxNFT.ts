@@ -12,13 +12,20 @@ export default function mahaxNFT(mode: string) {
 
   const nftContracts = [
     {
-      chainName: "Rinkeby",
-      chainWss: nconf.get('WSS_RINKEBY'),
+      chainName: "Ethereum",
+      chainWss: nconf.get('MAINNET_ETH'),
       contract: {
-        address: "0xCb3f67601f122190f2F6aE2ce1262cfb8e6361C4"
-
+        address: "0xbdD8F4dAF71C2cB16ccE7e54BB81ef3cfcF5AAcb"
       }
     },
+    // {
+    //   chainName: "Rinkeby",
+    //   chainWss: nconf.get('WSS_RINKEBY'),
+    //   contract: {
+    //     address: "0xCb3f67601f122190f2F6aE2ce1262cfb8e6361C4"
+
+    //   }
+    // },
     // {
     //   chainName: "Polygon Mainnet",
     //   chainWss: nconf.get("MAINNET_MATIC"),
@@ -112,44 +119,5 @@ export default function mahaxNFT(mode: string) {
 
   })
 
-  // contract.events.allEvents()
-  //   .on("connected", (nr: any) => console.log('MahaXNFT connected'))
-  //   .on("data", async(data: any) => {
-  //     console.log('data', data)
-  //     let telegramMsg = "";
-  //     let discordMsg = "";
-
-  //     if (data.event == "Deposit"){
-  //       telegramMsg = await msgToBeSent(data, 'Rinkeby', '', 'mahaxnft')
-  //       discordMsg =  await msgToBeSent(data, 'Rinkeby', '', 'mahaxnft')
-
-
-  //       telegram.sendMessage(
-  //         mode === 'production' ? config().production.TELEGRAM_CHAT_ID : config().staging.TELEGRAM_CHAT_ID,
-  //         telegramMsg
-  //       )
-  //       discord.sendMessage(
-  //         mode === 'production' ? config().production.DISCORD.mahax : config().staging.DISCORD,
-  //         discordMsg
-  //       )
-  //     }
-  //     // this transfer event is used for transferFrom event but causing issue for create lock
-  //     if (data.event == "Transfer" && data.returnValues.from !== '0x0000000000000000000000000000000000000000') {
-  //       telegramMsg = await msgToBeSent(data, '', '', 'mahaxnft')
-  //       discordMsg =  await msgToBeSent(data, '', '', 'mahaxnft')
-
-  //       telegram.sendMessage(
-  //         mode === 'production' ? config().production.TELEGRAM_CHAT_ID : config().staging.TELEGRAM_CHAT_ID,
-  //         telegramMsg
-  //       )
-  //       discord.sendMessage(
-  //         mode === 'production' ? config().production.DISCORD.mahax : config().staging.DISCORD,
-  //         discordMsg
-  //       )
-  //     }
-
-
-  //   })
-  //   .on("error", (err:any) => console.log("error", err));
 
 }

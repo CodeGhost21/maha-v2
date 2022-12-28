@@ -12,6 +12,11 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "_renderingContract",
+        "type": "address"
+      },
+      {
         "internalType": "uint96",
         "name": "_royaltyFeeNumerator",
         "type": "uint96"
@@ -500,14 +505,22 @@
         "internalType": "uint256",
         "name": "_value",
         "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "_updateNFTstake",
-        "type": "bool"
       }
     ],
     "name": "depositFor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "emergencyRefund",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -614,6 +627,19 @@
       }
     ],
     "name": "hasRole",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "inBootstrapMode",
     "outputs": [
       {
         "internalType": "bool",
@@ -786,11 +812,6 @@
         "internalType": "uint256",
         "name": "_to",
         "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "_updateNFTstake",
-        "type": "bool"
       }
     ],
     "name": "merge",
@@ -814,11 +835,6 @@
         "internalType": "address",
         "name": "_to",
         "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "_stakeNFT",
-        "type": "bool"
       }
     ],
     "name": "migrateTokenFor",
@@ -1151,6 +1167,13 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stopBootstrapMode",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
