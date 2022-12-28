@@ -1,5 +1,5 @@
 require('dotenv').config()
-const ncon = require("nconf");
+const nconf = require("nconf");
 
 
 process.env.ROOT_PATH = __dirname;
