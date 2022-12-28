@@ -1,5 +1,5 @@
-import { config } from "dotenv";
-import { get } from "nconf";
+const config = require("dotenv");
+const get = require("nconf");
 
 config();
 process.env.ROOT_PATH = __dirname;
