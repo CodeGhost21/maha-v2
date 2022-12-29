@@ -9,4 +9,7 @@
 // import fantomNotify from './src/bots/fantomNotify';
 
 import mahaxNFT from "./bots/mahaxNFT";
+import arth from "./bots/arth";
+
 mahaxNFT();
+arth();
