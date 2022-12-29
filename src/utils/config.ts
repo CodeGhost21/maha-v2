@@ -1,7 +1,7 @@
-import nconf from 'nconf'
+import nconf from "nconf";
 
 export const config = () => {
-  return{
+  return {
     production: {
       TELEGRAM_CHAT_ID: nconf.get("TELEGRAM_CHAT_ID"),
       DISCORD: {
@@ -12,12 +12,12 @@ export const config = () => {
         mahax: nconf.get("MahaxLocks_DiscordChannel"),
         quickswap: nconf.get("BuySell_DiscordChannel"),
         curvePolygon: nconf.get("BuySell_DiscordChannel"),
-        twitterMention: nconf.get("TwitterMention_Discord")
-      }
+        twitterMention: nconf.get("TwitterMention_Discord"),
+      },
     },
     staging: {
       TELEGRAM_CHAT_ID: nconf.get("Test_Tele_Chat_Id"),
-      DISCORD: nconf.get("Test_DISCORD_CHANNEL_ID")
-    }
-  }
-}
+      DISCORD: nconf.get("Test_DISCORD_CHANNEL_ID"),
+    },
+  };
+};

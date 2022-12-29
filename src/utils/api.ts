@@ -1,4 +1,4 @@
-import rp from 'request-promise'
+import rp from "request-promise";
 
 export const getMahaPrice = async () => {
   const mahaToUsdPrice = await rp(
@@ -59,4 +59,3 @@ export const poolTokenVal = async () => {
 
   return data;
 };
-

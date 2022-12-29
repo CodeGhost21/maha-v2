@@ -28,14 +28,14 @@ export type ICollateralPrices = {
 };
 
 export const getCollateralPrices = async (): Promise<ICollateralPrices> => {
-  let result
+  let result;
   try {
-     result = await CoinGeckoClient.simple.price({
+    result = await CoinGeckoClient.simple.price({
       ids: "bitcoin,ethereum,dai,tether,mahadao,arth,usd-coin,scallop,binance-usd,apeswap-finance,wmatic,wbnb,frax-share,binancecoin",
       vs_currencies: "USD",
     });
   } catch (error) {
-    console.log("getCollateralPrices error", error)
+    console.log("getCollateralPrices error", error);
   }
 
   return {
@@ -56,7 +56,7 @@ export const getCollateralPrices = async (): Promise<ICollateralPrices> => {
     BSCUSDT: result?.data.tether.usd || 0,
     WMATIC: result?.data.wmatic.usd || 0,
     WBNB: result?.data.wbnb.usd || 0,
-    FRAX: result?.data['frax-share'].usd || 0,
-    BNB: result?.data['binancecoin'].usd || 0
+    FRAX: result?.data["frax-share"].usd || 0,
+    BNB: result?.data["binancecoin"].usd || 0,
   };
 };
