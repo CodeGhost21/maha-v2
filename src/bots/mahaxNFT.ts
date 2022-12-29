@@ -1,7 +1,7 @@
 import nconf from "nconf";
 
 import MAHAX from "../abi/MAHAX.json";
-// import * as discord from "../output/discord";
+import * as discord from "../output/discord";
 import { ethers } from "ethers";
 import { toDisplayNumber } from "../utils/formatValues";
 import { WebSocketProvider } from "@ethersproject/providers";
@@ -141,8 +141,7 @@ export default () => {
         nft.opensea
       );
 
-      console.log(msg);
-      // discord.sendMessage(nconf.get("MAHA_LOCK_CHANNEL"), msg);
+      discord.sendMessage(nconf.get("MAHA_LOCK_CHANNEL"), msg);
     });
 
     // contract.on("Withdraw", (...args) => {
