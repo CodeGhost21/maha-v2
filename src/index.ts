@@ -1,8 +1,6 @@
 import nconf from "nconf";
 
-nconf.argv()
-  .env()
-  .file({ file: './config.json' });
+nconf.argv().env().file({ file: "./config.json" });
 // import borrowingOperations from './bots/arthloans/borrowingOperations';
 // import strategies from './src/bots/arthloans/strategies'
 // import farming from './src/bots/arthloans/farming'
@@ -12,14 +10,14 @@ nconf.argv()
 // import troveManager from './src/bots/arthloans/troveManage'
 // import { twitterMetions } from './bots/twitterMention';
 // import fantomNotify from './src/bots/fantomNotify';
-import mahaxNFT from './bots/gov/mahaxNFT'
-console.log('>>>>>>>>', nconf.get("TEST"));
+import mahaxNFT from "./bots/mahaxNFT";
+console.log(">>>>>>>>", nconf.get("TEST"));
 
-console.log('>>>>>>', nconf.get('TEST'))
+console.log(">>>>>>", nconf.get("TEST"));
 
 // At a time 13 connections can be open
 
-const mode = 'production'
+const mode = "production";
 // const mode = 'staging'
 
 // borrowingOperations(mode) // 1 instances // opne, close, modify the loan
@@ -36,11 +34,10 @@ const mode = 'production'
 
 // fantomNotify(mode)
 
-
 export const main = async () => {
   // twitterMetions(mode)
-  mahaxNFT(mode)
+  mahaxNFT(mode);
   // borrowingOperations(mode)
-}
+};
 
-main()
+main();
