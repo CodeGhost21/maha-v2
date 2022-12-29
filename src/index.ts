@@ -14,6 +14,8 @@ nconf.argv()
 // import fantomNotify from './src/bots/fantomNotify';
 import mahaxNFT from './bots/gov/mahaxNFT'
 
+console.log('>>>>>>', nconf.get('TEST'))
+
 // At a time 13 connections can be open
 
 const mode = 'production'
