@@ -1,8 +1,8 @@
 import nconf from "nconf";
 
 nconf.argv()
-   .env()
-   .file({ file: './config.json' });
+  .env()
+  .file({ file: './config.json' });
 // import borrowingOperations from './bots/arthloans/borrowingOperations';
 // import strategies from './src/bots/arthloans/strategies'
 // import farming from './src/bots/arthloans/farming'
@@ -13,6 +13,7 @@ nconf.argv()
 // import { twitterMetions } from './bots/twitterMention';
 // import fantomNotify from './src/bots/fantomNotify';
 import mahaxNFT from './bots/gov/mahaxNFT'
+console.log('>>>>>>>>', nconf.get("TEST"));
 
 // At a time 13 connections can be open
 
