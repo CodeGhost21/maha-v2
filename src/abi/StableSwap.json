@@ -1,386 +1,516 @@
-[{
-  "stateMutability": "nonpayable",
-  "type": "constructor",
-  "inputs": [],
-  "outputs": []
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "add_liquidity",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_deposit_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_min_mint_amount",
-    "type": "uint256"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "add_liquidity",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_deposit_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_min_mint_amount",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "add_liquidity",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_deposit_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_min_mint_amount",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }, {
-    "name": "_use_underlying",
-    "type": "bool"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "_min_amounts",
-    "type": "uint256[4]"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256[4]"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "_min_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256[4]"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "_min_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }, {
-    "name": "_use_underlying",
-    "type": "bool"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256[4]"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity_one_coin",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "i",
-    "type": "int128"
-  }, {
-    "name": "_min_amount",
-    "type": "uint256"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity_one_coin",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "i",
-    "type": "int128"
-  }, {
-    "name": "_min_amount",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity_one_coin",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "i",
-    "type": "int128"
-  }, {
-    "name": "_min_amount",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }, {
-    "name": "_use_underlying",
-    "type": "bool"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity_imbalance",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_max_burn_amount",
-    "type": "uint256"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity_imbalance",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_max_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "remove_liquidity_imbalance",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_max_burn_amount",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }, {
-    "name": "_use_underlying",
-    "type": "bool"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "view",
-  "type": "function",
-  "name": "calc_withdraw_one_coin",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_token_amount",
-    "type": "uint256"
-  }, {
-    "name": "i",
-    "type": "int128"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }],
-  "gas": 5753
-}, {
-  "stateMutability": "view",
-  "type": "function",
-  "name": "calc_token_amount",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_amounts",
-    "type": "uint256[4]"
-  }, {
-    "name": "_is_deposit",
-    "type": "bool"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }],
-  "gas": 6666
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "exchange_underlying",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_i",
-    "type": "int128"
-  }, {
-    "name": "_j",
-    "type": "int128"
-  }, {
-    "name": "_dx",
-    "type": "uint256"
-  }, {
-    "name": "_min_dy",
-    "type": "uint256"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "exchange_underlying",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_i",
-    "type": "int128"
-  }, {
-    "name": "_j",
-    "type": "int128"
-  }, {
-    "name": "_dx",
-    "type": "uint256"
-  }, {
-    "name": "_min_dy",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}, {
-  "stateMutability": "nonpayable",
-  "type": "function",
-  "name": "exchange_underlying",
-  "inputs": [{
-    "name": "_pool",
-    "type": "address"
-  }, {
-    "name": "_i",
-    "type": "int128"
-  }, {
-    "name": "_j",
-    "type": "int128"
-  }, {
-    "name": "_dx",
-    "type": "uint256"
-  }, {
-    "name": "_min_dy",
-    "type": "uint256"
-  }, {
-    "name": "_receiver",
-    "type": "address"
-  }, {
-    "name": "_use_underlying",
-    "type": "bool"
-  }],
-  "outputs": [{
-    "name": "",
-    "type": "uint256"
-  }]
-}]
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_zap",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_lp",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_pool",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_arth",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_arthUsd",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_usdc",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_usdt",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_busd",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountARTHIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountBUSDIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDCIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDTIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minLpTokensOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "addLiquidityUsingARTH",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountARTHusdIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountBUSDIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDCIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDTIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minLpTokensOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "addLiquidityUsingARTHusd",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "arth",
+    "outputs": [
+      {
+        "internalType": "contract IERC20WithDecimals",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "arthUsd",
+    "outputs": [
+      {
+        "internalType": "contract IARTHusdRebase",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "busd",
+    "outputs": [
+      {
+        "internalType": "contract IERC20WithDecimals",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountBUSDIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDCIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDTIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDOutMinForBUSD",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDOutMinForUSDC",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDOutMinForUSDT",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "buyARTHForExact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountBUSDIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDCIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDTIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDOutMinForBUSD",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDOutMinForUSDC",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDOutMinForUSDT",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "buyARTHUSDForExact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lp",
+    "outputs": [
+      {
+        "internalType": "contract IERC20WithDecimals",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pool",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountLpIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minBUSDOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minUSDCOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minUSDTOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minARTHusdOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "removeLiquidityUsingARTH",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountLpIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minBUSDOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minUSDCOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minUSDTOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minARTHusdOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "removeLiquidityUsingARTHusd",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountARTHInForBUSD",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHInForUSDC",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHInForUSDT",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountBUSDOutMin",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDCOutMin",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDTOutMin",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "sellARTHForExact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDInForBUSD",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDInForUSDC",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountARTHUSDInForUSDT",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountBUSDOutMin",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDCOutMin",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountUSDTOutMin",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "sellARTHUSDForExact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "usdc",
+    "outputs": [
+      {
+        "internalType": "contract IERC20WithDecimals",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "usdt",
+    "outputs": [
+      {
+        "internalType": "contract IERC20WithDecimals",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "zap",
+    "outputs": [
+      {
+        "internalType": "contract IZapDepositor",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

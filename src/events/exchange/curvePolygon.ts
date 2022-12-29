@@ -4,9 +4,10 @@ import { ethers } from "ethers";
 
 import StableSwapABI from "../../abi/StableSwap.json";
 import { toDisplayNumber } from "../../utils/formatValues";
-
+import {getArthToUSD} from '../../utils/api'
 import * as telegram from "../../output/telegram";
 import * as discord from "../../output/discord";
+import { config } from '../../utils/config';
 
 const telegramTemplate = (
   tokenSoldAmt: string,
@@ -28,7 +29,7 @@ const telegramTemplate = (
 
 ${dots}
 
-*1 ARTH* = *$${constants.getArthToUSD()}*
+*1 ARTH* = *$${getArthToUSD()}*
 
 [📶 Transaction Hash 📶 ](https://polygonscan.com/tx/${transactionHash})
 `;
@@ -54,27 +55,29 @@ const discordTemplate = (
 
 ${dots}
 
-*1 ARTH* = *$${constants.getArthToUSD()}*
+*1 ARTH* = *$${getArthToUSD()}*
 
 [📶 Transaction Hash 📶 ](https://polygonscan.com/tx/${transactionHash})
 `;
 };
 
-const main = () => {
-  const web3 = new Web3(nconf.get("POLYGON_PROVIDER"));
+const main = (mode: any) => {
+  const web3 = new Web3(nconf.get("MAINNET_BSC"));
   const contract = new web3.eth.Contract(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     StableSwapABI,
-    nconf.get("POLYGON_CURVE_CONTRACT")
+    '0x62d05F6d5DDEBFaa4E866086dcdacD76A272D321'
   );
+
+  console.log('contract.events', contract.events)
 
   contract.events
     .allEvents()
     .on("connected", () => console.log("connected"))
     .on("data", async (data: any) => {
       let dotColor = "";
-
+      console.log('data', data)
       if (data.event != "TokenExchangeUnderlying") return;
 
       let tokenSold = "";
@@ -128,7 +131,7 @@ const main = () => {
       }
 
       telegram.sendMessage(
-        nconf.get("TELEGRAM_EXCHANGE_CHATID"),
+        mode === 'production' ? config().production.TELEGRAM_CHAT_ID : config().staging.TELEGRAM_CHAT_ID,
         telegramTemplate(
           tokenSoldAmt,
           tokenSold,
@@ -142,7 +145,7 @@ const main = () => {
       );
 
       discord.sendMessage(
-        nconf.get("DISCORD_EXCHANGE_CHANNEL"),
+        mode === 'production' ? config().production.DISCORD.curvePolygon : config().staging.DISCORD,
         discordTemplate(
           tokenSoldAmt,
           tokenSold,
@@ -157,4 +160,4 @@ const main = () => {
     });
 };
 
-main();
+export default main

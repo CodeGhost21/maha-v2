@@ -1,6 +1,6 @@
-const rp = require("request-promise");
+import rp from 'request-promise'
 
-const getMahaPrice = async () => {
+export const getMahaPrice = async () => {
   const mahaToUsdPrice = await rp(
     `https://api.coingecko.com/api/v3/simple/price?ids=mahadao&vs_currencies=usd`
   );
@@ -11,7 +11,7 @@ const getMahaPrice = async () => {
   return mahaToUsd;
 };
 
-const getEthToMahaPrice = async () => {
+export const getEthToMahaPrice = async () => {
   const mahaToEthPrice = await rp(
     `https://api.coingecko.com/api/v3/simple/price?ids=mahadao&vs_currencies=eth`
   );
@@ -22,7 +22,7 @@ const getEthToMahaPrice = async () => {
   return ethToMaha;
 };
 
-const getArthToUSD = async () => {
+export const getArthToUSD = async () => {
   const arthToUsdPrice = await rp(
     `https://api.coingecko.com/api/v3/simple/price?ids=arth&vs_currencies=usd`
   );
@@ -33,23 +33,24 @@ const getArthToUSD = async () => {
   return arthToUsd;
 };
 
-const tvlAprFn = async () => {
+export const tvlAprFn = async () => {
   const data = JSON.parse(await rp("https://api.arthcoin.com/apy/loans"));
 
   const tvlAprObj = {
     bsc: {
-      tvl: data.chainSpecificData["56"].tvl.arthMahaApe.toLocaleString(),
-      apr: data.chainSpecificData["56"].apr.arthMahaApe.toLocaleString(),
+      tvl: data.chainSpecificData["56"].tvl,
+      apr: data.chainSpecificData["56"].apr,
     },
     polygon: {
-      tvl: data.chainSpecificData["137"].tvl.arthMaha.toLocaleString(),
-      apr: data.chainSpecificData["137"].apr.arthMaha.toLocaleString(),
+      tvl: data.chainSpecificData["137"].tvl,
+      apr: data.chainSpecificData["137"].apr,
     },
   };
+
   return tvlAprObj;
 };
 
-const poolTokenVal = async () => {
+export const poolTokenVal = async () => {
   const options = {
     method: "POST",
     uri: "https://api.arthcoin.com/apy/lp",
@@ -59,10 +60,3 @@ const poolTokenVal = async () => {
   return data;
 };
 
-module.exports = {
-  getMahaPrice,
-  getEthToMahaPrice,
-  getArthToUSD,
-  tvlAprFn,
-  poolTokenVal,
-};
