@@ -1,7 +1,7 @@
 import nconf from "nconf";
 
 import MAHAX from "../abi/MAHAX.json";
-import * as discord from "../output/discord";
+// import * as discord from "../output/discord";
 import { ethers } from "ethers";
 import { toDisplayNumber } from "../utils/formatValues";
 import { WebSocketProvider } from "@ethersproject/providers";
@@ -28,7 +28,6 @@ const craftMessageFromEvent = async (
   explorer: string,
   opensea: string
 ) => {
-  let noOfTotalDots = 0;
   let msg = "";
 
   const prices = await getCollateralPrices();
@@ -56,31 +55,27 @@ const craftMessageFromEvent = async (
     const depositType = Number(data.args[4]);
 
     const usdValue = (value * prices.MAHA).toFixed(2);
+    const noOfTotalDots = Math.ceil(value / 50);
 
     const m = moment(locktime * 1000).format("DD MMM YYYY");
 
     console.log("deposit", who, tokenId, value, locktime, depositType);
-
     if (depositType == 1) {
-      noOfTotalDots = Math.ceil(value / 100);
       msg =
         `**NFT #${tokenId}** minted with **${value} MAHA** *($${usdValue})* tokens locked` +
-        ` by **${who}** till *${m}*`;
+        ` till *${m}*`;
     } else if (depositType == 2) {
-      noOfTotalDots = Math.ceil(value / 100);
       msg =
         `**${value} MAHA** *($${usdValue})* tokens was added into NFT #${tokenId}` +
         ` by **${who}**`;
     } else if (depositType == 3) {
-      const m = moment(locktime * 1000).format("DD MMM YYYY");
       msg = `The lock period of **NFT #${tokenId}** is extended to *${m}* by **${who}**.`;
-    }
+    } else return;
 
     return craftMessage(
       msg,
       data.transactionHash,
       tokenId,
-      who,
       noOfTotalDots,
       explorer,
       opensea,
@@ -99,7 +94,6 @@ const craftMessage = (
   msg: string,
   txHash: string,
   tokenId: number,
-  who: string,
   noOfTotalDots: number,
   explorer: string,
   opensea: string,
@@ -117,15 +111,10 @@ const craftMessage = (
   }
 
   const hash = `<${explorer}/tx/${txHash}>`;
-  const from = `<${explorer}/account/${who}>`;
   const openseaLink = `<${opensea}/${tokenId}>`;
 
   return (
-    `${msg}\n\n` +
-    `${dots}\n\n` +
-    `From: ${from}\n` +
-    `Hash: ${hash}\n` +
-    `OpenSea: ${openseaLink}`
+    `${msg}\n\n` + `${dots}\n\n` + `Hash: ${hash}\n` + `OpenSea: ${openseaLink}`
   );
 };
 
@@ -152,13 +141,9 @@ export default () => {
         nft.opensea
       );
 
-      discord.sendMessage(nconf.get("MAHA_LOCK_CHANNEL"), msg);
+      console.log(msg);
+      // discord.sendMessage(nconf.get("MAHA_LOCK_CHANNEL"), msg);
     });
-
-    // contract.on("Transfer", (...args) => {
-    //   console.log("event", args[6]);
-    //   craftMessageFromEvent(args[4], nft.explorer, nft.opensea);
-    // });
 
     // contract.on("Withdraw", (...args) => {
     //   console.log(args);
