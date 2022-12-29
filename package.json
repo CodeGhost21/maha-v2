@@ -17,7 +17,6 @@
     "cover:check": "nyc --check-coverage npm run test",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
-    "preversion": "npm run build && npm run cover:check",
     "postversion": "git push && git push --tags",
     "prepare": "npm run build",
     "test": "mocha",
