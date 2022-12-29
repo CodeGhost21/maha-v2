@@ -54,19 +54,20 @@ const craftMessageFromEvent = async (
     const locktime: number = data.args[3].toNumber();
     const depositType = Number(data.args[4]);
 
-    const usdValue = (value * prices.MAHA).toFixed(2);
     const noOfTotalDots = Math.ceil(value / 50);
 
     const m = moment(locktime * 1000).format("DD MMM YYYY");
 
+    const price = prices.MAHA ? `*($${(value * prices.MAHA).toFixed(2)})*` : "";
+
     console.log("deposit", who, tokenId, value, locktime, depositType);
     if (depositType == 1) {
       msg =
-        `**NFT #${tokenId}** minted with **${value} MAHA** *($${usdValue})* tokens locked` +
+        `**NFT #${tokenId}** minted with **${value} MAHA** ${price} tokens locked` +
         ` till *${m}*`;
     } else if (depositType == 2) {
       msg =
-        `**${value} MAHA** *($${usdValue})* tokens was added into NFT #${tokenId}` +
+        `**${value} MAHA** ${price} tokens was added into NFT #${tokenId}` +
         ` by **${who}**`;
     } else if (depositType == 3) {
       msg = `The lock period of **NFT #${tokenId}** is extended to *${m}* by **${who}**.`;

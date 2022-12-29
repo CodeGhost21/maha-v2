@@ -19,9 +19,7 @@ export const getCollateralPrices = async (): Promise<ICollateralPrices> => {
     console.log("getCollateralPrices error", error);
   }
 
-  console.log(result);
-
   return {
-    MAHA: result?.data.mahadao.usd || 0,
+    MAHA: result?.data?.mahadao?.usd || 0,
   };
 };
