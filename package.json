@@ -13,6 +13,7 @@
     "clean": "rimraf dist",
     "clean:all": "npm run clean && (rm -r ./node_modules || true)",
     "cover": "nyc npm run test",
+    "dev": "ts-node index.js",
     "cover:check": "nyc --check-coverage npm run test",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
