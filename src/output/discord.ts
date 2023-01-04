@@ -1,7 +1,7 @@
 import nconf from "nconf";
 import { Client, Intents, TextChannel } from "discord.js";
 
-const clientMaha = new Client({
+export const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
     Intents.FLAGS.GUILD_MEMBERS,
@@ -16,14 +16,14 @@ const clientMaha = new Client({
   ],
 });
 
-clientMaha.on("ready", () =>
-  console.log(`DISCORD: Logged in as ${clientMaha.user?.tag}!`)
+client.on("ready", () =>
+  console.log(`DISCORD: Logged in as ${client.user?.tag}!`)
 );
 
-clientMaha.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
+client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
 export const sendMessage = (channelName: string, messageMarkdown?: string) => {
   if (!messageMarkdown) return;
-  const channel = clientMaha.channels.cache.get(channelName);
+  const channel = client.channels.cache.get(channelName);
   (channel as TextChannel).send(messageMarkdown);
 };

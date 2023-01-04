@@ -7,9 +7,12 @@
 // import troveManager from './src/bots/arthloans/troveManage'
 // import { twitterMetions } from './bots/twitterMention';
 // import fantomNotify from './src/bots/fantomNotify';
+import { open } from "./database";
+open();
 
 import mahaxNFT from "./bots/mahaxNFT";
 import arth from "./bots/arth";
+import "./bots/gm";
 
 mahaxNFT();
 arth();
