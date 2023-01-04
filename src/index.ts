@@ -10,9 +10,11 @@
 import { open } from "./database";
 open();
 
+import mahalend from './bots/mahalend'
 import mahaxNFT from "./bots/mahaxNFT";
 import arth from "./bots/arth";
 import "./bots/gm";
 
 mahaxNFT();
 arth();
+mahalend()
