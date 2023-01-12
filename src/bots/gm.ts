@@ -43,14 +43,25 @@ client.on("messageCreate", (message) => {
       .then((users) => {
         const top = users
           .sort((a, b) => b.streak - a.streak)
-          .slice(0, 5)
+          .slice(0, 10)
           .map((u) => `🔥 **${u.userTag}** is on a **${u.streak}** GM streak!`)
           .join("\n");
 
-        const total_icons = ["🥇", "🥈", "🥉", "🎉", "🎉"];
+        const total_icons = [
+          "🥇",
+          "🥈",
+          "🥉",
+          "🎉",
+          "🎉",
+          "🤲",
+          "🤲",
+          "🤲",
+          "🤲",
+          "🤲",
+        ];
         const total = users
           .sort((a, b) => b.totalGMs - a.totalGMs)
-          .slice(0, 5)
+          .slice(0, 10)
           .map(
             (u, i) =>
               `${total_icons[i]} **${u.userTag}** has said gm **${
@@ -60,9 +71,9 @@ client.on("messageCreate", (message) => {
           .join("\n");
 
         const text =
-          "__Top 5 gm streaks__ 🏆\n" +
+          "__Top 10 gm streaks__ 🏆\n" +
           top +
-          "\n\n__Top 5 total gm’s__ 🏆\n" +
+          "\n\n__Top 10 total gm’s__ 🏆\n" +
           total;
 
         message.reply(text);
