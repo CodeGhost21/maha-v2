@@ -10,11 +10,11 @@
 import { open } from "./database";
 open();
 
-// import mahaxNFT from "./bots/mahaxNFT";
+import mahaLocks from "./bots/mahaLocks";
 // import arth from "./bots/arth";
 import "./bots/gm";
 
 // import "./scripts/scrape-gms";
 
-// mahaxNFT();
+mahaLocks();
 // arth();

@@ -9,7 +9,7 @@ const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 
 client.on("messageCreate", (message) => {
-  if (message.channelId !== nconf.get("GM_CHANNEL") && !message.guild) return;
+  if (message.channelId !== nconf.get("CHANNEL_GM") && !message.guild) return;
   if (message.author.bot) return;
 
   const content = message.content.toLowerCase();
@@ -59,6 +59,7 @@ client.on("messageCreate", (message) => {
           "🤲",
           "🤲",
         ];
+
         const total = users
           .sort((a, b) => b.totalGMs - a.totalGMs)
           .slice(0, 10)
