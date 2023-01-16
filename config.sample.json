@@ -1,18 +1,24 @@
 {
-    "DISCORD_CLIENT_TOKEN": "xxxxxxx",
-    "DISCORD_GUILD_ID": "0000000000",
+  "DISCORD_CLIENT_TOKEN": "------",
+  "DISCORD_GUILD_ID": "------",
 
-    "CHANNEL_LENDING": "0000000000",
-    "CHANNEL_MAHA_LOCKS": "0000000000",
-    "CHANNEL_ARTH_ACTIVITY": "0000000000",
-    "CHANNEL_GM": "0000000000",
+  "CHANNEL_LENDING": "------",
+  "CHANNEL_MAHA_LOCKS": "------",
+  "CHANNEL_ARTH_ACTIVITY": "------",
+  "CHANNEL_TWITTER_COMMUNITY": "------",
+  "CHANNEL_GM": "------",
 
-    "CONTRACT_POOL": "0x0000",
-    "CONTRACT_LOCKER": "0x0000",
-    "CONTRACT_ARTH_BO": "0x0000",
-    "CONTRACT_ARTH_TM": "0x0000",
+  "TWITTER_API_KEY": "------",
+  "TWITTER_API_SECRET": "------",
+  "TWITTER_ACCESS_TOKEN": "------",
+  "TWITTER_ACCESS_TOKEN_SECRET": "------",
 
-    "DATABASE_URI": "mongodb://localhost/discord-bot",
-    "RPC_WSS": "wss://mainnet.infura.io/ws/v3/----",
-    "NODE_ENV": "staging"
+  "CONTRACT_POOL": "------",
+  "CONTRACT_LOCKER": "------",
+  "CONTRACT_ARTH_BO": "------",
+  "CONTRACT_ARTH_TM": "------",
+
+  "DATABASE_URI": "------",
+  "RPC_WSS": "------",
+  "NODE_ENV": "------"
 }
