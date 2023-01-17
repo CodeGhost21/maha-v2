@@ -1,23 +1,13 @@
 import nconf from "nconf";
+import moment from "moment";
+import { ethers } from "ethers";
+import { WebSocketProvider } from "@ethersproject/providers";
 
 import MAHAX from "../abi/MAHAX.json";
 import * as discord from "../output/discord";
-import { ethers } from "ethers";
 import { toDisplayNumber } from "../utils/formatValues";
-import { WebSocketProvider } from "@ethersproject/providers";
-import moment from "moment";
 import { getCollateralPrices } from "../utils/getCollateralPrices";
 import { IEvent } from "../utils/interfaces";
-
-const nftContracts = [
-  {
-    chainWss: nconf.get("MAINNET_ETH"),
-    explorer: "https://etherscan.io",
-    contract: "0xbdD8F4dAF71C2cB16ccE7e54BB81ef3cfcF5AAcb",
-    opensea:
-      "https://opensea.io/assets/ethereum/0xbdd8f4daf71c2cb16cce7e54bb81ef3cfcf5aacb",
-  },
-];
 
 const craftMessageFromEvent = async (
   data: IEvent,
@@ -81,7 +71,6 @@ const craftMessageFromEvent = async (
   } else if (data.event == "Withdraw") {
     const who = data.args[0];
     const url = `${explorer}/address/${who}`;
-
     msg = `A NFT is has been withdrawn by [${who}](${url})`;
   } else return;
   return;
@@ -111,30 +100,31 @@ const craftMessage = (
   const openseaLink = `<${opensea}/${tokenId}>`;
 
   return (
-    `${msg}\n\n` + `${dots}\n\n` + `Hash: ${hash}\n` + `OpenSea: ${openseaLink}`
+    `${msg}\n\n` +
+    `${dots}\n\n` +
+    `Transaction: ${hash}\n` +
+    `OpenSea: ${openseaLink}`
   );
 };
 
 export default () => {
-  console.log("listening for maha events");
+  console.log("listening for maha lock events");
 
-  nftContracts.map((nft) => {
-    const provider = new WebSocketProvider(nft.chainWss);
-    const contract = new ethers.Contract(nft.contract, MAHAX, provider);
+  const chainWss = nconf.get("RPC_WSS");
+  const explorer = "https://etherscan.io";
+  const contract = nconf.get("CONTRACT_LOCKER");
+  const opensea = `https://opensea.io/assets/ethereum/${contract}`;
 
-    contract.on("Deposit", async (...args) => {
-      const msg = await craftMessageFromEvent(
-        args[6],
-        nft.explorer,
-        nft.opensea
-      );
+  const provider = new WebSocketProvider(chainWss);
+  const Locker = new ethers.Contract(contract, MAHAX, provider);
 
-      discord.sendMessage(nconf.get("MAHA_LOCK_CHANNEL"), msg);
-    });
-
-    // contract.on("Withdraw", (...args) => {
-    //   console.log(args);
-    //   discord.sendMessage(nconf.get("MAHA_LOCK_CHANNEL"), "test");
-    // });
+  Locker.on("Deposit", async (...args) => {
+    const msg = await craftMessageFromEvent(args[6], explorer, opensea);
+    discord.sendMessage(nconf.get("CHANNEL_MAHA_LOCKS"), msg);
   });
+
+  // contract.on("Withdraw", (...args) => {
+  //   console.log(args);
+  //   discord.sendMessage(nconf.get("CHANNEL_MAHA_LOCKS"), "test");
+  // });
 };

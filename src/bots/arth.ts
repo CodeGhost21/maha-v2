@@ -13,7 +13,7 @@ import { getCollateralPrices } from "../utils/getCollateralPrices";
 
 const contracts = [
   {
-    chainWss: nconf.get("MAINNET_ETH"),
+    chainWss: nconf.get("RPC_WSS"),
     explorer: "https://etherscan.io",
     borrowingOperations: "0xD3761E54826837B8bBd6eF0A278D5b647B807583",
     troveManager: "0xF4eD5d0C3C977B57382fabBEa441A63FAaF843d3",
@@ -173,7 +173,7 @@ const craftMessage = (
   return (
     `${msg}\n\n` +
     `${dots}` +
-    `Hash: ${hash}` +
+    `Transaction: ${hash}` +
     (account ? `\nLoan Details: ${loanLink}` : "")
   );
 };
@@ -198,19 +198,19 @@ export default () => {
       // event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, uint8 operation);
       const msg = await craftMessageFromEvent(args[5], c.explorer);
       console.log(msg);
-      discord.sendMessage(nconf.get("ARTH_ACTIVITY_CHANNEL"), msg);
+      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), msg);
     });
 
     troveManager.on("TroveLiquidated", async (...args) => {
       // event TroveLiquidated(address indexed _borrower, uint _debt, uint _coll, uint8 operation);
       const msg = await craftMessageFromEvent(args[4], c.explorer);
-      discord.sendMessage(nconf.get("ARTH_ACTIVITY_CHANNEL"), msg);
+      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), msg);
     });
 
     troveManager.on("Redemption", async (...args) => {
       // event Redemption(uint _attemptedLUSDAmount, uint _actualLUSDAmount, uint _ETHSent, uint _ETHFee);
       const msg = await craftMessageFromEvent(args[4], c.explorer);
-      discord.sendMessage(nconf.get("ARTH_ACTIVITY_CHANNEL"), msg);
+      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), msg);
     });
   });
 };
