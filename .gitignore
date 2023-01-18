@@ -4,5 +4,8 @@ coverage/
 dist/
 node_modules/
 
+config.json
+.env
+
 # Project files:
 *.sublime-*
