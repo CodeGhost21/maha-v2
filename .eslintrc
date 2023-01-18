@@ -1,5 +1,9 @@
 {
   "root": true,
+  "env": {
+    "browser": true,
+    "node": true
+  },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "extends": [
@@ -8,6 +12,7 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
-    " @typescript-eslint/ban-ts-comment": ["off"]
+    "@typescript-eslint/ban-ts-comment": ["off"],
+    "no-console": "off"
   }
 }

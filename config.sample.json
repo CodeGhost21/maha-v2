@@ -1,0 +1,18 @@
+{
+    "DISCORD_CLIENT_TOKEN": "xxxxxxx",
+    "DISCORD_GUILD_ID": "0000000000",
+
+    "CHANNEL_LENDING": "0000000000",
+    "CHANNEL_MAHA_LOCKS": "0000000000",
+    "CHANNEL_ARTH_ACTIVITY": "0000000000",
+    "CHANNEL_GM": "0000000000",
+
+    "CONTRACT_POOL": "0x0000",
+    "CONTRACT_LOCKER": "0x0000",
+    "CONTRACT_ARTH_BO": "0x0000",
+    "CONTRACT_ARTH_TM": "0x0000",
+
+    "DATABASE_URI": "mongodb://localhost/discord-bot",
+    "RPC_WSS": "wss://mainnet.infura.io/ws/v3/----",
+    "NODE_ENV": "staging"
+}

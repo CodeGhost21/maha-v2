@@ -3,9 +3,13 @@
 coverage/
 dist/
 node_modules/
-
-config.json
 .env
-
+config.json
 # Project files:
 *.sublime-*
+
+**/*.map
+# **/*.js
+**/*.d.ts
+
+/*.log

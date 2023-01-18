@@ -1,7 +1,7 @@
 import nconf from "nconf";
-import { Client, Intents, MessageEmbed } from "discord.js";
+import { Client, Intents, TextChannel } from "discord.js";
 
-const client = new Client({
+export const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
     Intents.FLAGS.GUILD_MEMBERS,
@@ -10,8 +10,6 @@ const client = new Client({
     Intents.FLAGS.GUILD_PRESENCES,
     Intents.FLAGS.GUILD_MESSAGES,
     Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-    Intents.FLAGS.DIRECT_MESSAGES,
-    Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
     Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
   ],
 });
@@ -20,23 +18,10 @@ client.on("ready", () =>
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`)
 );
 
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
-  if (interaction.commandName == "maha") await interaction.reply("DAO!");
-});
+client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
-client.on("messageCreate", (msg) => {
-  if (msg.content.toLowerCase() == "maha") msg.channel.send("DAO");
-});
-
-client.login(nconf.get("DISCORD_TOKEN")); //login bot using token
-
-export const sendMessage = (channelName: string, messageMarkdown: string) => {
+export const sendMessage = (channelName: string, messageMarkdown?: string) => {
+  if (!messageMarkdown) return;
   const channel = client.channels.cache.get(channelName);
-
-  const discordMsgEmbed = new MessageEmbed()
-    .setColor("#F07D55")
-    .setDescription(messageMarkdown);
-
-  if (channel) channel.send({ embeds: [discordMsgEmbed] });
+  (channel as TextChannel).send(messageMarkdown);
 };
