@@ -8,6 +8,8 @@ import * as discord from "../output/discord";
 import { toDisplayNumber } from "../utils/formatValues";
 import { getCollateralPrices } from "../utils/getCollateralPrices";
 import { IEvent } from "../utils/interfaces";
+import { handleEmbedMessage } from '../helper/handleMessage'
+
 
 const craftMessageFromEvent = async (
   data: IEvent,
@@ -120,7 +122,8 @@ export default () => {
 
   Locker.on("Deposit", async (...args) => {
     const msg = await craftMessageFromEvent(args[6], explorer, opensea);
-    discord.sendMessage(nconf.get("CHANNEL_MAHA_LOCKS"), msg);
+    const embedMessage = await handleEmbedMessage(msg || '')
+    discord.sendMessage(nconf.get("CHANNEL_MAHA_LOCKS"), embedMessage);
   });
 
   // contract.on("Withdraw", (...args) => {

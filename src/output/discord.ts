@@ -1,5 +1,5 @@
 import nconf from "nconf";
-import { Client, Intents, MessageEmbed, TextChannel } from "discord.js";
+import { Client, Intents, TextChannel, MessageOptions } from "discord.js";
 
 export const client = new Client({
   intents: [
@@ -22,40 +22,8 @@ client.on("ready", () =>
 
 client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
-export const sendMessage = (channelId: string, messageMarkdown?: string, tweet?: any) => {
+export const sendMessage = (channelName: string, messageMarkdown?: MessageOptions | string) => {
   if (!messageMarkdown) return;
-  const channel = client.channels.cache.get(channelId);
-  let discordMsgEmbed: any
-
-  if(tweet){
-    console.log('if tweet')
-    // client.user?.setUsername(user.screen_name)
-    // client.user?.setAvatar(user.profile_image_url)
-    discordMsgEmbed = new MessageEmbed()
-      .setColor("#F07D55")
-      .setTitle(`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
-      .setDescription(messageMarkdown)
-      .setAuthor({
-        name: tweet ? tweet.user.name : '',
-        iconURL: tweet ? tweet.user.profile_image_url : ''
-      })
-      .setURL(`https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`)
-      .setFooter({
-        text: tweet ?'Twitter' : '',
-        iconURL: tweet ?  'https://i2-prod.birminghammail.co.uk/incoming/article18471307.ece/ALTERNATES/s1200c/1_Twitter-new-icon-mobile-app.jpg' : ''
-      })
-      .setTimestamp()
-
-  }
-  else{
-    client.user?.setUsername('Maha')
-
-    discordMsgEmbed = new MessageEmbed()
-      .setColor("#F07D55")
-      .setDescription(messageMarkdown)
-
-  }
-
-  console.log("sendMessage",channelId, channel, messageMarkdown);
-  if (channel) (channel as TextChannel).send({ embeds: [discordMsgEmbed] });
+  const channel = client.channels.cache.get(channelName);
+  (channel as TextChannel).send(messageMarkdown)
 };
