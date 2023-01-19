@@ -15,9 +15,10 @@ client.on("messageCreate", async (message) => {
 
   const content = message.content.toLowerCase();
 
-  User.findOne({ userID: message.author.id }).then((user) => {
+  User.findOne({ userID: message.author.id }).then(async (user) => {
     if (!user) {
       // If it's the user's first message
+      const users = await User.find()
       user = new User({
         userTag: message.author.tag,
         userID: message.author.id,
@@ -25,6 +26,7 @@ client.on("messageCreate", async (message) => {
         maxStreak: 0,
         totalGMs: 0,
         lastGM: message.createdAt,
+        gmRank: users.length + 1
       });
       user.save();
 
