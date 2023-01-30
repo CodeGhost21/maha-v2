@@ -6,6 +6,7 @@ import { twitterMetions } from './output/twitter';
 import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
 import "./bots/gm";
+import "./bots/collabLand"
 
 import { open } from "./database";
 
@@ -21,7 +22,6 @@ twitterMetions()
 mahaLocks();
 
 app.use(cors())
-// app.use(cors(testCorsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 

@@ -1,7 +1,9 @@
 import * as jwt from 'jsonwebtoken'
+import nconf from "nconf";
+
 import InvalidJWTError from '../errors/InvalidJWTError'
 
-const secret = 'arth-wallet'
+const secret = nconf.get("JWT_SECRET")
 
 export const authenticateJWT = (req: any, res: any, next: any) => {
 
@@ -12,7 +14,6 @@ export const authenticateJWT = (req: any, res: any, next: any) => {
 
   if (token) {
     jwt.verify(token, secret, (err: any, user: any) => {
-
       if (err) return next(new InvalidJWTError())
       if (err) return next()
       req.user = user

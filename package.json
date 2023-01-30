@@ -79,6 +79,7 @@
     "twitter-v2": "^1.1.0",
     "underscore": "^1.13.2",
     "web3": "^1.7.3",
+    "web3-eth-contract": "^1.8.1",
     "web3-providers-ws": "^1.7.3"
   }
 }
