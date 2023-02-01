@@ -2,19 +2,20 @@ import bodyParser from "body-parser";
 import express from "express";
 import * as http from 'http'
 const cors = require('cors')
+const passport = require('passport')
+const session = require('express-session')
+
+import './strategies/discord'
 import { twitterMetions } from './output/twitter';
 import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
 import "./bots/gm";
 import "./bots/collabLand"
-
 import { open } from "./database";
 
 const app = express();
 const server = new http.Server(app)
 open();
-
-
 twitterMetions()
 // mahaxNFT();
 // arth();
@@ -25,7 +26,16 @@ app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.session());
 app.use(routes)
+
+app.use('/rewards', express.static('rewards'));
 
 app.set("port", process.env.PORT || 5000);
 const port = app.get("port");

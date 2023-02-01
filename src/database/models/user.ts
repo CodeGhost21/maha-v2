@@ -8,8 +8,13 @@ export interface IUser {
   totalGMs: number;
   lastGM: Date;
   gmRank: number;
-  jwt: string
-  walletAddress: string
+  jwt: string;
+  walletAddress: string;
+  discordVerify: boolean;
+  discordName: string;
+  discordDiscriminator: string;
+  discordAvatar: string;
+  signDiscord: boolean
 }
 
 const UserSchema = new mongoose.Schema({
@@ -21,7 +26,12 @@ const UserSchema = new mongoose.Schema({
   lastGM: Date,
   gmRank: { type: Number, default: 0 },
   jwt: String,
-  walletAddress: { type: String, default: '' }
+  walletAddress: { type: String, default: '' },
+  discordVerify: { type: Boolean, default: false },
+  discordName: { type: String, default: '' },
+  discordDiscriminator: { type: String, default: '' },
+  discordAvatar: { type: String, default: '' },
+  signDiscord: { type: Boolean, default: false }
 });
 
 export type IUserModel = IUser & mongoose.Document;
