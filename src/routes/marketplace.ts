@@ -1,8 +1,8 @@
-import { Router } from 'express'
-import { getMarketPlaceData } from '../controller/marketPlace'
+import { Router } from "express";
+import { getMarketPlaceData } from "../controller/marketPlace";
 
-const router = Router()
+const router = Router();
 
-router.get('/marketPlace', (req, res) => getMarketPlaceData(req, res))
+router.get("/", (req, res) => getMarketPlaceData(req, res));
 
-export default router
+export default router;

@@ -24,7 +24,7 @@ passport.deserializeUser(async (id: string, done: any) => {
 passport.use(new Strategy({
     clientID: '876737547286495252',
     clientSecret: '-T_qEehGXvw3qJBB0fhLSrxpyH1cQtJh',
-    callbackURL: 'https://0631-14-143-239-186.ngrok.io/discord/redirect',
+    callbackURL: 'https://d924-14-142-22-194.in.ngrok.io/discord/redirect',
     scope: ['identify']
 }, async (accessToken: any, refreshToken: any, profile: any, done: any) => {
     // console.log(accessToken, refreshToken);

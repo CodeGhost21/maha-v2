@@ -1,19 +1,19 @@
 [
     {
         "name": "Maha #1",
-        "imgUrl": "https://0631-14-143-239-186.ngrok.io/rewards/jet.jpeg",
+        "imgUrl": "https://d924-14-142-22-194.in.ngrok.io/rewards/jet.jpeg",
         "price": 50,
         "stock": 1
     },
     {
         "name": "Maha #2",
-        "imgUrl": "https://0631-14-143-239-186.ngrok.io/rewards/tesla.jpeg",
+        "imgUrl": "https://d924-14-142-22-194.in.ngrok.io/rewards/tesla.jpeg",
         "price": 100,
         "stock": 2
     },
     {
         "name": "Maha #3",
-        "imgUrl": "https://0631-14-143-239-186.ngrok.io/rewards/jetski.jpeg",
+        "imgUrl": "https://d924-14-142-22-194.in.ngrok.io/rewards/jetski.jpeg",
         "price": 150,
         "stock": 5
     }

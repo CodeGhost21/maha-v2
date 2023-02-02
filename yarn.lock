@@ -5363,7 +5363,7 @@ lodash.merge@^4.6.2:
   resolved "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
-lodash@^4.17.12, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21:
+lodash@^4.17.12, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.3.0:
   version "4.17.21"
   resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -5685,9 +5685,16 @@ mongodb@4.12.1:
     "@aws-sdk/credential-providers" "^3.186.0"
     saslprep "^1.0.3"
 
+mongoose-private-paths@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/mongoose-private-paths/-/mongoose-private-paths-0.7.0.tgz#f75ab2f70d7bb25f3b82f1a6a99bff1910348730"
+  integrity sha512-WPnyjIbPalEJgW8AvHYm8i/kMs3oY+1n2Lk30/PhcH7pGVvDw5m0UY8lubLbk6ShamQLRCWJSO90Id+q6tKj+w==
+  dependencies:
+    lodash "^4.3.0"
+
 mongoose-timestamp@^0.6.0:
   version "0.6.0"
-  resolved "https://registry.npmjs.org/mongoose-timestamp/-/mongoose-timestamp-0.6.0.tgz"
+  resolved "https://registry.yarnpkg.com/mongoose-timestamp/-/mongoose-timestamp-0.6.0.tgz#da54110ca8e6d4c2b9957a0366836c362ed272be"
   integrity sha512-H0f/x2z7yvIiijP3UaE6bsSTP71WqVxn8GR8OOYKUSWmf+U1mD1K+QeEQ5BlYl6zbp/l/19F8sHXA/vUAyDnRg==
   dependencies:
     defaults "^1.0.3"
