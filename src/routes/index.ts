@@ -1,7 +1,8 @@
 import { Router } from "express";
 import user from "./user";
 import discord from "./discord";
-import marketPlace from "./marketplace";
+import product from "./product";
+import cart from "./cart";
 
 const router = Router();
 router.get("/", (req, res) => {
@@ -10,7 +11,8 @@ router.get("/", (req, res) => {
 });
 
 router.use("/user", user);
-router.use("/marketPlace", marketPlace);
+router.use("/product", product);
 router.use("/discord", discord);
+router.use("/cart", cart);
 
 export default router;

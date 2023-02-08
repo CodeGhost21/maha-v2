@@ -5,7 +5,8 @@ import {
   walletVerify,
   getLeaderboard,
   fetchUser,
-  getRewards,
+  getRecentRewards,
+  getUsersDailyPoints,
 } from "../controller/user";
 
 const router = Router();
@@ -14,7 +15,11 @@ router.get("/leaderBoard", (req, res) => getLeaderboard(req, res));
 
 router.use(authenticateJWT);
 router.use(ensureLoggedIn);
-router.get("/rewards", (req, res) => getRewards(req, res));
+
+//dummy api for users daily points
+router.get("/dailyPoints", (req, res) => getUsersDailyPoints(req, res));
+router.get("/recentRewards", (req, res) => getRecentRewards(req, res));
+
 router.post("/verifyWallet", (req, res) => {
   walletVerify(req, res);
 });

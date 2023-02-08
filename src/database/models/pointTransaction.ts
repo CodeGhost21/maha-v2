@@ -13,7 +13,7 @@ export interface IPointTransaction {
   subPoints: number;
 }
 
-const PointTransactionSchema = new Schema(
+const pointTransactionSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     messageId: { type: Schema.Types.ObjectId, ref: "Message" },
@@ -29,5 +29,5 @@ const PointTransactionSchema = new Schema(
 export type IPointTransactionModel = IPointTransaction & Document;
 export const PointTransaction = mongoose.model(
   "PointTransaction",
-  PointTransactionSchema
+  pointTransactionSchema
 );

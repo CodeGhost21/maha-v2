@@ -1,59 +1,61 @@
-import * as jwt from 'jsonwebtoken'
+import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
 // import * as ethers from 'ethers'
 import { client, sendMessage } from "../output/discord";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { User } from "../database/models/user";
 // import MAHAX from "../abi/MahaXAbi.json"
-const Contract = require('web3-eth-contract');
+const Contract = require("web3-eth-contract");
 
 Contract.setProvider(nconf.get("ETH_RPC"));
-const accessTokenSecret = nconf.get("JWT_SECRET")
+const accessTokenSecret = nconf.get("JWT_SECRET");
 // const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"))
 
-client.on('guildMemberAdd', async (member) => {
-    let token = ''
-    const user = await User.findOne({ userID: member.user.id })
-    if (user) {
-        token = await jwt.sign({ userID: String(user.userID) }, accessTokenSecret)
-        user['jwt'] = token
-        user['signDiscord'] = true
-        await user.save();
-    }
-    else {
-        const date = Date.now()
-        const newUser = new User({
-            userTag: `${member.user.username}#${member.user.discriminator}`,
-            userID: member.user.id,
-            streak: 0,
-            maxStreak: 0,
-            totalGMs: 0,
-            lastGM: date,
-            discordName: member.user.username,
-            discordDiscriminator: member.user.discriminator,
-            discordAvatar: member.user.avatar,
-            signDiscord: true
-        });
-        await newUser.save();
-        token = await jwt.sign({ userID: String(newUser.userID) }, accessTokenSecret)
+client.on("guildMemberAdd", async (member) => {
+  let token = "";
+  const user = await User.findOne({ userID: member.user.id });
+  if (user) {
+    token = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+    user["jwt"] = token;
+    user["signDiscord"] = true;
+    await user.save();
+  } else {
+    const date = Date.now();
+    const newUser = new User({
+      userTag: `${member.user.username}#${member.user.discriminator}`,
+      userID: member.user.id,
+      streak: 0,
+      maxStreak: 0,
+      totalGMs: 0,
+      lastGM: date,
+      discordName: member.user.username,
+      discordDiscriminator: member.user.discriminator,
+      discordAvatar: member.user.avatar,
+      signDiscord: true,
+    });
+    await newUser.save();
+    token = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
 
-        //save jwt 
-        newUser['jwt'] = token
-        await newUser.save();
-    }
-    const row = new MessageActionRow().addComponents(
-        new MessageButton().setLabel('Connect Wallet').setStyle('LINK').setURL(`http://localhost:3000/profile/${token}`)
-    )
-    const message = `Welcome <@${member.id}> to our server`
-    const discordMsgEmbed = new MessageEmbed()
-        .setColor("#F07D55")
-        .setDescription(message)
-    const payload = {
-        // content: message,
-        embeds: [discordMsgEmbed],
-        components: [row]
-    }
-    sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload)
+    //save jwt
+    newUser["jwt"] = token;
+    await newUser.save();
+  }
+  const row = new MessageActionRow().addComponents(
+    new MessageButton()
+      .setLabel("Connect Wallet")
+      .setStyle("LINK")
+      .setURL(`http://localhost:3000/profile/${token}`)
+  );
+  const message = `Welcome <@${member.id}> to our server`;
+  const discordMsgEmbed = new MessageEmbed()
+    .setColor("#F07D55")
+    .setDescription(message);
+  const payload = {
+    // content: message,
+    embeds: [discordMsgEmbed],
+    components: [row],
+  };
+  sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
 });
 
 // export const walletVerify = async (req: any, res: any) => {

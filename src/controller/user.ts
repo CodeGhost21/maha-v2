@@ -10,6 +10,7 @@ import { User } from "../database/models/user";
 import MAHAX from "../abi/MahaXAbi.json";
 import leaderBoardData from "../assets/leaderBoard.json";
 import rewards from "../assets/rewards.json";
+import usersDailyPoints from "../assets/usersDailyPoints.json";
 
 const secret = nconf.get("JWT_SECRET");
 
@@ -20,7 +21,7 @@ const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
 export const fetchUser = async (req: Request, res: Response) => {
   try {
     const tokenData: any = await jwt.verify(req.params.jwt, secret);
-    const user = await User.findOne({ userID: tokenData.userID });
+    const user = await User.findOne({ _id: tokenData.id });
     if (user) {
       res.send(user);
     } else {
@@ -37,7 +38,7 @@ export const getLeaderboard = async (req: Request, res: Response) => {
 };
 
 //get latest rewards of a user
-export const getRewards = (req: Request, res: Response) => {
+export const getRecentRewards = (req: Request, res: Response) => {
   res.send(rewards);
 };
 
@@ -45,7 +46,7 @@ export const getRewards = (req: Request, res: Response) => {
 export const walletVerify = async (req: any, res: any) => {
   try {
     const userReq = req.user;
-    const userData = await User.findOne({ userID: userReq.userID });
+    const userData = await User.findOne({ id: userReq.id });
     if (userData) {
       const result = ethers.utils.verifyMessage(
         userData.jwt || "",
@@ -109,3 +110,7 @@ export const fetchNFT = async () => {
 };
 
 // fetchNFT()
+
+export const getUsersDailyPoints = async (req: Request, res: Response) => {
+  res.send(usersDailyPoints);
+};

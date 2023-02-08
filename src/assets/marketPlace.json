@@ -3,18 +3,21 @@
         "name": "Maha #1",
         "imgUrl": "https://d924-14-142-22-194.in.ngrok.io/rewards/jet.jpeg",
         "price": 50,
-        "stock": 1
+        "stock": 1,
+        "desc":""
     },
     {
         "name": "Maha #2",
         "imgUrl": "https://d924-14-142-22-194.in.ngrok.io/rewards/tesla.jpeg",
         "price": 100,
-        "stock": 2
+        "stock": 2,
+        "desc":""
     },
     {
         "name": "Maha #3",
         "imgUrl": "https://d924-14-142-22-194.in.ngrok.io/rewards/jetski.jpeg",
         "price": 150,
-        "stock": 5
+        "stock": 5,
+        "desc":""
     }
 ]
