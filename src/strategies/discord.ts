@@ -25,7 +25,7 @@ passport.use(
     {
       clientID: "876737547286495252",
       clientSecret: "-T_qEehGXvw3qJBB0fhLSrxpyH1cQtJh",
-      callbackURL: "https://d924-14-142-22-194.in.ngrok.io/discord/redirect",
+      callbackURL: nconf.get("DISCORD_CALLBACK_URL"),
       scope: ["identify"],
     },
     async (accessToken: any, refreshToken: any, profile: any, done: any) => {
