@@ -20,7 +20,7 @@ export const addProduct = async () => {
     await newItem.save();
   });
 };
-// addProduct();
+addProduct();
 
 export const getProduct = async (req: Request, res: Response) => {
   const product = await Product.findOne({ _id: req.body.productId });
