@@ -30,6 +30,9 @@ client.on("messageCreate", async (message) => {
         totalGMs: 0,
         lastGM: message.createdAt,
         gmRank: users.length + 1,
+        discordName: message.author.username,
+        discordAvatar: message.author.avatar,
+        discordDiscriminator: message.author.discriminator,
       });
       user.save();
 
@@ -123,7 +126,7 @@ client.on("messageCreate", async (message) => {
         user.maxStreak =
           user.streak > user.maxStreak ? user.streak : user.maxStreak;
         user.totalGMs += 1;
-        user.totalPoints = points;
+        user.totalPoints += points;
         user.save();
       }
 
@@ -132,7 +135,7 @@ client.on("messageCreate", async (message) => {
         await assignGmPoints(user, newMessage.id, points);
         user.streak = 1;
         user.totalGMs += 1;
-        user.totalPoints = points;
+        user.totalPoints += points;
         user.save();
       } else if (isToday(lastGM) && user.totalGMs == 0) {
         await assignGmPoints(user, newMessage.id, points);

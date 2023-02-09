@@ -8,9 +8,8 @@ const Contract = require("web3-eth-contract");
 import { sendMessage } from "../output/discord";
 import { User } from "../database/models/user";
 import MAHAX from "../abi/MahaXAbi.json";
-import leaderBoardData from "../assets/leaderBoard.json";
-import rewards from "../assets/rewards.json";
 import usersDailyPoints from "../assets/usersDailyPoints.json";
+import { PointTransaction } from "../database/models/pointTransaction";
 
 const secret = nconf.get("JWT_SECRET");
 
@@ -34,12 +33,27 @@ export const fetchUser = async (req: Request, res: Response) => {
 
 //users leaderboard
 export const getLeaderboard = async (req: Request, res: Response) => {
-  res.send(leaderBoardData);
+  const users = await User.find()
+    .select("discordName totalPoints")
+    .sort({ totalPoints: -1 });
+  res.send(users);
 };
 
 //get latest rewards of a user
-export const getRecentRewards = (req: Request, res: Response) => {
-  res.send(rewards);
+export const getRecentRewards = async (req: any, res: Response) => {
+  const user = req.user;
+  try {
+    const userDetails = await User.findOne({ _id: user.id });
+    if (userDetails) {
+      const recentRewards = await PointTransaction.find({
+        userId: userDetails._id,
+        addPoints: { $gt: 0 },
+      }).select("type createdAt addPoints");
+      res.send(recentRewards);
+    }
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 //connect wallet verify
