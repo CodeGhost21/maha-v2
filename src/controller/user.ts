@@ -8,7 +8,7 @@ const Contract = require("web3-eth-contract");
 import { sendMessage } from "../output/discord";
 import { User } from "../database/models/user";
 import MAHAX from "../abi/MahaXAbi.json";
-import usersDailyPoints from "../assets/usersDailyPoints.json";
+// import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { checkGuildMember } from "../output/discord";
 
@@ -55,6 +55,31 @@ export const getRecentRewards = async (req: any, res: Response) => {
       }).select("type createdAt addPoints");
       res.send(recentRewards);
     }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getUsersDailyPoints = async (req: any, res: Response) => {
+  const usersDailyPoints: any = [];
+  const user = req.user;
+  try {
+    const userDetails = await User.findOne({ _id: user.id });
+    if (userDetails) {
+      const dailyPoints = await PointTransaction.find({
+        userId: userDetails._id,
+      }).select("totalPoints createdAt");
+      if (dailyPoints.length > 0) {
+        dailyPoints.map((item) => {
+          console.log(new Date(item.createdAt).getTime());
+          usersDailyPoints.push([
+            String(new Date(item.createdAt).getTime()),
+            String(item.totalPoints),
+          ]);
+        });
+      }
+    }
+    res.send(usersDailyPoints);
   } catch (e) {
     console.log(e);
   }
@@ -128,7 +153,3 @@ export const fetchNFT = async () => {
 };
 
 // fetchNFT()
-
-export const getUsersDailyPoints = async (req: Request, res: Response) => {
-  res.send(usersDailyPoints);
-};
