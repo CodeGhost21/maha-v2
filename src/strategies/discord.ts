@@ -3,6 +3,7 @@ import nconf from "nconf";
 import * as jwt from "jsonwebtoken";
 const { Strategy } = require("passport-discord");
 import { User, IUserModel } from "../database/models/user";
+import { checkGuildMember } from "../output/discord";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -35,12 +36,16 @@ passport.use(
         if (user) {
           done(null, user);
         } else {
+          const verifyUser = await checkGuildMember(profile.id);
+          console.log("verifyUser", verifyUser);
+
           const newUser = new User({
             userID: profile.id,
             userTag: `${profile.username}#${profile.discriminator}`,
             discordName: profile.username,
             discordDiscriminator: profile.discriminator,
             discordAvatar: profile.avatar,
+            discordVerify: verifyUser,
           });
           await newUser.save();
           console.log(newUser.id, newUser.id);

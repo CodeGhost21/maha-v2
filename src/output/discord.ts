@@ -22,8 +22,24 @@ client.on("ready", () =>
 
 client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
-export const sendMessage = (channelName: string, messageMarkdown?: MessageOptions | string) => {
+export const sendMessage = (
+  channelName: string,
+  messageMarkdown?: MessageOptions | string
+) => {
   if (!messageMarkdown) return;
   const channel = client.channels.cache.get(channelName);
-  (channel as TextChannel).send(messageMarkdown)
+  (channel as TextChannel).send(messageMarkdown);
+};
+
+export const checkGuildMember = async (memberId: string) => {
+  const guild = await client.guilds.fetch(nconf.get("DISCORD_GUILD_ID"));
+  try {
+    const response = await guild.members.fetch(memberId);
+    if (response.user) {
+      return true;
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
 };
