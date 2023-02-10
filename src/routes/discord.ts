@@ -15,7 +15,7 @@ router.get(
 );
 
 router.get("/redirect", passport.authenticate("discord"), (req: any, res) => {
-  res.redirect(`${nconf.get("REDIRECT_URL")}/${req.user.jwt}`);
+  res.redirect(`${nconf.get("REDIRECT_URL")}/${req.user.userID}`);
 });
 
 export default router;

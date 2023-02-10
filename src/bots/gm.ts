@@ -33,6 +33,7 @@ client.on("messageCreate", async (message) => {
         discordName: message.author.username,
         discordAvatar: message.author.avatar,
         discordDiscriminator: message.author.discriminator,
+        discordVerify: true,
       });
       user.save();
 

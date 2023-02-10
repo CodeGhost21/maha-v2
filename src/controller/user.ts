@@ -1,6 +1,6 @@
 import nconf from "nconf";
 import * as ethers from "ethers";
-import * as jwt from "jsonwebtoken";
+// import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { MessageEmbed } from "discord.js";
 const Contract = require("web3-eth-contract");
@@ -10,8 +10,9 @@ import { User } from "../database/models/user";
 import MAHAX from "../abi/MahaXAbi.json";
 import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
+import { checkGuildMember } from "../output/discord";
 
-const secret = nconf.get("JWT_SECRET");
+// const secret = nconf.get("JWT_SECRET");
 
 Contract.setProvider(nconf.get("ETH_RPC"));
 const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
@@ -19,9 +20,12 @@ const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
 //get user data
 export const fetchUser = async (req: Request, res: Response) => {
   try {
-    const tokenData: any = await jwt.verify(req.params.jwt, secret);
-    const user = await User.findOne({ _id: tokenData.id });
+    // const tokenData: any = await jwt.verify(req.params.id, secret);
+    const user: any = await User.findOne({ userID: req.params.id });
     if (user) {
+      const verifyUser = await checkGuildMember(user.userID);
+      user["discordVerify"] = verifyUser;
+      await user.save();
       res.send(user);
     } else {
       res.send("not a valid user");

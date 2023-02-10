@@ -10,7 +10,7 @@ import {
 } from "../controller/user";
 
 const router = Router();
-router.get("/fetch/:jwt", async (req: any, res) => fetchUser(req, res));
+router.get("/fetch/:id", async (req: any, res) => fetchUser(req, res));
 router.get("/leaderBoard", (req, res) => getLeaderboard(req, res));
 
 router.use(authenticateJWT);
