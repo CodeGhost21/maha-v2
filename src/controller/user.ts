@@ -60,6 +60,7 @@ export const getRecentRewards = async (req: any, res: Response) => {
   }
 };
 
+//user points
 export const getUsersDailyPoints = async (req: any, res: Response) => {
   const usersDailyPoints: any = [];
   const user = req.user;
@@ -71,7 +72,6 @@ export const getUsersDailyPoints = async (req: any, res: Response) => {
       }).select("totalPoints createdAt");
       if (dailyPoints.length > 0) {
         dailyPoints.map((item) => {
-          console.log(new Date(item.createdAt).getTime());
           usersDailyPoints.push([
             String(new Date(item.createdAt).getTime()),
             String(item.totalPoints),
