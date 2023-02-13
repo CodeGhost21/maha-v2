@@ -73,8 +73,8 @@ export const getUsersDailyPoints = async (req: any, res: Response) => {
       if (dailyPoints.length > 0) {
         dailyPoints.map((item) => {
           usersDailyPoints.push([
-            String(new Date(item.createdAt).getTime()),
-            String(item.totalPoints),
+            new Date(item.createdAt).getTime(),
+            item.totalPoints,
           ]);
         });
       }
