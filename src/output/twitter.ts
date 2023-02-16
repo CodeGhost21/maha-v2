@@ -58,13 +58,9 @@ export const twitterMetions = async () => {
       msgTemplate = tweet.extended_tweet
         ? tweet.extended_tweet.full_text
         : tweet.text;
+
       const message = await handleEmbedMessage(msgTemplate, tweet);
-      discord.sendMessage(
-        nconf.get("NODE_ENV") === "production"
-          ? nconf.get("TwitterMention_Discord")
-          : nconf.get("Test_DISCORD_CHANNEL_ID"),
-        message
-      );
+      discord.sendMessage(nconf.get("CHANNEL_TWITTER_COMMUNITY"), message);
     }
   });
 };
