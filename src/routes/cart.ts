@@ -11,5 +11,5 @@ router.use(ensureLoggedIn);
 router.post("/item", addItem);
 router.delete("/item/:id", removeItem);
 router.get("/items", allItems);
-router.get("/buyNow", (req, res) => buyNow(req, res));
+router.get("/buyNow", buyNow);
 export default router;
