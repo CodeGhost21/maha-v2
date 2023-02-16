@@ -4,19 +4,21 @@ import nconf from "nconf";
 import { client } from "../output/discord";
 import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
+import { assignRank } from '../helper/upadteRank'
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 
-client.on("messageCreate", (message) => {
+client.on("messageCreate", async (message) => {
   if (message.channelId !== nconf.get("CHANNEL_GM") && !message.guild) return;
   if (message.author.bot) return;
 
   const content = message.content.toLowerCase();
 
-  User.findOne({ userID: message.author.id }).then((user) => {
+  User.findOne({ userID: message.author.id }).then(async (user) => {
     if (!user) {
       // If it's the user's first message
+      const users = await User.find()
       user = new User({
         userTag: message.author.tag,
         userID: message.author.id,
@@ -24,15 +26,16 @@ client.on("messageCreate", (message) => {
         maxStreak: 0,
         totalGMs: 0,
         lastGM: message.createdAt,
+        gmRank: users.length + 1
       });
       user.save();
 
       message.channel.send(
         `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
-          `Just say "Good Morning" or "Gm" once everyday and ` +
-          ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
-          `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
-          `Try it out! Say "Good Morning" 🌞`
+        `Just say "Good Morning" or "Gm" once everyday and ` +
+        ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
+        `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
+        `Try it out! Say "Good Morning" 🌞`
       );
     }
   });
@@ -65,8 +68,7 @@ client.on("messageCreate", (message) => {
           .slice(0, 10)
           .map(
             (u, i) =>
-              `${total_icons[i]} **${u.userTag}** has said gm **${
-                u.totalGMs
+              `${total_icons[i]} **${u.userTag}** has said gm **${u.totalGMs
               } time${u.totalGMs > 1 ? "s" : ""}**.`
           )
           .join("\n");
@@ -90,7 +92,7 @@ client.on("messageCreate", (message) => {
       dateTime: message.createdAt,
     }).save();
 
-    User.findOne({ userID: message.author.id }).then((user) => {
+    User.findOne({ userID: message.author.id }).then(async (user) => {
       if (!user) return;
 
       const lastGM = new Date(user.lastGM || 0);
@@ -118,12 +120,10 @@ client.on("messageCreate", (message) => {
         user.maxStreak = 1;
         user.save();
       }
-
-      const text = `gm <@${message.author.id}>!\nYou've said gm for **${
-        user.streak
-      } day${user.streak > 1 ? "s" : ""} in a row** 🔥 and a total of ${
-        user.totalGMs
-      } time${user.streak > 1 ? "s" : ""} 🥳`;
+      const rankResult = await assignRank(user.userID || '')
+      const text = `gm <@${message.author.id}>!\nYou've said gm for **${user.streak
+        } day${user.streak > 1 ? "s" : ""} in a row** 🔥 and a total of ${user.totalGMs
+        } time${user.streak > 1 ? "s" : ""} 🥳 your rank is ${rankResult.rank} out of ${rankResult.totalUsers}`;
 
       message.channel.send(text).then().catch(console.log);
     });
@@ -131,3 +131,4 @@ client.on("messageCreate", (message) => {
     return;
   }
 });
+

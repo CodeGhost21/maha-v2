@@ -7,6 +7,9 @@ export interface IUser {
   maxStreak: number;
   totalGMs: number;
   lastGM: Date;
+  gmRank: number;
+  jwt: string
+  walletAddress: string
 }
 
 const UserSchema = new mongoose.Schema({
@@ -16,6 +19,9 @@ const UserSchema = new mongoose.Schema({
   maxStreak: { type: Number, default: 0 },
   totalGMs: { type: Number, default: 0 },
   lastGM: Date,
+  gmRank: { type: Number, default: 0 },
+  jwt: String,
+  walletAddress: { type: String, default: '' }
 });
 
 export type IUserModel = IUser & mongoose.Document;

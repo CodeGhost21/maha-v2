@@ -10,7 +10,7 @@ import { WebSocketProvider } from "@ethersproject/providers";
 import { toDisplayNumber } from "../utils/formatValues";
 import { ethers } from "ethers";
 import { getCollateralPrices } from "../utils/getCollateralPrices";
-
+import { handleEmbedMessage } from '../helper/handleMessage'
 const contracts = [
   {
     chainWss: nconf.get("RPC_WSS"),
@@ -197,20 +197,23 @@ export default () => {
     borrowerOperations.on("TroveUpdated", async (...args) => {
       // event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, uint8 operation);
       const msg = await craftMessageFromEvent(args[5], c.explorer);
+      const embedMessage = await handleEmbedMessage(msg || '')
       console.log(msg);
-      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), msg);
+      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
     });
 
     troveManager.on("TroveLiquidated", async (...args) => {
       // event TroveLiquidated(address indexed _borrower, uint _debt, uint _coll, uint8 operation);
       const msg = await craftMessageFromEvent(args[4], c.explorer);
-      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), msg);
+      const embedMessage = await handleEmbedMessage(msg || '')
+      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
     });
 
     troveManager.on("Redemption", async (...args) => {
       // event Redemption(uint _attemptedLUSDAmount, uint _actualLUSDAmount, uint _ETHSent, uint _ETHFee);
       const msg = await craftMessageFromEvent(args[4], c.explorer);
-      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), msg);
+      const embedMessage = await handleEmbedMessage(msg || '')
+      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
     });
   });
 };

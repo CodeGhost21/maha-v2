@@ -1,5 +1,5 @@
 import nconf from "nconf";
-import { Client, Intents, TextChannel } from "discord.js";
+import { Client, Intents, TextChannel, MessageOptions } from "discord.js";
 
 export const client = new Client({
   intents: [
@@ -11,6 +11,8 @@ export const client = new Client({
     Intents.FLAGS.GUILD_MESSAGES,
     Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
+    Intents.FLAGS.DIRECT_MESSAGES,
+    Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
   ],
 });
 
@@ -20,8 +22,8 @@ client.on("ready", () =>
 
 client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
-export const sendMessage = (channelName: string, messageMarkdown?: string) => {
+export const sendMessage = (channelName: string, messageMarkdown?: MessageOptions | string) => {
   if (!messageMarkdown) return;
   const channel = client.channels.cache.get(channelName);
-  (channel as TextChannel).send(messageMarkdown);
+  (channel as TextChannel).send(messageMarkdown)
 };
