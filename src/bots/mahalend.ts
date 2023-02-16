@@ -8,7 +8,7 @@ import { getDisplayBalance } from "../utils/formatValues";
 // import { getCollateralPrices } from "../utils/getCollateralPrices";
 import { IEvent } from "../utils/interfaces";
 import { getAssetName } from "../utils/getAssetName";
-import { handleEmbedMessage } from '../helper/handleMessage'
+import { handleEmbedMessage } from "../helper/handleMessage";
 
 const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
   let msg = "";
@@ -89,25 +89,25 @@ export default () => {
 
   contract.on("Supply", async (...args) => {
     const msg = await craftMessageFromEvent(args[5], explorer);
-    const embedMessage = await handleEmbedMessage(msg || '')
+    const embedMessage = await handleEmbedMessage(msg || "");
     discord.sendMessage(nconf.get("CHANNEL_LENDING"), embedMessage);
   });
 
   contract.on("Withdraw", async (...args) => {
     const msg = await craftMessageFromEvent(args[4], explorer);
-    const embedMessage = await handleEmbedMessage(msg || '')
+    const embedMessage = await handleEmbedMessage(msg || "");
     discord.sendMessage(nconf.get("CHANNEL_LENDING"), embedMessage);
   });
 
   contract.on("Borrow", async (...args) => {
     const msg = await craftMessageFromEvent(args[7], explorer);
-    const embedMessage = await handleEmbedMessage(msg || '')
+    const embedMessage = await handleEmbedMessage(msg || "");
     discord.sendMessage(nconf.get("CHANNEL_LENDING"), embedMessage);
   });
 
   contract.on("Repay", async (...args) => {
     const msg = await craftMessageFromEvent(args[5], explorer);
-    const embedMessage = await handleEmbedMessage(msg || '')
+    const embedMessage = await handleEmbedMessage(msg || "");
     discord.sendMessage(nconf.get("CHANNEL_LENDING"), embedMessage);
   });
 };

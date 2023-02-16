@@ -1,15 +1,17 @@
-import { Router } from 'express'
-import { authenticateJWT } from '../middleware/authenticateJWT'
-import ensureLoggedIn from '../middleware/ensureLoggedIn'
-import { walletVerify } from '../bots/collabLand'
+import { Router } from "express";
+import user from "./user";
+import discord from "./discord";
+import product from "./product";
+import cart from "./cart";
 
-const router = Router()
-router.get("/", (req, res) => {
-    res.send("API Running successfully");
-    // next(new Error("hello world"))
+const router = Router();
+router.get("/", (_req, res) => {
+  res.json({ message: "api running successfully" });
 });
-router.use(authenticateJWT)
-router.use(ensureLoggedIn)
-router.post('/verifyWallet', (req, res) => { walletVerify(req, res) })
 
-export default router
+router.use("/user", user);
+router.use("/product", product);
+router.use("/discord", discord);
+router.use("/cart", cart);
+
+export default router;

@@ -1,8 +1,8 @@
-import HttpError from './HttpError'
+import HttpError from "./HttpError";
 
 export default class InvalidJWTError extends HttpError {
-    constructor() {
-        super('Bad JWT')
-        this.status = 403
-    }
+  constructor() {
+    super("Bad JWT");
+    this.status = 403;
+  }
 }
