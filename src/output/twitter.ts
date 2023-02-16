@@ -20,18 +20,17 @@ export const twitterMetions = async () => {
 
   const clientv2 = new TwitterApi(nconf.get("TWITTER_BEARER_TOKEN")).v2;
 
-  const followingListMahaDAO = await clientv2.following("1246916938678169600");
+  const followingListMahaDAO = await clientv2.following("1246916938678169600"); // mahadao
 
-  let whiteListedUsers = followingListMahaDAO.data.map((data) => data.id);
+  const whiteListedUsers = followingListMahaDAO.data.map((data) => data.id);
 
-  whiteListedUsers = [
-    ...whiteListedUsers,
-    "2170763245",
-    "1038703148293124096",
-  ].filter((id: string) => id != "767252878209744896");
+  const finalWhiteListedUsers = whiteListedUsers
+    .filter((id: string) => id != "767252878209744896") // senamakel
+    .filter((id: string) => id != "1246916938678169600") // themahadao
+    .filter((id: string) => id != "1564239036348354560"); // thepeopleofeden
 
   const streamFilter = clientv1.stream("statuses/filter", {
-    follow: whiteListedUsers,
+    follow: finalWhiteListedUsers,
     track: trackWords,
     tweet_mode: "full_text",
   });
@@ -39,7 +38,7 @@ export const twitterMetions = async () => {
   //  eslint-disable-next-line @typescript-eslint/no-explicit-any
   streamFilter.on("tweet", async (tweet: any) => {
     if (
-      whiteListedUsers.includes(tweet.user.id_str) &&
+      finalWhiteListedUsers.includes(tweet.user.id_str) &&
       trackWords.some((word) => {
         if (tweet.extended_tweet) {
           return tweet.extended_tweet.full_text.includes(word);
