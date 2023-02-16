@@ -3,7 +3,7 @@ import { getAllProduct, getProduct } from "../controller/product";
 
 const router = Router();
 
-router.get("/allProduct", (req, res) => getAllProduct(req, res));
-router.post("/getProduct", (req, res) => getProduct(req, res));
+router.get("/products", getAllProduct);
+router.get("/products/:productId", getProduct);
 
 export default router;

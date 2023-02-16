@@ -5,9 +5,8 @@ import product from "./product";
 import cart from "./cart";
 
 const router = Router();
-router.get("/", (req, res) => {
-  res.send("API Running successfully");
-  // next(new Error("hello world"))
+router.get("/", (_req, res) => {
+  res.json({ message: "api running successfully" });
 });
 
 router.use("/user", user);

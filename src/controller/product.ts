@@ -23,8 +23,6 @@ export const addProduct = async () => {
 // addProduct();
 
 export const getProduct = async (req: Request, res: Response) => {
-  const product = await Product.findOne({ _id: req.body.productId });
-  if (product) {
-    res.send(product);
-  }
+  const product = await Product.findOne({ _id: req.params.productId });
+  if (product) res.send(product);
 };

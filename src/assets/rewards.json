@@ -1,26 +1,26 @@
 [
-    {
-        "userId":"63db617a4202fd818e0a4968",
-        "type":"Twitter Tweet",
-        "points":50,
-        "createdAt":"2023-02-02T08:53:44.400Z"
-    },
-    {
-        "userId":"63db617a4202fd818e0a4968",
-        "type":"NFT",
-        "points":300,
-        "createdAt":"2023-02-02T08:53:44.400Z"
-    },
-    {
-        "userId":"63db617a4202fd818e0a4968",
-        "type":"Discord gm",
-        "points":100,
-        "createdAt":"2023-02-02T08:53:44.400Z"
-    },
-    {
-        "userId":"63db617a4202fd818e0a4968",
-        "type":"Twitter Profile",
-        "points":60,
-        "createdAt":"2023-02-02T08:53:44.400Z"
-    }
+  {
+    "userId": "63db617a4202fd818e0a4968",
+    "type": "Twitter Tweet",
+    "points": 50,
+    "createdAt": "2023-02-02T08:53:44.400Z"
+  },
+  {
+    "userId": "63db617a4202fd818e0a4968",
+    "type": "NFT",
+    "points": 300,
+    "createdAt": "2023-02-02T08:53:44.400Z"
+  },
+  {
+    "userId": "63db617a4202fd818e0a4968",
+    "type": "Discord gm",
+    "points": 100,
+    "createdAt": "2023-02-02T08:53:44.400Z"
+  },
+  {
+    "userId": "63db617a4202fd818e0a4968",
+    "type": "Twitter Profile",
+    "points": 60,
+    "createdAt": "2023-02-02T08:53:44.400Z"
+  }
 ]

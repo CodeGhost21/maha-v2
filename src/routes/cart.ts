@@ -7,8 +7,9 @@ const router = Router();
 
 router.use(authenticateJWT);
 router.use(ensureLoggedIn);
-router.post("/addItem", (req, res) => addItem(req, res));
-router.post("/removeItem", (req, res) => removeItem(req, res));
-router.get("/fetchItems", (req, res) => allItems(req, res));
+
+router.post("/item", addItem);
+router.delete("/item/:id", removeItem);
+router.get("/items", allItems);
 router.get("/buyNow", (req, res) => buyNow(req, res));
 export default router;

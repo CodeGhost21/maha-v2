@@ -1,20 +1,22 @@
 import bodyParser from "body-parser";
 import express from "express";
 import * as http from "http";
-const cors = require("cors");
-const passport = require("passport");
-const session = require("express-session");
+import cors from "cors";
+import passport from "passport";
+import session from "express-session";
 
+import { open } from "./database";
+
+// import "./bots/collabLand.ts.dis";
+import "./bots/gm";
 import "./strategies/discord";
 import { twitterMetions } from "./output/twitter";
 import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
-import "./bots/gm";
-import "./bots/collabLand";
-import { open } from "./database";
 
 const app = express();
 const server = new http.Server(app);
+
 open();
 twitterMetions();
 // mahaxNFT();

@@ -3,7 +3,7 @@ import nconf from "nconf";
 import * as jwt from "jsonwebtoken";
 
 import { client } from "../output/discord";
-import { User } from "../database/models/user";
+import { IUserModel, User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
@@ -18,7 +18,8 @@ client.on("messageCreate", async (message) => {
 
   const content = message.content.toLowerCase();
 
-  User.findOne({ userID: message.author.id }).then(async (user) => {
+  // find and cerate user
+  await User.findOne({ userID: message.author.id }).then(async (user) => {
     if (!user) {
       // If it's the user's first message
       const users = await User.find();
@@ -51,6 +52,7 @@ client.on("messageCreate", async (message) => {
     }
   });
 
+  // leaderboard?
   if (lbKeywords.includes(content)) {
     User.find({})
       .lean()
@@ -96,6 +98,7 @@ client.on("messageCreate", async (message) => {
     return;
   }
 
+  // good morning?
   if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
     const newMessage = new Message({
       content: message.cleanContent,
@@ -162,9 +165,13 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-const assignGmPoints = async (user: any, messageId: string, points: number) => {
+const assignGmPoints = async (
+  user: IUserModel,
+  messageId: string,
+  points: number
+) => {
   const newPointsTransaction = new PointTransaction({
-    userId: user._id,
+    userId: user.id,
     messageId: messageId,
     type: "gm",
     totalPoints: user.totalPoints + points,

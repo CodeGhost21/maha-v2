@@ -8,8 +8,7 @@ import * as discord from "../output/discord";
 import { toDisplayNumber } from "../utils/formatValues";
 import { getCollateralPrices } from "../utils/getCollateralPrices";
 import { IEvent } from "../utils/interfaces";
-import { handleEmbedMessage } from '../helper/handleMessage'
-
+import { handleEmbedMessage } from "../helper/handleMessage";
 
 const craftMessageFromEvent = async (
   data: IEvent,
@@ -48,7 +47,6 @@ const craftMessageFromEvent = async (
 
     const price = prices.MAHA ? `*($${(value * prices.MAHA).toFixed(2)})*` : "";
 
-    console.log("deposit", who, tokenId, value, locktime, depositType);
     if (depositType == 1) {
       msg =
         `**NFT #${tokenId}** minted with **${value} MAHA** ${price} tokens locked` +
@@ -122,7 +120,7 @@ export default () => {
 
   Locker.on("Deposit", async (...args) => {
     const msg = await craftMessageFromEvent(args[6], explorer, opensea);
-    const embedMessage = await handleEmbedMessage(msg || '')
+    const embedMessage = await handleEmbedMessage(msg || "");
     discord.sendMessage(nconf.get("CHANNEL_MAHA_LOCKS"), embedMessage);
   });
 

@@ -10,22 +10,43 @@ import { WebSocketProvider } from "@ethersproject/providers";
 import { toDisplayNumber } from "../utils/formatValues";
 import { ethers } from "ethers";
 import { getCollateralPrices } from "../utils/getCollateralPrices";
-import { handleEmbedMessage } from '../helper/handleMessage'
-const contracts = [
-  {
-    chainWss: nconf.get("RPC_WSS"),
-    explorer: "https://etherscan.io",
-    borrowingOperations: "0xD3761E54826837B8bBd6eF0A278D5b647B807583",
-    troveManager: "0xF4eD5d0C3C977B57382fabBEa441A63FAaF843d3",
-  },
-];
+import { handleEmbedMessage } from "../helper/handleMessage";
 
-const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
+const craftMessage = (
+  msg: string,
+  txHash: string,
+  account: string | undefined,
+  noOfTotalDots: number,
+  dotType?: "green" | "red"
+) => {
+  let dots = "";
+
+  if (dotType && noOfTotalDots > 0) {
+    for (let i = 0; i < noOfTotalDots; i++) {
+      if (dotType == "green") dots += "💰";
+      else dots += "🔴";
+    }
+
+    dots += "\n\n";
+  }
+
+  const explorer = "https://etherscan.io";
+  const hash = `<${explorer}/tx/${txHash}>`;
+  const loanLink = `<https://arth.loans/#/loan/details/${account}/ETH/>`;
+
+  return (
+    `${msg}\n\n` +
+    `${dots}` +
+    `Transaction: ${hash}` +
+    (account ? `\nLoan Details: ${loanLink}` : "")
+  );
+};
+
+const craftMessageFromEvent = async (data: IEvent) => {
   const prices = await getCollateralPrices();
 
   if (data.event == "TroveUpdated") {
     // event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, uint8 operation);
-
     const _borrower = data.args[0];
     const _debt = data.args[1];
     const _coll = data.args[2];
@@ -48,7 +69,6 @@ const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
         data.transactionHash,
         _borrower,
         noOfTotalDots,
-        explorer,
         "green"
       );
     }
@@ -57,14 +77,7 @@ const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
       // not getting any values in this event
       const msg = `**${_borrower}**'s loan has now been closed.`;
 
-      return craftMessage(
-        msg,
-        data.transactionHash,
-        _borrower,
-        1,
-        explorer,
-        "red"
-      );
+      return craftMessage(msg, data.transactionHash, _borrower, 1, "red");
     }
 
     if (operation == 2) {
@@ -80,7 +93,6 @@ const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
         data.transactionHash,
         _borrower,
         noOfTotalDots,
-        explorer,
         "green"
       );
     }
@@ -109,7 +121,6 @@ const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
       data.transactionHash,
       _borrower,
       noOfTotalDots,
-      explorer,
       "red"
     );
   } else if (data.event == "Redemption") {
@@ -140,7 +151,6 @@ const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
       data.transactionHash,
       undefined,
       noOfTotalDots,
-      explorer,
       "red"
     );
   }
@@ -148,72 +158,46 @@ const craftMessageFromEvent = async (data: IEvent, explorer: string) => {
   return;
 };
 
-const craftMessage = (
-  msg: string,
-  txHash: string,
-  account: string | undefined,
-  noOfTotalDots: number,
-  explorer: string,
-  dotType?: "green" | "red"
-) => {
-  let dots = "";
-
-  if (dotType && noOfTotalDots > 0) {
-    for (let i = 0; i < noOfTotalDots; i++) {
-      if (dotType == "green") dots += "💰";
-      else dots += "🔴";
-    }
-
-    dots += "\n\n";
-  }
-
-  const hash = `<${explorer}/tx/${txHash}>`;
-  const loanLink = `<https://arth.loans/#/loan/details/${account}/ETH/>`;
-
-  return (
-    `${msg}\n\n` +
-    `${dots}` +
-    `Transaction: ${hash}` +
-    (account ? `\nLoan Details: ${loanLink}` : "")
-  );
-};
-
 export default () => {
   console.log("listening for arth events");
-  contracts.map((c) => {
-    const provider = new WebSocketProvider(c.chainWss);
 
-    const borrowerOperations = new ethers.Contract(
-      c.borrowingOperations,
-      borrowerOperationsABI,
-      provider
-    );
-    const troveManager = new ethers.Contract(
-      c.troveManager,
-      troveManagerABI,
-      provider
-    );
+  const chainWss = nconf.get("RPC_WSS");
 
-    borrowerOperations.on("TroveUpdated", async (...args) => {
-      // event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, uint8 operation);
-      const msg = await craftMessageFromEvent(args[5], c.explorer);
-      const embedMessage = await handleEmbedMessage(msg || '')
-      console.log(msg);
-      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
-    });
+  const borrowingOperationsAddr = nconf.get("CONTRACT_ARTH_BO");
+  const troveManagerAddr = nconf.get("CONTRACT_ARTH_TM");
 
-    troveManager.on("TroveLiquidated", async (...args) => {
-      // event TroveLiquidated(address indexed _borrower, uint _debt, uint _coll, uint8 operation);
-      const msg = await craftMessageFromEvent(args[4], c.explorer);
-      const embedMessage = await handleEmbedMessage(msg || '')
-      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
-    });
+  const provider = new WebSocketProvider(chainWss);
 
-    troveManager.on("Redemption", async (...args) => {
-      // event Redemption(uint _attemptedLUSDAmount, uint _actualLUSDAmount, uint _ETHSent, uint _ETHFee);
-      const msg = await craftMessageFromEvent(args[4], c.explorer);
-      const embedMessage = await handleEmbedMessage(msg || '')
-      discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
-    });
+  const borrowerOperations = new ethers.Contract(
+    borrowingOperationsAddr,
+    borrowerOperationsABI,
+    provider
+  );
+  const troveManager = new ethers.Contract(
+    troveManagerAddr,
+    troveManagerABI,
+    provider
+  );
+
+  borrowerOperations.on("TroveUpdated", async (...args) => {
+    // event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, uint8 operation);
+    const msg = await craftMessageFromEvent(args[5]);
+    const embedMessage = await handleEmbedMessage(msg || "");
+    console.log(msg);
+    discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
+  });
+
+  troveManager.on("TroveLiquidated", async (...args) => {
+    // event TroveLiquidated(address indexed _borrower, uint _debt, uint _coll, uint8 operation);
+    const msg = await craftMessageFromEvent(args[4]);
+    const embedMessage = await handleEmbedMessage(msg || "");
+    discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
+  });
+
+  troveManager.on("Redemption", async (...args) => {
+    // event Redemption(uint _attemptedLUSDAmount, uint _actualLUSDAmount, uint _ETHSent, uint _ETHFee);
+    const msg = await craftMessageFromEvent(args[4]);
+    const embedMessage = await handleEmbedMessage(msg || "");
+    discord.sendMessage(nconf.get("CHANNEL_ARTH_ACTIVITY"), embedMessage);
   });
 };

@@ -4,6 +4,7 @@ import nconf from "nconf";
 import { client, sendMessage } from "../output/discord";
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { User } from "../database/models/user";
+
 // import MAHAX from "../abi/MahaXAbi.json"
 const Contract = require("web3-eth-contract");
 
@@ -36,10 +37,11 @@ client.on("guildMemberAdd", async (member) => {
     await newUser.save();
     token = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
 
-    //save jwt
+    // save jwt
     newUser["jwt"] = token;
     await newUser.save();
   }
+
   const row = new MessageActionRow().addComponents(
     new MessageButton()
       .setLabel("Connect Wallet")
@@ -50,11 +52,13 @@ client.on("guildMemberAdd", async (member) => {
   const discordMsgEmbed = new MessageEmbed()
     .setColor("#F07D55")
     .setDescription(message);
+
   const payload = {
     // content: message,
     embeds: [discordMsgEmbed],
     components: [row],
   };
+
   sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
 });
 

@@ -10,18 +10,16 @@ import {
 } from "../controller/user";
 
 const router = Router();
-router.get("/fetch/:id", async (req: any, res) => fetchUser(req, res));
-router.get("/leaderBoard", (req, res) => getLeaderboard(req, res));
+
+router.get("/fetch/:id", fetchUser); // <- need to hide sensitive datapoints
+router.get("/leaderBoard", getLeaderboard);
 
 router.use(authenticateJWT);
 router.use(ensureLoggedIn);
 
-//dummy api for users daily points
-router.get("/dailyPoints", (req, res) => getUsersDailyPoints(req, res));
-router.get("/recentRewards", (req, res) => getRecentRewards(req, res));
-
-router.post("/verifyWallet", (req, res) => {
-  walletVerify(req, res);
-});
+// dummy api for users daily points
+router.get("/dailyPoints", getUsersDailyPoints);
+router.get("/recentRewards", getRecentRewards);
+router.post("/verifyWallet", walletVerify);
 
 export default router;

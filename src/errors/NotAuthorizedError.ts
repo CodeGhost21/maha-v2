@@ -1,8 +1,8 @@
-import BadRequestError from './BadRequestError'
+import BadRequestError from "./BadRequestError";
 
 export default class NotAuthorizedError extends BadRequestError {
-    constructor(message?: string) {
-        super('You are not authorised to access this page')
-        this.status = 401
-    }
+  constructor(message?: string) {
+    super(message || "You are not authorised to access this page");
+    this.status = 401;
+  }
 }

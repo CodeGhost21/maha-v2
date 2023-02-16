@@ -1,23 +1,23 @@
 [
-    {
-        "name": "Maha #1",
-        "imgUrl": "http://172.105.59.250:5000/rewards/jet.jpeg",
-        "price": 50,
-        "stock": 1,
-        "desc":""
-    },
-    {
-        "name": "Maha #2",
-        "imgUrl": "http://172.105.59.250:5000/rewards/tesla.jpeg",
-        "price": 100,
-        "stock": 2,
-        "desc":""
-    },
-    {
-        "name": "Maha #3",
-        "imgUrl": "http://172.105.59.250:5000/rewards/jetski.jpeg",
-        "price": 150,
-        "stock": 5,
-        "desc":""
-    }
+  {
+    "name": "Maha #1",
+    "imgUrl": "http://172.105.59.250:5000/rewards/jet.jpeg",
+    "price": 50,
+    "stock": 1,
+    "desc": ""
+  },
+  {
+    "name": "Maha #2",
+    "imgUrl": "http://172.105.59.250:5000/rewards/tesla.jpeg",
+    "price": 100,
+    "stock": 2,
+    "desc": ""
+  },
+  {
+    "name": "Maha #3",
+    "imgUrl": "http://172.105.59.250:5000/rewards/jetski.jpeg",
+    "price": 150,
+    "stock": 5,
+    "desc": ""
+  }
 ]

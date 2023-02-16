@@ -42,4 +42,4 @@ const UserSchema = new mongoose.Schema(
 );
 
 export type IUserModel = IUser & mongoose.Document;
-export const User = mongoose.model("User", UserSchema);
+export const User = mongoose.model<IUserModel>("User", UserSchema);

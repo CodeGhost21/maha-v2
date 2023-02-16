@@ -3,19 +3,19 @@ import * as ethers from "ethers";
 // import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { MessageEmbed } from "discord.js";
-const Contract = require("web3-eth-contract");
 
 import { sendMessage } from "../output/discord";
 import { User } from "../database/models/user";
-import MAHAX from "../abi/MahaXAbi.json";
 // import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { checkGuildMember } from "../output/discord";
 
 // const secret = nconf.get("JWT_SECRET");
 
-Contract.setProvider(nconf.get("ETH_RPC"));
-const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
+// const Contract = require("web3-eth-contract");
+// import MAHAX from "../abi/MahaXAbi.json";
+// Contract.setProvider(nconf.get("ETH_RPC"));
+// const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
 
 //get user data
 export const fetchUser = async (req: Request, res: Response) => {
@@ -123,31 +123,30 @@ export const fetchNFT = async () => {
   const allUsers = await User.find();
   if (allUsers.length > 0) {
     await allUsers.map(async (user) => {
-      if (user.walletAddress !== "") {
-        const noOfNFTs = await mahaXContract.methods
-          .balanceOf(user.walletAddress)
-          .call();
-        if (noOfNFTs > 0) {
-          // let totalMahaStaked = 0;
-          // for (let i = 0; i < noOfNFTs; i++) {
-          //   const nftId = await mahaXContract.methods
-          //     .tokenOfOwnerByIndex(user.walletAddress, i)
-          //     .call();
-          //   const nftAmount = await mahaXContract.methods.locked(nftId).call();
-          //   if (nftAmount.amount / 1e18 >= 100) {
-          //     totalMahaStaked += nftAmount.amount / 1e18;
-          //   }
-          // }
-          // console.log("totalMahaStaked", totalMahaStaked);
-
-          // if (totalMahaStaked > 300) {
-          await User.updateOne(
-            { walletAddress: user.walletAddress },
-            { stakedMaha: true }
-          );
-          //       }
-        }
-      }
+      // if (user.walletAddress !== "") {
+      //   const noOfNFTs = await mahaXContract.methods
+      //     .balanceOf(user.walletAddress)
+      //     .call();
+      //   if (noOfNFTs > 0) {
+      //     // let totalMahaStaked = 0;
+      //     // for (let i = 0; i < noOfNFTs; i++) {
+      //     //   const nftId = await mahaXContract.methods
+      //     //     .tokenOfOwnerByIndex(user.walletAddress, i)
+      //     //     .call();
+      //     //   const nftAmount = await mahaXContract.methods.locked(nftId).call();
+      //     //   if (nftAmount.amount / 1e18 >= 100) {
+      //     //     totalMahaStaked += nftAmount.amount / 1e18;
+      //     //   }
+      //     // }
+      //     // console.log("totalMahaStaked", totalMahaStaked);
+      //     // if (totalMahaStaked > 300) {
+      //     await User.updateOne(
+      //       { walletAddress: user.walletAddress },
+      //       { stakedMaha: true }
+      //     );
+      //     //       }
+      //   }
+      // }
     });
   }
 };

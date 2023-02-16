@@ -1,5 +1,5 @@
 import { Router } from "express";
-const passport = require("passport");
+import passport from "passport";
 import nconf from "nconf";
 
 const router = Router();
