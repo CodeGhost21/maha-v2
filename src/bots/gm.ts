@@ -36,11 +36,11 @@ client.on("messageCreate", async (message) => {
         discordDiscriminator: message.author.discriminator,
         discordVerify: true,
       });
-      user.save();
+      await user.save();
 
       const token = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-      user["jwt"] = token;
-      user.save();
+      user.jwt = token;
+      await user.save();
 
       message.channel.send(
         `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
