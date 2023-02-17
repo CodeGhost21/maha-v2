@@ -20,36 +20,35 @@ client.on("messageCreate", async (message) => {
 
   // find and cerate user
   await User.findOne({ userID: message.author.id }).then(async (user) => {
-    if (!user) {
-      // If it's the user's first message
-      const users = await User.find();
-      user = new User({
-        userTag: message.author.tag,
-        userID: message.author.id,
-        streak: 0,
-        maxStreak: 0,
-        totalGMs: 0,
-        lastGM: message.createdAt,
-        gmRank: users.length + 1,
-        discordName: message.author.username,
-        discordAvatar: message.author.avatar,
-        discordDiscriminator: message.author.discriminator,
-        discordVerify: true,
-      });
-      await user.save();
+    if (user) return;
+    // If it's the user's first message
+    const usersCount = await User.count();
+    const newUser = new User({
+      userTag: message.author.tag,
+      userID: message.author.id,
+      streak: 0,
+      maxStreak: 0,
+      totalGMs: 0,
+      lastGM: message.createdAt,
+      gmRank: usersCount + 1,
+      discordName: message.author.username,
+      discordAvatar: message.author.avatar,
+      discordDiscriminator: message.author.discriminator,
+      discordVerify: true,
+    });
+    await newUser.save();
 
-      const token = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-      user.jwt = token;
-      await user.save();
+    const token = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
+    newUser.jwt = token;
+    await newUser.save();
 
-      message.channel.send(
-        `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
-          `Just say "Good Morning" or "Gm" once everyday and ` +
-          ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
-          `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
-          `Try it out! Say "Good Morning" 🌞`
-      );
-    }
+    message.channel.send(
+      `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
+        `Just say "Good Morning" or "Gm" once everyday and ` +
+        ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
+        `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
+        `Try it out! Say "Good Morning" 🌞`
+    );
   });
 
   // leaderboard?
