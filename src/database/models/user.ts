@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 export interface IUser {
   userTag: string;
   userID: string;
+  twitterID: string;
+  twitterName: string;
+  twitterBio: string;
+  twitterProfileImg: string;
+  twitterBanner: string;
   streak: number;
   maxStreak: number;
   totalGMs: number;
@@ -17,12 +22,19 @@ export interface IUser {
   signDiscord: boolean;
   totalPoints: number;
   stakedMaha: boolean;
+  twitter_oauth_access_token: string,
+  twitter_oauth_access_token_secret: string,
 }
 
 const UserSchema = new mongoose.Schema(
   {
     userTag: String,
     userID: String,
+    twitterID: { type: String, default: "" },
+    twitterName: { type: String, default: "" },
+    twitterBio: { type: String, default: "" },
+    twitterProfileImg: { type: String, default: "" },
+    twitterBanner: { type: String, default: "" },
     streak: { type: Number, default: 0 },
     maxStreak: { type: Number, default: 0 },
     totalGMs: { type: Number, default: 0 },
@@ -37,6 +49,8 @@ const UserSchema = new mongoose.Schema(
     signDiscord: { type: Boolean, default: false },
     totalPoints: { type: Number, default: 0 },
     stakedMaha: { type: Boolean, default: false },
+    twitter_oauth_access_token: { type: String, default: "" },
+    twitter_oauth_access_token_secret: { type: String, default: "" },
   },
   { timestamps: true }
 );
