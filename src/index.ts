@@ -4,6 +4,7 @@ import * as http from "http";
 import cors from "cors";
 import passport from "passport";
 import session from "express-session";
+const cron = require("node-cron");
 
 import { open } from "./database";
 
@@ -13,6 +14,7 @@ import "./strategies/discord";
 import { twitterMetions } from "./output/twitter";
 import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
+import { nftTransfer, dailyMahaXRewards } from "./controller/rewards";
 
 const app = express();
 const server = new http.Server(app);
@@ -23,10 +25,16 @@ twitterMetions();
 // arth();
 // mahalend()
 mahaLocks();
+nftTransfer();
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+cron.schedule("0 0 * * *", async () => {
+  console.log("running a task every minute");
+  dailyMahaXRewards();
+});
 
 app.use(
   session({

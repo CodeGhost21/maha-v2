@@ -18,7 +18,7 @@ export const twitterMetions = async () => {
     access_token_secret: nconf.get("TWITTER_ACCESS_TOKEN_SECRET"),
   });
 
-  const clientv2 = new TwitterApi(nconf.get("TWITTER_BEARER_TOKEN")).v2;
+  const clientv2 = new TwitterApi(nconf.get("BEARER_TOKEN")).v2;
 
   const followingListMahaDAO = await clientv2.following("1246916938678169600"); // mahadao
 
