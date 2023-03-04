@@ -21,7 +21,9 @@ import { checkGuildMember } from "../output/discord";
 export const fetchUser = async (req: Request, res: Response) => {
   try {
     // const tokenData: any = await jwt.verify(req.params.id, secret);
-    const user: any = await User.findOne({ userID: req.params.id });
+    const user: any = await User.findOne({ userID: req.params.id }).select(
+      "discordAvatar discordVerify signDiscord streak userTag userID walletAddress totalPoints signTwitter jwt"
+    );
     if (user) {
       const verifyUser = await checkGuildMember(user.userID);
       user["discordVerify"] = verifyUser;

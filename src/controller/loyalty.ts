@@ -1,39 +1,49 @@
-import { Comparator, ImageComparer, Processor } from "image-comparer";
+import nconf from "nconf";
+const Jimp = require("jimp");
+const Contract = require("web3-eth-contract");
+
+import MAHAX from "../abi/MahaXAbi.json";
 import { User } from "../database/models/user";
-import fs from 'fs'
-import request from 'request'
 
-function download(uri: any, filename: any, callback: () => void) {
-  request.head(uri, function (err: any, res: any, body: any) {
-    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-  });
-}
+Contract.setProvider(nconf.get("ETH_RPC"));
 
-export const twitterProfileCheck = async () => {
-  // const user = req.user;
-  try {
-    const userDetails = await User.findOne({ _id: '63fdcfc4b1a45ab2b74edec6' });
-    if (userDetails) {
-      const userTwitterImage = userDetails.twitterProfileImg;
-      console.log(userTwitterImage)
-      download(userTwitterImage, 'asset/63fdcfc4b1a45ab2b74edec6.png', function () {
-        console.log('done', typeof (__dirname + '/assets/63fdcfc4b1a45ab2b74edec6.png'))
-        const ImgBufA = Buffer.from('http://localhost:5001/rewards/jet.jpeg');
-        const ImgBufB = Buffer.from('http://localhost:5001/rewards/jet.jpeg');
-        console.log(ImgBufA, ImgBufB)
-        ImageComparer.create()
-          .withProcessor(Processor.MEAN_PIXEL())
-          .withComparator(Comparator.RGBA_PCT(0.2))
-          .compare(ImgBufA, ImgBufB)
-          .then((res) => console.log(res.pct))
-      })
+const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
 
-    }
-  } catch (e) {
-    console.log(e)
+export const profileImageComparing = async (profileImgaeUrl: string) => {
+  const image1 = await Jimp.read(profileImgaeUrl);
+  const image2 = await Jimp.read(profileImgaeUrl);
+  const diff = Jimp.diff(image1, image2);
+  if (Math.ceil(diff.percent) === 1) {
+    return false;
   }
-}
+  return true;
+};
 
-
+export const checkTask = async (req: any, res: any) => {
+  console.log(req.body);
+  const user = await User.findOne({ _id: req.user.id });
+  if (user) {
+    if (req.body.task === "gm") {
+      if (user.totalGMs > 0) res.send({ success: true });
+      else res.send({ success: false });
+    } else if (req.body.task === "twitterProfile") {
+      const twitterResponse = await profileImageComparing(
+        user.twitterProfileImg
+      );
+      res.send({ success: twitterResponse });
+    } else if (req.body.task === "discordProfile") {
+      // const discordResponse = await profileImageComparing(user.discordAvatar);
+      res.send({ success: true });
+    } else if (req.body.task === "intro") {
+      res.send({ success: true });
+    } else if (req.body.task === "opensea") {
+      const operator = nconf.get("OPERATOR");
+      const response = await mahaXContract.methods
+        .isApprovedForAll(user.walletAddress, operator)
+        .call();
+      res.send({ success: response });
+    }
+  }
+};
 
 // twitterProfileCheck();

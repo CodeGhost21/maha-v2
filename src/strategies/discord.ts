@@ -37,7 +37,6 @@ passport.use(
         else {
           const verifyUser = await checkGuildMember(profile.id);
           // console.log("verifyUser", verifyUser);
-
           const newUser = new User({
             userID: profile.id,
             userTag: `${profile.username}#${profile.discriminator}`,

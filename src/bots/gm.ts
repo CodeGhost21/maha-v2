@@ -50,10 +50,7 @@ client.on("messageCreate", async (message) => {
         `Just say "Good Morning" or "Gm" once everyday and ` +
         ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
         `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
-        `Try it out! Say "Good Morning" 🌞`,
-      {
-        e,
-      }
+        `Try it out! Say "Good Morning" 🌞`
     );
   });
 
