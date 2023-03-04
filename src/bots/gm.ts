@@ -13,7 +13,8 @@ const lbKeywords = ["!leaderboard", "!lb"];
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
 client.on("messageCreate", async (message) => {
-  if (message.channelId !== nconf.get("CHANNEL_GM") && !message.guild) return;
+  if (message.channelId !== nconf.get("CHANNEL_GM")) return;
+  //  && !message.guild
   if (message.author.bot) return;
 
   const content = message.content.toLowerCase();
@@ -42,12 +43,17 @@ client.on("messageCreate", async (message) => {
     newUser.jwt = token;
     await newUser.save();
 
+    // message.
+
     message.channel.send(
       `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
         `Just say "Good Morning" or "Gm" once everyday and ` +
         ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
         `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
-        `Try it out! Say "Good Morning" 🌞`
+        `Try it out! Say "Good Morning" 🌞`,
+      {
+        e,
+      }
     );
   });
 
