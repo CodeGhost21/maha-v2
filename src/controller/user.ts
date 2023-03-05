@@ -21,7 +21,9 @@ import { checkGuildMember } from "../output/discord";
 export const fetchUser = async (req: Request, res: Response) => {
   try {
     // const tokenData: any = await jwt.verify(req.params.id, secret);
-    const user: any = await User.findOne({ userID: req.params.id });
+    const user: any = await User.findOne({ userID: req.params.id }).select(
+      "discordAvatar discordVerify signDiscord streak userTag userID walletAddress totalPoints signTwitter jwt"
+    );
     if (user) {
       const verifyUser = await checkGuildMember(user.userID);
       user["discordVerify"] = verifyUser;
@@ -89,15 +91,17 @@ export const getUsersDailyPoints = async (req: any, res: Response) => {
 export const walletVerify = async (req: any, res: any) => {
   try {
     const userReq = req.user;
-    const userData = await User.findOne({ id: userReq.id });
+    const userData = await User.findOne({ _id: userReq.id });
+
     if (userData) {
       const result = ethers.utils.verifyMessage(
-        userData.jwt || "",
+        userData.userID || "",
         req.body.hash
       );
       if (result === req.body.address) {
         userData["walletAddress"] = req.body.address;
         userData["discordVerify"] = true;
+        userData["signDiscord"] = true;
         await userData.save();
         const discordMsgEmbed = new MessageEmbed()
           .setColor("#F07D55")

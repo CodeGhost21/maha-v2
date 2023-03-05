@@ -33,11 +33,15 @@ passport.use(
     async (_accessToken, _refreshToken, profile, done) => {
       if (profile) {
         const user = await User.findOne({ userID: profile.id });
-        if (user) done(null, user);
-        else {
+        if (user) {
+          console.log(profile);
+          user["discordAvatar"] = profile.avatar || "";
+          user["discordName"] = profile.username;
+          await user.save();
+          done(null, user);
+        } else {
           const verifyUser = await checkGuildMember(profile.id);
           // console.log("verifyUser", verifyUser);
-
           const newUser = new User({
             userID: profile.id,
             userTag: `${profile.username}#${profile.discriminator}`,

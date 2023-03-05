@@ -8,6 +8,7 @@ export interface IUser {
   twitterBio: string;
   twitterProfileImg: string;
   twitterBanner: string;
+  signTwitter: boolean;
   streak: number;
   maxStreak: number;
   totalGMs: number;
@@ -22,8 +23,8 @@ export interface IUser {
   signDiscord: boolean;
   totalPoints: number;
   stakedMaha: boolean;
-  twitter_oauth_access_token: string,
-  twitter_oauth_access_token_secret: string,
+  twitter_oauth_access_token: string;
+  twitter_oauth_access_token_secret: string;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -35,6 +36,7 @@ const UserSchema = new mongoose.Schema(
     twitterBio: { type: String, default: "" },
     twitterProfileImg: { type: String, default: "" },
     twitterBanner: { type: String, default: "" },
+    signTwitter: { type: Boolean, default: false },
     streak: { type: Number, default: 0 },
     maxStreak: { type: Number, default: 0 },
     totalGMs: { type: Number, default: 0 },
