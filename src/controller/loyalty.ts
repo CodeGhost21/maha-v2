@@ -19,7 +19,10 @@ export const profileImageComparing = async (
     "https://peopleofeden.s3.amazonaws.com/NFT/01b87d5d5f971679ddc6d58a281c5629.png"
   );
   resizeNFT.resize(size, size).write("rewards/resizeNFT.png");
+  // console.log(nconf.get("ROOT_PATH"));
+
   const nftUrl = `${nconf.get("ROOT_PATH")}/rewards/resizeNFT.png`;
+  // console.log("nftUrl", nftUrl);
 
   const nftImage = await Jimp.read(nftUrl);
   const profile = await Jimp.read(profileImageUrl);
