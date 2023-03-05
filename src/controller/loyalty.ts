@@ -21,7 +21,7 @@ export const profileImageComparing = async (
   resizeNFT.resize(size, size).write("rewards/resizeNFT.png");
   // console.log(nconf.get("ROOT_PATH"));
 
-  const nftUrl = `${nconf.get("ROOT_PATH")}/rewards/resizeNFT.png`;
+  const nftUrl = `https://staging-gifts-api.peopleofeden.com/rewards/resizeNFT.png`;
   // console.log("nftUrl", nftUrl);
 
   const nftImage = await Jimp.read(nftUrl);
