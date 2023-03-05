@@ -37,33 +37,37 @@ export const profileImageComparing = async (
 
 export const checkTask = async (req: any, res: any) => {
   console.log(req.body);
-  const user = await User.findOne({ _id: req.user.id });
-  if (user) {
-    if (req.body.task === "gm") {
-      if (user.totalGMs > 0) res.send({ success: true });
-      else res.send({ success: false });
-    } else if (req.body.task === "twitterProfile") {
-      const twitterResponse = await profileImageComparing(
-        user.twitterProfileImg,
-        48
-      );
-      res.send({ success: twitterResponse });
-    } else if (req.body.task === "discordProfile") {
-      const discordResponse = await profileImageComparing(
-        `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-        128
-      );
-      res.send({ success: discordResponse });
-    } else if (req.body.task === "intro") {
-      res.send({ success: true });
-    } else if (req.body.task === "opensea") {
-      const operator = nconf.get("OPERATOR");
-      console.log(operator, user.walletAddress);
-      const response = await mahaXContract.methods
-        .isApprovedForAll(user.walletAddress, operator)
-        .call();
-      res.send({ success: !response });
+  try {
+    const user = await User.findOne({ _id: req.user.id });
+    if (user) {
+      if (req.body.task === "gm") {
+        if (user.totalGMs > 0) res.send({ success: true });
+        else res.send({ success: false });
+      } else if (req.body.task === "twitterProfile") {
+        const twitterResponse = await profileImageComparing(
+          user.twitterProfileImg,
+          48
+        );
+        res.send({ success: twitterResponse });
+      } else if (req.body.task === "discordProfile") {
+        const discordResponse = await profileImageComparing(
+          `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
+          128
+        );
+        res.send({ success: discordResponse });
+      } else if (req.body.task === "intro") {
+        res.send({ success: true });
+      } else if (req.body.task === "opensea") {
+        const operator = nconf.get("OPERATOR");
+        console.log(operator, user.walletAddress);
+        const response = await mahaXContract.methods
+          .isApprovedForAll(user.walletAddress, operator)
+          .call();
+        res.send({ success: !response });
+      }
     }
+  } catch (e) {
+    console.log(e);
   }
 };
 
