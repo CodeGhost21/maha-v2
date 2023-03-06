@@ -4,6 +4,7 @@ import * as jwt from "jsonwebtoken";
 import { Strategy } from "passport-discord";
 import { IUserModel, User } from "../database/models/user";
 import { checkGuildMember } from "../output/discord";
+import { Loyalty } from "../database/models/loyaty";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -51,6 +52,11 @@ passport.use(
             discordVerify: verifyUser,
           });
           await newUser.save();
+
+          const newLoyalty = new Loyalty({
+            userId: newUser._id,
+          });
+          await newLoyalty.save();
 
           // save a jwt token with a 7 day expiry
           const token = await jwt.sign(

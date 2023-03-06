@@ -37,7 +37,6 @@ export const dailyMahaXRewards = async () => {
             .call();
           const nftAmount = await mahaXContract.methods.locked(nftId).call();
           const mahaX = await calculateMAHAX(nftAmount);
-          console.log(nftId, "Maha", nftAmount.amount, "mahaX", mahaX);
           totalMahaX += mahaX;
         }
 
@@ -48,8 +47,6 @@ export const dailyMahaXRewards = async () => {
           addPoints: Math.floor(totalMahaX),
         });
         await newPointsTransaction.save();
-        console.log("newPointsTransaction", newPointsTransaction);
-
         user["totalPoints"] = user.totalPoints + Math.floor(totalMahaX);
         await user.save();
       }
@@ -58,8 +55,6 @@ export const dailyMahaXRewards = async () => {
 };
 
 export const nftTransfer = async () => {
-  console.log("openseaData");
-
   const chainWss = nconf.get("POLYGON_RPC_WSS");
   const contract = nconf.get("POLYGON_LOCKER_ADDRESS");
 
