@@ -50,11 +50,13 @@ export const getLeaderboard = async (req: Request, res: Response) => {
     const userLoyalty: any = await Loyalty.findOne({ userId: user._id }).select(
       "totalLoyalty"
     );
+    console.log(userLoyalty);
+
     const userResponse = {
       discordName: user.discordName,
       totalPoints: user.totalPoints,
       imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-      loyaltyPoints: userLoyalty.totalLoyalty,
+      loyaltyPoints: userLoyalty.totalLoyalty || 0,
     };
     allUsers.push(userResponse);
   });
