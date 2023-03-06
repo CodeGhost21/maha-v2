@@ -1,5 +1,6 @@
 import nconf from "nconf";
 import * as ethers from "ethers";
+const Bluebird = require("bluebird");
 // import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { MessageEmbed } from "discord.js";
@@ -9,6 +10,7 @@ import { User } from "../database/models/user";
 // import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { checkGuildMember } from "../output/discord";
+import { Loyalty } from "../database/models/loyaty";
 
 // const secret = nconf.get("JWT_SECRET");
 
@@ -39,10 +41,25 @@ export const fetchUser = async (req: Request, res: Response) => {
 
 //users leaderboard
 export const getLeaderboard = async (req: Request, res: Response) => {
-  const users = await User.find()
-    .select("discordName totalPoints")
+  const users: any = await User.find()
+    .select("discordName totalPoints discordAvatar userID")
     .sort({ totalPoints: -1 });
-  res.send(users);
+
+  const allUsers: any = [];
+  await Bluebird.mapSeries(users, async (user: any) => {
+    const userLoyalty: any = await Loyalty.findOne({ userId: user._id }).select(
+      "totalLoyalty"
+    );
+    const userResponse = {
+      discordName: user.discordName,
+      totalPoints: user.totalPoints,
+      imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
+      loyaltyPoints: userLoyalty.totalLoyalty,
+    };
+    allUsers.push(userResponse);
+  });
+
+  res.send(allUsers);
 };
 
 //get latest rewards of a user
