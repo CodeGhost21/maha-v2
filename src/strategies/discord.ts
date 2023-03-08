@@ -33,12 +33,19 @@ passport.use(
     },
     async (_accessToken, _refreshToken, profile, done) => {
       if (profile) {
-        const user = await User.findOne({ userID: profile.id });
+        const user: any = await User.findOne({ userID: profile.id });
         if (user) {
           console.log(profile);
           user["discordAvatar"] = profile.avatar || "";
           user["discordName"] = profile.username;
           await user.save();
+          const checkLoyalty = await Loyalty.findOne({ userId: user._id });
+          if (!checkLoyalty) {
+            const newLoyalty = new Loyalty({
+              userId: user._id,
+            });
+            await newLoyalty.save();
+          }
           done(null, user);
         } else {
           const verifyUser = await checkGuildMember(profile.id);
