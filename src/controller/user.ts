@@ -41,25 +41,29 @@ export const fetchUser = async (req: Request, res: Response) => {
 
 //users leaderboard
 export const getLeaderboard = async (req: Request, res: Response) => {
-  const users: any = await User.find()
-    .select("discordName totalPoints discordAvatar userID")
-    .sort({ totalPoints: -1 });
+  try {
+    const users: any = await User.find()
+      .select("discordName totalPoints discordAvatar userID")
+      .sort({ totalPoints: -1 });
 
-  const allUsers: any = [];
-  await Bluebird.mapSeries(users, async (user: any) => {
-    const userLoyalty: any = await Loyalty.findOne({ userId: user._id }).select(
-      "totalLoyalty"
-    );
-    const userResponse = {
-      discordName: user.discordName,
-      totalPoints: user.totalPoints,
-      imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-      loyaltyPoints: userLoyalty.totalLoyalty,
-    };
-    allUsers.push(userResponse);
-  });
+    const allUsers: any = [];
+    await Bluebird.mapSeries(users, async (user: any) => {
+      const userLoyalty: any = await Loyalty.findOne({ userId: user._id });
+      console.log(userLoyalty);
 
-  res.send(allUsers);
+      const userResponse = {
+        discordName: user.discordName,
+        totalPoints: user.totalPoints,
+        imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
+        loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
+      };
+      allUsers.push(userResponse);
+    });
+
+    res.send(allUsers);
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 //get latest rewards of a user
