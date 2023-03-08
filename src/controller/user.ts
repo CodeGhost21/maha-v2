@@ -1,5 +1,6 @@
 import nconf from "nconf";
 import * as ethers from "ethers";
+const Bluebird = require("bluebird");
 // import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { MessageEmbed } from "discord.js";
@@ -9,6 +10,7 @@ import { User } from "../database/models/user";
 // import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { checkGuildMember } from "../output/discord";
+import { Loyalty } from "../database/models/loyaty";
 
 // const secret = nconf.get("JWT_SECRET");
 
@@ -21,7 +23,9 @@ import { checkGuildMember } from "../output/discord";
 export const fetchUser = async (req: Request, res: Response) => {
   try {
     // const tokenData: any = await jwt.verify(req.params.id, secret);
-    const user: any = await User.findOne({ userID: req.params.id });
+    const user: any = await User.findOne({ userID: req.params.id }).select(
+      "discordAvatar discordVerify signDiscord streak userTag userID walletAddress totalPoints signTwitter jwt"
+    );
     if (user) {
       const verifyUser = await checkGuildMember(user.userID);
       user["discordVerify"] = verifyUser;
@@ -37,10 +41,25 @@ export const fetchUser = async (req: Request, res: Response) => {
 
 //users leaderboard
 export const getLeaderboard = async (req: Request, res: Response) => {
-  const users = await User.find()
-    .select("discordName totalPoints")
+  const users: any = await User.find()
+    .select("discordName totalPoints discordAvatar userID")
     .sort({ totalPoints: -1 });
-  res.send(users);
+
+  const allUsers: any = [];
+  await Bluebird.mapSeries(users, async (user: any) => {
+    const userLoyalty: any = await Loyalty.findOne({ userId: user._id }).select(
+      "totalLoyalty"
+    );
+    const userResponse = {
+      discordName: user.discordName,
+      totalPoints: user.totalPoints,
+      imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
+      loyaltyPoints: userLoyalty.totalLoyalty,
+    };
+    allUsers.push(userResponse);
+  });
+
+  res.send(allUsers);
 };
 
 //get latest rewards of a user
@@ -89,15 +108,17 @@ export const getUsersDailyPoints = async (req: any, res: Response) => {
 export const walletVerify = async (req: any, res: any) => {
   try {
     const userReq = req.user;
-    const userData = await User.findOne({ id: userReq.id });
+    const userData = await User.findOne({ _id: userReq.id });
+
     if (userData) {
       const result = ethers.utils.verifyMessage(
-        userData.jwt || "",
+        userData.userID || "",
         req.body.hash
       );
       if (result === req.body.address) {
         userData["walletAddress"] = req.body.address;
         userData["discordVerify"] = true;
+        userData["signDiscord"] = true;
         await userData.save();
         const discordMsgEmbed = new MessageEmbed()
           .setColor("#F07D55")

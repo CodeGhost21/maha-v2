@@ -5,6 +5,7 @@ import { Strategy } from "passport-discord";
 import { IUserModel, User } from "../database/models/user";
 import { checkGuildMember } from "../output/discord";
 import urlJoin from "../utils/urlJoin";
+import { Loyalty } from "../database/models/loyaty";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -36,11 +37,15 @@ passport.use(
     async (_accessToken, _refreshToken, profile, done) => {
       if (profile) {
         const user = await User.findOne({ userID: profile.id });
-        if (user) done(null, user);
-        else {
+        if (user) {
+          console.log(profile);
+          user["discordAvatar"] = profile.avatar || "";
+          user["discordName"] = profile.username;
+          await user.save();
+          done(null, user);
+        } else {
           const verifyUser = await checkGuildMember(profile.id);
           // console.log("verifyUser", verifyUser);
-
           const newUser = new User({
             userID: profile.id,
             userTag: `${profile.username}#${profile.discriminator}`,
@@ -50,6 +55,11 @@ passport.use(
             discordVerify: verifyUser,
           });
           await newUser.save();
+
+          const newLoyalty = new Loyalty({
+            userId: newUser._id,
+          });
+          await newLoyalty.save();
 
           // save a jwt token with a 7 day expiry
           const token = await jwt.sign(
