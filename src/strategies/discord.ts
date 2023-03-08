@@ -4,6 +4,7 @@ import * as jwt from "jsonwebtoken";
 import { Strategy } from "passport-discord";
 import { IUserModel, User } from "../database/models/user";
 import { checkGuildMember } from "../output/discord";
+import urlJoin from "../utils/urlJoin";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -22,12 +23,14 @@ passport.deserializeUser(async (id: string, done) => {
   }
 });
 
+const callbackURL = urlJoin(nconf.get("DOMAIN"), "/discord/redirect");
+
 passport.use(
   new Strategy(
     {
       clientID: nconf.get("DISCORD_CLIENT_ID"),
       clientSecret: nconf.get("DISCORD_CLIENT_SECRET"),
-      callbackURL: nconf.get("DISCORD_CALLBACK_URL"),
+      callbackURL: callbackURL,
       scope: ["identify"],
     },
     async (_accessToken, _refreshToken, profile, done) => {
