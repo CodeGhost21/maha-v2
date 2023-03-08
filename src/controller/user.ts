@@ -55,7 +55,7 @@ export const getLeaderboard = async (req: Request, res: Response) => {
         discordName: user.discordName,
         totalPoints: user.totalPoints,
         imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-        loyaltyPoints: userLoyalty.totalLoyalty || 0,
+        loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
       };
       allUsers.push(userResponse);
     });
