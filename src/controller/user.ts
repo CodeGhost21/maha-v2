@@ -5,7 +5,7 @@ const Bluebird = require("bluebird");
 import { Request, Response } from "express";
 import { MessageEmbed } from "discord.js";
 
-import { sendMessage } from "../output/discord";
+// import { sendMessage } from "../output/discord";
 import { User } from "../database/models/user";
 // import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
