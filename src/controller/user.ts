@@ -3,7 +3,7 @@ import * as ethers from "ethers";
 const Bluebird = require("bluebird");
 // import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-import { MessageEmbed } from "discord.js";
+// import { MessageEmbed } from "discord.js";
 
 // import { sendMessage } from "../output/discord";
 import { User } from "../database/models/user";
@@ -121,12 +121,12 @@ export const walletVerify = async (req: any, res: any) => {
         userData["discordVerify"] = true;
         userData["signDiscord"] = true;
         await userData.save();
-        const discordMsgEmbed = new MessageEmbed()
-          .setColor("#F07D55")
-          .setDescription("Congratulation your wallet has been connected");
-        const payload = {
-          embeds: [discordMsgEmbed],
-        };
+        // const discordMsgEmbed = new MessageEmbed()
+        //   .setColor("#F07D55")
+        //   .setDescription("Congratulation your wallet has been connected");
+        // const payload = {
+        //   embeds: [discordMsgEmbed],
+        // };
         // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
         res.send({ success: true });
       } else {
