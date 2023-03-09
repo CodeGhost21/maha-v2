@@ -9,7 +9,7 @@ import { User } from "../database/models/user";
 
 Contract.setProvider(nconf.get("ETH_RPC"));
 
-const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
+const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"));
 const profileImageComparing = async (
   profileImageUrl: string,
   size: number,
@@ -66,7 +66,7 @@ export const checkTask = async (req: any, res: any) => {
         }
       } else if (req.body.task === "discordProfile") {
         const discordResponse = await profileImageComparing(
-          `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
+          `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}.png`,
           128,
           user.walletAddress
         );

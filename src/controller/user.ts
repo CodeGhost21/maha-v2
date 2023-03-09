@@ -9,15 +9,18 @@ import { sendMessage } from "../output/discord";
 import { User } from "../database/models/user";
 // import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { checkGuildMember } from "../output/discord";
 import { Loyalty } from "../database/models/loyaty";
+
+import callback from "../library/oauth-promise";
+const oauthCallback = nconf.get("TWITTER_CALLBACK_URL");
+const oauth = callback(oauthCallback);
 
 // const secret = nconf.get("JWT_SECRET");
 
 // const Contract = require("web3-eth-contract");
 // import MAHAX from "../abi/MahaXAbi.json";
 // Contract.setProvider(nconf.get("ETH_RPC"));
-// const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
+// const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"));
 
 //get user data
 export const fetchUser = async (req: Request, res: Response) => {
@@ -26,14 +29,8 @@ export const fetchUser = async (req: Request, res: Response) => {
     const user: any = await User.findOne({ userID: req.params.id }).select(
       "discordAvatar discordVerify signDiscord streak userTag userID walletAddress totalPoints signTwitter jwt"
     );
-    if (user) {
-      const verifyUser = await checkGuildMember(user.userID);
-      user["discordVerify"] = verifyUser;
-      await user.save();
-      res.send(user);
-    } else {
-      res.send("not a valid user");
-    }
+    if (user) res.send(user);
+    else res.send("not a valid user");
   } catch (e) {
     console.log(e);
   }
@@ -130,7 +127,7 @@ export const walletVerify = async (req: any, res: any) => {
         const payload = {
           embeds: [discordMsgEmbed],
         };
-        sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
+        // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
         res.send({ success: true });
       } else {
         res.send({ success: false });
@@ -177,3 +174,20 @@ export const fetchNFT = async () => {
 };
 
 // fetchNFT()
+
+export const updateTwitterProfile = async () => {
+  const allUsers = await User.find({ twitterID: { $ne: "" } });
+  if (allUsers.length > 0) {
+    allUsers.map(async (user: any) => {
+      const response: any = await oauth.getProtectedResource(
+        "https://api.twitter.com/1.1/account/verify_credentials.json",
+        "GET",
+        user.twitter_oauth_access_token,
+        user.twitter_oauth_access_token_secret
+      );
+      const parseData = JSON.parse(response.data);
+      user["twitterProfileImg"] = parseData.profile_image_url_https;
+      await user.save();
+    });
+  }
+};

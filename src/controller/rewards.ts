@@ -11,7 +11,7 @@ import { Loyalty } from "../database/models/loyaty";
 
 Contract.setProvider(nconf.get("ETH_RPC"));
 
-const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
+const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"));
 const e18 = new BigNumber(10).pow(18);
 
 const calculateMAHAX = (nftData: any) => {
@@ -91,8 +91,8 @@ export const dailyMahaXRewards = async () => {
 };
 
 export const nftTransfer = async () => {
-  const chainWss = nconf.get("POLYGON_RPC_WSS");
-  const contract = nconf.get("POLYGON_LOCKER_ADDRESS");
+  const chainWss = nconf.get("RPC_WSS");
+  const contract = nconf.get("CONTRACT_LOCKER");
 
   const provider = new WebSocketProvider(chainWss);
   const MahaXContract = new ethers.Contract(contract, MAHAX, provider);
