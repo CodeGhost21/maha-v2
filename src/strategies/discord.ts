@@ -35,10 +35,15 @@ passport.use(
       if (profile) {
         const user: any = await User.findOne({ userID: profile.id });
         if (user) {
+          const token = await jwt.sign(
+            { id: String(user.id), expiry: Date.now() + 86400000 * 7 },
+            accessTokenSecret
+          );
           const verifyUser = await checkGuildMember(user.userID);
           user["discordVerify"] = verifyUser;
           user["discordAvatar"] = profile.avatar || "";
           user["discordName"] = profile.username;
+          user["jwt"] = token;
           await user.save();
           const checkLoyalty = await Loyalty.findOne({ userId: user._id });
           if (!checkLoyalty) {
