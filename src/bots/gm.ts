@@ -121,6 +121,9 @@ client.on("messageCreate", async (message) => {
 
       user.userTag = message.author.tag;
       user.lastGM = message.createdAt;
+      user.discordName = message.author.username;
+      user.discordAvatar = message.author.avatar || "";
+      user.discordDiscriminator = message.author.discriminator;
 
       // If user's last gm was yesterday, then continue streak
       if (isYesterday(lastGM)) {
