@@ -18,7 +18,6 @@ import {
   nftTransfer,
   //  dailyMahaXRewards
 } from "./controller/rewards";
-import { updateTwitterProfile } from "./controller/user";
 //
 const app = express();
 const server = new http.Server(app);
@@ -38,7 +37,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 cron.schedule("0 0 * * *", async () => {
   console.log("running a task every minute");
   // dailyMahaXRewards();
-  updateTwitterProfile();
 });
 
 app.use(

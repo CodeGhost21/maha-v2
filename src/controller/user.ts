@@ -175,19 +175,18 @@ export const fetchNFT = async () => {
 
 // fetchNFT()
 
-export const updateTwitterProfile = async () => {
-  const allUsers = await User.find({ twitterID: { $ne: "" } });
-  if (allUsers.length > 0) {
-    allUsers.map(async (user: any) => {
-      const response: any = await oauth.getProtectedResource(
-        "https://api.twitter.com/1.1/account/verify_credentials.json",
-        "GET",
-        user.twitter_oauth_access_token,
-        user.twitter_oauth_access_token_secret
-      );
-      const parseData = JSON.parse(response.data);
-      user["twitterProfileImg"] = parseData.profile_image_url_https;
-      await user.save();
-    });
-  }
+export const updateTwitterProfile = async (user: any) => {
+  const response: any = await oauth.getProtectedResource(
+    "https://api.twitter.com/1.1/account/verify_credentials.json",
+    "GET",
+    user.twitter_oauth_access_token,
+    user.twitter_oauth_access_token_secret
+  );
+  const parseData = JSON.parse(response.data);
+  user["twitterProfileImg"] = parseData.profile_image_url_https;
+  await user.save();
+  console.log(user.twitterProfileImg);
+  return user;
 };
+
+export const updateDiscordProfile = async () => {};

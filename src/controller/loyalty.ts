@@ -6,6 +6,7 @@ const Contract = require("web3-eth-contract");
 import MAHAX from "../abi/MahaXAbi.json";
 import { Loyalty } from "../database/models/loyaty";
 import { User } from "../database/models/user";
+import { updateTwitterProfile } from "./user";
 
 Contract.setProvider(nconf.get("ETH_RPC"));
 
@@ -16,29 +17,31 @@ const profileImageComparing = async (
   walletAddress: string
 ) => {
   //resize image for image comparing
-  // const noOfNFTs = await mahaXContract.methods.balanceOf(walletAddress).call();
-  // console.log(noOfNFTs);
-  // for (let i = 0; i < noOfNFTs; i++) {
-  //   const nftId = await mahaXContract.methods
-  //     .tokenOfOwnerByIndex(walletAddress, i)
-  //     .call();
-  //   const tokenUri = await mahaXContract.methods.tokenURI(nftId).call();
-  // console.log(tokenUri);
-  const resizeNFT = await Jimp.read(
-    "https://peopleofeden.s3.amazonaws.com/NFT/01b87d5d5f971679ddc6d58a281c5629.png"
-  );
-  resizeNFT.resize(size, size).write("rewards/resizeNFT.png");
-  const nftUrl = `${nconf.get("ROOT_PATH")}/rewards/resizeNFT.png`;
+  const noOfNFTs = await mahaXContract.methods.balanceOf(walletAddress).call();
+  console.log(noOfNFTs);
+  if (noOfNFTs > 0) {
+    for (let i = 0; i < noOfNFTs; i++) {
+      const nftId = await mahaXContract.methods
+        .tokenOfOwnerByIndex(walletAddress, i)
+        .call();
+      const tokenUri = await mahaXContract.methods.tokenURI(nftId).call();
+      console.log(tokenUri);
+      const resizeNFT = await Jimp.read(
+        "https://peopleofeden.s3.amazonaws.com/NFT/01b87d5d5f971679ddc6d58a281c5629.png"
+      );
+      resizeNFT.resize(size, size).write("rewards/resizeNFT.png");
+      const nftUrl = `${nconf.get("ROOT_PATH")}/rewards/resizeNFT.png`;
 
-  const nftImage = await Jimp.read(nftUrl);
-  const profile = await Jimp.read(profileImageUrl);
+      const nftImage = await Jimp.read(nftUrl);
+      const profile = await Jimp.read(profileImageUrl);
 
-  const diff = Jimp.diff(nftImage, profile);
-  // fs.unlinkSync(nftUrl);
-  if (diff.percent <= 0.4) {
-    return true;
+      const diff = Jimp.diff(nftImage, profile);
+      // fs.unlinkSync(nftUrl);
+      if (diff.percent <= 0.4) {
+        return true;
+      }
+    }
   }
-  // }
   return false;
 };
 
@@ -54,10 +57,12 @@ export const checkTask = async (req: any, res: any) => {
           await userLoyalty.save();
         }
       } else if (req.body.task === "twitterProfile") {
+        //check for updated twitter profile
+        const updatedUser = await updateTwitterProfile(user);
         const twitterResponse = await profileImageComparing(
-          user.twitterProfileImg,
+          updatedUser.twitterProfileImg,
           48,
-          user.walletAddress
+          updatedUser.walletAddress
         );
         if (twitterResponse) {
           userLoyalty["twitterProfile"] = true;
