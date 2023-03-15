@@ -11,7 +11,7 @@ import { open } from "./database";
 // import "./bots/collabLand.ts.dis";
 import "./bots/gm";
 import "./strategies/discord";
-import { twitterMetions } from "./output/twitter";
+// import { twitterMetions } from "./output/twitter";
 // import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
 import {
@@ -23,7 +23,7 @@ const app = express();
 const server = new http.Server(app);
 
 open();
-twitterMetions();
+// twitterMetions();
 // mahaxNFT();
 // arth();
 // mahalend()
