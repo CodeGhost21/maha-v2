@@ -8,7 +8,6 @@ const cron = require("node-cron");
 
 import { open } from "./database";
 
-// import "./bots/collabLand.ts.dis";
 import "./bots/gm";
 import "./strategies/discord";
 // import { twitterMetions } from "./output/twitter";
