@@ -6,9 +6,12 @@ import { User } from "../database/models/user";
 import { sendRequest } from "../library/sendRequest";
 import { updateTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
+import { saveFeed } from "../utils/saveFeed";
+
 Contract.setProvider(nconf.get("ETH_RPC"));
 
 const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"));
+
 const profileImageComparing = async (
   profileImageUrl: string,
   size: number,
@@ -47,6 +50,7 @@ export const checkTask = async (req: any, res: any) => {
           userLoyalty["gm"] = true;
           userLoyalty["totalLoyalty"] = userLoyalty.totalLoyalty + 0.25;
           await userLoyalty.save();
+          await saveFeed(user, "loyalty", req.body.task, 0.25);
         }
       } else if (req.body.task === "twitterProfile") {
         //check for updated twitter profile
@@ -61,6 +65,7 @@ export const checkTask = async (req: any, res: any) => {
           userLoyalty["twitterProfile"] = true;
           userLoyalty["totalLoyalty"] = userLoyalty.totalLoyalty + 0.25;
           await userLoyalty.save();
+          await saveFeed(user, "loyalty", req.body.task, 0.25);
         }
       } else if (req.body.task === "discordProfile") {
         const discordResponse = await profileImageComparing(
@@ -72,6 +77,7 @@ export const checkTask = async (req: any, res: any) => {
           userLoyalty["discordProfile"] = true;
           userLoyalty["totalLoyalty"] = userLoyalty.totalLoyalty + 0.25;
           await userLoyalty.save();
+          await saveFeed(user, "loyalty", req.body.task, 0.25);
         }
       } else if (req.body.task === "intro") {
       } else if (req.body.task === "opensea") {
@@ -83,6 +89,7 @@ export const checkTask = async (req: any, res: any) => {
           userLoyalty["opensea"] = true;
           userLoyalty["totalLoyalty"] = userLoyalty.totalLoyalty + 0.25;
           await userLoyalty.save();
+          await saveFeed(user, "loyalty", req.body.task, 0.25);
         }
       }
       res.send(userLoyalty);

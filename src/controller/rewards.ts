@@ -8,6 +8,7 @@ import { User } from "../database/models/user";
 import { PointTransaction } from "../database/models/pointTransaction";
 import MAHAX from "../abi/MahaXAbi.json";
 import { Loyalty } from "../database/models/loyaty";
+import { saveFeed } from "../utils/saveFeed";
 
 Contract.setProvider(nconf.get("ETH_RPC"));
 
@@ -63,6 +64,7 @@ export const dailyMahaXRewards = async () => {
         await newPointsTransaction.save();
         user["totalPoints"] = user.totalPoints + Math.floor(totalMahaX);
         await user.save();
+        await saveFeed(user, "normal", "mahaXLock", totalMahaX);
       }
 
       const dailyTransactions = await getDailyTransactions(user._id);
@@ -84,6 +86,7 @@ export const dailyMahaXRewards = async () => {
         await newPointsTransaction.save();
         user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
         await user.save();
+        await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
       }
     });
   }
@@ -112,6 +115,7 @@ export const nftTransfer = async () => {
 
       toUser["totalPoints"] = toUser.totalPoints + 10;
       await toUser.save();
+      saveFeed(toUser, "normal", "buyNFT", 10);
     }
 
     const fromUser = await User.findOne({ walletAddress: from });
@@ -126,6 +130,7 @@ export const nftTransfer = async () => {
 
       fromUser["totalPoints"] = fromUser.totalPoints - 10;
       await fromUser.save();
+      saveFeed(toUser, "normal", "sellNFT", 10);
     }
   });
 };

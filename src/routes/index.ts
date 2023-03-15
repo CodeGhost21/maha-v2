@@ -3,8 +3,9 @@ import user from "./user";
 import discord from "./discord";
 import product from "./product";
 import cart from "./cart";
-import twitter from './twitter';
-import loyalty from './loyalty'
+import twitter from "./twitter";
+import loyalty from "./loyalty";
+import feed from "./feed";
 
 const router = Router();
 router.get("/", (_req, res) => {
@@ -16,6 +17,7 @@ router.use("/product", product);
 router.use("/discord", discord);
 router.use("/twitter", twitter);
 router.use("/cart", cart);
-router.use("/loyalty", loyalty)
+router.use("/loyalty", loyalty);
+router.use("/feed", feed);
 
 export default router;

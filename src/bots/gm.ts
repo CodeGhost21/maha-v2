@@ -7,6 +7,7 @@ import { IUserModel, User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
+import { Feed } from "../database/models/feed";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
@@ -179,6 +180,13 @@ const assignGmPoints = async (
     totalPoints: user.totalPoints + points,
     addPoints: points,
   });
-
   await newPointsTransaction.save();
+
+  const newFeed = new Feed({
+    userId: user.id,
+    type: "normal",
+    task: "gm",
+    points: points,
+  });
+  await newFeed.save();
 };

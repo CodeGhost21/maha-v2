@@ -13,10 +13,7 @@ import "./strategies/discord";
 // import { twitterMetions } from "./output/twitter";
 // import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
-import {
-  nftTransfer,
-  //  dailyMahaXRewards
-} from "./controller/rewards";
+import { nftTransfer, dailyMahaXRewards } from "./controller/rewards";
 //
 const app = express();
 const server = new http.Server(app);
@@ -39,7 +36,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 cron.schedule("0 0 * * *", async () => {
   console.log("running a task every minute");
-  // dailyMahaXRewards();
+  dailyMahaXRewards();
 });
 
 app.use(
