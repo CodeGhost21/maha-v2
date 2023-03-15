@@ -32,18 +32,6 @@ const profileImageComparing = async (
       if (response) {
         return true;
       }
-      // return response;
-      // const resizeNFT = await Jimp.read(parseNftMetadata.image);
-      // resizeNFT.resize(size, size).write("rewards/resizeNFT.jpg");
-      // const nftUrl = `${nconf.get("ROOT_PATH")}/rewards/resizeNFT.jpg`;
-
-      // const nftImage = await Jimp.read(nftUrl);
-      // const profile = await Jimp.read(profileImageUrl);
-
-      // const diff = Jimp.diff(nftImage, profile);
-      // if (diff.percent <= 0.4) {
-      //   return true;
-      // }
     }
   }
   return false;

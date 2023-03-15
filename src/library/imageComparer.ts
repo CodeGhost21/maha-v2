@@ -1,6 +1,7 @@
 import nconf from "nconf";
 import path from "path";
 const Jimp = require("jimp");
+const fs = require("fs");
 
 export const imageComparing = async (
   profileURL: string,
@@ -11,23 +12,19 @@ export const imageComparing = async (
   const nft = await Jimp.read(nftURL);
   const resizePath = path.join(
     nconf.get("ROOT_PATH"),
-    `/rewards/}resizeImage.png`
+    `/rewards/resizeImage.png`
   );
-  const resizeNFT = await nft.resize(size, size).write(resizePath);
-
+  const resizeNFT = await nft.resize(size, size).writeAsync(resizePath);
   //   hash
-  const example1Hash = profileImage.hash();
-  const example2Hash = resizeNFT.hash();
-  //   console.log("hash", example1Hash === example2Hash);
-
+  const profileHash = profileImage.hash();
+  const nftHash = resizeNFT.hash();
   //   distance
   const distance = await Jimp.distance(profileImage, resizeNFT);
-  //   console.log("distance", distance);
-
+  //difference
   const diff = await Jimp.diff(profileImage, resizeNFT);
-  //   console.log("difference", diff.percent);
 
-  if (example1Hash !== example2Hash || distance > 0.15 || diff > 0.15) {
+  fs.unlinkSync(resizePath);
+  if (profileHash !== nftHash || distance > 0.15 || diff > 0.15) {
     return false;
   }
   return true;
