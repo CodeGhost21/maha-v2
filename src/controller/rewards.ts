@@ -33,7 +33,6 @@ const getDailyTransactions = async (userId: string) => {
     userId: userId,
     createdAt: { $gt: start, $lt: end },
   }).select("addPoints subPoints userId");
-  console.log(dailyTransactions);
   return dailyTransactions;
 };
 

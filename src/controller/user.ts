@@ -46,8 +46,6 @@ export const getLeaderboard = async (req: Request, res: Response) => {
     const allUsers: any = [];
     await Bluebird.mapSeries(users, async (user: any) => {
       const userLoyalty: any = await Loyalty.findOne({ userId: user._id });
-      console.log(userLoyalty);
-
       const userResponse = {
         discordName: user.discordName,
         totalPoints: user.totalPoints,

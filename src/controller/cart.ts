@@ -49,11 +49,6 @@ export const removeItem = async (req: any, res: Response) => {
         productId: req.body.productId,
       });
       if (cartItem) {
-        const response = await CartItem.deleteOne({
-          productId: req.body.productId,
-        });
-        console.log(response);
-
         const product: any = await Product.findOne({
           _id: req.body.productId,
         });
