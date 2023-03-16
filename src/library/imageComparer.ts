@@ -22,9 +22,10 @@ export const imageComparing = async (
   // const distance = await Jimp.distance(profileImage, resizeNFT);
   //difference
   const diff = await Jimp.diff(profileImage, resizeNFT);
+  console.log(diff);
 
   fs.unlinkSync(resizePath);
-  if (diff > 0.15) {
+  if (diff.percentage > 0.15) {
     return false;
   }
   return true;
