@@ -16,15 +16,15 @@ export const imageComparing = async (
   );
   const resizeNFT = await nft.resize(size, size).writeAsync(resizePath);
   //   hash
-  const profileHash = profileImage.hash();
-  const nftHash = resizeNFT.hash();
+  // const profileHash = profileImage.hash();
+  // const nftHash = resizeNFT.hash();
   //   distance
-  const distance = await Jimp.distance(profileImage, resizeNFT);
+  // const distance = await Jimp.distance(profileImage, resizeNFT);
   //difference
   const diff = await Jimp.diff(profileImage, resizeNFT);
 
   fs.unlinkSync(resizePath);
-  if (profileHash !== nftHash || distance > 0.15 || diff > 0.15) {
+  if (diff > 0.15) {
     return false;
   }
   return true;
