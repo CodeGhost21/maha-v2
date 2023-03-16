@@ -183,7 +183,6 @@ export const updateTwitterProfile = async (user: any) => {
   const parseData = JSON.parse(response.data);
   user["twitterProfileImg"] = parseData.profile_image_url_https;
   await user.save();
-  console.log(user.twitterProfileImg);
   return user;
 };
 
