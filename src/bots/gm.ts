@@ -8,7 +8,7 @@ import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { Feed } from "../database/models/feed";
-
+import { saveFeed } from "../utils/saveFeed";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 const accessTokenSecret = nconf.get("JWT_SECRET");
@@ -181,12 +181,5 @@ const assignGmPoints = async (
     addPoints: points,
   });
   await newPointsTransaction.save();
-
-  const newFeed = new Feed({
-    userId: user.id,
-    type: "normal",
-    task: "gm",
-    points: points,
-  });
-  await newFeed.save();
+  await saveFeed(user, "normal", "gm", points);
 };
