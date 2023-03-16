@@ -6,6 +6,8 @@ export const saveFeed = async (
   task: string,
   points: number
 ) => {
+  console.log(user, type, task);
+
   const newFeed = new Feed({
     userId: user._id,
     type: type,
