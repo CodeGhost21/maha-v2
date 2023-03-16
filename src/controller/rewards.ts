@@ -8,10 +8,11 @@ import { User } from "../database/models/user";
 import { PointTransaction } from "../database/models/pointTransaction";
 import MAHAX from "../abi/MahaXAbi.json";
 import { Loyalty } from "../database/models/loyaty";
+import { saveFeed } from "../utils/saveFeed";
 
 Contract.setProvider(nconf.get("ETH_RPC"));
 
-const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"));
+const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"));
 const e18 = new BigNumber(10).pow(18);
 
 const calculateMAHAX = (nftData: any) => {
@@ -33,7 +34,6 @@ const getDailyTransactions = async (userId: string) => {
     userId: userId,
     createdAt: { $gt: start, $lt: end },
   }).select("addPoints subPoints userId");
-  console.log(dailyTransactions);
   return dailyTransactions;
 };
 
@@ -64,6 +64,7 @@ export const dailyMahaXRewards = async () => {
         await newPointsTransaction.save();
         user["totalPoints"] = user.totalPoints + Math.floor(totalMahaX);
         await user.save();
+        await saveFeed(user, "normal", "mahaXLock", totalMahaX);
       }
 
       const dailyTransactions = await getDailyTransactions(user._id);
@@ -85,14 +86,24 @@ export const dailyMahaXRewards = async () => {
         await newPointsTransaction.save();
         user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
         await user.save();
+        await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
+        await Loyalty.updateOne(
+          { userId: user.id },
+          {
+            gm: false,
+            twitterProfile: false,
+            discordProfile: false,
+            opensea: false,
+          }
+        );
       }
     });
   }
 };
 
 export const nftTransfer = async () => {
-  const chainWss = nconf.get("POLYGON_RPC_WSS");
-  const contract = nconf.get("POLYGON_LOCKER_ADDRESS");
+  const chainWss = nconf.get("RPC_WSS");
+  const contract = nconf.get("CONTRACT_LOCKER");
 
   const provider = new WebSocketProvider(chainWss);
   const MahaXContract = new ethers.Contract(contract, MAHAX, provider);
@@ -113,6 +124,7 @@ export const nftTransfer = async () => {
 
       toUser["totalPoints"] = toUser.totalPoints + 10;
       await toUser.save();
+      saveFeed(toUser, "normal", "buyNFT", 10);
     }
 
     const fromUser = await User.findOne({ walletAddress: from });
@@ -127,6 +139,7 @@ export const nftTransfer = async () => {
 
       fromUser["totalPoints"] = fromUser.totalPoints - 10;
       await fromUser.save();
+      saveFeed(toUser, "normal", "sellNFT", 10);
     }
   });
 };

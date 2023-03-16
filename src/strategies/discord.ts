@@ -38,9 +38,15 @@ passport.use(
       if (profile) {
         const user: any = await User.findOne({ userID: profile.id });
         if (user) {
-          console.log(profile);
+          const token = await jwt.sign(
+            { id: String(user.id), expiry: Date.now() + 86400000 * 7 },
+            accessTokenSecret
+          );
+          const verifyUser = await checkGuildMember(user.userID);
+          user["discordVerify"] = verifyUser;
           user["discordAvatar"] = profile.avatar || "";
           user["discordName"] = profile.username;
+          user["jwt"] = token;
           await user.save();
           const checkLoyalty = await Loyalty.findOne({ userId: user._id });
           if (!checkLoyalty) {
@@ -52,7 +58,6 @@ passport.use(
           done(null, user);
         } else {
           const verifyUser = await checkGuildMember(profile.id);
-          // console.log("verifyUser", verifyUser);
           const newUser = new User({
             userID: profile.id,
             userTag: `${profile.username}#${profile.discriminator}`,
@@ -62,7 +67,6 @@ passport.use(
             discordVerify: verifyUser,
           });
           await newUser.save();
-
           const newLoyalty = new Loyalty({
             userId: newUser._id,
           });
@@ -74,7 +78,6 @@ passport.use(
             accessTokenSecret
           );
           newUser.jwt = token;
-
           await newUser.save();
           done(null, newUser);
         }

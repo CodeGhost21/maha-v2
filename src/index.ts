@@ -8,24 +8,27 @@ const cron = require("node-cron");
 
 import { open } from "./database";
 
-// import "./bots/collabLand.ts.dis";
 import "./bots/gm";
 import "./strategies/discord";
-import { twitterMetions } from "./output/twitter";
-import mahaLocks from "./bots/mahaLocks";
+// import { twitterMetions } from "./output/twitter";
+// import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
 import { nftTransfer, dailyMahaXRewards } from "./controller/rewards";
-
+//
 const app = express();
 const server = new http.Server(app);
 
 open();
-twitterMetions();
+// twitterMetions();
 // mahaxNFT();
 // arth();
 // mahalend()
-mahaLocks();
+// mahaLocks();
 nftTransfer();
+// test(
+//   "https://pbs.twimg.com/profile_images/1635575535391866881/Cf6S6PXS_normal.jpg",
+//   "https://cdn.peopleofeden.com/generation/614/0/226e6d944506785b2ac939bbb5cc2e8f.png"
+// );
 
 app.use(cors());
 app.use(bodyParser.json());

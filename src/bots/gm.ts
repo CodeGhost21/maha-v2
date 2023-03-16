@@ -7,7 +7,7 @@ import { IUserModel, User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
-
+import { saveFeed } from "../utils/saveFeed";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 const accessTokenSecret = nconf.get("JWT_SECRET");
@@ -123,6 +123,9 @@ client.on("messageCreate", async (message) => {
 
       user.userTag = message.author.tag;
       user.lastGM = message.createdAt;
+      user.discordName = message.author.username;
+      user.discordAvatar = message.author.avatar || "";
+      user.discordDiscriminator = message.author.discriminator;
 
       // If user's last gm was yesterday, then continue streak
       if (isYesterday(lastGM)) {
@@ -178,6 +181,6 @@ const assignGmPoints = async (
     totalPoints: user.totalPoints + points,
     addPoints: points,
   });
-
   await newPointsTransaction.save();
+  await saveFeed(user, "normal", "gm", points);
 };

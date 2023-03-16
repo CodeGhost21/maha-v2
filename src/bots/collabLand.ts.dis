@@ -10,7 +10,7 @@ const Contract = require("web3-eth-contract");
 
 Contract.setProvider(nconf.get("ETH_RPC"));
 const accessTokenSecret = nconf.get("JWT_SECRET");
-// const mahaXContract = new Contract(MAHAX, nconf.get("LOCKER_ADDRESS"))
+// const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"))
 
 client.on("guildMemberAdd", async (member) => {
   let token = "";
