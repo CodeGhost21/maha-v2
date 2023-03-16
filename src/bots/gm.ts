@@ -7,7 +7,6 @@ import { IUserModel, User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { Feed } from "../database/models/feed";
 import { saveFeed } from "../utils/saveFeed";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
