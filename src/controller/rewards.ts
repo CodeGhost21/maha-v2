@@ -87,6 +87,15 @@ export const dailyMahaXRewards = async () => {
         user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
         await user.save();
         await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
+        await Loyalty.updateOne(
+          { userId: user.id },
+          {
+            gm: false,
+            twitterProfile: false,
+            discordProfile: false,
+            opensea: false,
+          }
+        );
       }
     });
   }
