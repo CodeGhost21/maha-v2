@@ -3,7 +3,7 @@ import * as ethers from "ethers";
 import Bluebird from "bluebird";
 
 // import * as jwt from "jsonwebtoken";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 // import { MessageEmbed } from "discord.js";
 
 // import { sendMessage } from "../output/discord";
@@ -35,6 +35,18 @@ export const fetchUser = async (req: Request, res: Response) => {
   } catch (e) {
     console.log(e);
   }
+};
+
+export const fetchMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // @ts-ignore
+  const _id = String(req?.user?.id);
+  const user = await User.findOne({ _id });
+  if (user) return res.json(user);
+  return next();
 };
 
 //users leaderboard

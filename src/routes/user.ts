@@ -4,18 +4,20 @@ import ensureLoggedIn from "../middleware/ensureLoggedIn";
 import {
   walletVerify,
   getLeaderboard,
-  fetchUser,
+  fetchMe,
   getRecentRewards,
   getUsersDailyPoints,
 } from "../controller/user";
 
 const router = Router();
 
-router.get("/fetch/:id", fetchUser); // <- need to hide sensitive datapoints
+// router.get("/fetch/:id", fetchUser); // <- need to hide sensitive datapoints
 router.get("/leaderBoard", getLeaderboard);
 
 router.use(authenticateJWT);
 router.use(ensureLoggedIn);
+
+router.get("/me", fetchMe); // <- need to hide sensitive datapoints
 
 // dummy api for users daily points
 router.get("/dailyPoints", getUsersDailyPoints);

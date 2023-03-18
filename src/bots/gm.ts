@@ -1,6 +1,5 @@
 import { isYesterday, isToday } from "date-fns";
 import nconf from "nconf";
-import * as jwt from "jsonwebtoken";
 
 import { client } from "../output/discord";
 import { IUserModel, User } from "../database/models/user";
@@ -8,9 +7,9 @@ import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { saveFeed } from "../utils/saveFeed";
+
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
-const accessTokenSecret = nconf.get("JWT_SECRET");
 
 client.on("messageCreate", async (message) => {
   if (message.channelId !== nconf.get("CHANNEL_GM") && !message.guild) return;
@@ -37,10 +36,6 @@ client.on("messageCreate", async (message) => {
         discordVerify: true,
       });
 
-      await user.save();
-
-      const token = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-      user["jwt"] = token;
       await user.save();
 
       message.channel.send(

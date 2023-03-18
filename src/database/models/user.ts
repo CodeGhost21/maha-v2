@@ -14,11 +14,15 @@ export interface IUser {
   totalGMs: number;
   lastGM: Date;
   gmRank: number;
-  jwt: string;
+  // jwt: string;
   walletAddress: string;
   discordVerify: boolean;
   discordName: string;
   discordDiscriminator: string;
+
+  discordOauthAccessToken: string;
+  discordOauthRefreshToken: string;
+
   discordAvatar: string;
   signDiscord: boolean;
   totalPoints: number;
@@ -42,7 +46,7 @@ const UserSchema = new mongoose.Schema(
     totalGMs: { type: Number, default: 0 },
     lastGM: Date,
     gmRank: { type: Number, default: 0 },
-    jwt: String,
+    // jwt: String,
     walletAddress: { type: String, default: "" },
     discordVerify: { type: Boolean, default: false },
     discordName: { type: String, default: "" },
@@ -51,8 +55,12 @@ const UserSchema = new mongoose.Schema(
     signDiscord: { type: Boolean, default: false },
     totalPoints: { type: Number, default: 0 },
     stakedMaha: { type: Boolean, default: false },
-    twitterOauthAccessToken: { type: String, default: "" },
-    twitterOauthAccessTokenSecret: { type: String, default: "" },
+
+    twitterOauthAccessToken: { type: String },
+    discordOauthRefreshToken: { type: String },
+
+    discordOauthAccessToken: { type: String },
+    discordOauthAccessTokenSecret: { type: String },
   },
   { timestamps: true }
 );

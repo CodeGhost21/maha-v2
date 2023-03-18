@@ -39,8 +39,6 @@ app.use(
 app.use(passport.session());
 app.use(routes);
 
-app.use("/rewards", express.static("rewards"));
-
-app.set("port", process.env.PORT || 5000);
-const port = app.get("port");
+const port = nconf.get("PORT") || 5000;
+app.set("port", port);
 server.listen(port, () => console.log(`Server started on port ${port}`));

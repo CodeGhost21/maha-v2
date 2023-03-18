@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
+import { User } from "../database/models/user";
 
 import InvalidJWTError from "../errors/InvalidJWTError";
 
@@ -21,15 +22,15 @@ export const authenticateJWT = (
     : null;
 
   if (token) {
-    jwt.verify(token, secret, {}, (err, decoded) => {
+    jwt.verify(token, secret, {}, async (err, decoded: any) => {
       if (err) return next(new InvalidJWTError());
-      if (err) return next();
 
-      console.log("jwt", decoded);
-      // req.user = user;
+      if (decoded.id && Date.now() < decoded.expiry) {
+        const user = await User.findOne({ _id: String(decoded.id) });
+        // @ts-ignore
+        if (user) req.user = user;
+      }
       next();
-
-      console.log(decoded);
     });
   } else next();
 };
