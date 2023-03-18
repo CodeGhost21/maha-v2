@@ -11,13 +11,13 @@ export interface IFeed {
 
 const feedSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
-    type: { type: String, enum: ["normal", "loyalty"] },
-    task: { type: String, default: "" },
-    points: { type: Number, default: 0 },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    type: { type: String, enum: ["normal", "loyalty"], required: true },
+    task: { type: String, required: true },
+    points: { type: Number, default: 0, required: true },
   },
   { timestamps: true }
 );
 
 export type IFeedModel = IFeed & Document;
-export const Feed = mongoose.model("Feed", feedSchema);
+export const Feed = mongoose.model<IFeed>("Feed", feedSchema);

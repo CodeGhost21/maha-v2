@@ -23,8 +23,8 @@ export interface IUser {
   signDiscord: boolean;
   totalPoints: number;
   stakedMaha: boolean;
-  twitter_oauth_access_token: string;
-  twitter_oauth_access_token_secret: string;
+  twitterOauthAccessToken: string;
+  twitterOauthAccessTokenSecret: string;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -51,8 +51,8 @@ const UserSchema = new mongoose.Schema(
     signDiscord: { type: Boolean, default: false },
     totalPoints: { type: Number, default: 0 },
     stakedMaha: { type: Boolean, default: false },
-    twitter_oauth_access_token: { type: String, default: "" },
-    twitter_oauth_access_token_secret: { type: String, default: "" },
+    twitterOauthAccessToken: { type: String, default: "" },
+    twitterOauthAccessTokenSecret: { type: String, default: "" },
   },
   { timestamps: true }
 );

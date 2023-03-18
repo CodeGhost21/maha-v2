@@ -79,8 +79,8 @@ export const userProfileBanner = async (req: any, res: any) => {
       user["twitterBio"] = parseData.description;
       user["twitterProfileImg"] = parseData.profile_image_url_https;
       user["twitterBanner"] = parseData.profile_banner_url;
-      user["twitter_oauth_access_token"] = oauth_access_token;
-      user["twitter_oauth_access_token_secret"] = oauth_access_token_secret;
+      user["twitterOauthAccessToken"] = oauth_access_token;
+      user["twitterOauthAccessTokenSecret"] = oauth_access_token_secret;
       user["signTwitter"] = true;
       await user.save();
       res.json({ success: true });

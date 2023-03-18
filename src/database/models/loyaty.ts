@@ -14,7 +14,7 @@ export interface ILoyalty {
 
 const loyaltySchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     gm: { type: Boolean, default: false },
     twitterProfile: { type: Boolean, default: false },
     discordProfile: { type: Boolean, default: false },
@@ -26,4 +26,4 @@ const loyaltySchema = new Schema(
 );
 
 export type ILoyaltyModel = ILoyalty & Document;
-export const Loyalty = mongoose.model("Loyalty", loyaltySchema);
+export const Loyalty = mongoose.model<ILoyaltyModel>("Loyalty", loyaltySchema);

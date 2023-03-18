@@ -1,6 +1,7 @@
 import nconf from "nconf";
 import * as ethers from "ethers";
-const Bluebird = require("bluebird");
+import Bluebird from "bluebird";
+
 // import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 // import { MessageEmbed } from "discord.js";
@@ -186,4 +187,6 @@ export const updateTwitterProfile = async (user: any) => {
   return user;
 };
 
-export const updateDiscordProfile = async () => {};
+export const updateDiscordProfile = async () => {
+  // nothing
+};

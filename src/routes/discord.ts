@@ -14,11 +14,8 @@ router.get(
   })
 );
 
-router.get("/redirect", passport.authenticate("discord"), (req: any, res) => {
-  const frontendUrl = urlJoin(
-    nconf.get("FRONTEND_URL"),
-    `#/profile/${req.user.userID}`
-  );
+router.get("/redirect", passport.authenticate("discord"), (req, res) => {
+  const frontendUrl = urlJoin(nconf.get("FRONTEND_URL"), `#/profile`);
   res.redirect(frontendUrl);
 });
 

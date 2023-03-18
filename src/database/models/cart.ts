@@ -11,4 +11,4 @@ const cart = new mongoose.Schema({
 });
 
 export type ICartModel = ICart & Document;
-export const Cart = mongoose.model("Cart", cart);
+export const Cart = mongoose.model<ICartModel>("Cart", cart);
