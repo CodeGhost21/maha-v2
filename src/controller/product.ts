@@ -1,15 +1,15 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Product } from "../database/models/product";
 import marketplaceData from "../assets/marketPlace.json";
 
 export const getAllProduct = async (req: Request, res: Response) => {
-  const allItems = await Product.find();
-  if (allItems.length > 0) res.send(allItems);
-  else res.send([]);
+  const allItems = await Product.find().limit(100);
+  if (allItems.length > 0) res.json(allItems);
+  else res.json([]);
 };
 
 export const addProduct = async () => {
-  marketplaceData.map(async (item: any) => {
+  marketplaceData.map(async (item) => {
     const newItem = new Product({
       name: item.name,
       imgUrl: item.imgUrl,
@@ -20,9 +20,13 @@ export const addProduct = async () => {
     await newItem.save();
   });
 };
-// addProduct();
 
-export const getProduct = async (req: Request, res: Response) => {
+export const getProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const product = await Product.findOne({ _id: req.params.productId });
-  if (product) res.send(product);
+  if (product) return res.json(product);
+  return next();
 };

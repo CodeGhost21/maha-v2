@@ -1,15 +1,15 @@
 import nconf from "nconf";
 import path from "path";
-const Jimp = require("jimp");
-const fs = require("fs");
+import jimp from "jimp";
+import fs from "fs";
 
 export const imageComparing = async (
   profileURL: string,
   nftURL: string,
   size: number
 ) => {
-  const profileImage = await Jimp.read(profileURL);
-  const nft = await Jimp.read(nftURL);
+  const profileImage = await jimp.read(profileURL);
+  const nft = await jimp.read(nftURL);
   const resizePath = path.join(
     nconf.get("ROOT_PATH"),
     `/rewards/resizeImage.png`
@@ -23,12 +23,9 @@ export const imageComparing = async (
   //difference
   console.log(profileImage, resizeNFT);
 
-  const diff = await Jimp.diff(profileImage, resizeNFT);
+  const diff = await jimp.diff(profileImage, resizeNFT);
   console.log(diff.percent);
 
   fs.unlinkSync(resizePath);
-  if (diff.percentage > 0.15) {
-    return false;
-  }
-  return true;
+  return diff.percent <= 0.15;
 };

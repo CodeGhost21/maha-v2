@@ -1,18 +1,11 @@
 import { BigNumber } from "bignumber.js";
-import nconf from "nconf";
-import { ethers } from "ethers";
-import { WebSocketProvider } from "@ethersproject/providers";
-const Contract = require("web3-eth-contract");
 
 import { User } from "../database/models/user";
 import { PointTransaction } from "../database/models/pointTransaction";
-import MAHAX from "../abi/MahaXAbi.json";
 import { Loyalty } from "../database/models/loyaty";
 import { saveFeed } from "../utils/saveFeed";
+import * as web3 from "../utils/web3";
 
-Contract.setProvider(nconf.get("ETH_RPC"));
-
-const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"));
 const e18 = new BigNumber(10).pow(18);
 
 const calculateMAHAX = (nftData: any) => {
@@ -39,18 +32,15 @@ const getDailyTransactions = async (userId: string) => {
 
 export const dailyMahaXRewards = async () => {
   const allUsers = await User.find({ walletAddress: { $ne: "" } });
+
   if (allUsers.length > 0) {
-    allUsers.map(async (user: any) => {
-      const noOfNFTs = await mahaXContract.methods
-        .balanceOf(user.walletAddress)
-        .call();
+    allUsers.map(async (user) => {
+      const noOfNFTs = await web3.balanceOf(user.walletAddress);
       if (noOfNFTs > 0) {
         let totalMahaX = 0;
         for (let i = 0; i < noOfNFTs; i++) {
-          const nftId = await mahaXContract.methods
-            .tokenOfOwnerByIndex(user.walletAddress, i)
-            .call();
-          const nftAmount = await mahaXContract.methods.locked(nftId).call();
+          const nftId = await web3.tokenOfOwnerByIndex(user.walletAddress, i);
+          const nftAmount = await web3.locked(nftId);
           const mahaX = await calculateMAHAX(nftAmount);
           totalMahaX += mahaX;
         }
@@ -99,47 +89,4 @@ export const dailyMahaXRewards = async () => {
       }
     });
   }
-};
-
-export const nftTransfer = async () => {
-  const chainWss = nconf.get("ETH_RPC");
-  const contract = nconf.get("CONTRACT_LOCKER");
-
-  const provider = new WebSocketProvider(chainWss);
-  const MahaXContract = new ethers.Contract(contract, MAHAX, provider);
-
-  MahaXContract.on("Transfer", async (...args) => {
-    const from = args[0];
-    const to = args[1];
-
-    const toUser = await User.findOne({ walletAddress: to });
-    if (toUser) {
-      const newPointsTransaction = new PointTransaction({
-        userId: toUser.id,
-        type: "NFT Transfer",
-        totalPoints: toUser.totalPoints + 10,
-        addPoints: 10,
-      });
-      await newPointsTransaction.save();
-
-      toUser["totalPoints"] = toUser.totalPoints + 10;
-      await toUser.save();
-      saveFeed(toUser, "normal", "buyNFT", 10);
-    }
-
-    const fromUser = await User.findOne({ walletAddress: from });
-    if (fromUser) {
-      const newPointsTransaction = new PointTransaction({
-        userId: fromUser.id,
-        type: "NFT Transfer",
-        totalPoints: fromUser.totalPoints - 10,
-        subPoints: 10,
-      });
-      await newPointsTransaction.save();
-
-      fromUser["totalPoints"] = fromUser.totalPoints - 10;
-      await fromUser.save();
-      saveFeed(toUser, "normal", "sellNFT", 10);
-    }
-  });
 };

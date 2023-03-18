@@ -18,11 +18,6 @@ const oauth = callback(oauthCallback);
 
 // const secret = nconf.get("JWT_SECRET");
 
-// const Contract = require("web3-eth-contract");
-// import MAHAX from "../abi/MahaXAbi.json";
-// Contract.setProvider(nconf.get("ETH_RPC"));
-// const mahaXContract = new Contract(MAHAX, nconf.get("CONTRACT_LOCKER"));
-
 //get user data
 export const fetchUser = async (req: Request, res: Response) => {
   try {
