@@ -14,7 +14,6 @@ export interface IUser {
   totalGMs: number;
   lastGM: Date;
   gmRank: number;
-  // jwt: string;
   walletAddress: string;
   discordVerify: boolean;
   discordName: string;
@@ -46,7 +45,6 @@ const UserSchema = new mongoose.Schema(
     totalGMs: { type: Number, default: 0 },
     lastGM: Date,
     gmRank: { type: Number, default: 0 },
-    // jwt: String,
     walletAddress: { type: String, default: "" },
     discordVerify: { type: Boolean, default: false },
     discordName: { type: String, default: "" },
