@@ -2047,6 +2047,11 @@
   resolved "https://registry.npmjs.org/@types/nconf/-/nconf-0.10.2.tgz"
   integrity sha512-qy5EPdN8hnlix/q/QYr4ZnICDgaEFh2qivsNYlg4/KlvM7Ye2CqeDo0UXxSoiWplZzyl2PzOxwx4MODaxS+KpA==
 
+"@types/node-cron@^3.0.7":
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/@types/node-cron/-/node-cron-3.0.7.tgz#978bf75f7247385c61d23b6a060ba9eedb03e2f4"
+  integrity sha512-9PuLtBboc/+JJ7FshmJWv769gDonTpItN0Ol5TMwclpSQNjVyB2SRxSKBcTtbSysSL5R7Oea06kTTFNciCoYwA==
+
 "@types/node-fetch@^2.6.1":
   version "2.6.1"
   resolved "https://registry.npmjs.org/@types/node-fetch/-/node-fetch-2.6.1.tgz"
@@ -8669,11 +8674,6 @@ uri-js@^4.2.2:
   integrity sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==
   dependencies:
     punycode "^2.1.0"
-
-url-join@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/url-join/-/url-join-5.0.0.tgz#c2f1e5cbd95fa91082a93b58a1f42fecb4bdbcf1"
-  integrity sha512-n2huDr9h9yzd6exQVnH/jU5mr+Pfx08LRXXZhkLLetAMESRj+anQsTAh940iMrIetKAmry9coFuZQ2jY8/p3WA==
 
 url-parse-lax@^1.0.0:
   version "1.0.0"

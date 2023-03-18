@@ -35,6 +35,7 @@
     "@types/mocha": "^9.1.1",
     "@types/nconf": "^0.10.2",
     "@types/node": "^16.4.13",
+    "@types/node-cron": "^3.0.7",
     "@types/node-telegram-bot-api": "^0.57.1",
     "@types/passport": "^1.0.12",
     "@types/sharp": "^0.31.1",

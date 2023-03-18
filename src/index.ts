@@ -1,34 +1,23 @@
-import bodyParser from "body-parser";
-import express from "express";
 import * as http from "http";
+import bodyParser from "body-parser";
 import cors from "cors";
+import cron from "node-cron";
+import express from "express";
 import passport from "passport";
 import session from "express-session";
-const cron = require("node-cron");
+import nconf from "nconf";
 
-import { open } from "./database";
+import * as database from "./database";
 
 import "./bots/gm";
 import "./strategies/discord";
-// import { twitterMetions } from "./output/twitter";
-// import mahaLocks from "./bots/mahaLocks";
 import routes from "./routes";
-import { nftTransfer, dailyMahaXRewards } from "./controller/rewards";
-//
+import { dailyMahaXRewards } from "./controller/rewards";
+
+database.open();
+
 const app = express();
 const server = new http.Server(app);
-
-open();
-// twitterMetions();
-// mahaxNFT();
-// arth();
-// mahalend()
-// mahaLocks();
-nftTransfer();
-// test(
-//   "https://pbs.twimg.com/profile_images/1635575535391866881/Cf6S6PXS_normal.jpg",
-//   "https://cdn.peopleofeden.com/generation/614/0/226e6d944506785b2ac939bbb5cc2e8f.png"
-// );
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -41,7 +30,7 @@ cron.schedule("0 0 * * *", async () => {
 
 app.use(
   session({
-    secret: "keyboard cat",
+    secret: nconf.get("SESSION_SECRET") || "keyboard-cat",
     resave: false,
     saveUninitialized: false,
   })

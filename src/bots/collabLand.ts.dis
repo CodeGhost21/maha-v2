@@ -46,7 +46,7 @@ client.on("guildMemberAdd", async (member) => {
     new MessageButton()
       .setLabel("Connect Wallet")
       .setStyle("LINK")
-      .setURL(`${nconf.get("REDIRECT_URL")}/${token}`)
+      .setURL(`${nconf.get("FRONTEND_URL")}/${token}`)
   );
   const message = `Welcome <@${member.id}> to our server`;
   const discordMsgEmbed = new MessageEmbed()

@@ -102,7 +102,7 @@ export const dailyMahaXRewards = async () => {
 };
 
 export const nftTransfer = async () => {
-  const chainWss = nconf.get("RPC_WSS");
+  const chainWss = nconf.get("ETH_RPC");
   const contract = nconf.get("CONTRACT_LOCKER");
 
   const provider = new WebSocketProvider(chainWss);
