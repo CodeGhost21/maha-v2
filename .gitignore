@@ -13,5 +13,7 @@ config.json
 **/*.d.ts
 
 /*.log
+/tmp/*
+!/tmp/.gitkeep
 
 config.backup.json
