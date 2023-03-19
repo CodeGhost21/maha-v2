@@ -1,18 +1,16 @@
 import { Feed } from "../database/models/feed";
+import { IUserModel } from "../database/models/user";
 
 export const saveFeed = async (
-  user: any,
+  user: IUserModel,
   type: string,
   task: string,
   points: number
 ) => {
-  console.log(user, type, task);
-
-  const newFeed = new Feed({
+  await Feed.create({
     userId: user._id,
     type: type,
     task: task,
     points: points,
   });
-  await newFeed.save();
 };

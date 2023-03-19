@@ -7,7 +7,12 @@ export interface ICart {
 }
 
 const cart = new mongoose.Schema({
-  userId: { type: Schema.Types.ObjectId, ref: "User" },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    unique: true,
+  },
 });
 
 export type ICartModel = ICart & Document;

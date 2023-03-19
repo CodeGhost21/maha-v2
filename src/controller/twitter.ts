@@ -8,7 +8,7 @@ const COOKIE_NAME = "oauth_token";
 const tokens: any = {};
 
 export const oAuthRequestToken = async (req: Request, res: Response) => {
-  const { oauth_token, oauth_token_secret, results } =
+  const { oauth_token, oauth_token_secret } =
     await twiiterOauth.getOAuthRequestToken();
 
   await res.cookie(COOKIE_NAME, oauth_token, {
@@ -16,7 +16,6 @@ export const oAuthRequestToken = async (req: Request, res: Response) => {
     httpOnly: true,
   });
 
-  console.log("sdf", results);
   tokens[oauth_token] = { oauth_token_secret };
 
   res.json({ oauth_token });
@@ -90,12 +89,8 @@ export const userProfileBanner = async (
 };
 
 export const twitterLogout = async (req: Request, res: Response) => {
-  try {
-    const oauth_token = req.cookies[COOKIE_NAME];
-    delete tokens[oauth_token];
-    res.cookie(COOKIE_NAME, {}, { maxAge: -1 });
-    res.json({ success: true });
-  } catch (error) {
-    res.status(403).json({ message: "Missing, invalid, or expired tokens" });
-  }
+  const oauth_token = req.cookies[COOKIE_NAME];
+  delete tokens[oauth_token];
+  res.cookie(COOKIE_NAME, {}, { maxAge: -1 });
+  res.json({ success: true });
 };

@@ -24,19 +24,16 @@ const getCallback = (
       oauth_token: string;
       oauth_token_secret: string;
       results: object;
-    }> => {
-      return new Promise((resolve, reject) => {
+    }> =>
+      new Promise((resolve, reject) => {
         _oauth.getOAuthRequestToken(
           (error, oauth_token, oauth_token_secret, results) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve({ oauth_token, oauth_token_secret, results });
-            }
+            console.log(error, oauth_token, oauth_token_secret, results);
+            if (error) reject(error);
+            else resolve({ oauth_token, oauth_token_secret, results });
           }
         );
-      });
-    },
+      }),
 
     getOAuthAccessToken: (
       oauth_token: string,

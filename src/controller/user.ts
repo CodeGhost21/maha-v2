@@ -63,28 +63,26 @@ export const getUsersDailyPoints = async (req: Request, res: Response) => {
 
 // connect wallet verify
 export const walletVerify = async (req: Request, res: Response) => {
-  try {
-    const user = req.user as IUserModel;
-    const result = ethers.utils.verifyMessage(user.userID || "", req.body.hash);
+  const user = req.user as IUserModel;
 
-    if (result === req.body.address) {
-      user.walletAddress = req.body.address;
-      user.discordVerify = true;
-      user.signDiscord = true;
-      await user.save();
-      // const discordMsgEmbed = new MessageEmbed()
-      //   .setColor("#F07D55")
-      //   .setDescription("Congratulation your wallet has been connected");
-      // const payload = {
-      //   embeds: [discordMsgEmbed],
-      // };
-      // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
-      res.json({ success: true });
-    } else {
-      res.json({ success: false });
-    }
-  } catch (error) {
-    console.log(error);
+  const message = `Login into Gifts of Eden: ${user.id}`;
+  const result = ethers.utils.verifyMessage(message, req.body.hash);
+
+  if (result === req.body.address) {
+    user.walletAddress = req.body.address;
+    user.discordVerify = true;
+    user.signDiscord = true;
+    await user.save();
+    // const discordMsgEmbed = new MessageEmbed()
+    //   .setColor("#F07D55")
+    //   .setDescription("Congratulation your wallet has been connected");
+    // const payload = {
+    //   embeds: [discordMsgEmbed],
+    // };
+    // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
+    res.json({ success: true });
+  } else {
+    res.json({ success: false });
   }
 };
 

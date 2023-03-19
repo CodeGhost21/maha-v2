@@ -14,7 +14,12 @@ export interface ILoyalty {
 
 const loyaltySchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true,
+    },
     gm: { type: Boolean, default: false },
     twitterProfile: { type: Boolean, default: false },
     discordProfile: { type: Boolean, default: false },

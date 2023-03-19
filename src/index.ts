@@ -2,7 +2,7 @@ import * as http from "http";
 import bodyParser from "body-parser";
 import cors from "cors";
 import cron from "node-cron";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import session from "express-session";
 import nconf from "nconf";
@@ -13,6 +13,7 @@ import "./bots/gm";
 import "./strategies/discord";
 import routes from "./routes";
 import { dailyMahaXRewards } from "./controller/rewards";
+import HttpError from "./errors/HttpError";
 
 database.open();
 
@@ -38,6 +39,15 @@ app.use(
 
 app.use(passport.session());
 app.use(routes);
+
+app.use(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (err: HttpError, _req: Request, res: Response, _next: NextFunction) => {
+    res.status(err.status || 500);
+    // @ts-ignore
+    res.json({ error: err.message || err.data, success: false });
+  }
+);
 
 const port = nconf.get("PORT") || 5000;
 app.set("port", port);

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { ICartModel } from "./cart";
-import { ILoyaltyModel } from "./loyaty";
+import { Cart, ICartModel } from "./cart";
+import { ILoyaltyModel, Loyalty } from "./loyaty";
 
 export interface IUser {
   userTag: string;
@@ -72,8 +72,16 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
-UserSchema.methods.getLoyalty = function () {
-  return this.name + "TROLOLO";
+UserSchema.methods.getLoyalty = async function () {
+  const found = await Loyalty.findOne({ userId: this.id });
+  if (found) return found;
+  return Loyalty.create({ userId: this.id });
+};
+
+UserSchema.methods.getCart = async function () {
+  const found = await Cart.findOne({ userId: this.id });
+  if (found) return found;
+  return Cart.create({ userId: this.id });
 };
 
 export type IUserModel = IUser & mongoose.Document;
