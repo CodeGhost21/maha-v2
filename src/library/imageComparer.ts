@@ -24,7 +24,7 @@ export const imageComparing = async (
   // console.log(profileImage, resizeNFT);
 
   const diff = await jimp.diff(profileImage, resizeNFT);
-  console.log(diff.percent);
+  console.log(profileURL, nftURL, diff.percent);
 
   fs.unlinkSync(resizePath);
   return diff.percent <= 0.15;
