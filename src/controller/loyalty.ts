@@ -53,8 +53,9 @@ export const checkTask = async (req: Request, res: Response) => {
 
   if (req.body.task === "gm") loyalty.gm = user.totalGMs > 0;
 
+  // check for updated twitter profile
   if (req.body.task === "twitterProfile") {
-    // check for updated twitter profile
+    // todo; refresh the user's twitter profile by fetching the latest profile
     const updatedUser = await updateTwitterProfile(user);
     const twitterCheck = await profileImageComparing(
       updatedUser.twitterProfileImg,
@@ -65,7 +66,10 @@ export const checkTask = async (req: Request, res: Response) => {
     loyalty.twitterProfile = twitterCheck;
   }
 
+  // check for updated discord profile
   if (req.body.task === "discordProfile") {
+    // todo refresh the discord profile by fetching the latest one using
+    // the user's access token
     const discordCheck = await profileImageComparing(
       `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}.jpg`,
       128,

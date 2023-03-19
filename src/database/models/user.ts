@@ -22,6 +22,7 @@ export interface IUser {
   discordDiscriminator: string;
 
   discordOauthAccessToken: string;
+  discordOauthAccessTokenExpiry: Date;
   discordOauthRefreshToken: string;
 
   discordAvatar: string;
@@ -71,6 +72,7 @@ const UserSchema = new mongoose.Schema(
 
     discordOauthAccessToken: { type: String },
     discordOauthAccessTokenSecret: { type: String },
+    discordOauthAccessTokenExpiry: Date,
   },
   {
     timestamps: true,
