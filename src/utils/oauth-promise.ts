@@ -1,23 +1,25 @@
-//convert oauth methods to promises so we can use async/await syntax
-//and keep our code sexier
+// convert oauth methods to promises so we can use async/await syntax
+// and keep our code sexier
 import { OAuth } from "oauth";
-import nconf from "nconf";
 
-const getCallback = (oauthCallback: string) => {
-  const CONSUMER_KEY = nconf.get("TWITTER_CONSUMER_KEY");
-  const CONSUMER_SECRET = nconf.get("TWITTER_CONSUMER_SECRET");
-
+const getCallback = (
+  requestTokenURL: string,
+  accessTokenURL: string,
+  consumerKey: string,
+  consumerSecret: string,
+  oauthCallbackURL: string
+) => {
   const _oauth = new OAuth(
-    "https://api.twitter.com/oauth/request_token",
-    "https://api.twitter.com/oauth/access_token",
-    CONSUMER_KEY, // consumer key
-    CONSUMER_SECRET, // consumer secret
+    requestTokenURL,
+    accessTokenURL,
+    consumerKey, // consumer key
+    consumerSecret, // consumer secret
     "1.0",
-    oauthCallback,
+    oauthCallbackURL,
     "HMAC-SHA1"
   );
 
-  const oauth = {
+  return {
     getOAuthRequestToken: (): Promise<{
       oauth_token: string;
       oauth_token_secret: string;
@@ -70,7 +72,7 @@ const getCallback = (oauthCallback: string) => {
       method: string,
       oauth_access_token: string,
       oauth_access_token_secret: string
-    ) => {
+    ): Promise<{ data: any; response: any }> => {
       return new Promise((resolve, reject) => {
         _oauth.getProtectedResource(
           url,
@@ -88,8 +90,6 @@ const getCallback = (oauthCallback: string) => {
       });
     },
   };
-
-  return oauth;
 };
 
 export default getCallback;

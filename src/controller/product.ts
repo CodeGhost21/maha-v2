@@ -2,10 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { Product } from "../database/models/product";
 import marketplaceData from "../assets/marketPlace.json";
 
-export const getAllProduct = async (req: Request, res: Response) => {
+export const getAllProduct = async (_req: Request, res: Response) => {
   const allItems = await Product.find().limit(100);
-  if (allItems.length > 0) res.json(allItems);
-  else res.json([]);
+  res.json(allItems);
 };
 
 export const addProduct = async () => {
@@ -21,12 +20,7 @@ export const addProduct = async () => {
   });
 };
 
-export const getProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getProduct = async (req: Request, res: Response) => {
   const product = await Product.findOne({ _id: req.params.productId });
-  if (product) return res.json(product);
-  return next();
+  return res.json(product);
 };

@@ -1,13 +1,12 @@
-import nconf from "nconf";
 import { Loyalty } from "../database/models/loyaty";
-import { User } from "../database/models/user";
 import { sendRequest } from "../library/sendRequest";
 import { updateTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
 import { saveFeed } from "../utils/saveFeed";
 
 import * as web3 from "../utils/web3";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
+import { PassportRequest } from "../interface";
 
 const profileImageComparing = async (
   profileImageUrl: string,
@@ -38,13 +37,11 @@ const profileImageComparing = async (
 };
 
 export const checkTask = async (
-  req: Request,
+  req: PassportRequest,
   res: Response,
   next: NextFunction
 ) => {
-  // @ts-ignore
-  const _id = req.user.id;
-  const user = await User.findOne({ _id });
+  const user = req.user;
   if (!user) return next();
 
   const userLoyalty = await Loyalty.findOne({ userId: user._id });
@@ -99,12 +96,7 @@ export const checkTask = async (
   res.json(userLoyalty);
 };
 
-export const getLoyalty = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  // @ts-ignore
+export const getLoyalty = async (req: PassportRequest, res: Response) => {
   const _id = req.user.id;
   const userLoyalty = await Loyalty.findOne({ userId: _id });
   res.json(userLoyalty);

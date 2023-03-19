@@ -11,12 +11,7 @@ import { User } from "../database/models/user";
 // import usersDailyPoints from "../assets/usersDailyPoints.json";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { Loyalty } from "../database/models/loyaty";
-
-import callback from "../library/oauth-promise";
-const oauthCallback = nconf.get("TWITTER_CALLBACK_URL");
-const oauth = callback(oauthCallback);
-
-// const secret = nconf.get("JWT_SECRET");
+import twiiterOauth from "../library/twitter-oauth";
 
 //get user data
 export const fetchUser = async (req: Request, res: Response) => {
@@ -182,7 +177,7 @@ export const fetchNFT = async () => {
 // fetchNFT()
 
 export const updateTwitterProfile = async (user: any) => {
-  const response: any = await oauth.getProtectedResource(
+  const response: any = await twiiterOauth.getProtectedResource(
     "https://api.twitter.com/1.1/account/verify_credentials.json",
     "GET",
     user.twitter_oauth_access_token,

@@ -1,17 +1,17 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { Cart } from "../database/models/cart";
 import { CartItem } from "../database/models/cartItems";
 import { Product } from "../database/models/product";
 import { User, IUserModel } from "../database/models/user";
+import { PassportRequest } from "../interface";
 
 export const addItem = async (
-  req: Request,
+  req: PassportRequest,
   res: Response,
   next: NextFunction
 ) => {
   if (!req.user) return next();
 
-  // @ts-ignore
   const user: IUserModel = req.user;
 
   let cart = await Cart.findOne({ userId: user.id });
@@ -47,7 +47,7 @@ export const addItem = async (
 };
 
 export const removeItem = async (
-  req: Request,
+  req: PassportRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -62,9 +62,12 @@ export const removeItem = async (
       productId: req.body.productId,
     });
     if (cartItem) {
-      const product: any = await Product.findOne({
+      const product = await Product.findOne({
         _id: req.body.productId,
       });
+
+      if (!product) return next();
+
       await User.updateOne(
         { id: user.id },
         { $inc: { totalPoints: product.price } }
@@ -76,13 +79,11 @@ export const removeItem = async (
 };
 
 export const allItems = async (
-  req: Request,
+  req: PassportRequest,
   res: Response,
   next: NextFunction
 ) => {
   if (!req.user) return next();
-
-  // @ts-ignore
   const user: IUserModel = req.user;
 
   const cart = await Cart.findOne({ userId: user.id });
@@ -90,11 +91,8 @@ export const allItems = async (
     const cartItems = await CartItem.find({ cartId: cart.id }).populate(
       "productId"
     );
-    const allItems: any = [];
-    cartItems.map((item) => {
-      allItems.push(item.productId);
-    });
 
+    const allItems = cartItems.map((item) => item.productId);
     res.json(allItems);
   } else {
     res.json([]);
@@ -102,19 +100,18 @@ export const allItems = async (
 };
 
 export const buyNow = async (
-  req: Request,
+  req: PassportRequest,
   res: Response,
   next: NextFunction
 ) => {
   if (!req.user) return next();
 
-  // @ts-ignore
   const user: IUserModel = req.user;
   try {
     const cart = await Cart.findOne({ userId: user.id });
     if (cart) {
       const cartItems = await CartItem.find({ cartId: cart._id });
-      cartItems.map(async (item: any) => {
+      cartItems.map(async (item) => {
         await Product.updateOne(
           { id: item.productId },
           { $set: { userId: user.id } }
