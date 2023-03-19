@@ -2,95 +2,60 @@ import { IUserModel } from "./../database/models/user";
 
 import { Request, NextFunction, Response } from "express";
 import twiiterOauth from "../library/twitter-oauth";
+import BadRequestError from "../errors/BadRequestError";
 
-const COOKIE_NAME = "oauthToken";
+export const requestToken = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
 
-const tokens: any = {};
-
-export const oAuthRequestToken = async (req: Request, res: Response) => {
   const { oauthToken, oauthTokenSecret } =
     await twiiterOauth.getOAuthRequestToken();
 
-  await res.cookie(COOKIE_NAME, oauthToken, {
-    maxAge: 15 * 60 * 1000, // 15 minutes
-    httpOnly: true,
-  });
-
-  tokens[oauthToken] = { oauthTokenSecret };
+  // set request token into user obj
+  user.twitterRequestToken = oauthToken;
+  user.twitterRequestTokenSecret = oauthTokenSecret;
+  await user.save();
 
   res.json({ oauthToken });
 };
 
-export const verifyAccessToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const verifyAccessToken = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
   const { oauthToken, oauthVerifier } = req.body;
 
-  if (!oauthToken) return next();
+  // validate
+  if (!oauthToken) throw new BadRequestError("missing oauth token");
+  if (!oauthVerifier) throw new BadRequestError("missing oauth verified");
+  if (String(oauthToken) !== String(user.twitterRequestToken))
+    throw new BadRequestError("oauth token mismatch");
 
-  // const oauthToken = global_oauthToken
-  const oauthToken_secret = tokens[oauthToken].oauthToken_secret;
+  // convert request token to access token
+  const { oauthAccessToken, oauthAccessTokenSecret } =
+    await twiiterOauth.getOAuthAccessToken(
+      user.twitterRequestToken,
+      user.twitterRequestTokenSecret,
+      oauthVerifier
+    );
 
-  const {
-    oauthAccessToken: oauthAccessToken,
-    oauthAccessTokenSecret: oauthTokenSecret,
-    results,
-  } = await twiiterOauth.getOAuthAccessToken(
-    oauthToken,
-    oauthToken_secret,
-    oauthVerifier
-  );
-
-  console.log(results);
-
-  tokens[oauthToken] = {
-    ...tokens[oauthToken],
-    oauthAccessToken,
-    oauthTokenSecret,
-  };
-
-  res.json({ success: true });
-};
-
-export const userProfileBanner = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const user = req.user as IUserModel;
-
-  const oauthToken = req.header("access-token");
-  if (!oauthToken) return next();
-
-  const { oauthAccessToken, oauthTokenSecret } = tokens[oauthToken];
-
+  // fetch the twitter profile to see if everything works
   const response = await twiiterOauth.getProtectedResource(
     "https://api.twitter.com/1.1/account/verify_credentials.json",
     "GET",
     oauthAccessToken,
-    oauthTokenSecret
+    oauthAccessTokenSecret
   );
 
   const parseData = JSON.parse(response.data);
-  if (user) {
-    user.twitterID = parseData.id_str;
-    user.twitterName = parseData.name;
-    user.twitterBio = parseData.description;
-    user.twitterProfileImg = parseData.profile_image_url_https;
-    user.twitterBanner = parseData.profile_banner_url;
-    user.twitterOauthAccessToken = oauthAccessToken;
-    user.twitterOauthAccessTokenSecret = oauthTokenSecret;
-    user.signTwitter = true;
-    await user.save();
-    res.json({ success: true });
-  }
-};
 
-export const twitterLogout = async (req: Request, res: Response) => {
-  const oauthToken = req.cookies[COOKIE_NAME];
-  delete tokens[oauthToken];
-  res.cookie(COOKIE_NAME, {}, { maxAge: -1 });
+  user.twitterID = parseData.id_str;
+  user.twitterName = parseData.name;
+  user.twitterBio = parseData.description;
+  user.twitterProfileImg = parseData.profile_image_url_https;
+  user.twitterBanner = parseData.profile_banner_url;
+  user.twitterOauthAccessToken = oauthAccessToken;
+  user.twitterOauthAccessTokenSecret = oauthAccessTokenSecret;
+
+  user.signTwitter = true;
+  await user.save();
+
   res.json({ success: true });
 };

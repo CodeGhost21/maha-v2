@@ -28,8 +28,11 @@ export interface IUser {
   signDiscord: boolean;
   totalPoints: number;
   stakedMaha: boolean;
+
   twitterOauthAccessToken: string;
   twitterOauthAccessTokenSecret: string;
+  twitterRequestToken: string;
+  twitterRequestTokenSecret: string;
 
   getLoyalty: () => Promise<ILoyaltyModel>;
   getCart: () => Promise<ICartModel>;
@@ -61,8 +64,10 @@ const UserSchema = new mongoose.Schema(
     totalPoints: { type: Number, default: 0 },
     stakedMaha: { type: Boolean, default: false },
 
-    twitterOauthAccessToken: { type: String },
-    twitterOauthAccessTokenSecret: { type: String },
+    twitterOauthAccessToken: String,
+    twitterOauthAccessTokenSecret: String,
+    twitterRequestTokenSecret: String,
+    twitterRequestToken: String,
 
     discordOauthAccessToken: { type: String },
     discordOauthAccessTokenSecret: { type: String },

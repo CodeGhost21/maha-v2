@@ -25,7 +25,7 @@ export const verifyWithDiscord = [
 
     const frontendUrl = urlJoin(
       nconf.get("FRONTEND_URL"),
-      `#/profile?token=${token}`
+      `/profile?token=${token}`
     );
 
     res.redirect(frontendUrl);

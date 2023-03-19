@@ -70,16 +70,7 @@ export const walletVerify = async (req: Request, res: Response) => {
 
   if (result === req.body.address) {
     user.walletAddress = req.body.address;
-    user.discordVerify = true;
-    user.signDiscord = true;
     await user.save();
-    // const discordMsgEmbed = new MessageEmbed()
-    //   .setColor("#F07D55")
-    //   .setDescription("Congratulation your wallet has been connected");
-    // const payload = {
-    //   embeds: [discordMsgEmbed],
-    // };
-    // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
     res.json({ success: true });
   } else {
     res.json({ success: false });
