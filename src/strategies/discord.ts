@@ -2,7 +2,7 @@ import passport from "passport";
 import nconf from "nconf";
 import { Strategy } from "passport-discord";
 import { IUserModel, User } from "../database/models/user";
-import { checkGuildMember } from "../output/discord";
+import { checkGuildMember } from "../utils/discord";
 import urlJoin from "../utils/urlJoin";
 import { Loyalty } from "../database/models/loyaty";
 

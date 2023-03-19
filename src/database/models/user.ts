@@ -34,11 +34,11 @@ const UserSchema = new mongoose.Schema(
   {
     userTag: String,
     userID: String,
-    twitterID: { type: String, default: "" },
-    twitterName: { type: String, default: "" },
-    twitterBio: { type: String, default: "" },
-    twitterProfileImg: { type: String, default: "" },
-    twitterBanner: { type: String, default: "" },
+    twitterID: String,
+    twitterName: String,
+    twitterBio: String,
+    twitterProfileImg: String,
+    twitterBanner: String,
     signTwitter: { type: Boolean, default: false },
     streak: { type: Number, default: 0 },
     maxStreak: { type: Number, default: 0 },
@@ -46,16 +46,18 @@ const UserSchema = new mongoose.Schema(
     lastGM: Date,
     gmRank: { type: Number, default: 0 },
     walletAddress: { type: String, default: "" },
+
     discordVerify: { type: Boolean, default: false },
     discordName: { type: String, default: "" },
     discordDiscriminator: { type: String, default: "" },
     discordAvatar: { type: String, default: "" },
+
     signDiscord: { type: Boolean, default: false },
     totalPoints: { type: Number, default: 0 },
     stakedMaha: { type: Boolean, default: false },
 
     twitterOauthAccessToken: { type: String },
-    discordOauthRefreshToken: { type: String },
+    twitterOauthAccessTokenSecret: { type: String },
 
     discordOauthAccessToken: { type: String },
     discordOauthAccessTokenSecret: { type: String },

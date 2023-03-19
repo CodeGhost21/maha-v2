@@ -1,7 +1,7 @@
 import { isYesterday, isToday } from "date-fns";
 import nconf from "nconf";
 
-import { client } from "../output/discord";
+import { client } from "../utils/discord";
 import { IUserModel, User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
