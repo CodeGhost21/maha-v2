@@ -4,7 +4,7 @@ import nconf from "nconf";
 import { client } from "../utils/discord";
 import { IUserModel, User } from "../database/models/user";
 import { Message } from "../database/models/message";
-import { assignRank } from "../helper/upadteRank";
+import { assignRank } from "../utils/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { saveFeed } from "../utils/saveFeed";
 
