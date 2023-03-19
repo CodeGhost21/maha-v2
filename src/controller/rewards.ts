@@ -1,14 +1,17 @@
 import { BigNumber } from "bignumber.js";
 
-import { User } from "../database/models/user";
+import { IUserModel, User } from "../database/models/user";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { Loyalty } from "../database/models/loyaty";
 import { saveFeed } from "../utils/saveFeed";
 import * as web3 from "../utils/web3";
 
 const e18 = new BigNumber(10).pow(18);
 
-const calculateMAHAX = (nftData: any) => {
+const calculateMAHAX = (nftData: {
+  amount: number | string;
+  end: number;
+  start: number;
+}) => {
   const maha = new BigNumber(nftData.amount);
   const duration = nftData.end - nftData.start;
   // years4 should be duration of maha locked
@@ -31,63 +34,61 @@ const getDailyTransactions = async (userId: string) => {
 };
 
 export const dailyMahaXRewards = async () => {
-  const allUsers = await User.find({ walletAddress: { $ne: "" } });
+  const allUsers: IUserModel[] = await User.find({
+    walletAddress: { $ne: "" },
+  });
 
-  if (allUsers.length > 0) {
-    allUsers.map(async (user) => {
-      const noOfNFTs = await web3.balanceOf(user.walletAddress);
-      if (noOfNFTs > 0) {
-        let totalMahaX = 0;
-        for (let i = 0; i < noOfNFTs; i++) {
-          const nftId = await web3.tokenOfOwnerByIndex(user.walletAddress, i);
-          const nftAmount = await web3.locked(nftId);
-          const mahaX = await calculateMAHAX(nftAmount);
-          totalMahaX += mahaX;
-        }
+  allUsers.map(async (user) => {
+    const noOfNFTs = await web3.balanceOf(user.walletAddress);
 
-        const newPointsTransaction = new PointTransaction({
-          userId: user.id,
-          type: "NFT Locked",
-          totalPoints: user.totalPoints + Math.floor(totalMahaX),
-          addPoints: Math.floor(totalMahaX),
-        });
-        await newPointsTransaction.save();
-        user["totalPoints"] = user.totalPoints + Math.floor(totalMahaX);
-        await user.save();
-        await saveFeed(user, "normal", "mahaXLock", totalMahaX);
+    if (noOfNFTs > 0) {
+      let totalMahaX = 0;
+
+      for (let i = 0; i < noOfNFTs; i++) {
+        const nftId = await web3.tokenOfOwnerByIndex(user.walletAddress, i);
+        const nftAmount = await web3.locked(nftId);
+        const mahaX = await calculateMAHAX(nftAmount);
+        totalMahaX += mahaX;
       }
 
-      const dailyTransactions = await getDailyTransactions(user._id);
-      if (dailyTransactions.length > 0) {
-        const userLoyalty = await Loyalty.findOne({
-          userId: user._id,
-        }).select("totalLoyalty");
+      await PointTransaction.create({
+        userId: user.id,
+        type: "NFT Locked",
+        totalPoints: user.totalPoints + Math.floor(totalMahaX),
+        addPoints: Math.floor(totalMahaX),
+      });
+      user.totalPoints = user.totalPoints + Math.floor(totalMahaX);
+      await user.save();
 
-        let totalPoints = 0;
-        dailyTransactions.map((item) => {
-          if (item.addPoints > 0) totalPoints += item.addPoints;
-        });
-        const dailyLoyaltyPoints = totalPoints * userLoyalty.totalLoyalty;
-        const newPointsTransaction = new PointTransaction({
-          userId: user.id,
-          type: "Loyalty",
-          totalPoints: user.totalPoints + dailyLoyaltyPoints,
-          addPoints: dailyLoyaltyPoints,
-        });
-        await newPointsTransaction.save();
-        user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
-        await user.save();
-        await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
-        await Loyalty.updateOne(
-          { userId: user.id },
-          {
-            gm: false,
-            twitterProfile: false,
-            discordProfile: false,
-            opensea: false,
-          }
-        );
-      }
-    });
-  }
+      await saveFeed(user, "normal", "mahaXLock", totalMahaX);
+    }
+
+    const dailyTransactions = await getDailyTransactions(user._id);
+    if (dailyTransactions.length > 0) {
+      const userLoyalty = await user.getLoyalty();
+
+      let totalPoints = 0;
+      dailyTransactions.map((item) => {
+        if (item.addPoints > 0) totalPoints += item.addPoints;
+      });
+      const dailyLoyaltyPoints = totalPoints * userLoyalty.totalLoyalty;
+      const newPointsTransaction = new PointTransaction({
+        userId: user.id,
+        type: "Loyalty",
+        totalPoints: user.totalPoints + dailyLoyaltyPoints,
+        addPoints: dailyLoyaltyPoints,
+      });
+      await newPointsTransaction.save();
+      user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
+      await user.save();
+      await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
+      const loyalty = await user.getLoyalty();
+      await loyalty.update({
+        gm: false,
+        twitterProfile: false,
+        discordProfile: false,
+        opensea: false,
+      });
+    }
+  });
 };

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ICartModel } from "./cart";
 import { ILoyaltyModel } from "./loyaty";
 
 export interface IUser {
@@ -31,6 +32,7 @@ export interface IUser {
   twitterOauthAccessTokenSecret: string;
 
   getLoyalty: () => Promise<ILoyaltyModel>;
+  getCart: () => Promise<ICartModel>;
 }
 
 const UserSchema = new mongoose.Schema(

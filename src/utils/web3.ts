@@ -24,7 +24,9 @@ export const balanceOf = async (address: string): Promise<number> => {
   return await mahaXContract.methods.balanceOf(address).call();
 };
 
-export const locked = async (nftId: number): Promise<number> => {
+export const locked = async (
+  nftId: number
+): Promise<{ amount: string; end: number; start: number }> => {
   return await mahaXContract.methods.locked(nftId).call();
 };
 

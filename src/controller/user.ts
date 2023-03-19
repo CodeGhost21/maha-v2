@@ -1,26 +1,21 @@
 import Bluebird from "bluebird";
 import { ethers } from "ethers";
+import { Request, Response } from "express";
 
 import { IUserModel, User } from "../database/models/user";
 import { Loyalty } from "../database/models/loyaty";
-import { NextFunction, Response } from "express";
-import { PassportRequest } from "../interface";
 import { PointTransaction } from "../database/models/pointTransaction";
 import twiiterOauth from "../library/twitter-oauth";
+import NotFoundError from "../errors/NotFoundError";
 
-export const fetchMe = async (
-  req: PassportRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const _id = String(req?.user?.id);
-  const user = await User.findOne({ _id });
+export const fetchMe = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
   if (user) return res.json(user);
-  return next();
+  throw new NotFoundError();
 };
 
 //users leaderboard
-export const getLeaderboard = async (req: PassportRequest, res: Response) => {
+export const getLeaderboard = async (req: Request, res: Response) => {
   const users = await User.find()
     .select("discordName totalPoints discordAvatar userID")
     .sort({ totalPoints: -1 })
@@ -40,8 +35,8 @@ export const getLeaderboard = async (req: PassportRequest, res: Response) => {
 };
 
 // get latest rewards of a user
-export const getRecentRewards = async (req: PassportRequest, res: Response) => {
-  const user = req.user;
+export const getRecentRewards = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
 
   const recentRewards = await PointTransaction.find({
     userId: user.id,
@@ -51,11 +46,8 @@ export const getRecentRewards = async (req: PassportRequest, res: Response) => {
 };
 
 // user points
-export const getUsersDailyPoints = async (
-  req: PassportRequest,
-  res: Response
-) => {
-  const user = req.user;
+export const getUsersDailyPoints = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
 
   const dailyPoints = await PointTransaction.find({
     userId: user.id,
@@ -70,32 +62,24 @@ export const getUsersDailyPoints = async (
 };
 
 // connect wallet verify
-export const walletVerify = async (req: PassportRequest, res: Response) => {
+export const walletVerify = async (req: Request, res: Response) => {
   try {
-    const userReq = req.user;
-    const userData = await User.findOne({ _id: userReq.id });
+    const user = req.user as IUserModel;
+    const result = ethers.utils.verifyMessage(user.userID || "", req.body.hash);
 
-    if (userData) {
-      const result = ethers.utils.verifyMessage(
-        userData.userID || "",
-        req.body.hash
-      );
-      if (result === req.body.address) {
-        userData["walletAddress"] = req.body.address;
-        userData["discordVerify"] = true;
-        userData["signDiscord"] = true;
-        await userData.save();
-        // const discordMsgEmbed = new MessageEmbed()
-        //   .setColor("#F07D55")
-        //   .setDescription("Congratulation your wallet has been connected");
-        // const payload = {
-        //   embeds: [discordMsgEmbed],
-        // };
-        // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
-        res.json({ success: true });
-      } else {
-        res.json({ success: false });
-      }
+    if (result === req.body.address) {
+      user.walletAddress = req.body.address;
+      user.discordVerify = true;
+      user.signDiscord = true;
+      await user.save();
+      // const discordMsgEmbed = new MessageEmbed()
+      //   .setColor("#F07D55")
+      //   .setDescription("Congratulation your wallet has been connected");
+      // const payload = {
+      //   embeds: [discordMsgEmbed],
+      // };
+      // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
+      res.json({ success: true });
     } else {
       res.json({ success: false });
     }

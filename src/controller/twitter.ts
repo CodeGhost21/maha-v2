@@ -1,17 +1,13 @@
-import { User } from "./../database/models/user";
+import { IUserModel } from "./../database/models/user";
 
-import { PassportRequest } from "../interface";
-import { NextFunction, Response } from "express";
+import { Request, NextFunction, Response } from "express";
 import twiiterOauth from "../library/twitter-oauth";
 
 const COOKIE_NAME = "oauth_token";
 
 const tokens: any = {};
 
-export const oAuthRequestToken = async (
-  req: PassportRequest,
-  res: Response
-) => {
+export const oAuthRequestToken = async (req: Request, res: Response) => {
   const { oauth_token, oauth_token_secret, results } =
     await twiiterOauth.getOAuthRequestToken();
 
@@ -27,7 +23,7 @@ export const oAuthRequestToken = async (
 };
 
 export const oAuthAccessToken = async (
-  req: PassportRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -60,13 +56,13 @@ export const oAuthAccessToken = async (
 };
 
 export const userProfileBanner = async (
-  req: PassportRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const oauth_token = req.header("access-token");
-  // const oauth_token = global_oauth_token;
+  const user = req.user as IUserModel;
 
+  const oauth_token = req.header("access-token");
   if (!oauth_token) return next();
 
   const { oauth_access_token, oauth_access_token_secret } = tokens[oauth_token];
@@ -79,7 +75,6 @@ export const userProfileBanner = async (
   );
 
   const parseData = JSON.parse(response.data);
-  const user = await User.findOne({ _id: req.user.id });
   if (user) {
     user.twitterID = parseData.id_str;
     user.twitterName = parseData.name;
@@ -94,7 +89,7 @@ export const userProfileBanner = async (
   }
 };
 
-export const twitterLogout = async (req: PassportRequest, res: Response) => {
+export const twitterLogout = async (req: Request, res: Response) => {
   try {
     const oauth_token = req.cookies[COOKIE_NAME];
     delete tokens[oauth_token];

@@ -1,12 +1,11 @@
-import { Loyalty } from "../database/models/loyaty";
 import { sendRequest } from "../library/sendRequest";
 import { updateTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
 import { saveFeed } from "../utils/saveFeed";
 
 import * as web3 from "../utils/web3";
-import { NextFunction, Response } from "express";
-import { PassportRequest } from "../interface";
+import { Request, Response } from "express";
+import { IUserModel } from "../database/models/user";
 
 const profileImageComparing = async (
   profileImageUrl: string,
@@ -36,16 +35,10 @@ const profileImageComparing = async (
   return false;
 };
 
-export const checkTask = async (
-  req: PassportRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const user = req.user;
-  if (!user) return next();
+export const checkTask = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
 
-  const userLoyalty = await Loyalty.findOne({ userId: user._id });
-  if (!userLoyalty) return next();
+  const userLoyalty = await user.getLoyalty();
 
   if (req.body.task === "gm") {
     if (user.totalGMs > 0) {
@@ -96,8 +89,8 @@ export const checkTask = async (
   res.json(userLoyalty);
 };
 
-export const getLoyalty = async (req: PassportRequest, res: Response) => {
-  const _id = req.user.id;
-  const userLoyalty = await Loyalty.findOne({ userId: _id });
+export const getLoyalty = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userLoyalty = await user.getLoyalty();
   res.json(userLoyalty);
 };
