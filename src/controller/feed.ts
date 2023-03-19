@@ -7,7 +7,7 @@ export const allFeeds = async (req: PassportRequest, res: Response) => {
   const feeds = await Feed.find()
     .sort({ createdAt: -1 })
     .populate("userId", "discordName discordAvatar totalPoints userID");
-  res.send(feeds);
+  res.json(feeds);
 };
 
 export const userFeeds = async (req: PassportRequest, res: Response) => {
@@ -16,6 +16,6 @@ export const userFeeds = async (req: PassportRequest, res: Response) => {
     const feeds = await Feed.find({ userId: user._id })
       .sort({ createdAt: -1 })
       .populate("userId", "discordName discordAvatar totalPoints userID");
-    res.send(feeds);
+    res.json(feeds);
   }
 };

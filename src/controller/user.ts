@@ -1,38 +1,18 @@
-import nconf from "nconf";
-import * as ethers from "ethers";
 import Bluebird from "bluebird";
+import { ethers } from "ethers";
 
-// import * as jwt from "jsonwebtoken";
-import { NextFunction, Request, Response } from "express";
-// import { MessageEmbed } from "discord.js";
-
-// import { sendMessage } from "../output/discord";
-import { User } from "../database/models/user";
-// import usersDailyPoints from "../assets/usersDailyPoints.json";
-import { PointTransaction } from "../database/models/pointTransaction";
+import { IUserModel, User } from "../database/models/user";
 import { Loyalty } from "../database/models/loyaty";
+import { NextFunction, Response } from "express";
+import { PassportRequest } from "../interface";
+import { PointTransaction } from "../database/models/pointTransaction";
 import twiiterOauth from "../library/twitter-oauth";
 
-//get user data
-export const fetchUser = async (req: Request, res: Response) => {
-  try {
-    // const tokenData: any = await jwt.verify(req.params.id, secret);
-    const user: any = await User.findOne({ userID: req.params.id }).select(
-      "discordAvatar discordVerify signDiscord streak userTag userID walletAddress totalPoints signTwitter jwt"
-    );
-    if (user) res.send(user);
-    else res.send("not a valid user");
-  } catch (e) {
-    console.log(e);
-  }
-};
-
 export const fetchMe = async (
-  req: Request,
+  req: PassportRequest,
   res: Response,
   next: NextFunction
 ) => {
-  // @ts-ignore
   const _id = String(req?.user?.id);
   const user = await User.findOne({ _id });
   if (user) return res.json(user);
@@ -40,74 +20,57 @@ export const fetchMe = async (
 };
 
 //users leaderboard
-export const getLeaderboard = async (req: Request, res: Response) => {
-  try {
-    const users: any = await User.find()
-      .select("discordName totalPoints discordAvatar userID")
-      .sort({ totalPoints: -1 });
+export const getLeaderboard = async (req: PassportRequest, res: Response) => {
+  const users = await User.find()
+    .select("discordName totalPoints discordAvatar userID")
+    .sort({ totalPoints: -1 })
+    .limit(100);
 
-    const allUsers: any = [];
-    await Bluebird.mapSeries(users, async (user: any) => {
-      const userLoyalty: any = await Loyalty.findOne({ userId: user._id });
-      const userResponse = {
-        discordName: user.discordName,
-        totalPoints: user.totalPoints,
-        imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-        loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
-      };
-      allUsers.push(userResponse);
-    });
+  const allUsers = await Bluebird.mapSeries(users, async (user) => {
+    const userLoyalty = await Loyalty.findOne({ userId: user._id });
+    return {
+      discordName: user.discordName,
+      totalPoints: user.totalPoints,
+      imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
+      loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
+    };
+  });
 
-    res.send(allUsers);
-  } catch (e) {
-    console.log(e);
-  }
+  res.json(allUsers);
 };
 
-//get latest rewards of a user
-export const getRecentRewards = async (req: any, res: Response) => {
+// get latest rewards of a user
+export const getRecentRewards = async (req: PassportRequest, res: Response) => {
   const user = req.user;
-  try {
-    const userDetails = await User.findOne({ _id: user.id });
-    if (userDetails) {
-      const recentRewards = await PointTransaction.find({
-        userId: userDetails._id,
-        addPoints: { $gt: 0 },
-      }).select("type createdAt addPoints");
-      res.send(recentRewards);
-    }
-  } catch (e) {
-    console.log(e);
-  }
+
+  const recentRewards = await PointTransaction.find({
+    userId: user.id,
+    addPoints: { $gt: 0 },
+  }).select("type createdAt addPoints");
+  res.json(recentRewards);
 };
 
-//user points
-export const getUsersDailyPoints = async (req: any, res: Response) => {
-  const usersDailyPoints: any = [];
+// user points
+export const getUsersDailyPoints = async (
+  req: PassportRequest,
+  res: Response
+) => {
   const user = req.user;
-  try {
-    const userDetails = await User.findOne({ _id: user.id });
-    if (userDetails) {
-      const dailyPoints = await PointTransaction.find({
-        userId: userDetails._id,
-      }).select("totalPoints createdAt");
-      if (dailyPoints.length > 0) {
-        dailyPoints.map((item) => {
-          usersDailyPoints.push([
-            new Date(item.createdAt).getTime(),
-            item.totalPoints,
-          ]);
-        });
-      }
-    }
-    res.send(usersDailyPoints);
-  } catch (e) {
-    console.log(e);
-  }
+
+  const dailyPoints = await PointTransaction.find({
+    userId: user.id,
+  }).select("totalPoints createdAt");
+
+  const usersDailyPoints = dailyPoints.map((i) => [
+    new Date(i.createdAt).getTime(),
+    i.totalPoints,
+  ]);
+
+  res.json(usersDailyPoints);
 };
 
-//connect wallet verify
-export const walletVerify = async (req: any, res: any) => {
+// connect wallet verify
+export const walletVerify = async (req: PassportRequest, res: Response) => {
   try {
     const userReq = req.user;
     const userData = await User.findOne({ _id: userReq.id });
@@ -129,12 +92,12 @@ export const walletVerify = async (req: any, res: any) => {
         //   embeds: [discordMsgEmbed],
         // };
         // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
-        res.send({ success: true });
+        res.json({ success: true });
       } else {
-        res.send({ success: false });
+        res.json({ success: false });
       }
     } else {
-      res.send({ success: false });
+      res.json({ success: false });
     }
   } catch (error) {
     console.log(error);
@@ -176,15 +139,16 @@ export const fetchNFT = async () => {
 
 // fetchNFT()
 
-export const updateTwitterProfile = async (user: any) => {
-  const response: any = await twiiterOauth.getProtectedResource(
+export const updateTwitterProfile = async (user: IUserModel) => {
+  const response = await twiiterOauth.getProtectedResource(
     "https://api.twitter.com/1.1/account/verify_credentials.json",
     "GET",
-    user.twitter_oauth_access_token,
-    user.twitter_oauth_access_token_secret
+    user.twitterOauthAccessToken,
+    user.twitterOauthAccessTokenSecret
   );
+
   const parseData = JSON.parse(response.data);
-  user["twitterProfileImg"] = parseData.profile_image_url_https;
+  user.twitterProfileImg = parseData.profile_image_url_https;
   await user.save();
   return user;
 };

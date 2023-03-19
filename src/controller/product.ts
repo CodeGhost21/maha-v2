@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
 import { Product } from "../database/models/product";
+import { Request, Response } from "express";
 import marketplaceData from "../assets/marketPlace.json";
 
 export const getAllProduct = async (_req: Request, res: Response) => {

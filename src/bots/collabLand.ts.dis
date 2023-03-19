@@ -79,14 +79,14 @@ client.on("guildMemberAdd", async (member) => {
 //                     embeds: [discordMsgEmbed]
 //                 }
 //                 sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload)
-//                 res.send({ success: true, user: userData })
+//                 res.json({ success: true, user: userData })
 //             }
 //             else {
-//                 res.send({ success: false })
+//                 res.json({ success: false })
 //             }
 //         }
 //         else {
-//             res.send({ success: false })
+//             res.json({ success: false })
 //         }
 //     } catch (error) {
 //         console.log(error);

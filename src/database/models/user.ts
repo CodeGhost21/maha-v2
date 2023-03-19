@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ILoyaltyModel } from "./loyaty";
 
 export interface IUser {
   userTag: string;
@@ -28,6 +29,8 @@ export interface IUser {
   stakedMaha: boolean;
   twitterOauthAccessToken: string;
   twitterOauthAccessTokenSecret: string;
+
+  getLoyalty: () => Promise<ILoyaltyModel>;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -62,8 +65,14 @@ const UserSchema = new mongoose.Schema(
     discordOauthAccessToken: { type: String },
     discordOauthAccessTokenSecret: { type: String },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
+
+UserSchema.methods.getLoyalty = function () {
+  return this.name + "TROLOLO";
+};
 
 export type IUserModel = IUser & mongoose.Document;
 export const User = mongoose.model<IUserModel>("User", UserSchema);

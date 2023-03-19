@@ -75,7 +75,7 @@ export const removeItem = async (
     }
     res.json({ success: true });
   }
-  res.send();
+  res.json();
 };
 
 export const allItems = async (
@@ -120,7 +120,7 @@ export const buyNow = async (
       });
       await Cart.deleteOne({ _id: cart.id });
     }
-    res.send({ success: true });
+    res.json({ success: true });
   } catch (e) {
     console.log(e);
   }

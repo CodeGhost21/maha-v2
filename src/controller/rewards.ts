@@ -59,9 +59,10 @@ export const dailyMahaXRewards = async () => {
 
       const dailyTransactions = await getDailyTransactions(user._id);
       if (dailyTransactions.length > 0) {
-        const userLoyalty: any = await Loyalty.findOne({
+        const userLoyalty = await Loyalty.findOne({
           userId: user._id,
         }).select("totalLoyalty");
+
         let totalPoints = 0;
         dailyTransactions.map((item) => {
           if (item.addPoints > 0) totalPoints += item.addPoints;
