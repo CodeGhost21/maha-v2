@@ -21,7 +21,7 @@ export const imageComparing = async (
   //   distance
   // const distance = await Jimp.distance(profileImage, resizeNFT);
   //difference
-  console.log(profileImage, resizeNFT);
+  // console.log(profileImage, resizeNFT);
 
   const diff = await jimp.diff(profileImage, resizeNFT);
   console.log(diff.percent);
