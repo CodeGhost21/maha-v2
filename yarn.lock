@@ -2010,6 +2010,11 @@
   resolved "https://registry.npmjs.org/@types/geojson/-/geojson-7946.0.8.tgz"
   integrity sha512-1rkryxURpr6aWP7R786/UQOkJ3PcpQiWkAXBmdWc7ryFWqN6a4xfK7BtjXvFBKO9LjQ+MWQSWxYeZX1OApnArA==
 
+"@types/hat@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@types/hat/-/hat-0.0.1.tgz#b275868c98801bafc025b6c90ba8f97ec896ba3b"
+  integrity sha512-GQoFDN07Knft7pvik72m/ddy8wmwMykzJEPZLoT7Wp3PHZsttdAbQ51qKf1DLWAdU6Ac31xon1Ji3g0hqQv6sw==
+
 "@types/json-schema@^7.0.9":
   version "7.0.11"
   resolved "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.11.tgz"
@@ -5307,6 +5312,11 @@ hasha@^5.0.0:
   dependencies:
     is-stream "^2.0.0"
     type-fest "^0.8.0"
+
+hat@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/hat/-/hat-0.0.3.tgz#bb014a9e64b3788aed8005917413d4ff3d502d8a"
+  integrity sha512-zpImx2GoKXy42fVDSEad2BPKuSQdLcqsCYa48K3zHSzM/ugWuYjLDr8IXxpVuL7uCLHw56eaiLxCRthhOzf5ug==
 
 he@1.2.0:
   version "1.2.0"
