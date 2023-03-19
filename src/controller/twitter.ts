@@ -3,52 +3,52 @@ import { IUserModel } from "./../database/models/user";
 import { Request, NextFunction, Response } from "express";
 import twiiterOauth from "../library/twitter-oauth";
 
-const COOKIE_NAME = "oauth_token";
+const COOKIE_NAME = "oauthToken";
 
 const tokens: any = {};
 
 export const oAuthRequestToken = async (req: Request, res: Response) => {
-  const { oauth_token, oauth_token_secret } =
+  const { oauthToken, oauthTokenSecret } =
     await twiiterOauth.getOAuthRequestToken();
 
-  await res.cookie(COOKIE_NAME, oauth_token, {
+  await res.cookie(COOKIE_NAME, oauthToken, {
     maxAge: 15 * 60 * 1000, // 15 minutes
     httpOnly: true,
   });
 
-  tokens[oauth_token] = { oauth_token_secret };
+  tokens[oauthToken] = { oauthTokenSecret };
 
-  res.json({ oauth_token });
+  res.json({ oauthToken });
 };
 
-export const oAuthAccessToken = async (
+export const verifyAccessToken = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { oauth_token: req_oauth_token, oauth_verifier } = req.body;
-  const oauth_token = req.header("access-token");
-  if (!oauth_token) return next();
+  const { oauthToken, oauthVerifier } = req.body;
 
-  // const oauth_token = global_oauth_token
-  const oauth_token_secret = tokens[oauth_token].oauth_token_secret;
+  if (!oauthToken) return next();
 
-  if (oauth_token !== req_oauth_token) {
-    res.status(403).json({ message: "Request tokens do not match" });
-    return;
-  }
+  // const oauthToken = global_oauthToken
+  const oauthToken_secret = tokens[oauthToken].oauthToken_secret;
 
-  const { oauth_access_token, oauth_access_token_secret } =
-    await twiiterOauth.getOAuthAccessToken(
-      oauth_token,
-      oauth_token_secret,
-      oauth_verifier
-    );
+  const {
+    oauthAccessToken: oauthAccessToken,
+    oauthAccessTokenSecret: oauthTokenSecret,
+    results,
+  } = await twiiterOauth.getOAuthAccessToken(
+    oauthToken,
+    oauthToken_secret,
+    oauthVerifier
+  );
 
-  tokens[oauth_token] = {
-    ...tokens[oauth_token],
-    oauth_access_token,
-    oauth_access_token_secret,
+  console.log(results);
+
+  tokens[oauthToken] = {
+    ...tokens[oauthToken],
+    oauthAccessToken,
+    oauthTokenSecret,
   };
 
   res.json({ success: true });
@@ -61,16 +61,16 @@ export const userProfileBanner = async (
 ) => {
   const user = req.user as IUserModel;
 
-  const oauth_token = req.header("access-token");
-  if (!oauth_token) return next();
+  const oauthToken = req.header("access-token");
+  if (!oauthToken) return next();
 
-  const { oauth_access_token, oauth_access_token_secret } = tokens[oauth_token];
+  const { oauthAccessToken, oauthTokenSecret } = tokens[oauthToken];
 
   const response = await twiiterOauth.getProtectedResource(
     "https://api.twitter.com/1.1/account/verify_credentials.json",
     "GET",
-    oauth_access_token,
-    oauth_access_token_secret
+    oauthAccessToken,
+    oauthTokenSecret
   );
 
   const parseData = JSON.parse(response.data);
@@ -80,8 +80,8 @@ export const userProfileBanner = async (
     user.twitterBio = parseData.description;
     user.twitterProfileImg = parseData.profile_image_url_https;
     user.twitterBanner = parseData.profile_banner_url;
-    user.twitterOauthAccessToken = oauth_access_token;
-    user.twitterOauthAccessTokenSecret = oauth_access_token_secret;
+    user.twitterOauthAccessToken = oauthAccessToken;
+    user.twitterOauthAccessTokenSecret = oauthTokenSecret;
     user.signTwitter = true;
     await user.save();
     res.json({ success: true });
@@ -89,8 +89,8 @@ export const userProfileBanner = async (
 };
 
 export const twitterLogout = async (req: Request, res: Response) => {
-  const oauth_token = req.cookies[COOKIE_NAME];
-  delete tokens[oauth_token];
+  const oauthToken = req.cookies[COOKIE_NAME];
+  delete tokens[oauthToken];
   res.cookie(COOKIE_NAME, {}, { maxAge: -1 });
   res.json({ success: true });
 };

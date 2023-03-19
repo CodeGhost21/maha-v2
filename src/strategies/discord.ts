@@ -4,7 +4,6 @@ import { Strategy } from "passport-discord";
 import { IUserModel, User } from "../database/models/user";
 import { checkGuildMember } from "../utils/discord";
 import urlJoin from "../utils/urlJoin";
-import { Loyalty } from "../database/models/loyaty";
 
 // @ts-ignore
 passport.serializeUser<string>((user: IUserModel, done) => {
@@ -44,16 +43,7 @@ passport.use(
         user.discordOauthAccessToken = accessToken;
         user.discordOauthRefreshToken = refreshToken;
 
-        // user.jwt = token;
-
         await user.save();
-        const checkLoyalty = await Loyalty.findOne({ userId: user._id });
-        if (!checkLoyalty) {
-          const newLoyalty = new Loyalty({
-            userId: user._id,
-          });
-          await newLoyalty.save();
-        }
         done(null, user);
       } else {
         const verifyUser = await checkGuildMember(profile.id);
@@ -69,15 +59,6 @@ passport.use(
           discordOauthRefreshToken: refreshToken,
         });
 
-        const newLoyalty = new Loyalty({
-          userId: newUser.id,
-        });
-        await newLoyalty.save();
-
-        // save a jwt token with a 7 day expiry
-        // const token = await jwt.sign({ id: newUser.id, expiry }, jwtSecret);
-
-        await newUser.save();
         done(null, newUser);
       }
     }

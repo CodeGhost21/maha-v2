@@ -21,41 +21,44 @@ const getCallback = (
 
   return {
     getOAuthRequestToken: (): Promise<{
-      oauth_token: string;
-      oauth_token_secret: string;
+      oauthToken: string;
+      oauthTokenSecret: string;
       results: object;
     }> =>
       new Promise((resolve, reject) => {
         _oauth.getOAuthRequestToken(
-          (error, oauth_token, oauth_token_secret, results) => {
-            console.log(error, oauth_token, oauth_token_secret, results);
+          (error, oauthToken, oauthTokenSecret, results) => {
             if (error) reject(error);
-            else resolve({ oauth_token, oauth_token_secret, results });
+            else
+              resolve({
+                oauthToken,
+                oauthTokenSecret,
+                results,
+              });
           }
         );
       }),
 
     getOAuthAccessToken: (
-      oauth_token: string,
-      oauth_token_secret: string,
-      oauth_verifier: string
+      oauthToken: string,
+      oauthTokenSecret: string,
+      oauthVerifier: string
     ): Promise<{
-      oauth_access_token: string;
-      oauth_access_token_secret: string;
+      oauthAccessToken: string;
+      oauthAccessTokenSecret: string;
       results: object;
     }> => {
       return new Promise((resolve, reject) => {
         _oauth.getOAuthAccessToken(
-          oauth_token,
-          oauth_token_secret,
-          oauth_verifier,
-          (error, oauth_access_token, oauth_access_token_secret, results) => {
-            if (error) {
-              reject(error);
-            } else {
+          oauthToken,
+          oauthTokenSecret,
+          oauthVerifier,
+          (error, oauthAccessToken, oauthAccessTokenSecret, results) => {
+            if (error) reject(error);
+            else {
               resolve({
-                oauth_access_token,
-                oauth_access_token_secret,
+                oauthAccessToken,
+                oauthAccessTokenSecret,
                 results,
               });
             }
@@ -67,21 +70,18 @@ const getCallback = (
     getProtectedResource: (
       url: string,
       method: string,
-      oauth_access_token: string,
-      oauth_access_token_secret: string
+      oauthAccessToken: string,
+      oauthAccessTokenSecret: string
     ): Promise<{ data: any; response: any }> => {
       return new Promise((resolve, reject) => {
         _oauth.getProtectedResource(
           url,
           method,
-          oauth_access_token,
-          oauth_access_token_secret,
+          oauthAccessToken,
+          oauthAccessTokenSecret,
           (error, data, response) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve({ data, response });
-            }
+            if (error) reject(error);
+            else resolve({ data, response });
           }
         );
       });

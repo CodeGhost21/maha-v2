@@ -4,8 +4,8 @@ import ensureLoggedIn from "../middleware/ensureLoggedIn";
 
 const router = Router();
 
-router.get("/oauth/request_token", Twitter.oAuthRequestToken);
-router.post("/oauth/access_token", Twitter.oAuthAccessToken);
+router.get("/oauth/requestToken", Twitter.oAuthRequestToken);
+router.post("/oauth/verify", Twitter.verifyAccessToken);
 
 router.use(ensureLoggedIn);
 router.get("/profile_banner", Twitter.userProfileBanner);

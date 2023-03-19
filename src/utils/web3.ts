@@ -16,7 +16,7 @@ export const tokenURI = async (nftId: number): Promise<string> => {
 };
 
 export const isOpenseaApproved = async (address: string): Promise<boolean> => {
-  const operator = nconf.get("OPERATOR");
+  const operator = nconf.get("OPENSEA_SEAPORT_ADDRESS");
   return await mahaXContract.methods.isApprovedForAll(address, operator).call();
 };
 
