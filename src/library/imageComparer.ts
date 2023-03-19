@@ -10,10 +10,7 @@ export const imageComparing = async (
 ) => {
   const profileImage = await jimp.read(profileURL);
   const nft = await jimp.read(nftURL);
-  const resizePath = path.join(
-    nconf.get("ROOT_PATH"),
-    `/rewards/resizeImage.png`
-  );
+  const resizePath = path.join(nconf.get("ROOT_PATH"), `/tmp/resizeImage.png`);
   const resizeNFT = await nft.resize(size, size).writeAsync(resizePath);
   //   hash
   // const profileHash = profileImage.hash();
