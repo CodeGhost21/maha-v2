@@ -12,7 +12,7 @@ export interface ILoyalty {
   totalLoyalty: number;
 }
 
-const loyaltySchema = new Schema(
+const schema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -31,4 +31,4 @@ const loyaltySchema = new Schema(
 );
 
 export type ILoyaltyModel = ILoyalty & Document;
-export const Loyalty = mongoose.model<ILoyaltyModel>("Loyalty", loyaltySchema);
+export const Loyalty = mongoose.model<ILoyaltyModel>("Loyalty", schema);

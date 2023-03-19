@@ -1,6 +1,6 @@
 import { IUserModel } from "./../database/models/user";
 
-import { Request, NextFunction, Response } from "express";
+import { Request, Response } from "express";
 import twiiterOauth from "../library/twitter-oauth";
 import BadRequestError from "../errors/BadRequestError";
 
@@ -54,7 +54,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
   user.twitterOauthAccessToken = oauthAccessToken;
   user.twitterOauthAccessTokenSecret = oauthAccessTokenSecret;
 
-  user.signTwitter = true;
+  user.signTwitter = true; // todo this is really not needed tbh
   await user.save();
 
   res.json({ success: true });

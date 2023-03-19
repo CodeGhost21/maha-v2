@@ -8,10 +8,10 @@ export interface ICartItem {
   cartId: ICart;
 }
 
-const cartItem = new mongoose.Schema({
+const schema = new mongoose.Schema({
   productId: { type: Schema.Types.ObjectId, ref: "Product" },
   cartId: { type: Schema.Types.ObjectId, ref: "Cart" },
 });
 
 export type ICartItemModel = ICartItem & Document;
-export const CartItem = mongoose.model<ICartItemModel>("CartItem", cartItem);
+export const CartItem = mongoose.model<ICartItemModel>("CartItem", schema);

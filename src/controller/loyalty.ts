@@ -1,5 +1,4 @@
 import { sendRequest } from "../library/sendRequest";
-import { updateTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
 import { saveFeed } from "../utils/saveFeed";
 
@@ -55,15 +54,14 @@ export const checkTask = async (req: Request, res: Response) => {
 
   // check for updated twitter profile
   if (req.body.task === "twitterProfile") {
-    // todo; refresh the user's twitter profile by fetching the latest profile
-    const updatedUser = await updateTwitterProfile(user);
-    const twitterCheck = await profileImageComparing(
-      updatedUser.twitterProfileImg,
-      48,
-      updatedUser.walletAddress
-    );
-
-    loyalty.twitterProfile = twitterCheck;
+    // todo; refresh the user's twitter profile by fetching the latest profile using just the twitter id; no oauth needed here
+    // const updatedUser = await updateTwitterProfile(user);
+    // const twitterCheck = await profileImageComparing(
+    //   updatedUser.twitterProfileImg,
+    //   48,
+    //   updatedUser.walletAddress
+    // );
+    // loyalty.twitterProfile = twitterCheck;
   }
 
   // check for updated discord profile

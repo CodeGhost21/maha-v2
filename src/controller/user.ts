@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 import { IUserModel, User } from "../database/models/user";
 import { Loyalty } from "../database/models/loyaty";
 import { PointTransaction } from "../database/models/pointTransaction";
-import twiiterOauth from "../library/twitter-oauth";
+// import twiiterOauth from "../library/twitter-oauth";
 import NotFoundError from "../errors/NotFoundError";
 
 export const fetchMe = async (req: Request, res: Response) => {
@@ -79,52 +79,38 @@ export const walletVerify = async (req: Request, res: Response) => {
 
 //fetch nft of all users peroidically
 export const fetchNFT = async () => {
-  const allUsers = await User.find();
-  if (allUsers.length > 0) {
-    await allUsers.map(async (user) => {
-      // if (user.walletAddress !== "") {
-      //   const noOfNFTs = await mahaXContract.methods
-      //     .balanceOf(user.walletAddress)
-      //     .call();
-      //   if (noOfNFTs > 0) {
-      //     // let totalMahaStaked = 0;
-      //     // for (let i = 0; i < noOfNFTs; i++) {
-      //     //   const nftId = await mahaXContract.methods
-      //     //     .tokenOfOwnerByIndex(user.walletAddress, i)
-      //     //     .call();
-      //     //   const nftAmount = await mahaXContract.methods.locked(nftId).call();
-      //     //   if (nftAmount.amount / 1e18 >= 100) {
-      //     //     totalMahaStaked += nftAmount.amount / 1e18;
-      //     //   }
-      //     // }
-      //     // console.log("totalMahaStaked", totalMahaStaked);
-      //     // if (totalMahaStaked > 300) {
-      //     await User.updateOne(
-      //       { walletAddress: user.walletAddress },
-      //       { stakedMaha: true }
-      //     );
-      //     //       }
-      //   }
-      // }
-    });
-  }
+  // const allUsers = await User.find();
+  // if (allUsers.length > 0) {
+  //   await allUsers.map(async (user) => {
+  //     // if (user.walletAddress !== "") {
+  //     //   const noOfNFTs = await mahaXContract.methods
+  //     //     .balanceOf(user.walletAddress)
+  //     //     .call();
+  //     //   if (noOfNFTs > 0) {
+  //     //     // let totalMahaStaked = 0;
+  //     //     // for (let i = 0; i < noOfNFTs; i++) {
+  //     //     //   const nftId = await mahaXContract.methods
+  //     //     //     .tokenOfOwnerByIndex(user.walletAddress, i)
+  //     //     //     .call();
+  //     //     //   const nftAmount = await mahaXContract.methods.locked(nftId).call();
+  //     //     //   if (nftAmount.amount / 1e18 >= 100) {
+  //     //     //     totalMahaStaked += nftAmount.amount / 1e18;
+  //     //     //   }
+  //     //     // }
+  //     //     // console.log("totalMahaStaked", totalMahaStaked);
+  //     //     // if (totalMahaStaked > 300) {
+  //     //     await User.updateOne(
+  //     //       { walletAddress: user.walletAddress },
+  //     //       { stakedMaha: true }
+  //     //     );
+  //     //     //       }
+  //     //   }
+  //     // }
+  //   });
+  // }
 };
 
 // fetchNFT()
-
-export const updateTwitterProfile = async (user: IUserModel) => {
-  const response = await twiiterOauth.getProtectedResource(
-    "https://api.twitter.com/1.1/account/verify_credentials.json",
-    "GET",
-    user.twitterOauthAccessToken,
-    user.twitterOauthAccessTokenSecret
-  );
-
-  const parseData = JSON.parse(response.data);
-  user.twitterProfileImg = parseData.profile_image_url_https;
-  await user.save();
-  return user;
-};
 
 export const updateDiscordProfile = async () => {
   // nothing

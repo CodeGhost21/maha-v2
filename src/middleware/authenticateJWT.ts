@@ -6,6 +6,11 @@ import InvalidJWTError from "../errors/InvalidJWTError";
 
 const secret = nconf.get("JWT_SECRET");
 
+type jwtPayload = {
+  expiry: number;
+  id: string;
+};
+
 export const authenticateJWT = (
   req: Request,
   _res: Response,
@@ -21,8 +26,10 @@ export const authenticateJWT = (
     : null;
 
   if (token) {
-    jwt.verify(token, secret, {}, async (err, decoded: any) => {
+    jwt.verify(token, secret, {}, async (err, _decoded) => {
       if (err) return next(new InvalidJWTError());
+
+      const decoded = _decoded as jwtPayload;
 
       if (decoded.id) {
         if (Date.now() > decoded.expiry)

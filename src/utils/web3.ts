@@ -1,13 +1,12 @@
 import nconf from "nconf";
 import MAHAX from "../abi/MahaXAbi.json";
 import Web3 from "web3";
-import { BigNumber } from "ethers";
 
 const provider = new Web3.providers.HttpProvider(nconf.get("ETH_RPC"));
 export const web3 = new Web3(provider);
 
 const mahaXContract = new web3.eth.Contract(
-  MAHAX as any[],
+  MAHAX as AbiItem[],
   nconf.get("CONTRACT_LOCKER")
 );
 

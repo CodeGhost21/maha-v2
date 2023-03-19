@@ -6,7 +6,7 @@ import { IMessage } from "./message";
 export interface IPointTransaction {
   userId: IUser;
   messageId?: IMessage;
-  metadata: any;
+  metadata: object;
   type: string;
   totalPoints: number;
   addPoints: number;

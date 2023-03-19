@@ -6,7 +6,9 @@ export interface ICart {
   userId: IUser;
 }
 
-const cart = new mongoose.Schema({
+// TODO: remove this completely; cart needs to be handled on the frontend side; not backend.
+
+const schema = new mongoose.Schema({
   userId: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -16,4 +18,4 @@ const cart = new mongoose.Schema({
 });
 
 export type ICartModel = ICart & Document;
-export const Cart = mongoose.model<ICartModel>("Cart", cart);
+export const Cart = mongoose.model<ICartModel>("Cart", schema);

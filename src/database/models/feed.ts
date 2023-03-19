@@ -9,7 +9,7 @@ export interface IFeed {
   points: number;
 }
 
-const feedSchema = new Schema(
+const schema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     type: { type: String, enum: ["normal", "loyalty"], required: true },
@@ -20,4 +20,4 @@ const feedSchema = new Schema(
 );
 
 export type IFeedModel = IFeed & Document;
-export const Feed = mongoose.model<IFeed>("Feed", feedSchema);
+export const Feed = mongoose.model<IFeed>("Feed", schema);
