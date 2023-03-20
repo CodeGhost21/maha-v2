@@ -7,6 +7,7 @@ export interface IUser {
   userID: string;
   twitterID: string;
   twitterName: string;
+  twitterScreenName: string;
   twitterBio: string;
   twitterProfileImg: string;
   twitterBanner: string;
@@ -45,6 +46,7 @@ const UserSchema = new mongoose.Schema(
     userID: String,
     twitterID: String,
     twitterName: String,
+    twitterScreenName: String,
     twitterBio: String,
     twitterProfileImg: String,
     twitterBanner: String,

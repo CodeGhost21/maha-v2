@@ -48,6 +48,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
 
   user.twitterID = parseData.id_str;
   user.twitterName = parseData.name;
+  user.twitterScreenName = parseData.screen_name;
   user.twitterBio = parseData.description;
   user.twitterProfileImg = parseData.profile_image_url_https;
   user.twitterBanner = parseData.profile_banner_url;

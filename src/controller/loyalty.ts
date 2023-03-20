@@ -1,5 +1,5 @@
 import { sendRequest } from "../library/sendRequest";
-import { updateTwitterProfile } from "./user";
+import { fetchTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
 import { saveFeed } from "../utils/saveFeed";
 
@@ -24,6 +24,7 @@ const profileImageComparing = async (
 
     const data = await sendRequest<string>("get", tokenUri);
     const nftMetadata = JSON.parse(data);
+
     const response = await imageComparing(
       profileImageUrl,
       nftMetadata.image,
@@ -55,12 +56,15 @@ export const checkTask = async (req: Request, res: Response) => {
 
   // check for updated twitter profile
   if (req.body.task === "twitterProfile") {
+    console.log(req.body.task);
+
     // todo; refresh the user's twitter profile by fetching the latest profile
-    const updatedUser = await updateTwitterProfile(user);
+    const twitterProfile = await fetchTwitterProfile(user);
+    console.log(twitterProfile);
     const twitterCheck = await profileImageComparing(
-      updatedUser.twitterProfileImg,
+      twitterProfile,
       48,
-      updatedUser.walletAddress
+      user.walletAddress
     );
 
     loyalty.twitterProfile = twitterCheck;

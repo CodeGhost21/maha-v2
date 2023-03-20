@@ -2,10 +2,10 @@ import Bluebird from "bluebird";
 import { ethers } from "ethers";
 import { Request, Response } from "express";
 
+import { sendRequest } from "../library/sendRequest";
 import { IUserModel, User } from "../database/models/user";
 import { Loyalty } from "../database/models/loyaty";
 import { PointTransaction } from "../database/models/pointTransaction";
-import twiiterOauth from "../library/twitter-oauth";
 import NotFoundError from "../errors/NotFoundError";
 
 export const fetchMe = async (req: Request, res: Response) => {
@@ -77,18 +77,13 @@ export const walletVerify = async (req: Request, res: Response) => {
   }
 };
 
-export const updateTwitterProfile = async (user: IUserModel) => {
-  const response = await twiiterOauth.getProtectedResource(
-    "https://api.twitter.com/1.1/account/verify_credentials.json",
-    "GET",
-    user.twitterOauthAccessToken,
-    user.twitterOauthAccessTokenSecret
+export const fetchTwitterProfile = async (user: IUserModel) => {
+  const response = await sendRequest<string>(
+    "get",
+    `https://api.twitter.com/1.1/users/show.json?screen_name=${user.twitterScreenName}`
   );
-
-  const parseData = JSON.parse(response.data);
-  user.twitterProfileImg = parseData.profile_image_url_https;
-  await user.save();
-  return user;
+  const parseResponse = JSON.parse(response);
+  return parseResponse.profile_image_url_https;
 };
 
 export const updateDiscordProfile = async () => {
