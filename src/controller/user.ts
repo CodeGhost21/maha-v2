@@ -77,41 +77,6 @@ export const walletVerify = async (req: Request, res: Response) => {
   }
 };
 
-//fetch nft of all users peroidically
-export const fetchNFT = async () => {
-  const allUsers = await User.find();
-  if (allUsers.length > 0) {
-    await allUsers.map(async (user) => {
-      // if (user.walletAddress !== "") {
-      //   const noOfNFTs = await mahaXContract.methods
-      //     .balanceOf(user.walletAddress)
-      //     .call();
-      //   if (noOfNFTs > 0) {
-      //     // let totalMahaStaked = 0;
-      //     // for (let i = 0; i < noOfNFTs; i++) {
-      //     //   const nftId = await mahaXContract.methods
-      //     //     .tokenOfOwnerByIndex(user.walletAddress, i)
-      //     //     .call();
-      //     //   const nftAmount = await mahaXContract.methods.locked(nftId).call();
-      //     //   if (nftAmount.amount / 1e18 >= 100) {
-      //     //     totalMahaStaked += nftAmount.amount / 1e18;
-      //     //   }
-      //     // }
-      //     // console.log("totalMahaStaked", totalMahaStaked);
-      //     // if (totalMahaStaked > 300) {
-      //     await User.updateOne(
-      //       { walletAddress: user.walletAddress },
-      //       { stakedMaha: true }
-      //     );
-      //     //       }
-      //   }
-      // }
-    });
-  }
-};
-
-// fetchNFT()
-
 export const updateTwitterProfile = async (user: IUserModel) => {
   const response = await twiiterOauth.getProtectedResource(
     "https://api.twitter.com/1.1/account/verify_credentials.json",
