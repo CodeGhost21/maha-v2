@@ -1,12 +1,13 @@
 import Bluebird from "bluebird";
 import { ethers } from "ethers";
 import { Request, Response } from "express";
-
+const DiscordOauth2 = require("discord-oauth2");
 import { sendRequest } from "../library/sendRequest";
 import { IUserModel, User } from "../database/models/user";
 import { Loyalty } from "../database/models/loyaty";
 import { PointTransaction } from "../database/models/pointTransaction";
 import NotFoundError from "../errors/NotFoundError";
+const oauth = new DiscordOauth2();
 
 export const fetchMe = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
@@ -86,6 +87,10 @@ export const fetchTwitterProfile = async (user: IUserModel) => {
   return parseResponse.profile_image_url_https;
 };
 
-export const updateDiscordProfile = async () => {
+export const fetchDiscordProfile = async (user: IUserModel) => {
   // nothing
+  const response = await oauth.getUser(user.discordOauthAccessToken);
+  user["discordAvatar"] = response.avatar;
+  user.save();
+  return response.avatar;
 };

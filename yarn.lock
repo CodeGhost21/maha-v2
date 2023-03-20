@@ -3942,7 +3942,7 @@ discord-oauth2-api@^1.1.2:
 
 discord-oauth2@^2.11.0:
   version "2.11.0"
-  resolved "https://registry.npmjs.org/discord-oauth2/-/discord-oauth2-2.11.0.tgz"
+  resolved "https://registry.yarnpkg.com/discord-oauth2/-/discord-oauth2-2.11.0.tgz#799acc6777a216f8fbbf72d5ea29086eb4303f85"
   integrity sha512-pIbgXm498f7vqNd8/7JwoLd36YMFOFASSJdqyCGdwQpaG7ULHu9nLyifpVXI1b88xvNLqQwqugS8jxkn8Ypd1Q==
 
 discord.js@^13.6.0:

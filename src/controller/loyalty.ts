@@ -2,7 +2,7 @@ import { sendRequest } from "../library/sendRequest";
 import { fetchTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
 import { saveFeed } from "../utils/saveFeed";
-
+import { fetchDiscordProfile } from "./user";
 import * as web3 from "../utils/web3";
 import { Request, Response } from "express";
 import { IUserModel } from "../database/models/user";
@@ -56,17 +56,13 @@ export const checkTask = async (req: Request, res: Response) => {
 
   // check for updated twitter profile
   if (req.body.task === "twitterProfile") {
-    console.log(req.body.task);
-
     // todo; refresh the user's twitter profile by fetching the latest profile
     const twitterProfile = await fetchTwitterProfile(user);
-    console.log(twitterProfile);
     const twitterCheck = await profileImageComparing(
       twitterProfile,
       48,
       user.walletAddress
     );
-
     loyalty.twitterProfile = twitterCheck;
   }
 
@@ -74,8 +70,9 @@ export const checkTask = async (req: Request, res: Response) => {
   if (req.body.task === "discordProfile") {
     // todo refresh the discord profile by fetching the latest one using
     // the user's access token
+    const discordProfile = await fetchDiscordProfile(user);
     const discordCheck = await profileImageComparing(
-      `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}.jpg`,
+      `https://cdn.discordapp.com/avatars/${user.userID}/${discordProfile}.jpg`,
       128,
       user.walletAddress
     );
