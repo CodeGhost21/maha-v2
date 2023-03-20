@@ -88,6 +88,7 @@ export const dailyMahaXRewards = async () => {
         twitterProfile: false,
         discordProfile: false,
         opensea: false,
+        totalLoyalty: 0,
       });
     }
   });
