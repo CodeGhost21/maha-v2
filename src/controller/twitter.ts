@@ -44,6 +44,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
     oauthAccessTokenSecret
   );
 
+  // @ts-ignore
   const parseData = JSON.parse(response.data);
 
   user.twitterID = parseData.id_str;

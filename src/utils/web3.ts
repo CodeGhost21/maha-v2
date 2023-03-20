@@ -6,7 +6,7 @@ const provider = new Web3.providers.HttpProvider(nconf.get("ETH_RPC"));
 export const web3 = new Web3(provider);
 
 const mahaXContract = new web3.eth.Contract(
-  MAHAX as AbiItem[],
+  MAHAX as any[],
   nconf.get("CONTRACT_LOCKER")
 );
 
