@@ -1,10 +1,10 @@
 import { Router } from "express";
 import ensureLoggedIn from "../middleware/ensureLoggedIn";
-import { checkTask, getLoyalty } from "../controller/loyalty";
+import { checkLoyaltyTask, getLoyalty } from "../controller/loyalty";
 
 const router = Router();
 
 router.use(ensureLoggedIn);
-router.post("/checkTask", checkTask);
+router.post("/checkTask", checkLoyaltyTask);
 router.get("/getLoyalty", getLoyalty);
 export default router;

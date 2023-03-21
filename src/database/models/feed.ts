@@ -1,9 +1,8 @@
-import { Document, Schema } from "mongoose";
-import mongoose from "mongoose";
-import { IUser } from "./user";
+import mongoose, { Document, Schema } from "mongoose";
+import { IUserModel } from "./user";
 
 export interface IFeed {
-  userId: IUser;
+  userId: IUserModel;
   type: "normal" | "loyalty";
   task: string;
   points: number;

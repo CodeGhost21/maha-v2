@@ -1,12 +1,11 @@
-import mongoose from "mongoose";
-import { Document, Schema } from "mongoose";
-import { IUser } from "./user";
+import mongoose, { Document, Schema } from "mongoose";
+import { IUserModel } from "./user";
 
 export interface ICart {
-  userId: IUser;
+  userId: IUserModel;
 }
 
-const cart = new mongoose.Schema({
+const cart = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     ref: "User",

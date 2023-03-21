@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 import { Cart, ICartModel } from "./cart";
-import { ILoyaltyModel, Loyalty } from "./loyaty";
+// import { ILoyaltyModel, Loyalty } from "./loyaltySubmission";
+import { IOrganization } from "./organisation";
 
 export interface IUser {
   userTag: string;
   userID: string;
+  organizationId: IOrganization;
+  isModerator: boolean;
   twitterID: string;
   twitterName: string;
   twitterScreenName: string;
@@ -36,7 +39,7 @@ export interface IUser {
   twitterRequestToken: string;
   twitterRequestTokenSecret: string;
 
-  getLoyalty: () => Promise<ILoyaltyModel>;
+  // getLoyalty: () => Promise<ILoyaltyModel>;
   getCart: () => Promise<ICartModel>;
 }
 
@@ -44,6 +47,13 @@ const UserSchema = new mongoose.Schema(
   {
     userTag: String,
     userID: String,
+    organizationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+      unique: true,
+    },
+    isModerator: Boolean,
     twitterID: String,
     twitterName: String,
     twitterScreenName: String,
@@ -64,7 +74,13 @@ const UserSchema = new mongoose.Schema(
     discordAvatar: { type: String, default: "" },
 
     signDiscord: { type: Boolean, default: false },
+    // adding a point => totalPoints += points * ((maxBoost * loyalty) + 1)
+    // eg: MaxBoost = 5; loyalty = 0%; points = 100
+    // ---> totalPoints += 100 * (2.5 + 1) => 100 * 3.5 => 350
     totalPoints: { type: Number, default: 0 },
+
+    // this gets recalculated every time a user performs a loyalty task
+    loyaltyWeight: { type: Number, default: 0 }, // 0-1
     stakedMaha: { type: Boolean, default: false },
 
     twitterOauthAccessToken: String,
@@ -81,11 +97,11 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
-UserSchema.methods.getLoyalty = async function () {
-  const found = await Loyalty.findOne({ userId: this.id });
-  if (found) return found;
-  return Loyalty.create({ userId: this.id });
-};
+// UserSchema.methods.getLoyalty = async function () {
+//   const found = await Loyalty.findOne({ userId: this.id });
+//   if (found) return found;
+//   return Loyalty.create({ userId: this.id });
+// };
 
 UserSchema.methods.getCart = async function () {
   const found = await Cart.findOne({ userId: this.id });

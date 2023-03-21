@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 const DiscordOauth2 = require("discord-oauth2");
 import { sendRequest } from "../library/sendRequest";
 import { IUserModel, User } from "../database/models/user";
-import { Loyalty } from "../database/models/loyaty";
+// import { Loyalty } from "../database/models/loyaltySubmission";
 import { PointTransaction } from "../database/models/pointTransaction";
 import NotFoundError from "../errors/NotFoundError";
 const oauth = new DiscordOauth2();
@@ -23,12 +23,12 @@ export const getLeaderboard = async (req: Request, res: Response) => {
     .limit(100);
 
   const allUsers = await Bluebird.mapSeries(users, async (user) => {
-    const userLoyalty = await Loyalty.findOne({ userId: user._id });
+    // const userLoyalty = await Loyalty.findOne({ userId: user._id });
     return {
       discordName: user.discordName,
       totalPoints: user.totalPoints,
       imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-      loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
+      // loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
     };
   });
 

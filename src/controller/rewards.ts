@@ -65,31 +65,31 @@ export const dailyMahaXRewards = async () => {
 
     const dailyTransactions = await getDailyTransactions(user._id);
     if (dailyTransactions.length > 0) {
-      const userLoyalty = await user.getLoyalty();
+      // const userLoyalty = await user.getLoyalty();
 
       let totalPoints = 0;
       dailyTransactions.map((item) => {
         if (item.addPoints > 0) totalPoints += item.addPoints;
       });
-      const dailyLoyaltyPoints = totalPoints * userLoyalty.totalLoyalty;
+      // const dailyLoyaltyPoints = totalPoints * userLoyalty.totalLoyalty;
       const newPointsTransaction = new PointTransaction({
         userId: user.id,
         type: "Loyalty",
-        totalPoints: user.totalPoints + dailyLoyaltyPoints,
-        addPoints: dailyLoyaltyPoints,
+        // totalPoints: user.totalPoints + dailyLoyaltyPoints,
+        // addPoints: dailyLoyaltyPoints,
       });
       await newPointsTransaction.save();
-      user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
+      // user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
       await user.save();
-      await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
-      const loyalty = await user.getLoyalty();
-      await loyalty.update({
-        gm: false,
-        twitterProfile: false,
-        discordProfile: false,
-        opensea: false,
-        totalLoyalty: 0,
-      });
+      // await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
+      // const loyalty = await user.getLoyalty();
+      // await loyalty.update({
+      //   gm: false,
+      //   twitterProfile: false,
+      //   discordProfile: false,
+      //   opensea: false,
+      //   totalLoyalty: 0,
+      // });
     }
   });
 };
