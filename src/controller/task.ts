@@ -86,6 +86,6 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
     });
     await newPointTransaction.save();
 
-    await saveFeed(userDetails, "normal", taskDetails.name, taskDetails.points);
+    await saveFeed(userDetails, "task", taskDetails.name, taskDetails.points);
   }
 };

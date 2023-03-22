@@ -3,7 +3,7 @@ import { IUserModel } from "./user";
 
 export interface IFeed {
   userId: IUserModel;
-  type: "normal" | "loyalty";
+  type: "task" | "loyalty";
   task: string;
   points: number;
 }
