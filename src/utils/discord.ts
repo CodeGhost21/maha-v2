@@ -1,7 +1,10 @@
 import nconf from "nconf";
-import { Client, Intents, TextChannel, MessageOptions } from "discord.js";
+import { Client, Intents, TextChannel, MessageOptions, MessageEmbed, MessageActionRow, MessageButton } from "discord.js";
 import { User } from "../database/models/user";
+import * as jwt from "jsonwebtoken";
+import urlJoin from "./urlJoin";
 
+const jwtSecret = nconf.get("JWT_SECRET");
 const total_icons = [
   "🥇",
   "🥈",
@@ -54,6 +57,10 @@ client.once("ready", () => {
     name: 'tasks',
     description: 'Shows your loyalty tasks status',
   })
+  commands?.create({
+    name: 'verify',
+    description: 'Verify you twitter and wallet',
+  })
 }
 )
 
@@ -64,7 +71,6 @@ client.on('interactionCreate', async (interaction) => {
   const { commandName, options } = interaction;
 
   if (commandName === 'profile') {
-
     await User.findOne({ userID: interaction.user.id }).then(async (user) => {
       if (user) {
         const userLoyalty = await user.getLoyalty();
@@ -94,12 +100,72 @@ client.on('interactionCreate', async (interaction) => {
         ephemeral: true
       });
     })
+  } else if (commandName === 'verify') {
+    const expiry = Date.now() + 86400000 * 7;
+
+    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
+
+      const token = await jwt.sign({ id: user?.id, expiry }, jwtSecret);
+      const frontendUrl = urlJoin(
+        nconf.get("FRONTEND_URL"),
+        `/verify?token=${token}`
+      );
+      const row1 = new MessageActionRow().addComponents(
+        new MessageButton()
+          .setLabel("Verify Twitter")
+          .setStyle("LINK")
+          .setURL(urlJoin(frontendUrl, `&type=twitter`))
+      );
+      const row2 = new MessageActionRow().addComponents(
+        new MessageButton()
+          .setLabel("Verify Wallet")
+          .setStyle("LINK")
+          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`))
+      );
+      const discordMsgEmbed = new MessageEmbed()
+        .setColor("#F07D55")
+        .setDescription("Verify yourself by clicking below")
+
+      const discordSuccessEmbed = new MessageEmbed()
+        .setColor("#4ffa02")
+        .setDescription("You have been successfully verified.")
+
+
+
+      if (!user?.signTwitter && !user?.walletAddress) {
+        await interaction.reply({
+          embeds: [discordMsgEmbed],
+          components: [row1, row2],
+          ephemeral: true
+        })
+      } else if (!user?.signTwitter) {
+        await interaction.reply({
+          embeds: [discordMsgEmbed],
+          components: [row1],
+          ephemeral: true
+        })
+      } else if (!user?.walletAddress) {
+        await interaction.reply({
+          embeds: [discordMsgEmbed],
+          components: [row2],
+          ephemeral: true
+        })
+      } else {
+        await interaction.reply({
+          embeds: [discordSuccessEmbed],
+          ephemeral: true
+        })
+      }
+    })
+
   }
 })
 
-// client.on('guildMemberAdd', async (user) => {
-//   let channel = user.guild.channels.cache.get(nconf.get('CHANNEL_VERIFY'))
+//This listener is for user joining the guild
+// client.on('guildMemberAdd', async member => {
+//   console.log(member)
 // })
+
 
 client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
