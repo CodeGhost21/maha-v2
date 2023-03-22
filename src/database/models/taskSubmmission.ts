@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, ObjectId } from "mongoose";
+import { IUserModel } from "./user";
 import { IOrganizationModel } from "./organisation";
 
 export interface ITask {
@@ -6,6 +7,7 @@ export interface ITask {
   type: "form" | "retweet" | "gm";
   instructions: string;
   points: number;
+  approvedBy: IUserModel; // moderator
   organizationId: IOrganizationModel;
 }
 
@@ -19,6 +21,7 @@ const task = new Schema({
   },
   instructions: String,
   points: Number,
+  approvedBy: { type: Schema.Types.ObjectId, ref: "User" }, // moderator
   organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
 });
 
