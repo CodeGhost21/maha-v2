@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { Cart, ICartModel } from "./cart";
 // import { ILoyaltyModel, Loyalty } from "./loyaltySubmission";
 import { IOrganization } from "./organisation";
@@ -43,15 +43,13 @@ export interface IUser {
   getCart: () => Promise<ICartModel>;
 }
 
-const UserSchema = new mongoose.Schema(
+const UserSchema = new Schema(
   {
     userTag: String,
     userID: String,
     organizationId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Organization",
-      required: true,
-      unique: true,
     },
     isModerator: Boolean,
     twitterID: String,
@@ -109,5 +107,5 @@ UserSchema.methods.getCart = async function () {
   return Cart.create({ userId: this.id });
 };
 
-export type IUserModel = IUser & mongoose.Document;
+export type IUserModel = IUser & Document;
 export const User = mongoose.model<IUserModel>("User", UserSchema);

@@ -2,14 +2,14 @@ import mongoose from "mongoose";
 
 export interface IOrganization {
   name: string;
-  channelId: string;
+  // channelId: string;
   guildId: string;
   maxBoost: number;
 }
 
 const organization = new mongoose.Schema({
   name: String,
-  channelId: String,
+  // channelId: String,
   guildId: String,
   maxBoost: Number, //eg: 10
 });
