@@ -9,6 +9,8 @@ import twitter from "./twitter";
 import loyalty from "./loyalty";
 import feed from "./feed";
 import organization from "./organization";
+import loyaltyTask from "./loyaltyTask";
+import task from "./task";
 
 const router = Router();
 router.get("/", (_req, res) => {
@@ -25,5 +27,7 @@ router.use("/cart", cart);
 router.use("/loyalty", loyalty);
 router.use("/feed", feed);
 router.use("/organization", organization);
+router.use("/loyaltyTask", loyaltyTask);
+router.use("/task", task);
 
 export default router;

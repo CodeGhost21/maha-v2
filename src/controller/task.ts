@@ -12,14 +12,15 @@ export const addTask = async (req: Request, res: Response) => {
     const newTask = new Task({
       name: req.body.name,
       instructions: req.body.instructions,
-      type: req.body.tyoe,
+      type: req.body.type,
       points: req.body.points,
     });
 
     await newTask.save();
     res.send(newTask);
+  } else {
+    res.send("task already existing");
   }
-  res.send("task already existing");
 };
 
 export const deleteTask = async (req: Request, res: Response) => {

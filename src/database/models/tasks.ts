@@ -21,7 +21,7 @@ const task = new Schema({
   },
   instructions: String,
   points: Number,
-  approvedBy: { type: Schema.Types.ObjectId, ref: "User" }, // moderator
+  // approvedBy: { type: Schema.Types.ObjectId, ref: "User" }, // moderator
   organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
 });
 

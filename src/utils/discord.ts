@@ -11,6 +11,7 @@ import {
 import { User } from "../database/models/user";
 import * as jwt from "jsonwebtoken";
 import urlJoin from "./urlJoin";
+import { Organization } from "../database/models/organisation";
 
 const jwtSecret = nconf.get("JWT_SECRET");
 const total_icons = [
@@ -45,6 +46,8 @@ export const client = new Client({
     Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
   ],
 });
+
+client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -173,11 +176,22 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 //This listener is for user joining the guild
-// client.on('guildMemberAdd', async member => {
-//   console.log(member)
-// })
-
-client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
+client.on("guildMemberAdd", async (member) => {
+  const organization = await Organization.findOne({ guildId: member.guild.id });
+  if (organization) {
+    if (!member.user.bot) {
+      const newUser = new User({
+        userTag: member.user.username + "#" + member.user.discriminator,
+        userID: member.user.id,
+        discordName: member.user.username,
+        discordAvatar: member.user.avatar,
+        discordDiscriminator: member.user.discriminator,
+        organizationId: organization.id,
+      });
+      await newUser.save();
+    }
+  }
+});
 
 export const sendMessage = (
   channelName: string,
