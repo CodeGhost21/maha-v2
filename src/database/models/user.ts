@@ -51,7 +51,7 @@ const UserSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Organization",
     },
-    isModerator: Boolean,
+    isModerator: { type: Boolean, default: false },
     twitterID: String,
     twitterName: String,
     twitterScreenName: String,
