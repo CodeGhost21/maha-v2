@@ -1,8 +1,8 @@
-import mongoose, { Schema, ObjectId } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { IUserModel } from "./user";
 import { IOrganizationModel } from "./organisation";
 
-export interface ITask {
+export interface ITaskSubmission {
   name: string;
   type: "form" | "retweet" | "gm";
   instructions: string;
@@ -12,7 +12,7 @@ export interface ITask {
 }
 
 // task are things that you can do that gives you points
-const task = new Schema({
+const taskSubmissionSchema = new mongoose.Schema({
   name: String,
   type: {
     type: String,
@@ -25,5 +25,8 @@ const task = new Schema({
   organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
 });
 
-export type ITaskModel = ITask & mongoose.Document;
-export const Task = mongoose.model<ITaskModel>("Task", task);
+export type ITaskSubmissionModel = ITaskSubmission & mongoose.Document;
+export const TaskSubmission = mongoose.model<ITaskSubmissionModel>(
+  "TaskSubmission",
+  taskSubmissionSchema
+);

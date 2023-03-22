@@ -6,6 +6,9 @@ import { Message } from "../database/models/message";
 import { assignRank } from "../utils/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { saveFeed } from "../utils/saveFeed";
+import { Organization } from "../database/models/organisation";
+import { completeTask } from "../controller/task";
+import { Task } from "../database/models/tasks";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
@@ -23,7 +26,7 @@ const total_icons = [
   "❌",
   "✅",
   "🔥",
-  "✋"
+  "✋",
 ];
 
 client.on("messageCreate", async (message) => {
@@ -33,6 +36,13 @@ client.on("messageCreate", async (message) => {
     if (!message.guild) return;
     if (message.author.bot) return;
 
+    const organizationDetails: any = await Organization.findOne({
+      guildId: message.guildId,
+    });
+    const gmTaskDetails = await Task.findOne({
+      organizationId: organizationDetails.id,
+      type: "gm",
+    });
 
     // find and cerate user
     await User.findOne({ userID: message.author.id }).then(async (user) => {
@@ -51,16 +61,16 @@ client.on("messageCreate", async (message) => {
           discordAvatar: message.author.avatar,
           discordDiscriminator: message.author.discriminator,
           discordVerify: true,
+          organizationId: organizationDetails.id,
         });
 
         await user.save();
-
         message.channel.send(
           `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
-          `Just say "Good Morning" or "Gm" once everyday and ` +
-          ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
-          `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
-          `Try it out! Say "Good Morning" 🌞`
+            `Just say "Good Morning" or "Gm" once everyday and ` +
+            ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
+            `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
+            `Try it out! Say "Good Morning" 🌞`
         );
       }
     });
@@ -73,17 +83,18 @@ client.on("messageCreate", async (message) => {
           const top = users
             .sort((a, b) => b.streak - a.streak)
             .slice(0, 10)
-            .map((u) => `🔥 **${u.userTag}** is on a **${u.streak}** GM streak!`)
+            .map(
+              (u) => `🔥 **${u.userTag}** is on a **${u.streak}** GM streak!`
+            )
             .join("\n");
-
-
 
           const total = users
             .sort((a, b) => b.totalGMs - a.totalGMs)
             .slice(0, 10)
             .map(
               (u, i) =>
-                `${total_icons[i]} **${u.userTag}** has said gm **${u.totalGMs
+                `${total_icons[i]} **${u.userTag}** has said gm **${
+                  u.totalGMs
                 } time${u.totalGMs > 1 ? "s" : ""}**.`
             )
             .join("\n");
@@ -108,11 +119,10 @@ client.on("messageCreate", async (message) => {
         dateTime: message.createdAt,
       });
 
-      await newMessage.save();
+      // await newMessage.save();
 
       User.findOne({ userID: message.author.id }).then(async (user) => {
         if (!user) return;
-
         //check for maha staked
         let points = 10;
         if (user.stakedMaha) {
@@ -126,38 +136,39 @@ client.on("messageCreate", async (message) => {
         user.discordName = message.author.username;
         user.discordAvatar = message.author.avatar || "";
         user.discordDiscriminator = message.author.discriminator;
+        user.organizationId = organizationDetails.id;
 
         // If user's last gm was yesterday, then continue streak
         if (isYesterday(lastGM)) {
-          await assignGmPoints(user, newMessage.id, points);
+          await completeTask(user, "gm");
           user.streak += 1;
           user.maxStreak =
             user.streak > user.maxStreak ? user.streak : user.maxStreak;
           user.totalGMs += 1;
-          user.totalPoints += points;
           user.save();
         }
 
         // If user's last gm was older than yesterday, then break streak
         else if (!isToday(lastGM)) {
-          await assignGmPoints(user, newMessage.id, points);
+          await completeTask(user, "gm");
           user.streak = 1;
           user.totalGMs += 1;
-          user.totalPoints += points;
           user.save();
         } else if (isToday(lastGM) && user.totalGMs == 0) {
-          await assignGmPoints(user, newMessage.id, points);
+          await completeTask(user, "gm");
           user.streak = 1;
           user.totalGMs = 1;
           user.maxStreak = 1;
-          user.totalPoints = points;
           user.save();
         }
         const rankResult = await assignRank(user.userID || "");
-        const text = `gm <@${message.author.id}>!\nYou've said gm for **${user.streak
-          } day${user.streak > 1 ? "s" : ""} in a row** 🔥 and a total of ${user.totalGMs
-          } time${user.streak > 1 ? "s" : ""} 🥳 your rank is ${rankResult.rank
-          } out of ${rankResult.totalUsers}`;
+        const text = `gm <@${message.author.id}>!\nYou've said gm for **${
+          user.streak
+        } day${user.streak > 1 ? "s" : ""} in a row** 🔥 and a total of ${
+          user.totalGMs
+        } time${user.streak > 1 ? "s" : ""} 🥳 your rank is ${
+          rankResult.rank
+        } out of ${rankResult.totalUsers}`;
 
         message.channel.send(text).then().catch(console.log);
       });

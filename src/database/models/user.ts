@@ -32,6 +32,7 @@ export interface IUser {
   discordAvatar: string;
   signDiscord: boolean;
   totalPoints: number;
+  loyaltyWeight: number;
   stakedMaha: boolean;
 
   twitterOauthAccessToken: string;
