@@ -45,7 +45,6 @@ const profileImageComparing = async (
 };
 
 const checkLoyalty = async (user: any, loyaltyType: string) => {
-  console.log(loyaltyType);
   if (loyaltyType === "gm") {
     if (user.totalGMs > 0) return true;
   } else if (loyaltyType === "twitterProfile") {
@@ -73,11 +72,7 @@ export const allLoyaltyTask = async (req: Request, res: Response) => {
 
 export const addLoyaltyTask = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
-  console.log(user);
-
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
-  console.log(userDetails);
-
   if (userDetails) {
     const checkLoyaltyTask = await LoyaltyTask.findOne({
       $or: [{ name: req.body.name }, { type: req.body.type }],
@@ -188,11 +183,8 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
     const loyaltySubmittedTypes = allLoyaltySubmission.map(
       (item: ILoyaltySubmission) => item.type
     );
-    console.log(loyaltySubmittedTypes);
-
     let completedLoyaltySubmission: any = {};
     loyaltyTasks.map((taskType: string) => {
-      console.log(completedLoyaltySubmission, taskType);
       if (loyaltySubmittedTypes.includes(taskType))
         completedLoyaltySubmission[taskType] = true;
       else completedLoyaltySubmission[taskType] = false;
