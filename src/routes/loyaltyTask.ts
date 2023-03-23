@@ -5,17 +5,21 @@ import {
   allLoyaltyTask,
   completeLoyaltyTask,
   userLoyaltyTask,
-  loyaltyTaskTypes,
+  types,
+  updateLoyalty,
 } from "../controller/loyaltyTask";
 import ensureLoggedIn from "../middleware/ensureLoggedIn";
 
 const router = Router();
 
-router.post("/add", ensureLoggedIn, addLoyaltyTask);
-router.delete("/delete", ensureLoggedIn, deleteLoyaltyTask);
-router.get("/get", ensureLoggedIn, allLoyaltyTask);
-router.post("/completeLoyalty", ensureLoggedIn, completeLoyaltyTask);
-router.get("/userLoyalties", ensureLoggedIn, userLoyaltyTask);
-router.get("/taskType", ensureLoggedIn, loyaltyTaskTypes);
+router.get("/types", types);
+
+router.use(ensureLoggedIn);
+router.post("/add", addLoyaltyTask);
+router.delete("/delete", deleteLoyaltyTask);
+router.get("/get", allLoyaltyTask);
+router.post("/completeLoyalty", completeLoyaltyTask);
+router.get("/userLoyalties", userLoyaltyTask);
+router.put("/update", updateLoyalty);
 
 export default router;

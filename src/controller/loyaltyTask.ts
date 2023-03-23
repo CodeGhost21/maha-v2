@@ -15,6 +15,8 @@ import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { fetchTwitterProfile } from "./user";
 import { organizationLoyaltyTask } from "./organization";
 
+const loyaltyTypes = ["twitter_profile", "discordProfile"];
+
 const profileImageComparing = async (
   profileImageUrl: string,
   size: number,
@@ -194,15 +196,26 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
   }
 };
 
-export const loyaltyTaskTypes = async (req: Request, res: Response) => {
+export const types = async (req: Request, res: Response) => {
+  res.send(loyaltyTypes);
+};
+
+export const updateLoyalty = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
   const userDetails: any = await User.findOne({ _id: user.id });
   if (userDetails) {
-    let allTypes: any = await LoyaltyTask.find({
+    const loyalty = await LoyaltyTask.findOne({
+      _id: req.body.taskId,
       organizationId: userDetails.organizationId,
     });
+    if (loyalty) {
+      loyalty.name = req.body.name || loyalty.name;
+      loyalty.type = req.body.type || loyalty.type;
+      loyalty.weight = req.body.weight || loyalty.weight;
+      loyalty.instruction = req.body.instruction || loyalty.instruction;
 
-    allTypes = allTypes.map((i: ILoyaltyTask) => i.type);
-    res.send(allTypes);
+      await loyalty.save();
+      res.send({ success: true });
+    } else res.send({ success: false, message: "loyalty not found" });
   }
 };
