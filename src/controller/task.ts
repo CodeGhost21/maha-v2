@@ -66,6 +66,7 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
       instruction: taskDetails.instructions,
       points: taskDetails.points,
       approvedBy: userDetails.id,
+      organizationId: userDetails.organizationId,
     });
     await newTaskSubmission.save();
 
@@ -87,5 +88,19 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
     await newPointTransaction.save();
 
     await saveFeed(userDetails, "task", taskDetails.name, taskDetails.points);
+  }
+};
+
+export const userTasks = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails = await User.findOne({ _id: user.id });
+  if (userDetails) {
+    const allTask = await TaskSubmission.find({
+      organizationId: userDetails.organizationId,
+      approvedBy: userDetails.id,
+    });
+
+    console.log(allTask);
+    res.send(allTask);
   }
 };

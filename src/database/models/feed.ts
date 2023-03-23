@@ -11,7 +11,7 @@ export interface IFeed {
 const feedSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    type: { type: String, enum: ["normal", "loyalty"], required: true },
+    type: { type: String, enum: ["task", "loyalty"], required: true },
     task: { type: String, required: true },
     points: { type: Number, default: 0, required: true },
   },
