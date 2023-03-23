@@ -5,7 +5,7 @@ import { IOrganizationModel } from "./organisation";
 
 export interface ILoyaltyTask {
   name: string;
-  type: "form" | "twitter_follow" | "hold_nft" | "revoke_opensea" | "gm";
+  type: "twitter_profile" | "discord_profile" | "revoke_opensea" | "gm";
   instructions: string;
   weight: number;
   organizationId: IOrganizationModel;
@@ -19,7 +19,7 @@ const loyaltyTask = new Schema(
     name: String,
     type: {
       type: String,
-      enum: ["form", "twitter_follow", "hold_nft", "revoke_opensea", "gm"],
+      enum: ["twitter_profile", "discord_profile", "revoke_opensea", "gm"],
       required: true,
     },
     instructions: String,

@@ -3,13 +3,62 @@ import { use } from "passport";
 import * as web3 from "../utils/web3";
 import { sendRequest } from "../library/sendRequest";
 import { imageComparing } from "../library/imageComparer";
-import { LoyaltySubmission } from "../database/models/loyaltySubmission";
+import {
+  ILoyaltySubmission,
+  LoyaltySubmission,
+} from "../database/models/loyaltySubmission";
 import { LoyaltyTask } from "../database/models/loyaltyTasks";
 import { Organization } from "../database/models/organisation";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { IUserModel, User } from "../database/models/user";
 import { saveFeed } from "../utils/saveFeed";
 import { fetchTwitterProfile } from "./user";
+import { organizationLoyaltyTask } from "./organization";
+
+const profileImageComparing = async (
+  profileImageUrl: string,
+  size: number,
+  walletAddress: string
+) => {
+  // resize image for image comparing
+  const noOfNFTs = await web3.balanceOf(walletAddress);
+
+  if (noOfNFTs == 0) return false;
+
+  for (let i = 0; i < noOfNFTs; i++) {
+    const nftId = await web3.tokenOfOwnerByIndex(walletAddress, i);
+    const tokenUri = await web3.tokenURI(nftId);
+
+    const data = await sendRequest<string>("get", tokenUri);
+    const nftMetadata = JSON.parse(data);
+
+    const response = await imageComparing(
+      profileImageUrl,
+      nftMetadata.image,
+      size
+    );
+
+    if (response) return true;
+  }
+
+  return false;
+};
+
+const checkLoyalty = async (user: any, loyaltyType: string) => {
+  console.log(loyaltyType);
+  if (loyaltyType === "gm") {
+    if (user.totalGMs > 0) return true;
+  } else if (loyaltyType === "twitterProfile") {
+    const twitterProfile = await fetchTwitterProfile(user);
+    const twitterCheck = await profileImageComparing(
+      twitterProfile,
+      48,
+      user.walletAddress
+    );
+    return twitterCheck;
+  }
+  return false;
+};
 
 export const allLoyaltyTask = async (req: Request, res: Response) => {
   const loyaltyTasks = await LoyaltyTask.find();
@@ -118,47 +167,32 @@ export const completeLoyaltyTask = async (req: Request, res: Response) => {
   }
 };
 
-const checkLoyalty = async (user: any, loyaltyType: string) => {
-  console.log(loyaltyType);
-  if (loyaltyType === "gm") {
-    if (user.totalGMs > 0) return true;
-  } else if (loyaltyType === "twitterProfile") {
-    const twitterProfile = await fetchTwitterProfile(user);
-    const twitterCheck = await profileImageComparing(
-      twitterProfile,
-      48,
-      user.walletAddress
+export const userLoyaltyTask = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails: any = await User.findOne({ _id: user.id });
+  const organizationDetails: any = await Organization.findOne({
+    _id: userDetails.organizationId,
+  });
+  if (userDetails) {
+    const loyaltyTasks = await organizationLoyaltyTask(organizationDetails.id);
+    const allLoyaltySubmission = await LoyaltySubmission.find({
+      organizationId: userDetails.organizationId,
+      approvedBy: userDetails.id,
+    });
+
+    const loyaltySubmittedTypes = allLoyaltySubmission.map(
+      (item: ILoyaltySubmission) => item.type
     );
-    return twitterCheck;
+    console.log(loyaltySubmittedTypes);
+
+    let completedLoyaltySubmission: any = {};
+    loyaltyTasks.map((taskType: string) => {
+      console.log(completedLoyaltySubmission, taskType);
+      if (loyaltySubmittedTypes.includes(taskType))
+        completedLoyaltySubmission[taskType] = true;
+      else completedLoyaltySubmission[taskType] = false;
+    });
+
+    res.send(completedLoyaltySubmission);
   }
-  return false;
-};
-
-const profileImageComparing = async (
-  profileImageUrl: string,
-  size: number,
-  walletAddress: string
-) => {
-  // resize image for image comparing
-  const noOfNFTs = await web3.balanceOf(walletAddress);
-
-  if (noOfNFTs == 0) return false;
-
-  for (let i = 0; i < noOfNFTs; i++) {
-    const nftId = await web3.tokenOfOwnerByIndex(walletAddress, i);
-    const tokenUri = await web3.tokenURI(nftId);
-
-    const data = await sendRequest<string>("get", tokenUri);
-    const nftMetadata = JSON.parse(data);
-
-    const response = await imageComparing(
-      profileImageUrl,
-      nftMetadata.image,
-      size
-    );
-
-    if (response) return true;
-  }
-
-  return false;
 };

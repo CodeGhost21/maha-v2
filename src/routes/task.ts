@@ -12,8 +12,8 @@ const router = Router();
 
 router.post("/add", ensureLoggedIn, addTask);
 router.delete("/delete", ensureLoggedIn, deleteTask);
-router.get("/get", allTask);
+router.get("/get", ensureLoggedIn, allTask);
 // router.post("/completeTask", ensureLoggedIn, completeTask);
-router.get("/userTasks", userTasks);
+router.get("/userTasks", ensureLoggedIn, userTasks);
 
 export default router;
