@@ -5,7 +5,7 @@ import { IUserModel, User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../utils/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { saveFeed } from "../utils/saveFeed";
+// import { saveFeed } from "../utils/saveFeed";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
@@ -179,5 +179,5 @@ const assignGmPoints = async (
     addPoints: points,
   });
   await newPointsTransaction.save();
-  await saveFeed(user, "normal", "gm", points);
+  // await saveFeed(user, "normal", "gm", points);
 };

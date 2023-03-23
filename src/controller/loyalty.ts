@@ -1,7 +1,7 @@
 import { sendRequest } from "../library/sendRequest";
 import { fetchTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
-import { saveFeed } from "../utils/saveFeed";
+// import { saveFeed } from "../utils/saveFeed";
 import { fetchDiscordProfile } from "./user";
 import * as web3 from "../utils/web3";
 import { Request, Response } from "express";
