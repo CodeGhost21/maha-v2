@@ -1,3 +1,4 @@
+import { saveFeed } from './../utils/saveFeed';
 import { IUserModel } from "./../database/models/user";
 
 import { Request, NextFunction, Response } from "express";
@@ -57,6 +58,8 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
 
   user.signTwitter = true;
   await user.save();
+
+  saveFeed(`${user.discordName} has verified their twitter account`)
 
   res.json({ success: true });
 };

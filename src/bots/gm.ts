@@ -9,6 +9,7 @@ import { saveFeed } from "../utils/saveFeed";
 import { Organization } from "../database/models/organisation";
 import { completeTask } from "../controller/task";
 import { Task } from "../database/models/tasks";
+// import { saveFeed } from "../utils/saveFeed";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
@@ -186,5 +187,5 @@ const assignGmPoints = async (
     addPoints: points,
   });
   await newPointsTransaction.save();
-  await saveFeed(user, "normal", "gm", points);
+  // await saveFeed(user, "normal", "gm", points);
 };

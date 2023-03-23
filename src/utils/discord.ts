@@ -7,6 +7,7 @@ import {
   MessageEmbed,
   MessageActionRow,
   MessageButton,
+  MessageSelectMenu,
 } from "discord.js";
 import { User } from "../database/models/user";
 import * as jwt from "jsonwebtoken";
@@ -31,6 +32,31 @@ const total_icons = [
   "✋",
 ];
 let commands;
+
+
+const row = new MessageActionRow()
+  .addComponents(
+    new MessageSelectMenu()
+      .setCustomId("taskSelect")
+      .setPlaceholder("Select a task")
+      .addOptions([
+        {
+          label: 'First',
+          description: 'First',
+          value: 'First'
+        },
+        {
+          label: 'Second',
+          description: 'Second',
+          value: 'Second'
+        },
+        {
+          label: 'Third',
+          description: 'Third',
+          value: 'Third'
+        },
+      ])
+  )
 
 export const client = new Client({
   intents: [
@@ -63,13 +89,17 @@ client.once("ready", () => {
     name: "profile",
     description: "Shows your profile for Gift of Eden",
   });
-  commands?.create({
-    name: "tasks",
-    description: "Shows your loyalty tasks status",
-  });
+  // commands?.create({
+  //   name: "tasks",
+  //   description: "Shows your loyalty tasks status",
+  // });
   commands?.create({
     name: "verify",
     description: "Verify you twitter and wallet",
+  });
+  commands?.create({
+    name: "dropdown",
+    description: "Dropdown list for tasks",
   });
 });
 
@@ -92,15 +122,13 @@ client.on("interactionCreate", async (interaction) => {
             `Your current GM rank: ${user.gmRank}${total_icons[3]}\n` +
             `Total number of GM said: ${user.totalGMs}\n` +
             `Highest GM Streak Record: ${user.maxStreak}\n` +
-            `Twitter Verify: ${
-              user.signTwitter
-                ? `Completed!!${total_icons[11]}`
-                : `Pending${total_icons[10]}`
+            `Twitter Verify: ${user.signTwitter
+              ? `Completed!!${total_icons[11]}`
+              : `Pending${total_icons[10]}`
             }\n` +
-            `Wallet Connected: ${
-              user.walletAddress
-                ? `Completed!!${total_icons[11]}`
-                : `Pending${total_icons[10]}`
+            `Wallet Connected: ${user.walletAddress
+              ? `Completed!!${total_icons[11]}`
+              : `Pending${total_icons[10]}`
             }\n`,
         });
       }
@@ -127,18 +155,18 @@ client.on("interactionCreate", async (interaction) => {
         nconf.get("FRONTEND_URL"),
         `/verify?token=${token}`
       );
-      const row1 = new MessageActionRow().addComponents(
+      const row = new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel("Verify Twitter")
           .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=twitter`))
-      );
-      const row2 = new MessageActionRow().addComponents(
+          .setURL(urlJoin(frontendUrl, `&type=twitter`)),
+
         new MessageButton()
           .setLabel("Verify Wallet")
           .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`))
+          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`)),
       );
+
       const discordMsgEmbed = new MessageEmbed()
         .setColor("#F07D55")
         .setDescription("Verify yourself by clicking below");
@@ -150,19 +178,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!user?.signTwitter && !user?.walletAddress) {
         await interaction.reply({
           embeds: [discordMsgEmbed],
-          components: [row1, row2],
-          ephemeral: true,
-        });
-      } else if (!user?.signTwitter) {
-        await interaction.reply({
-          embeds: [discordMsgEmbed],
-          components: [row1],
-          ephemeral: true,
-        });
-      } else if (!user?.walletAddress) {
-        await interaction.reply({
-          embeds: [discordMsgEmbed],
-          components: [row2],
+          components: [row],
           ephemeral: true,
         });
       } else {
@@ -172,7 +188,48 @@ client.on("interactionCreate", async (interaction) => {
         });
       }
     });
+  } else if (commandName === "dropdown") {
+    const embed =
+      new MessageEmbed()
+        .setTitle('Welcome to task selector')
+        .setColor('GREEN')
+
+    await interaction.reply({ content: " ", ephemeral: true, embeds: [embed], components: [row] })
+
+    const embed1 =
+      new MessageEmbed()
+        .setTitle('Selected option 1')
+        .setColor('GREEN')
+
+    const embed2 =
+      new MessageEmbed()
+        .setTitle('Selected option 2')
+        .setColor('GREEN')
+
+    const embed3 =
+      new MessageEmbed()
+        .setTitle('Selected option 3')
+        .setColor('GREEN')
+
+
+
+    const collector = interaction.channel?.createMessageComponentCollector({
+      componentType: "SELECT_MENU",
+    })
+
+    collector?.on("collect", async (collected: any) => {
+      const value = collected.values[0]
+
+      if (value === 'First') {
+        collected.reply({ embeds: [embed1], ephemeral: true })
+      } else if (value === 'Second') {
+        collected.reply({ embeds: [embed2], ephemeral: true })
+      } else if (value === 'Third') {
+        collected.reply({ embeds: [embed3], ephemeral: true })
+      }
+    })
   }
+
 });
 
 //This listener is for user joining the guild

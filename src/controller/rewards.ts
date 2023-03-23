@@ -2,7 +2,7 @@ import { BigNumber } from "bignumber.js";
 
 import { IUserModel, User } from "../database/models/user";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { saveFeed } from "../utils/saveFeed";
+// import { saveFeed } from "../utils/saveFeed";
 import * as web3 from "../utils/web3";
 
 const e18 = new BigNumber(10).pow(18);
@@ -60,7 +60,7 @@ export const dailyMahaXRewards = async () => {
       user.totalPoints = user.totalPoints + Math.floor(totalMahaX);
       await user.save();
 
-      await saveFeed(user, "normal", "mahaXLock", totalMahaX);
+      // await saveFeed(user, "normal", "mahaXLock", totalMahaX);
     }
 
     const dailyTransactions = await getDailyTransactions(user._id);
