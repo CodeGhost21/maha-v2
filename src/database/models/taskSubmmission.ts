@@ -4,7 +4,7 @@ import { IOrganizationModel } from "./organisation";
 
 export interface ITaskSubmission {
   name: string;
-  type: "form" | "retweet" | "gm";
+  type: string;
   instructions: string;
   points: number;
   approvedBy: IUserModel; // moderator

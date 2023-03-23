@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
 import { Task } from "../database/models/tasks";
 import { IUserModel, User } from "../database/models/user";
-import { TaskSubmission } from "../database/models/taskSubmmission";
+import {
+  ITaskSubmission,
+  TaskSubmission,
+} from "../database/models/taskSubmmission";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { saveFeed } from "../utils/saveFeed";
 import { Organization } from "../database/models/organisation";
+import { organizationTask } from "./organization";
 
 export const allTask = async (req: Request, res: Response) => {
   const tasks = await Task.find();
@@ -93,14 +97,27 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
 
 export const userTasks = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
-  const userDetails = await User.findOne({ _id: user.id });
+  const userDetails: any = await User.findOne({ _id: user.id });
+  const organizationDetails: any = await Organization.findOne({
+    _id: userDetails.organizationId,
+  });
   if (userDetails) {
-    const allTask = await TaskSubmission.find({
+    const tasks = await organizationTask(organizationDetails.id);
+    const allTaskSubmission = await TaskSubmission.find({
       organizationId: userDetails.organizationId,
       approvedBy: userDetails.id,
     });
 
-    console.log(allTask);
-    res.send(allTask);
+    const taskSubmittedTypes = allTaskSubmission.map(
+      (item: ITaskSubmission) => item.type
+    );
+    let completedTaskSubmission: any = {};
+    tasks.map((taskType: string) => {
+      if (taskSubmittedTypes.includes(taskType))
+        completedTaskSubmission[taskType] = true;
+      else completedTaskSubmission[taskType] = false;
+    });
+
+    res.send(completedTaskSubmission);
   }
 };

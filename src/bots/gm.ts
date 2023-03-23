@@ -39,10 +39,6 @@ client.on("messageCreate", async (message) => {
     const organizationDetails: any = await Organization.findOne({
       guildId: message.guildId,
     });
-    const gmTaskDetails = await Task.findOne({
-      organizationId: organizationDetails.id,
-      type: "gm",
-    });
 
     // find and cerate user
     await User.findOne({ userID: message.author.id }).then(async (user) => {
@@ -112,22 +108,22 @@ client.on("messageCreate", async (message) => {
 
     // good morning?
     if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
-      const newMessage = new Message({
-        content: message.cleanContent,
-        userTag: message.author.tag,
-        userID: message.author.id,
-        dateTime: message.createdAt,
-      });
+      // const newMessage = new Message({
+      //   content: message.cleanContent,
+      //   userTag: message.author.tag,
+      //   userID: message.author.id,
+      //   dateTime: message.createdAt,
+      // });
 
       // await newMessage.save();
 
       User.findOne({ userID: message.author.id }).then(async (user) => {
         if (!user) return;
         //check for maha staked
-        let points = 10;
-        if (user.stakedMaha) {
-          points = 100;
-        }
+        // let points = 10;
+        // if (user.stakedMaha) {
+        //   points = 100;
+        // }
 
         const lastGM = new Date(user.lastGM || 0);
 

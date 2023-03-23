@@ -8,6 +8,7 @@ import { ILoyaltyTaskModel } from "./loyaltyTasks";
 import { IOrganizationModel } from "./organisation";
 
 export interface ILoyaltySubmission {
+  name: string;
   type: string;
   totalWeight: number;
   instructions: string;
@@ -17,7 +18,12 @@ export interface ILoyaltySubmission {
 
 const loyaltySubmission = new Schema(
   {
-    type: { type: String, default: "" },
+    name: String,
+    type: {
+      type: String,
+      enum: ["twitter_profile", "discord_profile", "revoke_opensea", "gm"],
+      required: true,
+    },
     totalWeight: Number,
     instructions: String,
     approvedBy: { type: Schema.Types.ObjectId, ref: "User" },
