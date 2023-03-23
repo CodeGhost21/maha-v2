@@ -11,7 +11,7 @@ import { LoyaltyTask } from "../database/models/loyaltyTasks";
 import { Organization } from "../database/models/organisation";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { IUserModel, User } from "../database/models/user";
-import { saveFeed } from "../utils/saveFeed";
+import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { fetchTwitterProfile } from "./user";
 import { organizationLoyaltyTask } from "./organization";
 
@@ -159,12 +159,7 @@ export const completeLoyaltyTask = async (req: Request, res: Response) => {
         });
         await newPointTransaction.save();
 
-        await saveFeed(
-          userDetails,
-          "loyalty",
-          fetchLoyaltyTask.name,
-          fetchLoyaltyTask.points
-        );
+        await sendFeedDiscord(`${user.discordName} said gm`);
         res.send("done");
       }
     } else {

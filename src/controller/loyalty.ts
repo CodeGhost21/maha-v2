@@ -1,7 +1,6 @@
 import { sendRequest } from "../library/sendRequest";
 import { fetchTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
-// import { saveFeed } from "../utils/saveFeed";
 import { fetchDiscordProfile } from "./user";
 import * as web3 from "../utils/web3";
 import { Request, Response } from "express";
@@ -96,7 +95,6 @@ export const checkLoyaltyTask = async (req: Request, res: Response) => {
   // await loyalty.save();
 
   // if (pointsBefore != pointsAfter)
-  //   await saveFeed(user, "loyalty", req.body.task, pointsAfter - pointsBefore);
 
   // res.json({ pointsBefore, pointsAfter, loyalty });
 };

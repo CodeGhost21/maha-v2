@@ -6,7 +6,7 @@ import {
   TaskSubmission,
 } from "../database/models/taskSubmmission";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { saveFeed } from "../utils/saveFeed";
+import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { Organization } from "../database/models/organisation";
 import { organizationTask } from "./organization";
 
@@ -97,7 +97,9 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
     });
     await newPointTransaction.save();
 
-    await saveFeed(userDetails, "task", taskDetails.name, taskDetails.points);
+    await sendFeedDiscord(
+      `${userDetails.discordName} has completed ${taskDetails.name} `
+    );
   }
 };
 

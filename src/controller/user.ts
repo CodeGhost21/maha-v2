@@ -7,7 +7,7 @@ import { IUserModel, User } from "../database/models/user";
 // import { Loyalty } from "../database/models/loyaltySubmission";
 import { PointTransaction } from "../database/models/pointTransaction";
 import NotFoundError from "../errors/NotFoundError";
-import { saveFeed } from "../utils/saveFeed";
+import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 const oauth = new DiscordOauth2();
 
 export const fetchMe = async (req: Request, res: Response) => {
@@ -73,7 +73,7 @@ export const walletVerify = async (req: Request, res: Response) => {
   if (result === req.body.address) {
     user.walletAddress = req.body.address;
     await user.save();
-    saveFeed(`@${user.discordName} has verified their wallet address`)
+    sendFeedDiscord(`@${user.discordName} has verified their wallet address`);
     res.json({ success: true });
   } else {
     res.json({ success: false });
