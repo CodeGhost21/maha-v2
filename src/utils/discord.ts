@@ -155,18 +155,18 @@ client.on("interactionCreate", async (interaction) => {
         nconf.get("FRONTEND_URL"),
         `/verify?token=${token}`
       );
-      const row1 = new MessageActionRow().addComponents(
+      const row = new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel("Verify Twitter")
           .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=twitter`))
-      );
-      const row2 = new MessageActionRow().addComponents(
+          .setURL(urlJoin(frontendUrl, `&type=twitter`)),
+
         new MessageButton()
           .setLabel("Verify Wallet")
           .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`))
+          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`)),
       );
+
       const discordMsgEmbed = new MessageEmbed()
         .setColor("#F07D55")
         .setDescription("Verify yourself by clicking below");
@@ -178,19 +178,7 @@ client.on("interactionCreate", async (interaction) => {
       if (!user?.signTwitter && !user?.walletAddress) {
         await interaction.reply({
           embeds: [discordMsgEmbed],
-          components: [row1, row2],
-          ephemeral: true,
-        });
-      } else if (!user?.signTwitter) {
-        await interaction.reply({
-          embeds: [discordMsgEmbed],
-          components: [row1],
-          ephemeral: true,
-        });
-      } else if (!user?.walletAddress) {
-        await interaction.reply({
-          embeds: [discordMsgEmbed],
-          components: [row2],
+          components: [row],
           ephemeral: true,
         });
       } else {
