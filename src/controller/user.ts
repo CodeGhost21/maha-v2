@@ -16,8 +16,8 @@ export const fetchMe = async (req: Request, res: Response) => {
   throw new NotFoundError();
 };
 
-//users leaderboard
-export const getLeaderboard = async (req: Request, res: Response) => {
+//users leaderBoard
+export const getLeaderBoard = async (req: Request, res: Response) => {
   const users = await User.find()
     .select("discordName totalPoints discordAvatar userID")
     .sort({ totalPoints: -1 })
@@ -95,4 +95,16 @@ export const fetchDiscordProfile = async (user: IUserModel) => {
   user["discordAvatar"] = response.avatar;
   user.save();
   return response.avatar;
+};
+
+export const allUsers = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
+  if (userDetails) {
+    const users = await User.find({
+      organizationId: userDetails.organizationId,
+    });
+
+    res.send(users);
+  }
 };

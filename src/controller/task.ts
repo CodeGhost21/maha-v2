@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Task } from "../database/models/tasks";
+import { ITaskModel, Task } from "../database/models/tasks";
 import { IUserModel, User } from "../database/models/user";
 import {
   ITaskSubmission,
@@ -25,16 +25,17 @@ export const addTask = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
   if (userDetails) {
-    const checkTask = await Task.findOne({ name: req.body.name });
+    const checkTask = await Task.findOne({
+      $or: [{ name: req.body.name }, { type: req.body.type }],
+    });
     if (!checkTask) {
       const newTask = new Task({
         name: req.body.name,
-        instructions: req.body.instructions,
+        instruction: req.body.instruction,
         type: req.body.type,
         points: req.body.points,
         organizationId: userDetails.organizationId,
       });
-
       await newTask.save();
       res.send(newTask);
     } else {
@@ -49,13 +50,13 @@ export const deleteTask = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
   if (userDetails) {
-    const checkTask = await Task.findOne({ name: req.body.name });
+    const checkTask = await Task.findOne({ _id: req.body.taskId });
     if (checkTask) {
-      Task.deleteOne({ _id: checkTask._id });
-      res.send("task deleted");
+      await Task.deleteOne({ _id: checkTask.id });
+      res.send({ success: true });
     }
   } else {
-    res.send("not authorized");
+    res.send({ success: false });
   }
 };
 
@@ -73,7 +74,7 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
     const newTaskSubmission = new TaskSubmission({
       name: taskDetails.name,
       type: taskDetails.type,
-      instruction: taskDetails.instructions,
+      instruction: taskDetails.instruction,
       points: taskDetails.points,
       approvedBy: userDetails.id,
       organizationId: userDetails.organizationId,
@@ -127,5 +128,18 @@ export const userTasks = async (req: Request, res: Response) => {
     });
 
     res.send(completedTaskSubmission);
+  }
+};
+
+export const taskTypes = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails: any = await User.findOne({ _id: user.id });
+  if (userDetails) {
+    let allTypes: any = await Task.find({
+      organizationId: userDetails.organizationId,
+    });
+
+    allTypes = allTypes.map((i: ITaskModel) => i.type);
+    res.send(allTypes);
   }
 };

@@ -4,7 +4,7 @@ import { IOrganizationModel } from "./organisation";
 export interface ITask {
   name: string;
   type: "form" | "retweet" | "gm";
-  instructions: string;
+  instruction: string;
   points: number;
   organizationId: IOrganizationModel;
 }
@@ -17,7 +17,7 @@ const task = new Schema({
     enum: ["form", "twitter_follow", "hold_nft", "revoke_opensea", "gm"],
     required: true,
   },
-  instructions: String,
+  instruction: String,
   points: Number,
   organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
 });

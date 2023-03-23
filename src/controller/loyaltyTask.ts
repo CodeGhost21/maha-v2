@@ -7,7 +7,7 @@ import {
   ILoyaltySubmission,
   LoyaltySubmission,
 } from "../database/models/loyaltySubmission";
-import { LoyaltyTask } from "../database/models/loyaltyTasks";
+import { ILoyaltyTask, LoyaltyTask } from "../database/models/loyaltyTasks";
 import { Organization } from "../database/models/organisation";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { IUserModel, User } from "../database/models/user";
@@ -79,7 +79,9 @@ export const addLoyaltyTask = async (req: Request, res: Response) => {
   console.log(userDetails);
 
   if (userDetails) {
-    const checkLoyaltyTask = await LoyaltyTask.findOne({ name: req.body.name });
+    const checkLoyaltyTask = await LoyaltyTask.findOne({
+      $or: [{ name: req.body.name }, { type: req.body.type }],
+    });
     if (!checkLoyaltyTask) {
       const newLoyaltyTask = new LoyaltyTask({
         name: req.body.name,
@@ -103,13 +105,15 @@ export const deleteLoyaltyTask = async (req: Request, res: Response) => {
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
 
   if (userDetails) {
-    const checkLoyaltyTask = await LoyaltyTask.findOne({ name: req.body.name });
+    const checkLoyaltyTask = await LoyaltyTask.findOne({
+      _id: req.body.taskId,
+    });
     if (checkLoyaltyTask) {
-      LoyaltyTask.deleteOne({ _id: checkLoyaltyTask._id });
-      res.send("loyalty task deleted");
+      await LoyaltyTask.deleteOne({ _id: checkLoyaltyTask._id });
+      res.send({ success: true });
     }
   } else {
-    res.send("not authorized");
+    res.send({ success: false });
   }
 };
 
@@ -195,5 +199,18 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
     });
 
     res.send(completedLoyaltySubmission);
+  }
+};
+
+export const loyaltyTaskTypes = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails: any = await User.findOne({ _id: user.id });
+  if (userDetails) {
+    let allTypes: any = await LoyaltyTask.find({
+      organizationId: userDetails.organizationId,
+    });
+
+    allTypes = allTypes.map((i: ILoyaltyTask) => i.type);
+    res.send(allTypes);
   }
 };

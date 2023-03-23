@@ -5,6 +5,7 @@ import {
   allLoyaltyTask,
   completeLoyaltyTask,
   userLoyaltyTask,
+  loyaltyTaskTypes,
 } from "../controller/loyaltyTask";
 import ensureLoggedIn from "../middleware/ensureLoggedIn";
 
@@ -15,5 +16,6 @@ router.delete("/delete", ensureLoggedIn, deleteLoyaltyTask);
 router.get("/get", ensureLoggedIn, allLoyaltyTask);
 router.post("/completeLoyalty", ensureLoggedIn, completeLoyaltyTask);
 router.get("/userLoyalties", ensureLoggedIn, userLoyaltyTask);
+router.get("/taskType", ensureLoggedIn, loyaltyTaskTypes);
 
 export default router;
