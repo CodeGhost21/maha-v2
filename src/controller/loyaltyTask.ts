@@ -61,8 +61,14 @@ const checkLoyalty = async (user: any, loyaltyType: string) => {
 };
 
 export const allLoyaltyTask = async (req: Request, res: Response) => {
-  const loyaltyTasks = await LoyaltyTask.find();
-  res.send(loyaltyTasks);
+  const user = req.user as IUserModel;
+  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
+  if (userDetails) {
+    const loyaltyTasks = await LoyaltyTask.find({
+      organizationId: userDetails.organizationId,
+    });
+    res.send(loyaltyTasks);
+  }
 };
 
 export const addLoyaltyTask = async (req: Request, res: Response) => {

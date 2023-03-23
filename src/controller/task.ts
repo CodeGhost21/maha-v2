@@ -11,8 +11,14 @@ import { Organization } from "../database/models/organisation";
 import { organizationTask } from "./organization";
 
 export const allTask = async (req: Request, res: Response) => {
-  const tasks = await Task.find();
-  res.send(tasks);
+  const user = req.user as IUserModel;
+  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
+  if (userDetails) {
+    const tasks = await Task.find({
+      organizationId: userDetails.organizationId,
+    });
+    res.send(tasks);
+  }
 };
 
 export const addTask = async (req: Request, res: Response) => {
