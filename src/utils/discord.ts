@@ -1,3 +1,4 @@
+import { LoyaltyTask } from './../database/models/loyaltyTasks';
 import nconf from "nconf";
 import {
   Client,
@@ -15,7 +16,7 @@ import { IUserModel, User } from "../database/models/user";
 import * as jwt from "jsonwebtoken";
 import urlJoin from "./urlJoin";
 import { Organization } from "../database/models/organisation";
-
+import { completeLoyaltyTask } from '../controller/loyaltyTask'
 const jwtSecret = nconf.get("JWT_SECRET");
 const total_icons = [
   "🥇",
@@ -34,29 +35,6 @@ const total_icons = [
   "✋",
 ];
 let commands;
-
-const row = new MessageActionRow().addComponents(
-  new MessageSelectMenu()
-    .setCustomId("taskSelect")
-    .setPlaceholder("Select a task")
-    .addOptions([
-      {
-        label: "First",
-        description: "First",
-        value: "First",
-      },
-      {
-        label: "Second",
-        description: "Second",
-        value: "Second",
-      },
-      {
-        label: "Third",
-        description: "Third",
-        value: "Third",
-      },
-    ])
-);
 
 export const client = new Client({
   intents: [
@@ -112,26 +90,41 @@ client.on("interactionCreate", async (interaction) => {
   if (commandName === "profile") {
     await User.findOne({ userID: interaction.user.id }).then(async (user) => {
       if (user) {
-        // const userLoyalty = await user.getLoyalty();
-
-        await interaction.reply({
-          content:
-            `Hello ${user.discordName}${total_icons[13]} \n\n` +
+        let content: string;
+        if (!user?.signTwitter && !user?.walletAddress) {
+          content = `Hello ${user.discordName}${total_icons[13]} \n\n` +
+            `Please verify yourself by typing /verify command\n\n` +
+            `Total points earned: ${user.totalPoints}\n` +
+            `Current Loyalty Completed: 0%\n\n` +
+            `Total number of GM said: ${user.totalGMs}\n` +
+            `Twitter Verify: ${user.signTwitter
+              ? `Completed!!${total_icons[11]}`
+              : `Pending${total_icons[10]}`
+            }\n` +
+            `Wallet Connected: ${user.walletAddress
+              ? `Completed!!${total_icons[11]}`
+              : `Pending${total_icons[10]}`
+            }\n`
+        } else {
+          content = `Hello ${user.discordName}${total_icons[13]} \n\n` +
             `Total points earned: ${user.totalPoints}\n` +
             // `Current Loyalty Completed: ${userLoyalty.totalLoyalty}%\n\n` +
             `Your current GM rank: ${user.gmRank}${total_icons[3]}\n` +
             `Total number of GM said: ${user.totalGMs}\n` +
             `Highest GM Streak Record: ${user.maxStreak}\n` +
-            `Twitter Verify: ${
-              user.signTwitter
-                ? `Completed!!${total_icons[11]}`
-                : `Pending${total_icons[10]}`
+            `Twitter Verify: ${user.signTwitter
+              ? `Completed!!${total_icons[11]}`
+              : `Pending${total_icons[10]}`
             }\n` +
-            `Wallet Connected: ${
-              user.walletAddress
-                ? `Completed!!${total_icons[11]}`
-                : `Pending${total_icons[10]}`
-            }\n`,
+            `Wallet Connected: ${user.walletAddress
+              ? `Completed!!${total_icons[11]}`
+              : `Pending${total_icons[10]}`
+            }\n`
+        }
+
+        await interaction.reply({
+          content: content,
+          ephemeral: true,
         });
       }
     });
@@ -161,16 +154,22 @@ client.on("interactionCreate", async (interaction) => {
         new MessageButton()
           .setLabel("Verify Twitter")
           .setStyle("LINK")
+          .setDisabled(user?.signTwitter)
           .setURL(urlJoin(frontendUrl, `&type=twitter`)),
 
         new MessageButton()
           .setLabel("Verify Wallet")
           .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`))
+          .setDisabled(!!user?.walletAddress)
+          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`)),
       );
+
 
       const discordMsgEmbed = new MessageEmbed()
         .setColor("#F07D55")
+        .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+        .setAuthor({ name: 'Gift of Eden', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+        .setTitle('Title here')
         .setDescription("Verify yourself by clicking below");
 
       const discordSuccessEmbed = new MessageEmbed()
@@ -181,7 +180,7 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.reply({
           embeds: [discordMsgEmbed],
           components: [row],
-          ephemeral: true,
+          ephemeral: false,
         });
       } else {
         await interaction.reply({
@@ -191,44 +190,50 @@ client.on("interactionCreate", async (interaction) => {
       }
     });
   } else if (commandName === "dropdown") {
-    const embed = new MessageEmbed()
-      .setTitle("Welcome to task selector")
-      .setColor("GREEN");
+    const embed =
+      new MessageEmbed()
+        .setTitle('Welcome to task selector')
+        .setColor('GREEN')
 
-    await interaction.reply({
-      content: " ",
-      ephemeral: true,
-      embeds: [embed],
-      components: [row],
-    });
+    const organization = await Organization.findOne({ guildId: interaction.guild?.id })
+    const allLoyalties = await LoyaltyTask.find({ organizationId: organization?.id })
+    const rowItem: any[] = []
+    allLoyalties.map((item) => {
+      rowItem.push({
+        label: item.name,
+        description: 'description',
+        value: item.type
+      })
+    })
 
-    const embed1 = new MessageEmbed()
-      .setTitle("Selected option 1")
-      .setColor("GREEN");
+    const row = new MessageActionRow()
+      .addComponents(
+        new MessageSelectMenu()
+          .setCustomId("taskSelect")
+          .setPlaceholder("Select a task")
+          .addOptions(rowItem)
+      )
 
-    const embed2 = new MessageEmbed()
-      .setTitle("Selected option 2")
-      .setColor("GREEN");
-
-    const embed3 = new MessageEmbed()
-      .setTitle("Selected option 3")
-      .setColor("GREEN");
+    await interaction.reply({ content: " ", ephemeral: true, embeds: [embed], components: [row] })
 
     const collector = interaction.channel?.createMessageComponentCollector({
       componentType: "SELECT_MENU",
     });
 
-    collector?.on("collect", async (collected) => {
-      const value = collected.values[0];
+    collector?.on("collect", async (collected: any) => {
+      const value = collected.values[0]
+      const taskResponse = await completeLoyaltyTask(interaction.user.id, value)
 
-      if (value === "First") {
-        collected.reply({ embeds: [embed1], ephemeral: true });
-      } else if (value === "Second") {
-        collected.reply({ embeds: [embed2], ephemeral: true });
-      } else if (value === "Third") {
-        collected.reply({ embeds: [embed3], ephemeral: true });
-      }
-    });
+      collected.reply({ content: `${interaction.user}, ${taskResponse}`, ephemeral: true })
+
+      // if (value === 'First') {
+      //   collected.reply({ embeds: [embed1], ephemeral: true })
+      // } else if (value === 'Second') {
+      //   collected.reply({ embeds: [embed2], ephemeral: true })
+      // } else if (value === 'Third') {
+      //   collected.reply({ embeds: [embed3], ephemeral: true })
+      // }
+    })
   }
 });
 

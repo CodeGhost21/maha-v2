@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { use } from "passport";
 import * as web3 from "../utils/web3";
 import { sendRequest } from "../library/sendRequest";
 import { imageComparing } from "../library/imageComparer";
@@ -11,7 +10,6 @@ import { ILoyaltyTask, LoyaltyTask } from "../database/models/loyaltyTasks";
 import { Organization } from "../database/models/organisation";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { IUserModel, User } from "../database/models/user";
-import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { fetchTwitterProfile } from "./user";
 import { organizationLoyaltyTask } from "./organization";
 
@@ -114,24 +112,24 @@ export const deleteLoyaltyTask = async (req: Request, res: Response) => {
   }
 };
 
-export const completeLoyaltyTask = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
-  const userDetails = await User.findOne({ _id: user.id });
+export const completeLoyaltyTask = async (userDiscordId: string, type: string) => {
+
+  const userDetails = await User.findOne({ userID: userDiscordId });
   if (userDetails) {
     const checkLoyaltySubmission = await LoyaltySubmission.findOne({
-      type: req.body.type,
+      type: type,
       approvedBy: userDetails.id,
       organizationId: userDetails.organizationId,
     });
     if (!checkLoyaltySubmission) {
-      const verifyLoyalty = await checkLoyalty(userDetails, req.body.type);
+      const verifyLoyalty = await checkLoyalty(userDetails, type);
       if (verifyLoyalty) {
         const organizationDetails: any = await Organization.findOne({
           _id: userDetails.organizationId,
         });
         const fetchLoyaltyTask: any = await LoyaltyTask.findOne({
           organizationId: userDetails.organizationId,
-          type: req.body.type,
+          type: type,
         });
         const newLoyaltySubmission = new LoyaltySubmission({
           approvedBy: userDetails.id,
@@ -160,13 +158,13 @@ export const completeLoyaltyTask = async (req: Request, res: Response) => {
         });
         await newPointTransaction.save();
 
-        await sendFeedDiscord(`${user.discordName} said gm`);
-        res.send("done");
+        // res.send("done");
+        return 'Task compeleted successfully.'
       }
-    } else {
-      res.send("already added");
+      return 'Task failed. Please check if you have compeleted the task.'
     }
   }
+  return 'no user found'
 };
 
 export const userLoyaltyTask = async (req: Request, res: Response) => {
