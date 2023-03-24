@@ -163,8 +163,9 @@ export const completeLoyaltyTask = async (userDiscordId: string, type: string) =
       }
       return 'Task failed. Please check if you have compeleted the task.'
     }
+    return 'You have already completed this task'
   }
-  return 'no user found'
+  return 'Something went wrong. Please try again.'
 };
 
 export const userLoyaltyTask = async (req: Request, res: Response) => {

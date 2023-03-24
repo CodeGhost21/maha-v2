@@ -17,6 +17,7 @@ import * as jwt from "jsonwebtoken";
 import urlJoin from "./urlJoin";
 import { Organization } from "../database/models/organisation";
 import { completeLoyaltyTask } from '../controller/loyaltyTask'
+import { sendFeedDiscord } from './sendFeedDiscord';
 const jwtSecret = nconf.get("JWT_SECRET");
 const total_icons = [
   "🥇",
@@ -67,176 +68,162 @@ client.once("ready", () => {
     name: "profile",
     description: "Shows your profile for Gift of Eden",
   });
-  // commands?.create({
-  //   name: "tasks",
-  //   description: "Shows your loyalty tasks status",
-  // });
+
   commands?.create({
     name: "verify",
     description: "Verify you twitter and wallet",
-  });
-  commands?.create({
-    name: "dropdown",
-    description: "Dropdown list for tasks",
   });
 });
 
 // Required to clean this code and make it work
 client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
+  try {
+    if (!interaction.isCommand()) return;
 
-  const { commandName } = interaction;
+    const { commandName } = interaction;
 
-  if (commandName === "profile") {
-    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
-      if (user) {
-        let content: string;
-        if (!user?.signTwitter || !user?.walletAddress) {
-          content = `Hello ${interaction.user}${total_icons[13]} \n\n` +
-            `Please verify yourself by typing /verify command\n\n` +
-            `Total points earned: ${user.totalPoints}\n` +
-            `Current Loyalty Completed: 0%\n\n` +
-            `Highest GM Streak Record: ${user.maxStreak}\n` +
-            `Twitter Verify: ${user.signTwitter
-              ? `Completed!!${total_icons[11]}`
-              : `Pending${total_icons[10]}`
-            }\n` +
-            `Wallet Connected: ${user.walletAddress
-              ? `Completed!!${total_icons[11]}`
-              : `Pending${total_icons[10]}`
-            }\n`
-        } else {
-          content = `Hello ${interaction.user}${total_icons[13]} \n\n` +
-            `***You have earned 100% loyalty which will boost your points by 10x and you have earned a total of 1000 points*** \n` +
-            `***hey good going you have 100days of gm streak 😮, keep going*** \n\n` +
-            `Your Wallet and Twitter both are verified 🥳 \n\n`
+    if (commandName === "profile") {
+      await User.findOne({ userID: interaction.user.id }).then(async (user) => {
+        if (user) {
+          let content: string;
 
-          // `Total points earned: ${user.totalPoints}\n` +
-          // `Your current GM rank: ${user.gmRank}${total_icons[3]}\n` +
-          // `Total number of GM said: ${user.totalGMs}\n` +
-          // `Highest GM Streak Record: ${user.maxStreak}\n` +
-          // `Twitter Verify: ${user.signTwitter
-          //   ? `Completed!!${total_icons[11]}`
-          //   : `Pending${total_icons[10]}`
-          // }\n` +
-          // `Wallet Connected: ${user.walletAddress
-          //   ? `Completed!!${total_icons[11]}`
-          //   : `Pending${total_icons[10]}`
-          // }\n`
+          const organization = await Organization.findOne({ guildId: interaction.guild?.id })
+          const allLoyalties = await LoyaltyTask.find({ organizationId: organization?.id })
+          const rowItem: any[] = []
+          allLoyalties.map((item) => {
+            rowItem.push({
+              label: item.name,
+              description: 'description',
+              value: item.type
+            })
+          })
+
+          const row = new MessageActionRow()
+            .addComponents(
+              new MessageSelectMenu()
+                .setCustomId("taskSelect")
+                .setPlaceholder("Select a task")
+                .addOptions(rowItem)
+            )
+
+          if (!user?.signTwitter || !user?.walletAddress) {
+            content = `Hello ${interaction.user}${total_icons[13]} \n\n` +
+              `***Please verify yourself by typing /verify command***\n\n` +
+              `Total points earned: ${user.totalPoints}\n` +
+              `Current Loyalty Completed: 0%\n\n` +
+              `Highest GM Streak Record: ${user.maxStreak}\n` +
+              `Twitter Verify: ${user.signTwitter
+                ? `Completed!!${total_icons[11]}`
+                : `Pending${total_icons[10]}`
+              }\n` +
+              `Wallet Connected: ${user.walletAddress
+                ? `Completed!!${total_icons[11]}`
+                : `Pending${total_icons[10]}`
+              }\n`
+          } else {
+            content = `Hello ${interaction.user}${total_icons[13]} \n\n` +
+              `***You have earned ${user.loyaltyWeight * 100}% loyalty which will boost your points by 10x and you have earned a total of ${user.totalPoints} points*** \n` +
+              `***hey good going you have ${user.maxStreak} days of gm streak 😮, keep going*** \n\n` +
+              `Your Wallet and Twitter both are verified 🥳 \n\n` +
+              `Loyalty Tasks`
+
+            // `Total points earned: ${user.totalPoints}\n` +
+            // `Your current GM rank: ${user.gmRank}${total_icons[3]}\n` +
+            // `Total number of GM said: ${user.totalGMs}\n` +
+            // `Highest GM Streak Record: ${user.maxStreak}\n` +
+            // `Twitter Verify: ${user.signTwitter
+            //   ? `Completed!!${total_icons[11]}`
+            //   : `Pending${total_icons[10]}`
+            // }\n` +
+            // `Wallet Connected: ${user.walletAddress
+            //   ? `Completed!!${total_icons[11]}`
+            //   : `Pending${total_icons[10]}`
+            // }\n`
+          }
+
+          if (!user?.signTwitter || !user?.walletAddress || rowItem.length < 1) {
+            await interaction.reply({
+              content: content,
+              ephemeral: true,
+            });
+          } else {
+            await interaction.reply({
+              content: content,
+              ephemeral: true,
+              components: [row]
+            });
+          }
+
+          const collector = interaction.channel?.createMessageComponentCollector({
+            componentType: "SELECT_MENU",
+          });
+
+          collector?.on("collect", async (collected: any) => {
+            let msg;
+            const value = collected.values[0]
+            const taskResponse = await completeLoyaltyTask(interaction.user.id, value)
+            if (value === 'twitter_profile') {
+              msg = `Looking fresh with that NFT profile pic!`
+            }
+            await sendFeedDiscord(`${collected?.user}, ${msg}`);
+            // await collected.reply({ content: `${collected?.user}, ${taskResponse}`, ephemeral: true })
+          })
         }
-
-        await interaction.reply({
-          content: content,
-          ephemeral: true,
-        });
-      }
-    });
-  } else if (commandName === "tasks") {
-    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
-      // const userLoyalty = await user?.getLoyalty();
-
-      await interaction.reply({
-        // content: `Loyalty Tasks${total_icons[5]} \n\n` +
-        //   `Say GM: ${userLoyalty?.gm ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n` +
-        //   `Change Twitter Profile: ${userLoyalty?.twitterProfile ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n` +
-        //   `Change Discord Profile: ${userLoyalty?.discordProfile ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n` +
-        //   `Revoke Opensea Access: ${userLoyalty?.opensea ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n`,
-        // ephemeral: true
       });
-    });
-  } else if (commandName === "verify") {
-    const expiry = Date.now() + 86400000 * 7;
+    } else if (commandName === "verify") {
+      const expiry = Date.now() + 86400000 * 7;
 
-    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
-      const token = await jwt.sign({ id: user?.id, expiry }, jwtSecret);
-      const frontendUrl = urlJoin(
-        nconf.get("FRONTEND_URL"),
-        `/verify?token=${token}`
-      );
-      const row = new MessageActionRow().addComponents(
-        new MessageButton()
-          .setLabel("Verify Twitter")
-          .setStyle("LINK")
-          .setDisabled(user?.signTwitter)
-          .setURL(urlJoin(frontendUrl, `&type=twitter`)),
+      await User.findOne({ userID: interaction.user.id }).then(async (user) => {
+        const token = await jwt.sign({ id: user?.id, expiry }, jwtSecret);
 
-        new MessageButton()
-          .setLabel("Verify Wallet")
-          .setStyle("LINK")
-          .setDisabled(!!user?.walletAddress)
-          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`)),
-      );
+        const frontendUrl = urlJoin(
+          nconf.get("FRONTEND_URL"),
+          `/verify?token=${token}`
+        );
+        const row = new MessageActionRow().addComponents(
+          new MessageButton()
+            .setLabel("Verify Twitter")
+            .setStyle("LINK")
+            .setDisabled(user?.signTwitter)
+            .setURL(urlJoin(frontendUrl, `&type=twitter`)),
+
+          new MessageButton()
+            .setLabel("Verify Wallet")
+            .setStyle("LINK")
+            .setDisabled(!!user?.walletAddress)
+            .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`)),
+        );
 
 
-      const discordMsgEmbed = new MessageEmbed()
-        .setColor("#F07D55")
-        .setThumbnail('https://i.imgur.com/AfFp7pu.png')
-        .setAuthor({ name: 'Gift of Eden', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
-        .setTitle('Title here')
-        .setDescription("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,");
+        const discordMsgEmbed = new MessageEmbed()
+          .setColor("#F07D55")
+          .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+          .setAuthor({ name: 'Gift of Eden', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+          .setTitle('Title here')
+          .setDescription("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,");
 
-      const discordSuccessEmbed = new MessageEmbed()
-        .setColor("#4ffa02")
-        .setDescription("You have been successfully verified.");
+        const discordSuccessEmbed = new MessageEmbed()
+          .setColor("#4ffa02")
+          .setDescription("You have been successfully verified.");
 
-      if (!user?.signTwitter || !user?.walletAddress) {
-        await interaction.reply({
-          embeds: [discordMsgEmbed],
-          components: [row],
-          ephemeral: true,
-        });
-      } else {
-        await interaction.reply({
-          embeds: [discordSuccessEmbed],
-          ephemeral: true,
-        });
-      }
-    });
-  } else if (commandName === "dropdown") {
-    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
-      if (!user?.walletAddress || !user.signTwitter) {
-        await interaction.reply({ content: "Verify yourself first with /verify commands to view the tasks ", ephemeral: true })
-        return;
-      }
-      const embed =
-        new MessageEmbed()
-          .setTitle('Daily Tasks')
-          .setDescription("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,")
-          .setColor('GREEN')
-
-      const organization = await Organization.findOne({ guildId: interaction.guild?.id })
-      const allLoyalties = await LoyaltyTask.find({ organizationId: organization?.id })
-      const rowItem: any[] = []
-      allLoyalties.map((item) => {
-        rowItem.push({
-          label: item.name,
-          description: 'description',
-          value: item.type
-        })
-      })
-
-      const row = new MessageActionRow()
-        .addComponents(
-          new MessageSelectMenu()
-            .setCustomId("taskSelect")
-            .setPlaceholder("Select a task")
-            .addOptions(rowItem)
-        )
-
-      await interaction.reply({ content: " ", ephemeral: true, embeds: [embed], components: [row] })
-
-      const collector = interaction.channel?.createMessageComponentCollector({
-        componentType: "SELECT_MENU",
+        if (!user?.signTwitter || !user?.walletAddress) {
+          await interaction.reply({
+            embeds: [discordMsgEmbed],
+            components: [row],
+            ephemeral: true,
+          });
+        } else {
+          await interaction.reply({
+            embeds: [discordSuccessEmbed],
+            ephemeral: true,
+          });
+        }
       });
-
-      collector?.on("collect", async (collected: any) => {
-        const value = collected.values[0]
-        const taskResponse = await completeLoyaltyTask(interaction.user.id, value)
-
-        collected.reply({ content: `${interaction.user}, ${taskResponse}`, ephemeral: true })
-      })
-    })
+    }
+  } catch (error) {
+    console.error(error);
   }
+
 });
 
 //This listener is for user joining the guild
