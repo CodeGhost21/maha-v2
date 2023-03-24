@@ -10,17 +10,22 @@ export interface ITask {
 }
 
 // task are things that you can do that gives you points
-const task = new Schema({
-  name: String,
-  type: {
-    type: String,
-    enum: ["form", "twitter_follow", "hold_nft", "revoke_opensea", "gm"],
-    required: true,
+const task = new Schema(
+  {
+    name: String,
+    type: {
+      type: String,
+      enum: ["form", "twitter_follow", "hold_nft", "revoke_opensea", "gm"],
+      required: true,
+    },
+    instruction: String,
+    points: Number,
+    organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
   },
-  instruction: String,
-  points: Number,
-  organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
-});
+  {
+    timestamps: true,
+  }
+);
 
 export type ITaskModel = ITask & mongoose.Document;
 export const Task = mongoose.model<ITaskModel>("Task", task);

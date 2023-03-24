@@ -7,12 +7,17 @@ export interface IOrganization {
   maxBoost: number;
 }
 
-const organization = new mongoose.Schema({
-  name: String,
-  // channelId: String,
-  guildId: String,
-  maxBoost: Number, //eg: 10
-});
+const organization = new mongoose.Schema(
+  {
+    name: String,
+    // channelId: String,
+    guildId: String,
+    maxBoost: Number, //eg: 10
+  },
+  {
+    timestamps: true,
+  }
+);
 
 export type IOrganizationModel = IOrganization & mongoose.Document;
 export const Organization = mongoose.model<IOrganizationModel>(
