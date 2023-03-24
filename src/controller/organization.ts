@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ILoyaltyTask, LoyaltyTask } from "../database/models/loyaltyTasks";
-import { Organization } from "../database/models/organisation";
+import { Organization } from "../database/models/organization";
 import { ITask, Task } from "../database/models/tasks";
 import { IUserModel, User } from "../database/models/user";
 

@@ -6,7 +6,7 @@ import {
   TaskSubmission,
 } from "../database/models/taskSubmmission";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { Organization } from "../database/models/organisation";
+import { Organization } from "../database/models/organization";
 import { orgTask } from "./organization";
 
 const taskTypes = ["gm", "hold_nft", "follow_twitter"];
@@ -99,7 +99,6 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
       loyalty: user.loyaltyWeight,
     });
     await newPointTransaction.save();
-
 
     return true;
   }

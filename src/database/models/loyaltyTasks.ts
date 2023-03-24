@@ -1,7 +1,7 @@
 // comes in from rupali's dashboard; this is the model where athe admin sets all the things that a user can do.
 
 import mongoose, { Document, Schema } from "mongoose";
-import { IOrganizationModel } from "./organisation";
+import { IOrganizationModel } from "./organization";
 
 export interface ILoyaltyTask {
   name: string;

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { Cart, ICartModel } from "./cart";
 // import { ILoyaltyModel, Loyalty } from "./loyaltySubmission";
-import { IOrganization } from "./organisation";
+import { IOrganization } from "./organization";
 
 export interface IUser {
   userTag: string;

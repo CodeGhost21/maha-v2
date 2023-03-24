@@ -4,7 +4,7 @@ import { client } from "../utils/discord";
 import { IUserModel, User } from "../database/models/user";
 import { assignRank } from "../utils/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { Organization } from "../database/models/organisation";
+import { Organization } from "../database/models/organization";
 import { completeTask } from "../controller/task";
 import { Message } from "../database/models/message";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
@@ -60,10 +60,10 @@ client.on("messageCreate", async (message) => {
         await user.save();
         message.channel.send(
           `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
-          `Just say "Good Morning" or "Gm" once everyday and ` +
-          ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
-          `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
-          `Try it out! Say "Good Morning" 🌞`
+            `Just say "Good Morning" or "Gm" once everyday and ` +
+            ` start a streak. Rewards are given out every month to GM-ers with the highest streak and highest monthly streak. ` +
+            `You can use **!gm** to see your streak and **!lb** or **!leaderboard** to view the leaderboards.\n\n` +
+            `Try it out! Say "Good Morning" 🌞`
         );
       }
     });
@@ -86,7 +86,8 @@ client.on("messageCreate", async (message) => {
             .slice(0, 10)
             .map(
               (u, i) =>
-                `${total_icons[i]} **${u.userTag}** has said gm **${u.totalGMs
+                `${total_icons[i]} **${u.userTag}** has said gm **${
+                  u.totalGMs
                 } time${u.totalGMs > 1 ? "s" : ""}**.`
             )
             .join("\n");
@@ -134,7 +135,6 @@ client.on("messageCreate", async (message) => {
         if (isYesterday(lastGM)) {
           const response = await completeTask(user, "gm");
           if (response) {
-
             user.streak += 1;
             user.maxStreak =
               user.streak > user.maxStreak ? user.streak : user.maxStreak;
@@ -161,10 +161,13 @@ client.on("messageCreate", async (message) => {
           }
         }
         const rankResult = await assignRank(user.userID || "");
-        const text = `gm <@${message.author.id}>!\nYou've said gm for **${user.streak
-          } day${user.streak > 1 ? "s" : ""} in a row** 🔥 and a total of ${user.totalGMs
-          } time${user.streak > 1 ? "s" : ""} 🥳 your rank is ${rankResult.rank
-          } out of ${rankResult.totalUsers}`;
+        const text = `gm <@${message.author.id}>!\nYou've said gm for **${
+          user.streak
+        } day${user.streak > 1 ? "s" : ""} in a row** 🔥 and a total of ${
+          user.totalGMs
+        } time${user.streak > 1 ? "s" : ""} 🥳 your rank is ${
+          rankResult.rank
+        } out of ${rankResult.totalUsers}`;
 
         message.channel.send(text).then().catch(console.log);
       });

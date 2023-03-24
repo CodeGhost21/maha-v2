@@ -15,7 +15,7 @@ import DiscordOauth2 from "discord-oauth2";
 import { IUserModel, User } from "../database/models/user";
 import * as jwt from "jsonwebtoken";
 import urlJoin from "./urlJoin";
-import { Organization } from "../database/models/organisation";
+import { Organization } from "../database/models/organization";
 import { completeLoyaltyTask } from "../controller/loyaltyTask";
 import { sendFeedDiscord } from "./sendFeedDiscord";
 const jwtSecret = nconf.get("JWT_SECRET");

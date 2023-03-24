@@ -7,7 +7,7 @@ import {
   LoyaltySubmission,
 } from "../database/models/loyaltySubmission";
 import { ILoyaltyTask, LoyaltyTask } from "../database/models/loyaltyTasks";
-import { Organization } from "../database/models/organisation";
+import { Organization } from "../database/models/organization";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { IUserModel, User } from "../database/models/user";
 import { fetchTwitterProfile } from "./user";

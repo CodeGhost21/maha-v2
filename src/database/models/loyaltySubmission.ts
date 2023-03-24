@@ -5,7 +5,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { IUser, IUserModel } from "./user";
 import { ILoyaltyTaskModel } from "./loyaltyTasks";
-import { IOrganizationModel } from "./organisation";
+import { IOrganizationModel } from "./organization";
 
 export interface ILoyaltySubmission {
   name: string;

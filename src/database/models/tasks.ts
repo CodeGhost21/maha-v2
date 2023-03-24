@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IOrganizationModel } from "./organisation";
+import { IOrganizationModel } from "./organization";
 
 export interface ITask {
   name: string;
