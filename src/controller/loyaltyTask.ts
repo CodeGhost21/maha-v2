@@ -47,7 +47,7 @@ const profileImageComparing = async (
 const checkLoyalty = async (user: any, loyaltyType: string) => {
   if (loyaltyType === "gm") {
     if (user.totalGMs > 0) return true;
-  } else if (loyaltyType === "twitterProfile") {
+  } else if (loyaltyType === "twitter_profile") {
     const twitterProfile = await fetchTwitterProfile(user);
     const twitterCheck = await profileImageComparing(
       twitterProfile,
@@ -166,12 +166,13 @@ export const completeLoyaltyTask = async (
         await newPointTransaction.save();
 
         // res.send("done");
-        return "Task compeleted successfully.";
+        return "Task completed successfully.";
       }
-      return "Task failed. Please check if you have compeleted the task.";
+      return "Task failed. Please check if you have completed the task.";
     }
+    return "You have already completed this task";
   }
-  return "no user found";
+  return "Something went wrong. Please try again.";
 };
 
 export const userLoyaltyTask = async (req: Request, res: Response) => {
