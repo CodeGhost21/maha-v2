@@ -45,8 +45,12 @@ export const updateOrg = async (req: Request, res: Response) => {
   if (userDetails) {
     const org = await Organization.findOne({ _id: userDetails.organizationId });
     if (org) {
+      org.name = req.body.orgName || org.name;
       org.maxBoost = req.body.maxBoost || org.maxBoost;
       org.guildId = req.body.guildId || org.guildId;
+      org.feedChannelId = req.body.feedChannelId || org.feedChannelId;
+      org.msgChannelId = req.body.msgChannelId || org.msgChannelId;
+
       await org.save();
       res.send({ success: true });
     } else {
