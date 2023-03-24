@@ -1,7 +1,6 @@
 import { sendRequest } from "../library/sendRequest";
 import { fetchTwitterProfile } from "./user";
 import { imageComparing } from "../library/imageComparer";
-import { fetchDiscordProfile } from "./user";
 import * as web3 from "../utils/web3";
 import { Request, Response } from "express";
 import { IUserModel } from "../database/models/user";

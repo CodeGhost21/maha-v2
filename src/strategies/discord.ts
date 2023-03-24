@@ -22,10 +22,11 @@ passport.deserializeUser(async (id: string, done) => {
 
 const callbackURL = urlJoin(nconf.get("DOMAIN"), "/discord/redirect");
 
+type callbackParams = { expires_in: number };
 const callback = async (
   accessToken: string,
   refreshToken: string,
-  params: any,
+  params: callbackParams,
   profile: Profile,
   done: (err?: Error | null, user?: Express.User, info?: object) => void
 ) => {

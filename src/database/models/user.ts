@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { Cart, ICartModel } from "./cart";
 // import { ILoyaltyModel, Loyalty } from "./loyaltySubmission";
 import { IOrganization } from "./organisation";
@@ -44,7 +44,7 @@ export interface IUser {
   getCart: () => Promise<ICartModel>;
 }
 
-const UserSchema = new Schema(
+const schema = new mongoose.Schema(
   {
     userTag: String,
     userID: String,
@@ -102,11 +102,11 @@ const UserSchema = new Schema(
 //   return Loyalty.create({ userId: this.id });
 // };
 
-UserSchema.methods.getCart = async function () {
+schema.methods.getCart = async function () {
   const found = await Cart.findOne({ userId: this.id });
   if (found) return found;
   return Cart.create({ userId: this.id });
 };
 
-export type IUserModel = IUser & Document;
-export const User = mongoose.model<IUserModel>("User", UserSchema);
+export type IUserModel = IUser & mongoose.Document;
+export const User = mongoose.model<IUserModel>("User", schema);

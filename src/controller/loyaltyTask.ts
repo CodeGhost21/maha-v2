@@ -6,12 +6,14 @@ import {
   ILoyaltySubmission,
   LoyaltySubmission,
 } from "../database/models/loyaltySubmission";
-import { LoyaltyTask } from "../database/models/loyaltyTasks";
+import { ILoyaltyTask, LoyaltyTask } from "../database/models/loyaltyTasks";
 import { Organization } from "../database/models/organisation";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { IUserModel, User } from "../database/models/user";
 import { fetchTwitterProfile } from "./user";
 import { organizationLoyaltyTask } from "./organization";
+
+const loyaltyTypes = ["twitter_profile", "discordProfile"];
 
 const profileImageComparing = async (
   profileImageUrl: string,
@@ -43,7 +45,6 @@ const profileImageComparing = async (
 };
 
 const checkLoyalty = async (user: any, loyaltyType: string) => {
-  console.log(loyaltyType);
   if (loyaltyType === "gm") {
     if (user.totalGMs > 0) return true;
   } else if (loyaltyType === "twitterProfile") {
@@ -71,13 +72,11 @@ export const allLoyaltyTask = async (req: Request, res: Response) => {
 
 export const addLoyaltyTask = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
-  console.log(user);
-
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
-  console.log(userDetails);
-
   if (userDetails) {
-    const checkLoyaltyTask = await LoyaltyTask.findOne({ name: req.body.name });
+    const checkLoyaltyTask = await LoyaltyTask.findOne({
+      $or: [{ name: req.body.name }, { type: req.body.type }],
+    });
     if (!checkLoyaltyTask) {
       const newLoyaltyTask = new LoyaltyTask({
         name: req.body.name,
@@ -101,13 +100,15 @@ export const deleteLoyaltyTask = async (req: Request, res: Response) => {
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
 
   if (userDetails) {
-    const checkLoyaltyTask = await LoyaltyTask.findOne({ name: req.body.name });
+    const checkLoyaltyTask = await LoyaltyTask.findOne({
+      _id: req.body.taskId,
+    });
     if (checkLoyaltyTask) {
-      LoyaltyTask.deleteOne({ _id: checkLoyaltyTask._id });
-      res.send("loyalty task deleted");
+      await LoyaltyTask.deleteOne({ _id: checkLoyaltyTask._id });
+      res.send({ success: true });
     }
   } else {
-    res.send("not authorized");
+    res.send({ success: false });
   }
 };
 
@@ -182,16 +183,37 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
     const loyaltySubmittedTypes = allLoyaltySubmission.map(
       (item: ILoyaltySubmission) => item.type
     );
-    console.log(loyaltySubmittedTypes);
-
-    let completedLoyaltySubmission: any = {};
+    const completedLoyaltySubmission: any = {};
     loyaltyTasks.map((taskType: string) => {
-      console.log(completedLoyaltySubmission, taskType);
       if (loyaltySubmittedTypes.includes(taskType))
         completedLoyaltySubmission[taskType] = true;
       else completedLoyaltySubmission[taskType] = false;
     });
 
     res.send(completedLoyaltySubmission);
+  }
+};
+
+export const types = async (req: Request, res: Response) => {
+  res.send(loyaltyTypes);
+};
+
+export const updateLoyalty = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails: any = await User.findOne({ _id: user.id });
+  if (userDetails) {
+    const loyalty = await LoyaltyTask.findOne({
+      _id: req.body.taskId,
+      organizationId: userDetails.organizationId,
+    });
+    if (loyalty) {
+      loyalty.name = req.body.name || loyalty.name;
+      loyalty.type = req.body.type || loyalty.type;
+      loyalty.weight = req.body.weight || loyalty.weight;
+      loyalty.instruction = req.body.instruction || loyalty.instruction;
+
+      await loyalty.save();
+      res.send({ success: true });
+    } else res.send({ success: false, message: "loyalty not found" });
   }
 };

@@ -10,7 +10,9 @@ import {
   MessageButton,
   MessageSelectMenu,
 } from "discord.js";
-import { User } from "../database/models/user";
+import DiscordOauth2 from "discord-oauth2";
+
+import { IUserModel, User } from "../database/models/user";
 import * as jwt from "jsonwebtoken";
 import urlJoin from "./urlJoin";
 import { Organization } from "../database/models/organisation";
@@ -216,7 +218,7 @@ client.on("interactionCreate", async (interaction) => {
 
     const collector = interaction.channel?.createMessageComponentCollector({
       componentType: "SELECT_MENU",
-    })
+    });
 
     collector?.on("collect", async (collected: any) => {
       const value = collected.values[0]
@@ -233,7 +235,6 @@ client.on("interactionCreate", async (interaction) => {
       // }
     })
   }
-
 });
 
 //This listener is for user joining the guild
@@ -271,4 +272,10 @@ export const checkGuildMember = async (memberId: string) => {
   } catch (e) {
     return false;
   }
+};
+
+export const fetchDiscordAvatar = async (user: IUserModel) => {
+  const oauth = new DiscordOauth2();
+  const response = await oauth.getUser(user.discordOauthAccessToken);
+  return response.avatar;
 };

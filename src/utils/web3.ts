@@ -1,7 +1,6 @@
 import nconf from "nconf";
 import MAHAX from "../abi/MahaXAbi.json";
 import Web3 from "web3";
-import { BigNumber } from "ethers";
 
 const provider = new Web3.providers.HttpProvider(nconf.get("ETH_RPC"));
 export const web3 = new Web3(provider);

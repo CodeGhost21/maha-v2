@@ -11,7 +11,7 @@ export interface IProduct {
   userId?: IUser;
 }
 
-const ProductSchema = new mongoose.Schema(
+const schema = new mongoose.Schema(
   {
     name: String,
     imgUrl: String,
@@ -24,4 +24,4 @@ const ProductSchema = new mongoose.Schema(
 );
 
 export type IProductModel = IProduct & Document;
-export const Product = mongoose.model<IProductModel>("Product", ProductSchema);
+export const Product = mongoose.model<IProductModel>("Product", schema);

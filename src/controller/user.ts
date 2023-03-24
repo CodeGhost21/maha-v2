@@ -1,14 +1,13 @@
 import Bluebird from "bluebird";
 import { ethers } from "ethers";
 import { Request, Response } from "express";
-const DiscordOauth2 = require("discord-oauth2");
 import { sendRequest } from "../library/sendRequest";
 import { IUserModel, User } from "../database/models/user";
 // import { Loyalty } from "../database/models/loyaltySubmission";
 import { PointTransaction } from "../database/models/pointTransaction";
 import NotFoundError from "../errors/NotFoundError";
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
-const oauth = new DiscordOauth2();
+import { fetchDiscordAvatar } from "../utils/discord";
 
 export const fetchMe = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
@@ -16,8 +15,8 @@ export const fetchMe = async (req: Request, res: Response) => {
   throw new NotFoundError();
 };
 
-//users leaderboard
-export const getLeaderboard = async (req: Request, res: Response) => {
+//users leaderBoard
+export const getLeaderBoard = async (req: Request, res: Response) => {
   const users = await User.find()
     .select("discordName totalPoints discordAvatar userID")
     .sort({ totalPoints: -1 })
@@ -90,9 +89,23 @@ export const fetchTwitterProfile = async (user: IUserModel) => {
 };
 
 export const fetchDiscordProfile = async (user: IUserModel) => {
-  // nothing
-  const response = await oauth.getUser(user.discordOauthAccessToken);
-  user["discordAvatar"] = response.avatar;
-  user.save();
-  return response.avatar;
+  const avatar = await fetchDiscordAvatar(user);
+  if (avatar) {
+    user.discordAvatar = avatar;
+    user.save();
+  }
+
+  return avatar;
+};
+
+export const allUsers = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
+  if (userDetails) {
+    const users = await User.find({
+      organizationId: userDetails.organizationId,
+    });
+
+    res.send(users);
+  }
 };

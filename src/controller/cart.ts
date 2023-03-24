@@ -16,19 +16,19 @@ export const addItem = async (
   const user = req.user as IUserModel;
   const cart = await user.getCart();
 
+  const product = await Product.findOne({ _id: req.body.productId });
+  if (!product) return next();
+
   const checkCartItem = await CartItem.findOne({
     productId: req.body.productId,
+    cartId: cart.id,
   });
 
   if (!checkCartItem) {
-    const newItem = new CartItem({
+    await CartItem.create({
       cartId: cart.id,
       productId: req.body.productId,
     });
-    await newItem.save();
-
-    const product = await Product.findOne({ _id: req.body.productId });
-    if (!product) return next();
 
     await User.updateOne(
       { id: user.id },

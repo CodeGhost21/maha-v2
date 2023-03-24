@@ -1,7 +1,7 @@
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { IUserModel } from "./../database/models/user";
 
-import { Request, NextFunction, Response } from "express";
+import { Request, Response } from "express";
 import twiiterOauth from "../library/twitter-oauth";
 import BadRequestError from "../errors/BadRequestError";
 
@@ -45,6 +45,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
     oauthAccessTokenSecret
   );
 
+  // @ts-ignore
   const parseData = JSON.parse(response.data);
 
   user.twitterID = parseData.id_str;
@@ -56,7 +57,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
   user.twitterOauthAccessToken = oauthAccessToken;
   user.twitterOauthAccessTokenSecret = oauthAccessTokenSecret;
 
-  user.signTwitter = true;
+  user.signTwitter = true; // todo this is really not needed tbh
   await user.save();
 
   sendFeedDiscord(`${user.discordName} has verified their twitter account`);

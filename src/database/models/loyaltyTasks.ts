@@ -6,7 +6,7 @@ import { IOrganizationModel } from "./organisation";
 export interface ILoyaltyTask {
   name: string;
   type: "twitter_profile" | "discord_profile" | "revoke_opensea" | "gm";
-  instructions: string;
+  instruction: string;
   weight: number;
   organizationId: IOrganizationModel;
 }
@@ -22,7 +22,7 @@ const loyaltyTask = new Schema(
       enum: ["twitter_profile", "discord_profile", "revoke_opensea", "gm"],
       required: true,
     },
-    instructions: String,
+    instruction: String,
     weight: Number, // 0-1  // validation every loyalty task for an org should add upto 1
     organizationId: {
       type: Schema.Types.ObjectId,

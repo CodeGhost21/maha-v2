@@ -1,5 +1,6 @@
 // convert oauth methods to promises so we can use async/await syntax
 // and keep our code sexier
+import { IncomingMessage } from "http";
 import { OAuth } from "oauth";
 
 const getCallback = (
@@ -72,7 +73,10 @@ const getCallback = (
       method: string,
       oauthAccessToken: string,
       oauthAccessTokenSecret: string
-    ): Promise<{ data: any; response: any }> => {
+    ): Promise<{
+      data: string | Buffer | undefined;
+      response: IncomingMessage | undefined;
+    }> => {
       return new Promise((resolve, reject) => {
         _oauth.getProtectedResource(
           url,

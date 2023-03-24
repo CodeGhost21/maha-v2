@@ -3,17 +3,21 @@ import {
   addTask,
   deleteTask,
   allTask,
-  completeTask,
   userTasks,
+  types,
+  updateTask,
 } from "../controller/task";
 import ensureLoggedIn from "../middleware/ensureLoggedIn";
 
 const router = Router();
 
-router.post("/add", ensureLoggedIn, addTask);
-router.delete("/delete", ensureLoggedIn, deleteTask);
-router.get("/get", ensureLoggedIn, allTask);
-// router.post("/completeTask", ensureLoggedIn, completeTask);
-router.get("/userTasks", ensureLoggedIn, userTasks);
+router.get("/types", types);
+
+router.use(ensureLoggedIn);
+router.post("/add", addTask);
+router.delete("/delete", deleteTask);
+router.get("/get", allTask);
+router.get("/userTasks", userTasks);
+router.put("/update", updateTask);
 
 export default router;
