@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 export interface IOrganization {
   name: string;
-  // channelId: string;
+  msgChannelId: string;
+  feedChannelId: string;
   guildId: string;
   maxBoost: number;
 }
@@ -10,7 +11,8 @@ export interface IOrganization {
 const organization = new mongoose.Schema(
   {
     name: String,
-    // channelId: String,
+    msgChannelId: String,
+    feedChannelId: String,
     guildId: String,
     maxBoost: Number, //eg: 10
   },

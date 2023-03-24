@@ -8,7 +8,7 @@ import {
 import { PointTransaction } from "../database/models/pointTransaction";
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { Organization } from "../database/models/organisation";
-import { organizationTask } from "./organization";
+import { orgTask } from "./organization";
 
 const taskTypes = ["gm", "hold_nft", "follow_twitter"];
 
@@ -113,7 +113,7 @@ export const userTasks = async (req: Request, res: Response) => {
   if (!org) return;
 
   if (user) {
-    const tasks = await organizationTask(org.id);
+    const tasks = await orgTask(org.id);
     const allTaskSubmission = await TaskSubmission.find({
       organizationId: user.organizationId,
       approvedBy: user.id,

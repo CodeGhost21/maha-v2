@@ -11,7 +11,7 @@ import { Organization } from "../database/models/organisation";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { IUserModel, User } from "../database/models/user";
 import { fetchTwitterProfile } from "./user";
-import { organizationLoyaltyTask } from "./organization";
+import { orgLoyaltyTask } from "./organization";
 
 const loyaltyTypes = ["twitter_profile", "discord_profile"];
 
@@ -181,7 +181,7 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
     _id: userDetails.organizationId,
   });
   if (userDetails) {
-    const loyaltyTasks = await organizationLoyaltyTask(organizationDetails.id);
+    const loyaltyTasks = await orgLoyaltyTask(organizationDetails.id);
     const allLoyaltySubmission = await LoyaltySubmission.find({
       organizationId: userDetails.organizationId,
       approvedBy: userDetails.id,
