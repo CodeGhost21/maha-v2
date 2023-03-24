@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
-import { Document, Schema } from "mongoose";
-import { ICart } from "./cart";
-import { IProduct } from "./product";
+import mongoose, { Document, Schema } from "mongoose";
+import { ICartModel } from "./cart";
+import { IProductModel } from "./product";
 
 export interface ICartItem {
-  productId: IProduct;
-  cartId: ICart;
+  productId: IProductModel;
+  cartId: ICartModel;
 }
 
 const schema = new mongoose.Schema({

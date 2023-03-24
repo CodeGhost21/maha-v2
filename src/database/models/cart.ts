@@ -1,9 +1,8 @@
-import mongoose from "mongoose";
-import { Document, Schema } from "mongoose";
-import { IUser } from "./user";
+import mongoose, { Document, Schema } from "mongoose";
+import { IUserModel } from "./user";
 
 export interface ICart {
-  userId: IUser;
+  userId: IUserModel;
 }
 
 // TODO: remove this completely; cart needs to be handled on the frontend side; not backend.

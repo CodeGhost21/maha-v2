@@ -2,7 +2,6 @@ import { BigNumber } from "bignumber.js";
 
 import { IUserModel, User } from "../database/models/user";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { saveFeed } from "../utils/saveFeed";
 import * as web3 from "../utils/web3";
 
 const e18 = new BigNumber(10).pow(18);
@@ -59,36 +58,34 @@ export const dailyMahaXRewards = async () => {
       });
       user.totalPoints = user.totalPoints + Math.floor(totalMahaX);
       await user.save();
-
-      await saveFeed(user, "normal", "mahaXLock", totalMahaX);
     }
 
     const dailyTransactions = await getDailyTransactions(user._id);
     if (dailyTransactions.length > 0) {
-      const userLoyalty = await user.getLoyalty();
+      // const userLoyalty = await user.getLoyalty();
 
       let totalPoints = 0;
       dailyTransactions.map((item) => {
         if (item.addPoints > 0) totalPoints += item.addPoints;
       });
-      const dailyLoyaltyPoints = totalPoints * userLoyalty.totalLoyalty;
+      // const dailyLoyaltyPoints = totalPoints * userLoyalty.totalLoyalty;
       const newPointsTransaction = new PointTransaction({
         userId: user.id,
         type: "Loyalty",
-        totalPoints: user.totalPoints + dailyLoyaltyPoints,
-        addPoints: dailyLoyaltyPoints,
+        // totalPoints: user.totalPoints + dailyLoyaltyPoints,
+        // addPoints: dailyLoyaltyPoints,
       });
       await newPointsTransaction.save();
-      user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
+      // user["totalPoints"] = user.totalPoints + dailyLoyaltyPoints;
       await user.save();
-      await saveFeed(user, "normal", "loyalty", dailyLoyaltyPoints);
-      const loyalty = await user.getLoyalty();
-      await loyalty.update({
-        gm: false,
-        twitterProfile: false,
-        discordProfile: false,
-        opensea: false,
-      });
+      // const loyalty = await user.getLoyalty();
+      // await loyalty.update({
+      //   gm: false,
+      //   twitterProfile: false,
+      //   discordProfile: false,
+      //   opensea: false,
+      //   totalLoyalty: 0,
+      // });
     }
   });
 };

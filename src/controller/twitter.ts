@@ -1,3 +1,4 @@
+import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { IUserModel } from "./../database/models/user";
 
 import { Request, Response } from "express";
@@ -49,6 +50,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
 
   user.twitterID = parseData.id_str;
   user.twitterName = parseData.name;
+  user.twitterScreenName = parseData.screen_name;
   user.twitterBio = parseData.description;
   user.twitterProfileImg = parseData.profile_image_url_https;
   user.twitterBanner = parseData.profile_banner_url;
@@ -57,6 +59,8 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
 
   user.signTwitter = true; // todo this is really not needed tbh
   await user.save();
+
+  sendFeedDiscord(`${user.discordName} has verified their twitter account`);
 
   res.json({ success: true });
 };

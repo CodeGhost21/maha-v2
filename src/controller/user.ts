@@ -1,12 +1,14 @@
 import Bluebird from "bluebird";
 import { ethers } from "ethers";
 import { Request, Response } from "express";
-
+const DiscordOauth2 = require("discord-oauth2");
+import { sendRequest } from "../library/sendRequest";
 import { IUserModel, User } from "../database/models/user";
-import { Loyalty } from "../database/models/loyaty";
+// import { Loyalty } from "../database/models/loyaltySubmission";
 import { PointTransaction } from "../database/models/pointTransaction";
-// import twiiterOauth from "../library/twitter-oauth";
 import NotFoundError from "../errors/NotFoundError";
+import { sendFeedDiscord } from "../utils/sendFeedDiscord";
+const oauth = new DiscordOauth2();
 
 export const fetchMe = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
@@ -14,20 +16,20 @@ export const fetchMe = async (req: Request, res: Response) => {
   throw new NotFoundError();
 };
 
-//users leaderboard
-export const getLeaderboard = async (req: Request, res: Response) => {
+//users leaderBoard
+export const getLeaderBoard = async (req: Request, res: Response) => {
   const users = await User.find()
     .select("discordName totalPoints discordAvatar userID")
     .sort({ totalPoints: -1 })
     .limit(100);
 
   const allUsers = await Bluebird.mapSeries(users, async (user) => {
-    const userLoyalty = await Loyalty.findOne({ userId: user._id });
+    // const userLoyalty = await Loyalty.findOne({ userId: user._id });
     return {
       discordName: user.discordName,
       totalPoints: user.totalPoints,
       imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-      loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
+      // loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
     };
   });
 
@@ -71,47 +73,38 @@ export const walletVerify = async (req: Request, res: Response) => {
   if (result === req.body.address) {
     user.walletAddress = req.body.address;
     await user.save();
+    sendFeedDiscord(`@${user.discordName} has verified their wallet address`);
     res.json({ success: true });
   } else {
     res.json({ success: false });
   }
 };
 
-//fetch nft of all users peroidically
-export const fetchNFT = async () => {
-  // const allUsers = await User.find();
-  // if (allUsers.length > 0) {
-  //   await allUsers.map(async (user) => {
-  //     // if (user.walletAddress !== "") {
-  //     //   const noOfNFTs = await mahaXContract.methods
-  //     //     .balanceOf(user.walletAddress)
-  //     //     .call();
-  //     //   if (noOfNFTs > 0) {
-  //     //     // let totalMahaStaked = 0;
-  //     //     // for (let i = 0; i < noOfNFTs; i++) {
-  //     //     //   const nftId = await mahaXContract.methods
-  //     //     //     .tokenOfOwnerByIndex(user.walletAddress, i)
-  //     //     //     .call();
-  //     //     //   const nftAmount = await mahaXContract.methods.locked(nftId).call();
-  //     //     //   if (nftAmount.amount / 1e18 >= 100) {
-  //     //     //     totalMahaStaked += nftAmount.amount / 1e18;
-  //     //     //   }
-  //     //     // }
-  //     //     // console.log("totalMahaStaked", totalMahaStaked);
-  //     //     // if (totalMahaStaked > 300) {
-  //     //     await User.updateOne(
-  //     //       { walletAddress: user.walletAddress },
-  //     //       { stakedMaha: true }
-  //     //     );
-  //     //     //       }
-  //     //   }
-  //     // }
-  //   });
-  // }
+export const fetchTwitterProfile = async (user: IUserModel) => {
+  const response = await sendRequest<string>(
+    "get",
+    `https://api.twitter.com/1.1/users/show.json?screen_name=${user.twitterScreenName}`
+  );
+  const parseResponse = JSON.parse(response);
+  return parseResponse.profile_image_url_https;
 };
 
-// fetchNFT()
-
-export const updateDiscordProfile = async () => {
+export const fetchDiscordProfile = async (user: IUserModel) => {
   // nothing
+  const response = await oauth.getUser(user.discordOauthAccessToken);
+  user["discordAvatar"] = response.avatar;
+  user.save();
+  return response.avatar;
+};
+
+export const allUsers = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
+  if (userDetails) {
+    const users = await User.find({
+      organizationId: userDetails.organizationId,
+    });
+
+    res.send(users);
+  }
 };

@@ -48,7 +48,7 @@ const callback = async (
     await user.save();
     done(null, user);
   } else {
-    const verifyUser = checkGuildMember(profile.id);
+    const verifyUser = await checkGuildMember(profile.id);
     const newUser = await User.create({
       userID: profile.id,
       userTag: `${profile.username}#${profile.discriminator}`,

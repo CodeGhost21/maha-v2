@@ -1,12 +1,16 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { Cart, ICartModel } from "./cart";
-import { ILoyaltyModel, Loyalty } from "./loyaty";
+// import { ILoyaltyModel, Loyalty } from "./loyaltySubmission";
+import { IOrganization } from "./organisation";
 
 export interface IUser {
   userTag: string;
   userID: string;
+  organizationId: IOrganization;
+  isModerator: boolean;
   twitterID: string;
   twitterName: string;
+  twitterScreenName: string;
   twitterBio: string;
   twitterProfileImg: string;
   twitterBanner: string;
@@ -28,6 +32,7 @@ export interface IUser {
   discordAvatar: string;
   signDiscord: boolean;
   totalPoints: number;
+  loyaltyWeight: number;
   stakedMaha: boolean;
 
   twitterOauthAccessToken: string;
@@ -35,7 +40,7 @@ export interface IUser {
   twitterRequestToken: string;
   twitterRequestTokenSecret: string;
 
-  getLoyalty: () => Promise<ILoyaltyModel>;
+  // getLoyalty: () => Promise<ILoyaltyModel>;
   getCart: () => Promise<ICartModel>;
 }
 
@@ -43,8 +48,14 @@ const schema = new mongoose.Schema(
   {
     userTag: String,
     userID: String,
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+    },
+    isModerator: { type: Boolean, default: false },
     twitterID: String,
     twitterName: String,
+    twitterScreenName: String,
     twitterBio: String,
     twitterProfileImg: String,
     twitterBanner: String,
@@ -62,7 +73,13 @@ const schema = new mongoose.Schema(
     discordAvatar: { type: String, default: "" },
 
     signDiscord: { type: Boolean, default: false },
+    // adding a point => totalPoints += points * ((maxBoost * loyalty) + 1)
+    // eg: MaxBoost = 5; loyalty = 0%; points = 100
+    // ---> totalPoints += 100 * (2.5 + 1) => 100 * 3.5 => 350
     totalPoints: { type: Number, default: 0 },
+
+    // this gets recalculated every time a user performs a loyalty task
+    loyaltyWeight: { type: Number, default: 0 }, // 0-1
     stakedMaha: { type: Boolean, default: false },
 
     twitterOauthAccessToken: String,
@@ -79,11 +96,11 @@ const schema = new mongoose.Schema(
   }
 );
 
-schema.methods.getLoyalty = async function () {
-  const found = await Loyalty.findOne({ userId: this.id });
-  if (found) return found;
-  return Loyalty.create({ userId: this.id });
-};
+// UserSchema.methods.getLoyalty = async function () {
+//   const found = await Loyalty.findOne({ userId: this.id });
+//   if (found) return found;
+//   return Loyalty.create({ userId: this.id });
+// };
 
 schema.methods.getCart = async function () {
   const found = await Cart.findOne({ userId: this.id });
