@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ILoyaltyTask, LoyaltyTask } from "../database/models/loyaltyTasks";
 import { Organization } from "../database/models/organisation";
 import { ITask, Task } from "../database/models/tasks";
+import { IUserModel, User } from "../database/models/user";
 
 export const addOrganization = async (req: Request, res: Response) => {
   const checkOrganization = await Organization.findOne({
@@ -36,4 +37,20 @@ export const organizationLoyaltyTask = async (organizationId: string) => {
     (item: ILoyaltyTask) => item.type
   );
   return loyaltyTaskTypes;
+};
+
+export const updateOrganization = async (req: Request, res: Response) => {
+  const user = req.user as IUserModel;
+  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
+  if (userDetails) {
+    const org = await Organization.findOne({ _id: userDetails.organizationId });
+    if (org) {
+      org.maxBoost = req.body.maxBoost || org.maxBoost;
+      org.guildId = req.body.guildId || org.guildId;
+      await org.save();
+      res.send({ success: true });
+    } else {
+      res.send({ success: false, msg: "organization not found" });
+    }
+  }
 };

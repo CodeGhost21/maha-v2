@@ -13,7 +13,7 @@ import { IUserModel, User } from "../database/models/user";
 import { fetchTwitterProfile } from "./user";
 import { organizationLoyaltyTask } from "./organization";
 
-const loyaltyTypes = ["twitter_profile", "discordProfile"];
+const loyaltyTypes = ["twitter_profile", "discord_profile"];
 
 const profileImageComparing = async (
   profileImageUrl: string,
@@ -71,11 +71,16 @@ export const allLoyaltyTask = async (req: Request, res: Response) => {
 };
 
 export const addLoyaltyTask = async (req: Request, res: Response) => {
+  console.log(req.body);
+
   const user = req.user as IUserModel;
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
   if (userDetails) {
     const checkLoyaltyTask = await LoyaltyTask.findOne({
-      $or: [{ name: req.body.name }, { type: req.body.type }],
+      $and: [
+        { organizationId: userDetails.organizationId },
+        { type: req.body.type },
+      ],
     });
     if (!checkLoyaltyTask) {
       const newLoyaltyTask = new LoyaltyTask({
@@ -112,8 +117,10 @@ export const deleteLoyaltyTask = async (req: Request, res: Response) => {
   }
 };
 
-export const completeLoyaltyTask = async (userDiscordId: string, type: string) => {
-
+export const completeLoyaltyTask = async (
+  userDiscordId: string,
+  type: string
+) => {
   const userDetails = await User.findOne({ userID: userDiscordId });
   if (userDetails) {
     const checkLoyaltySubmission = await LoyaltySubmission.findOne({
@@ -159,12 +166,12 @@ export const completeLoyaltyTask = async (userDiscordId: string, type: string) =
         await newPointTransaction.save();
 
         // res.send("done");
-        return 'Task compeleted successfully.'
+        return "Task compeleted successfully.";
       }
-      return 'Task failed. Please check if you have compeleted the task.'
+      return "Task failed. Please check if you have compeleted the task.";
     }
   }
-  return 'no user found'
+  return "no user found";
 };
 
 export const userLoyaltyTask = async (req: Request, res: Response) => {

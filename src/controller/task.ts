@@ -28,7 +28,10 @@ export const addTask = async (req: Request, res: Response) => {
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
   if (userDetails) {
     const checkTask = await Task.findOne({
-      $or: [{ name: req.body.name }, { type: req.body.type }],
+      $and: [
+        { organizationId: userDetails.organizationId },
+        { type: req.body.type },
+      ],
     });
     if (!checkTask) {
       const newTask = new Task({
