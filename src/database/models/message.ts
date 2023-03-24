@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export interface IMessage {
   content: string;
@@ -7,12 +7,12 @@ export interface IMessage {
   dateTime: Date;
 }
 
-const schema = new mongoose.Schema(
+const schema = new Schema(
   {
     content: String,
     userTag: String,
     userID: String,
-    // userId: { type: Schema.Types.ObjectId, ref: "User" },
+    // userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     dateTime: Date,
   },
   {

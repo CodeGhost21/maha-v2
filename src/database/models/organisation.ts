@@ -11,8 +11,8 @@ const organization = new mongoose.Schema(
   {
     name: String,
     // channelId: String,
-    guildId: String,
-    maxBoost: Number, //eg: 10
+    guildId: String, // Discord server id
+    maxBoost: { type: Number, min: 0, max: 100 }, //eg: 10
   },
   {
     timestamps: true,

@@ -2,12 +2,15 @@
 
 import mongoose, { Document, Schema } from "mongoose";
 import { IOrganizationModel } from "./organisation";
+import { IUserModel } from "./user";
 
 export interface ILoyaltyTask {
   name: string;
   type: "twitter_profile" | "discord_profile" | "revoke_opensea" | "gm";
   instruction: string;
   weight: number;
+  needsModeration: boolean;
+  createdBy: IUserModel;
   organizationId: IOrganizationModel;
 }
 
@@ -16,16 +19,23 @@ export interface ILoyaltyTask {
 // this helps us identify bots
 const loyaltyTask = new Schema(
   {
-    name: String,
+    name: { type: String, required: true },
+    instruction: { type: String, required: true },
+    needsModeration: { type: Boolean, required: true, default: false },
     type: {
       type: String,
       enum: ["twitter_profile", "discord_profile", "revoke_opensea", "gm"],
       required: true,
     },
-    instruction: String,
-    weight: Number, // 0-1  // validation every loyalty task for an org should add upto 1
+    weight: { type: Number, min: 0, max: 0, required: true }, // 0-1  // validation every loyalty task for an org should add upto 1
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
     organizationId: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: "Organization",
     },
   },
