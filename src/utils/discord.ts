@@ -218,7 +218,7 @@ client.on("interactionCreate", async (interaction) => {
       componentType: "SELECT_MENU",
     });
 
-    collector?.on("collect", async (collected: any) => {
+    collector?.on("collect", async (collected) => {
       const value = collected.values[0];
 
       if (value === "First") {

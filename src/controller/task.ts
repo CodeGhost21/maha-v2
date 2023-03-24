@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ITaskModel, Task } from "../database/models/tasks";
+import { Task } from "../database/models/tasks";
 import { IUserModel, User } from "../database/models/user";
 import {
   ITaskSubmission,
@@ -63,13 +63,12 @@ export const deleteTask = async (req: Request, res: Response) => {
 };
 
 export const completeTask = async (user: IUserModel, taskType: string) => {
-  const userDetails: any = await User.findOne({ _id: user.id });
-  const organizationDetails: any = await Organization.findOne({
-    _id: userDetails.organizationId,
-  });
+  const org = await Organization.findById(user.organizationId);
+  if (!org) return;
+
   const taskDetails = await Task.findOne({
     type: taskType,
-    organizationId: organizationDetails.id,
+    organizationId: org.id,
   });
 
   if (taskDetails) {
@@ -78,51 +77,49 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
       type: taskDetails.type,
       instruction: taskDetails.instruction,
       points: taskDetails.points,
-      approvedBy: userDetails.id,
-      organizationId: userDetails.organizationId,
+      approvedBy: user.id,
+      organizationId: user.organizationId,
     });
     await newTaskSubmission.save();
 
     const taskTotalPoints =
-      taskDetails.points *
-      (organizationDetails.maxBoost * userDetails.loyaltyWeight + 1);
-    userDetails.totalPoints += taskTotalPoints;
-    await userDetails.save();
+      taskDetails.points * (org.maxBoost * user.loyaltyWeight + 1);
+    user.totalPoints += taskTotalPoints;
+    await user.save();
 
     const newPointTransaction = new PointTransaction({
-      userId: userDetails.id,
+      userId: user.id,
       taskId: taskDetails.id,
       type: taskDetails.type,
       totalPoints: taskTotalPoints,
       addPoints: taskDetails.points,
-      boost: organizationDetails.maxBoost * userDetails.loyaltyWeight,
-      loyalty: userDetails.loyaltyWeight,
+      boost: org.maxBoost * user.loyaltyWeight,
+      loyalty: user.loyaltyWeight,
     });
     await newPointTransaction.save();
 
     await sendFeedDiscord(
-      `${userDetails.discordName} has completed ${taskDetails.name} `
+      `${user.discordName} has completed ${taskDetails.name} `
     );
   }
 };
 
 export const userTasks = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
-  const userDetails: any = await User.findOne({ _id: user.id });
-  const organizationDetails: any = await Organization.findOne({
-    _id: userDetails.organizationId,
-  });
-  if (userDetails) {
-    const tasks = await organizationTask(organizationDetails.id);
+  const org = await Organization.findById(user.organizationId);
+  if (!org) return;
+
+  if (user) {
+    const tasks = await organizationTask(org.id);
     const allTaskSubmission = await TaskSubmission.find({
-      organizationId: userDetails.organizationId,
-      approvedBy: userDetails.id,
+      organizationId: user.organizationId,
+      approvedBy: user.id,
     });
 
     const taskSubmittedTypes = allTaskSubmission.map(
       (item: ITaskSubmission) => item.type
     );
-    const completedTaskSubmission: any = {};
+    const completedTaskSubmission: { [task: string]: boolean } = {};
     tasks.map((taskType: string) => {
       if (taskSubmittedTypes.includes(taskType))
         completedTaskSubmission[taskType] = true;
@@ -139,7 +136,7 @@ export const types = async (req: Request, res: Response) => {
 
 export const updateTask = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
-  const userDetails: any = await User.findOne({ _id: user.id });
+  const userDetails = await User.findOne({ _id: user.id });
   if (userDetails) {
     const task = await Task.findOne({
       _id: req.body.taskId,
