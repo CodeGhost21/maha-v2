@@ -13,6 +13,8 @@ export const addOrg = async (req: Request, res: Response) => {
       name: req.body.orgName,
       guildId: req.body.guildId,
       maxBoost: req.body.maxBoost,
+      feedChannelId: req.body.feedChannelId,
+      msgChannelId: req.body.msgChannelId,
     });
     await newOrganization.save();
     res.send(newOrganization);
