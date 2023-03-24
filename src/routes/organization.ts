@@ -6,6 +6,6 @@ const router = Router();
 
 router.post("/add", addOrg);
 router.put("/update", ensureLoggedIn, updateOrg);
-router.post("/get", ensureLoggedIn, getOrg);
+router.get("/get", ensureLoggedIn, getOrg);
 
 export default router;
