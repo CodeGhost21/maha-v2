@@ -47,7 +47,7 @@ const profileImageComparing = async (
 const checkLoyalty = async (user: any, loyaltyType: string) => {
   if (loyaltyType === "gm") {
     if (user.totalGMs > 0) return true;
-  } else if (loyaltyType === "twitterProfile") {
+  } else if (loyaltyType === "twitter_profile") {
     const twitterProfile = await fetchTwitterProfile(user);
     const twitterCheck = await profileImageComparing(
       twitterProfile,
