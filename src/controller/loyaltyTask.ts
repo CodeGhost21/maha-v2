@@ -185,7 +185,7 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
     const loyaltySubmittedTypes = allLoyaltySubmission.map(
       (item: ILoyaltySubmission) => item.type
     );
-    let completedLoyaltySubmission: any = {};
+    const completedLoyaltySubmission: any = {};
     loyaltyTasks.map((taskType: string) => {
       if (loyaltySubmittedTypes.includes(taskType))
         completedLoyaltySubmission[taskType] = true;

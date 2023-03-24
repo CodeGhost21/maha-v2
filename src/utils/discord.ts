@@ -9,7 +9,9 @@ import {
   MessageButton,
   MessageSelectMenu,
 } from "discord.js";
-import { User } from "../database/models/user";
+import DiscordOauth2 from "discord-oauth2";
+
+import { IUserModel, User } from "../database/models/user";
 import * as jwt from "jsonwebtoken";
 import urlJoin from "./urlJoin";
 import { Organization } from "../database/models/organisation";
@@ -33,30 +35,28 @@ const total_icons = [
 ];
 let commands;
 
-
-const row = new MessageActionRow()
-  .addComponents(
-    new MessageSelectMenu()
-      .setCustomId("taskSelect")
-      .setPlaceholder("Select a task")
-      .addOptions([
-        {
-          label: 'First',
-          description: 'First',
-          value: 'First'
-        },
-        {
-          label: 'Second',
-          description: 'Second',
-          value: 'Second'
-        },
-        {
-          label: 'Third',
-          description: 'Third',
-          value: 'Third'
-        },
-      ])
-  )
+const row = new MessageActionRow().addComponents(
+  new MessageSelectMenu()
+    .setCustomId("taskSelect")
+    .setPlaceholder("Select a task")
+    .addOptions([
+      {
+        label: "First",
+        description: "First",
+        value: "First",
+      },
+      {
+        label: "Second",
+        description: "Second",
+        value: "Second",
+      },
+      {
+        label: "Third",
+        description: "Third",
+        value: "Third",
+      },
+    ])
+);
 
 export const client = new Client({
   intents: [
@@ -107,7 +107,7 @@ client.once("ready", () => {
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
-  const { commandName, options } = interaction;
+  const { commandName } = interaction;
 
   if (commandName === "profile") {
     await User.findOne({ userID: interaction.user.id }).then(async (user) => {
@@ -122,13 +122,15 @@ client.on("interactionCreate", async (interaction) => {
             `Your current GM rank: ${user.gmRank}${total_icons[3]}\n` +
             `Total number of GM said: ${user.totalGMs}\n` +
             `Highest GM Streak Record: ${user.maxStreak}\n` +
-            `Twitter Verify: ${user.signTwitter
-              ? `Completed!!${total_icons[11]}`
-              : `Pending${total_icons[10]}`
+            `Twitter Verify: ${
+              user.signTwitter
+                ? `Completed!!${total_icons[11]}`
+                : `Pending${total_icons[10]}`
             }\n` +
-            `Wallet Connected: ${user.walletAddress
-              ? `Completed!!${total_icons[11]}`
-              : `Pending${total_icons[10]}`
+            `Wallet Connected: ${
+              user.walletAddress
+                ? `Completed!!${total_icons[11]}`
+                : `Pending${total_icons[10]}`
             }\n`,
         });
       }
@@ -164,7 +166,7 @@ client.on("interactionCreate", async (interaction) => {
         new MessageButton()
           .setLabel("Verify Wallet")
           .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`)),
+          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`))
       );
 
       const discordMsgEmbed = new MessageEmbed()
@@ -189,47 +191,45 @@ client.on("interactionCreate", async (interaction) => {
       }
     });
   } else if (commandName === "dropdown") {
-    const embed =
-      new MessageEmbed()
-        .setTitle('Welcome to task selector')
-        .setColor('GREEN')
+    const embed = new MessageEmbed()
+      .setTitle("Welcome to task selector")
+      .setColor("GREEN");
 
-    await interaction.reply({ content: " ", ephemeral: true, embeds: [embed], components: [row] })
+    await interaction.reply({
+      content: " ",
+      ephemeral: true,
+      embeds: [embed],
+      components: [row],
+    });
 
-    const embed1 =
-      new MessageEmbed()
-        .setTitle('Selected option 1')
-        .setColor('GREEN')
+    const embed1 = new MessageEmbed()
+      .setTitle("Selected option 1")
+      .setColor("GREEN");
 
-    const embed2 =
-      new MessageEmbed()
-        .setTitle('Selected option 2')
-        .setColor('GREEN')
+    const embed2 = new MessageEmbed()
+      .setTitle("Selected option 2")
+      .setColor("GREEN");
 
-    const embed3 =
-      new MessageEmbed()
-        .setTitle('Selected option 3')
-        .setColor('GREEN')
-
-
+    const embed3 = new MessageEmbed()
+      .setTitle("Selected option 3")
+      .setColor("GREEN");
 
     const collector = interaction.channel?.createMessageComponentCollector({
       componentType: "SELECT_MENU",
-    })
+    });
 
     collector?.on("collect", async (collected: any) => {
-      const value = collected.values[0]
+      const value = collected.values[0];
 
-      if (value === 'First') {
-        collected.reply({ embeds: [embed1], ephemeral: true })
-      } else if (value === 'Second') {
-        collected.reply({ embeds: [embed2], ephemeral: true })
-      } else if (value === 'Third') {
-        collected.reply({ embeds: [embed3], ephemeral: true })
+      if (value === "First") {
+        collected.reply({ embeds: [embed1], ephemeral: true });
+      } else if (value === "Second") {
+        collected.reply({ embeds: [embed2], ephemeral: true });
+      } else if (value === "Third") {
+        collected.reply({ embeds: [embed3], ephemeral: true });
       }
-    })
+    });
   }
-
 });
 
 //This listener is for user joining the guild
@@ -267,4 +267,10 @@ export const checkGuildMember = async (memberId: string) => {
   } catch (e) {
     return false;
   }
+};
+
+export const fetchDiscordAvatar = async (user: IUserModel) => {
+  const oauth = new DiscordOauth2();
+  const response = await oauth.getUser(user.discordOauthAccessToken);
+  return response.avatar;
 };

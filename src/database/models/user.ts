@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { Cart, ICartModel } from "./cart";
 // import { ILoyaltyModel, Loyalty } from "./loyaltySubmission";
 import { IOrganization } from "./organisation";

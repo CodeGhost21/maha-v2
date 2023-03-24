@@ -122,7 +122,7 @@ export const userTasks = async (req: Request, res: Response) => {
     const taskSubmittedTypes = allTaskSubmission.map(
       (item: ITaskSubmission) => item.type
     );
-    let completedTaskSubmission: any = {};
+    const completedTaskSubmission: any = {};
     tasks.map((taskType: string) => {
       if (taskSubmittedTypes.includes(taskType))
         completedTaskSubmission[taskType] = true;
