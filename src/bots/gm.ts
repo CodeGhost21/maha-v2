@@ -6,7 +6,7 @@ import { assignRank } from "../utils/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
 import { Organization } from "../database/models/organisation";
 import { completeTask } from "../controller/task";
-
+import { Message } from "../database/models/message";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 const total_icons = [
@@ -105,14 +105,14 @@ client.on("messageCreate", async (message) => {
 
     // good morning?
     if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
-      // const newMessage = new Message({
-      //   content: message.cleanContent,
-      //   userTag: message.author.tag,
-      //   userID: message.author.id,
-      //   dateTime: message.createdAt,
-      // });
+      const newMessage = new Message({
+        content: message.cleanContent,
+        userTag: message.author.tag,
+        userID: message.author.id,
+        dateTime: message.createdAt,
+      });
 
-      // await newMessage.save();
+      await newMessage.save();
 
       User.findOne({ userID: message.author.id }).then(async (user) => {
         if (!user) return;
