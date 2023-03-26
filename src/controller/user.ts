@@ -2,49 +2,23 @@ import { ethers } from "ethers";
 import { Request, Response } from "express";
 import { sendRequest } from "../library/sendRequest";
 import { IUserModel } from "../database/models/user";
-import { PointTransaction } from "../database/models/pointTransaction";
 import NotFoundError from "../errors/NotFoundError";
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { fetchDiscordAvatar } from "../utils/discord";
+import { extractServerProfile } from "../utils/jwt";
 
 export const fetchMe = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
-  if (user) return res.json(user);
+  const profile = await extractServerProfile(req);
+  if (profile) return res.json(profile);
   throw new NotFoundError();
-};
-
-// get latest rewards of a user
-export const getRecentRewards = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
-
-  const recentRewards = await PointTransaction.find({
-    userId: user.id,
-    addPoints: { $gt: 0 },
-  }).select("type createdAt addPoints");
-  res.json(recentRewards);
-};
-
-// user points
-export const getUsersDailyPoints = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
-
-  const dailyPoints = await PointTransaction.find({
-    userId: user.id,
-  }).select("totalPoints createdAt");
-
-  const usersDailyPoints = dailyPoints.map((i) => [
-    new Date(i.createdAt).getTime(),
-    i.totalPoints,
-  ]);
-
-  res.json(usersDailyPoints);
 };
 
 // connect wallet verify
 export const walletVerify = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
+  const profile = await extractServerProfile(req);
+  const user = await profile.getUser();
 
-  const message = `Login into Gifts of Eden: ${user.id}`;
+  const message = `Login into Gifts of Eden: ${profile.id}`;
   const result = ethers.utils.verifyMessage(message, req.body.hash);
 
   if (result === req.body.address) {

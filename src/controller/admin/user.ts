@@ -1,18 +1,18 @@
 import { Request, Response } from "express";
-import { IServerProfile } from "../../database/models/serverProfile";
-import { IUserModel, User } from "../../database/models/user";
+import { ServerProfile } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
+import { extractServerProfile } from "../../utils/jwt";
 
 export const fetchMe = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
+  const user = await extractServerProfile(req);
   if (user) return res.json(user);
   throw new NotFoundError();
 };
 
 export const allUsers = async (req: Request, res: Response) => {
-  const user = req.user as IServerProfile;
+  const user = await extractServerProfile(req);
 
-  const users = await User.find({
+  const users = await ServerProfile.find({
     organizationId: user.organizationId,
   }).limit(100);
 

@@ -1,6 +1,8 @@
 import Bluebird from "bluebird";
-import { ServerProfile } from "../database/models/serverProfile";
-import { User } from "../database/models/user";
+import {
+  ServerProfile,
+  IServerProfileModel,
+} from "../database/models/serverProfile";
 
 export const assignRank = async (profile: IServerProfileModel) => {
   const users = await ServerProfile.find().sort({ streak: -1, lastGM: 1 });

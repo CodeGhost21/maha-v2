@@ -160,7 +160,7 @@ client.on("messageCreate", async (message) => {
         profile.save();
       }
     }
-    const rankResult = await assignRank(user.discordId || "");
+    const rankResult = await assignRank(profile);
     const text = `gm <@${message.author.id}>!\nYou've said gm for **${
       profile.streak
     } day${profile.streak > 1 ? "s" : ""} in a row** 🔥 and a total of ${

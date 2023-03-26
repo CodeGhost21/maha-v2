@@ -1,12 +1,13 @@
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
-import { IUserModel } from "./../database/models/user";
 
 import { Request, Response } from "express";
 import twiiterOauth from "../library/twitterOauth";
 import BadRequestError from "../errors/BadRequestError";
+import { extractServerProfile } from "../utils/jwt";
 
 export const requestToken = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
+  const profile = await extractServerProfile(req);
+  const user = await profile.getUser();
 
   const { oauthToken, oauthTokenSecret } =
     await twiiterOauth.getOAuthRequestToken();
@@ -20,7 +21,9 @@ export const requestToken = async (req: Request, res: Response) => {
 };
 
 export const verifyAccessToken = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
+  const profile = await extractServerProfile(req);
+  const user = await profile.getUser();
+
   const { oauthToken, oauthVerifier } = req.body;
 
   // validate

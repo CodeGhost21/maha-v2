@@ -2,14 +2,12 @@ import * as http from "http";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
-import passport from "passport";
 import session from "express-session";
 import nconf from "nconf";
 
 import * as database from "./database";
 
 import "./bots/gm";
-import "./strategies/discord";
 import routes from "./routes";
 import * as cron from "./cron";
 import HttpError from "./errors/HttpError";
@@ -32,7 +30,6 @@ app.use(
   })
 );
 
-app.use(passport.session());
 app.use(routes);
 
 app.use(

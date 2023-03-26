@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { Organization } from "../../database/models/organization";
-import { IServerProfileModel } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
+import { extractServerProfile } from "../../utils/jwt";
 
 export const updateOrg = async (req: Request, res: Response) => {
-  const serverProfile = req.user as IServerProfileModel;
+  const serverProfile = await extractServerProfile(req);
   if (!serverProfile) throw new NotFoundError("serverProfile not found");
 
   const org = await Organization.findById(serverProfile.organizationId);
@@ -21,7 +21,7 @@ export const updateOrg = async (req: Request, res: Response) => {
 };
 
 export const getOrg = async (req: Request, res: Response) => {
-  const serverProfile = req.user as IServerProfileModel;
+  const serverProfile = await extractServerProfile(req);
   if (!serverProfile) throw new NotFoundError("serverProfile not found");
 
   const org = await Organization.findById(serverProfile.organizationId);

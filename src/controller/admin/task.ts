@@ -4,6 +4,7 @@ import { Task, TaskTypes } from "../../database/models/tasks";
 import { IServerProfileModel } from "../../database/models/serverProfile";
 import BadRequestError from "../../errors/BadRequestError";
 import NotFoundError from "../../errors/NotFoundError";
+import { extractServerProfile } from "../../utils/jwt";
 
 const taskTypes: TaskTypes[] = [
   "form",
@@ -14,7 +15,7 @@ const taskTypes: TaskTypes[] = [
 ];
 
 export const allTasks = async (req: Request, res: Response) => {
-  const user = req.user as IServerProfileModel;
+  const user = await extractServerProfile(req);
   const tasks = await Task.find({
     organizationId: user.organizationId,
   });
@@ -22,7 +23,7 @@ export const allTasks = async (req: Request, res: Response) => {
 };
 
 export const addTask = async (req: Request, res: Response) => {
-  const user = req.user as IServerProfileModel;
+  const user = await extractServerProfile(req);
 
   const checkTask = await Task.findOne({
     $and: [{ organizationId: user.organizationId }, { type: req.body.type }],
@@ -42,7 +43,7 @@ export const addTask = async (req: Request, res: Response) => {
 };
 
 export const deleteTask = async (req: Request, res: Response) => {
-  const user = req.user as IServerProfileModel;
+  const user = await extractServerProfile(req);
   await Task.deleteOne({
     _id: req.body.taskId,
     organizationId: user.organizationId,
@@ -125,7 +126,7 @@ export const types = async (req: Request, res: Response) => {
 };
 
 export const updateTask = async (req: Request, res: Response) => {
-  const user = req.user as IServerProfileModel;
+  const user = await extractServerProfile(req);
 
   const task = await Task.findOne({
     _id: req.body.taskId,

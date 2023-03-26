@@ -3,6 +3,7 @@ import { executeProfileCommand } from "../controller/discord/profile";
 import { executeVerifyCommand } from "../controller/discord/verify";
 import { executeTasksCommand } from "../controller/discord/tasks";
 import { executeLeaderboardCommand } from "../controller/discord/leaderboard";
+import { executeSetupCommand } from "../controller/discord/setup";
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -27,6 +28,11 @@ client.once("ready", () => {
     name: "leaderboard",
     description: "View the leaderboard.",
   });
+
+  commands?.create({
+    name: "setup",
+    description: "Setup your server (Server owners only)",
+  });
 });
 
 // Required to clean this code and make it work
@@ -40,4 +46,5 @@ client.on("interactionCreate", async (interaction) => {
   else if (commandName === "tasks") executeTasksCommand(interaction);
   else if (commandName === "leaderboard")
     executeLeaderboardCommand(interaction);
+  else if (commandName === "setup") executeSetupCommand(interaction);
 });
