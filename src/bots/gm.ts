@@ -3,7 +3,7 @@ import { client } from "../utils/discord";
 import { User } from "../database/models/user";
 import { assignRank } from "../utils/upadteRank";
 import { Organization } from "../database/models/organization";
-import { completeTask } from "../controller/task";
+import { completeTask } from "../controller/admin/task";
 import { Message } from "../database/models/message";
 import {
   findOrCreateServerProfile,

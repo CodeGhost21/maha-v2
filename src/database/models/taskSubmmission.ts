@@ -2,10 +2,11 @@ import mongoose, { Schema } from "mongoose";
 
 import { IOrganizationModel } from "./organization";
 import { IServerProfileModel } from "./serverProfile";
+import { TaskTypes } from "./tasks";
 
 export interface ITaskSubmission {
   name: string;
-  type: string;
+  type: TaskTypes;
   instructions: string;
   points: number;
 

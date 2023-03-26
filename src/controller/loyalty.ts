@@ -58,7 +58,7 @@ export const completeLoyaltyTask = async (
         });
         await newPointTransaction.save();
 
-        // res.send("done");
+        // res.json("done");
         return "Task completed successfully.";
       }
       return "Task failed. Please check if you have completed the task.";
@@ -136,5 +136,5 @@ export const getLoyalty = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
   // const userLoyalty = await user.getLoyalty();
   // res.json(userLoyalty);
-  res.send({});
+  res.json({});
 };

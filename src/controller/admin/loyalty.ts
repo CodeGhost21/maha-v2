@@ -90,7 +90,7 @@ export const completeLoyaltyTask = async (
         });
         await newPointTransaction.save();
 
-        // res.send("done");
+        // res.json("done");
         return "Task completed successfully.";
       }
       return "Task failed. Please check if you have completed the task.";
@@ -123,12 +123,12 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
       else completedLoyaltySubmission[taskType] = false;
     });
 
-    res.send(completedLoyaltySubmission);
+    res.json(completedLoyaltySubmission);
   }
 };
 
 export const types = async (req: Request, res: Response) => {
-  res.send(loyaltyTypes);
+  res.json(loyaltyTypes);
 };
 
 export const updateLoyalty = async (req: Request, res: Response) => {
@@ -146,7 +146,7 @@ export const updateLoyalty = async (req: Request, res: Response) => {
       loyalty.instruction = req.body.instruction || loyalty.instruction;
 
       await loyalty.save();
-      res.send({ success: true });
-    } else res.send({ success: false, message: "loyalty not found" });
+      res.json({ success: true });
+    } else res.json({ success: false, message: "loyalty not found" });
   }
 };

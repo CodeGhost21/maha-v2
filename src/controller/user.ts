@@ -106,6 +106,6 @@ export const allUsers = async (req: Request, res: Response) => {
       organizationId: userDetails.organizationId,
     });
 
-    res.send(users);
+    res.json(users);
   }
 };

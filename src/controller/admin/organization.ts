@@ -17,7 +17,7 @@ export const updateOrg = async (req: Request, res: Response) => {
   org.msgChannelId = req.body.msgChannelId || org.msgChannelId;
 
   await org.save();
-  res.send({ success: true });
+  res.json({ success: true });
 };
 
 export const getOrg = async (req: Request, res: Response) => {

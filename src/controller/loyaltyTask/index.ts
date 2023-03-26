@@ -94,7 +94,7 @@ export const completeLoyaltyTask = async (
 export const userLoyaltyTask = async (req: Request, res: Response) => {};
 
 export const types = async (req: Request, res: Response) => {
-  res.send(loyaltyTypes);
+  res.json(loyaltyTypes);
 };
 
 export const updateLoyalty = async (req: Request, res: Response) => {
@@ -112,7 +112,7 @@ export const updateLoyalty = async (req: Request, res: Response) => {
       loyalty.instruction = req.body.instruction || loyalty.instruction;
 
       await loyalty.save();
-      res.send({ success: true });
-    } else res.send({ success: false, message: "loyalty not found" });
+      res.json({ success: true });
+    } else res.json({ success: false, message: "loyalty not found" });
   }
 };
