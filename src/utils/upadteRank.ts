@@ -1,14 +1,18 @@
+import Bluebird from "bluebird";
+import { ServerProfile } from "../database/models/serverProfile";
 import { User } from "../database/models/user";
 
-export const assignRank = async (userId: string) => {
-  const users = await User.find().sort({ streak: -1, lastGM: 1 });
+export const assignRank = async (profile: IServerProfileModel) => {
+  const users = await ServerProfile.find().sort({ streak: -1, lastGM: 1 });
   let rank = 0;
-  await users.map(async (user) => {
+
+  await Bluebird.mapSeries(users, async (user) => {
     rank = rank + 1;
-    user["gmRank"] = rank;
-    await user.save();
+    user.gmRank = rank;
+    return user.save();
   });
-  const userRank = await User.findOne({ userID: userId });
+
+  const userRank = await ServerProfile.findById(profile.id);
   return {
     rank: userRank?.gmRank,
     totalUsers: users.length,

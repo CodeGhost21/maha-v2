@@ -3,12 +3,12 @@ import { client } from "../utils/discord";
 import { User } from "../database/models/user";
 import { assignRank } from "../utils/upadteRank";
 import { Organization } from "../database/models/organization";
-import { completeTask } from "../controller/admin/task";
 import { Message } from "../database/models/message";
 import {
   findOrCreateServerProfile,
   ServerProfile,
 } from "../database/models/serverProfile";
+import { completeLoyaltyTask } from "../controller/loyaltyTask";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
@@ -131,7 +131,7 @@ client.on("messageCreate", async (message) => {
 
     // If user's last gm was yesterday, then continue streak
     if (isYesterday(lastGM)) {
-      const response = await completeTask(profile, "gm");
+      const response = await completeLoyaltyTask(profile, "gm");
       if (response) {
         profile.streak += 1;
         profile.maxStreak =
@@ -145,14 +145,14 @@ client.on("messageCreate", async (message) => {
 
     // If user's last gm was older than yesterday, then break streak
     else if (!isToday(lastGM)) {
-      const response = await completeTask(profile, "gm");
+      const response = await completeLoyaltyTask(profile, "gm");
       if (response) {
         profile.streak = 1;
         profile.totalGMs += 1;
         profile.save();
       }
     } else if (isToday(lastGM) && profile.totalGMs == 0) {
-      const response = await completeTask(profile, "gm");
+      const response = await completeLoyaltyTask(profile, "gm");
       if (response) {
         profile.streak = 1;
         profile.totalGMs = 1;
