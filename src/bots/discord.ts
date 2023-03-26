@@ -41,10 +41,15 @@ client.on("interactionCreate", async (interaction) => {
 
   const { commandName } = interaction;
 
-  if (commandName === "profile") executeProfileCommand(interaction);
-  else if (commandName === "verify") executeVerifyCommand(interaction);
-  else if (commandName === "tasks") executeTasksCommand(interaction);
-  else if (commandName === "leaderboard")
-    executeLeaderboardCommand(interaction);
-  else if (commandName === "setup") executeSetupCommand(interaction);
+  try {
+    if (commandName === "profile") executeProfileCommand(interaction);
+    else if (commandName === "verify") executeVerifyCommand(interaction);
+    else if (commandName === "tasks") executeTasksCommand(interaction);
+    else if (commandName === "leaderboard")
+      executeLeaderboardCommand(interaction);
+    else if (commandName === "setup") executeSetupCommand(interaction);
+  } catch (error) {
+    console.log(error);
+    // TODO capture error on sentry
+  }
 });
