@@ -16,7 +16,13 @@ client.once("ready", () => {
 
   commands?.create({
     name: "verify",
-    description: "Verify you twitter and wallet",
+    description: "Verify you twitter/wallet and increase your loyalty.",
+  });
+
+  commands?.create({
+    name: "loyalty",
+    description:
+      "View your loyalty score. More loyalty earns you more points for every quest.",
   });
 
   commands?.create({
@@ -26,7 +32,7 @@ client.once("ready", () => {
 
   commands?.create({
     name: "leaderboard",
-    description: "View the leaderboard. See where you stand.",
+    description: "View the leaderboard. See where you stand amongst others.",
   });
 
   commands?.create({
