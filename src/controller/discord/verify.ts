@@ -30,7 +30,7 @@ export const executeVerifyCommand = async (
 
   const frontendUrl = urlJoin(
     nconf.get("FRONTEND_URL"),
-    `/verify?token=${token}`
+    `/#/verify?token=${token}`
   );
   const row = new MessageActionRow().addComponents(
     new MessageButton()

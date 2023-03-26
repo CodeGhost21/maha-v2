@@ -11,7 +11,7 @@ client.once("ready", () => {
 
   commands?.create({
     name: "profile",
-    description: "Shows your profile for Gift of Eden",
+    description: "View/Complete your profile",
   });
 
   commands?.create({
@@ -20,13 +20,13 @@ client.once("ready", () => {
   });
 
   commands?.create({
-    name: "tasks",
-    description: "Get your daily tasks here.",
+    name: "quests",
+    description: "Complete quests and earn points!",
   });
 
   commands?.create({
     name: "leaderboard",
-    description: "View the leaderboard.",
+    description: "View the leaderboard. See where you stand.",
   });
 
   commands?.create({
@@ -44,7 +44,7 @@ client.on("interactionCreate", async (interaction) => {
   try {
     if (commandName === "profile") executeProfileCommand(interaction);
     else if (commandName === "verify") executeVerifyCommand(interaction);
-    else if (commandName === "tasks") executeTasksCommand(interaction);
+    else if (commandName === "quests") executeTasksCommand(interaction);
     else if (commandName === "leaderboard")
       executeLeaderboardCommand(interaction);
     else if (commandName === "setup") executeSetupCommand(interaction);

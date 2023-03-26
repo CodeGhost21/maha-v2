@@ -24,7 +24,7 @@ export const executeSetupCommand = async (
   const org = await Organization.findOne({ guildId });
   if (!org) await Organization.create({ guildId });
 
-  // TODO gate this only to admins
+  // TODO gate this only to admins. if the user is not an admin then redirect to the install page.
 
   const { profile } = await findOrCreateServerProfile(
     interaction.user.id,

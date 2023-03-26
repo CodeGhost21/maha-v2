@@ -34,7 +34,7 @@ export const executeTasksCommand = async (
   );
   if (rowItem.length < 1) {
     await interaction.reply({
-      content: "No tasks have been listed yet.",
+      content: "No quests have been created yet.",
       ephemeral: true,
     });
   } else {
