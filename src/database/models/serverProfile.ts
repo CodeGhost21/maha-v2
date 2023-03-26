@@ -84,7 +84,7 @@ export const ServerProfile = mongoose.model<IServerProfileModel>(
   schema
 );
 
-export const findOrCreateWithDiscordId = async (
+export const findOrCreateServerProfile = async (
   discordId: string,
   guildId: string
 ) => {

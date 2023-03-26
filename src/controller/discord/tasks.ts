@@ -5,7 +5,7 @@ import {
   MessageSelectMenu,
 } from "discord.js";
 
-import { findOrCreateWithDiscordId } from "../../database/models/serverProfile";
+import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { Task } from "../../database/models/tasks";
 
 export const executeTasksCommand = async (
@@ -14,7 +14,7 @@ export const executeTasksCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { organization } = await findOrCreateWithDiscordId(
+  const { organization } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );

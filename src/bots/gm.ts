@@ -6,7 +6,7 @@ import { Organization } from "../database/models/organization";
 import { completeTask } from "../controller/task";
 import { Message } from "../database/models/message";
 import {
-  findOrCreateWithDiscordId,
+  findOrCreateServerProfile,
   ServerProfile,
 } from "../database/models/serverProfile";
 
@@ -43,7 +43,7 @@ client.on("messageCreate", async (message) => {
   if (message.channelId !== org.gmChannelId) return;
 
   // find and cerate user
-  const results = await findOrCreateWithDiscordId(message.author.id, guildId);
+  const results = await findOrCreateServerProfile(message.author.id, guildId);
   const user = results.user;
   const profile = results.profile;
 

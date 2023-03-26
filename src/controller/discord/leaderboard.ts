@@ -1,6 +1,6 @@
 import { CacheType, CommandInteraction } from "discord.js";
 import {
-  findOrCreateWithDiscordId,
+  findOrCreateServerProfile,
   ServerProfile,
 } from "../../database/models/serverProfile";
 
@@ -27,7 +27,7 @@ export const executeLeaderboardCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { profile } = await findOrCreateWithDiscordId(
+  const { profile } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );

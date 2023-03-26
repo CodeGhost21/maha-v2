@@ -8,7 +8,7 @@ import {
 import nconf from "nconf";
 import * as jwt from "jsonwebtoken";
 
-import { findOrCreateWithDiscordId } from "../../database/models/serverProfile";
+import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import urlJoin from "../../utils/urlJoin";
 
 const jwtSecret = nconf.get("JWT_SECRET");
@@ -19,7 +19,7 @@ export const executeVerifyCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { user } = await findOrCreateWithDiscordId(
+  const { user } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );

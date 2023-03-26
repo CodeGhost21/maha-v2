@@ -9,7 +9,7 @@ import {
   LoyaltyTask,
   LoyaltyTaskType,
 } from "../../database/models/loyaltyTasks";
-import { findOrCreateWithDiscordId } from "../../database/models/serverProfile";
+import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 import { completeLoyaltyTask } from "../loyaltyTask";
 
@@ -19,7 +19,7 @@ export const executeProfileCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { profile, user } = await findOrCreateWithDiscordId(
+  const { profile, user } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );
