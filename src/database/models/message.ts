@@ -1,18 +1,19 @@
 import mongoose, { Schema } from "mongoose";
+import { IOrganizationModel } from "./organization";
+import { IServerProfileModel } from "./serverProfile";
 
 export interface IMessage {
   content: string;
-  userTag: string;
-  userID: string;
+  profileId: IServerProfileModel;
+  organizationId: IOrganizationModel;
   dateTime: Date;
 }
 
 const schema = new Schema(
   {
     content: String,
-    userTag: String,
-    userID: String,
-    // userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    profileId: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
+    organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
     dateTime: Date,
   },
   {

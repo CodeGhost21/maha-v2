@@ -110,8 +110,8 @@ export const executeGMstatement = async (
   if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
     const newMessage = new Message({
       content: message.cleanContent,
-      userTag: message.author.tag,
-      userID: message.author.id,
+      profileId: profile.id,
+      organizationId: profile.organizationId,
       dateTime: message.createdAt,
     });
 

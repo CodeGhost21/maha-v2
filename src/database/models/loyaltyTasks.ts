@@ -2,7 +2,7 @@
 
 import mongoose, { Document, Schema } from "mongoose";
 import { IOrganizationModel } from "./organization";
-import { IUserModel } from "./user";
+import { IServerProfileModel } from "./serverProfile";
 
 export type LoyaltyTaskType =
   | "twitter_profile"
@@ -16,7 +16,8 @@ export interface ILoyaltyTask {
   instruction: string;
   weight: number;
   needsModeration: boolean;
-  createdBy: IUserModel;
+
+  createdBy: IServerProfileModel;
   organizationId: IOrganizationModel;
 }
 
@@ -37,7 +38,7 @@ const loyaltyTask = new Schema(
     createdBy: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "User",
+      ref: "ServerProfile",
     },
     organizationId: {
       type: Schema.Types.ObjectId,

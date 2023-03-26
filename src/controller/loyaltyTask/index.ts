@@ -63,7 +63,7 @@ export const completeLoyaltyTask = async (
   if (!organization) throw new NotFoundError("organization not found");
 
   await LoyaltySubmission.create({
-    profile,
+    profileId: profile.id,
     organizationId: organization.id,
     type: loyaltyTask.type,
     totalWeight: loyaltyTask.weight,

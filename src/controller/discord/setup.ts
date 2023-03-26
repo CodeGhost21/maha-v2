@@ -10,6 +10,7 @@ import {
 
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import urlJoin from "../../utils/urlJoin";
+import { Organization } from "../../database/models/organization";
 
 const jwtSecret = nconf.get("JWT_SECRET");
 
@@ -19,10 +20,17 @@ export const executeSetupCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
+  // find or create the org if it doesn't exist
+  const org = await Organization.findOne({ guildId });
+  if (!org) await Organization.create({ guildId });
+
+  // TODO gate this only to admins
+
   const { profile } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );
+
   // 7 day expiry
   const expiry = Date.now() + 86400000 * 7;
 

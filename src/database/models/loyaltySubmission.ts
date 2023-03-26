@@ -13,7 +13,7 @@ export interface ILoyaltySubmission {
   totalWeight: number;
   instructions: string;
 
-  profile: IUserModel;
+  profileId: IUserModel;
   approvedBy: IUserModel;
   organizationId: IOrganizationModel;
 }
@@ -30,7 +30,7 @@ const loyaltySubmission = new Schema(
     instructions: String,
 
     approvedBy: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
-    profile: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
+    profileId: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
   },
   { timestamps: true }
