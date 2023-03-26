@@ -1,73 +1,20 @@
 import { Request, Response } from "express";
-import * as web3 from "../utils/web3";
-import { sendRequest } from "../library/sendRequest";
-import { imageComparing } from "../library/imageComparer";
 import {
   ILoyaltySubmission,
   LoyaltySubmission,
-} from "../database/models/loyaltySubmission";
-import { ILoyaltyTask, LoyaltyTask } from "../database/models/loyaltyTasks";
-import { Organization } from "../database/models/organization";
-import { PointTransaction } from "../database/models/pointTransaction";
-import { IUserModel, User } from "../database/models/user";
-import { fetchTwitterProfile } from "./user";
-import { orgLoyaltyTask } from "./organization";
+} from "../../database/models/loyaltySubmission";
+import { LoyaltyTask } from "../../database/models/loyaltyTasks";
+import { Organization } from "../../database/models/organization";
+import { PointTransaction } from "../../database/models/pointTransaction";
+import { IUserModel, User } from "../../database/models/user";
+import { getLoyaltyTasks } from "./organization";
 
 const loyaltyTypes = ["twitter_profile", "discord_profile"];
 
-const profileImageComparing = async (
-  profileImageUrl: string,
-  size: number,
-  walletAddress: string
-) => {
-  // resize image for image comparing
-  const noOfNFTs = await web3.balanceOf(walletAddress);
-
-  if (noOfNFTs == 0) return false;
-
-  for (let i = 0; i < noOfNFTs; i++) {
-    const nftId = await web3.tokenOfOwnerByIndex(walletAddress, i);
-    const tokenUri = await web3.tokenURI(nftId);
-
-    const data = await sendRequest<string>("get", tokenUri);
-    const nftMetadata = JSON.parse(data);
-
-    const response = await imageComparing(
-      profileImageUrl,
-      nftMetadata.image,
-      size
-    );
-
-    if (response) return true;
-  }
-
-  return false;
-};
-
-const checkLoyalty = async (user: any, loyaltyType: string) => {
-  if (loyaltyType === "gm") {
-    if (user.totalGMs > 0) return true;
-  } else if (loyaltyType === "twitter_profile") {
-    const twitterProfile = await fetchTwitterProfile(user);
-    const twitterCheck = await profileImageComparing(
-      twitterProfile,
-      48,
-      user.walletAddress
-    );
-    return twitterCheck;
-  }
-  return false;
-};
-
 export const allLoyaltyTask = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
-  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
-  if (userDetails) {
-    const loyaltyTasks = await LoyaltyTask.find({
-      organizationId: userDetails.organizationId,
-    });
-    res.send(loyaltyTasks);
-  }
+  const organizationId = req.params.orgId;
+  const loyaltyTasks = await LoyaltyTask.find({ organizationId });
+  res.json(loyaltyTasks);
 };
 
 export const addLoyaltyTask = async (req: Request, res: Response) => {
@@ -182,7 +129,7 @@ export const userLoyaltyTask = async (req: Request, res: Response) => {
     _id: userDetails.organizationId,
   });
   if (userDetails) {
-    const loyaltyTasks = await orgLoyaltyTask(organizationDetails.id);
+    const loyaltyTasks = await getLoyaltyTasks(organizationDetails.id);
     const allLoyaltySubmission = await LoyaltySubmission.find({
       organizationId: userDetails.organizationId,
       approvedBy: userDetails.id,

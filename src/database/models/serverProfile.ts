@@ -1,0 +1,82 @@
+import mongoose, { Schema } from "mongoose";
+import { IOrganizationModel } from "./organization";
+import { IUserModel, User } from "./user";
+
+export interface IServerProfile {
+  organizationId: IOrganizationModel;
+  userId: IUserModel;
+  isModerator: boolean;
+
+  streak: number;
+  maxStreak: number;
+  totalGMs: number;
+  lastGM: Date;
+  gmRank: number;
+
+  totalPoints: number;
+  loyaltyWeight: number;
+  stakedMaha: boolean;
+
+  // getLoyalty: () => Promise<ILoyaltyModel>;
+  getUser: () => Promise<IUserModel>;
+}
+
+const schema = new mongoose.Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
+    isModerator: { type: Boolean, default: false },
+
+    streak: { type: Number, default: 0 },
+    maxStreak: { type: Number, default: 0 },
+    totalGMs: { type: Number, default: 0 },
+    lastGM: Date,
+    gmRank: { type: Number, default: 0 },
+
+    walletAddress: { type: String, default: "" },
+
+    discordVerify: { type: Boolean, default: false },
+    discordName: { type: String, default: "" },
+    discordDiscriminator: { type: String, default: "" },
+    discordAvatar: { type: String, default: "" },
+
+    // adding a point => totalPoints += points * ((maxBoost * loyalty) + 1)
+    // eg: MaxBoost = 5; loyalty = 0%; points = 100
+    // ---> totalPoints += 100 * (2.5 + 1) => 100 * 3.5 => 350
+    totalPoints: { type: Number, default: 0 },
+
+    // this gets recalculated every time a user performs a loyalty task
+    loyaltyWeight: { type: Number, default: 0 }, // 0-1
+    stakedMaha: { type: Boolean, default: false },
+
+    twitterOauthAccessToken: String,
+    twitterOauthAccessTokenSecret: String,
+    twitterRequestTokenSecret: String,
+    twitterRequestToken: String,
+
+    discordOauthAccessToken: { type: String },
+    discordOauthAccessTokenSecret: { type: String },
+    discordOauthAccessTokenExpiry: Date,
+  },
+  {
+    timestamps: true,
+  }
+);
+
+schema.methods.getUser = async function () {
+  return await User.findById(this.userID);
+};
+
+export type IServerProfileModel = IServerProfile & mongoose.Document;
+export const ServerProfile = mongoose.model<IServerProfileModel>(
+  "ServerProfile",
+  schema
+);

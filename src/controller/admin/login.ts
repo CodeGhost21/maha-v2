@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import nconf from "nconf";
 import * as jwt from "jsonwebtoken";
-import urlJoin from "../utils/urlJoin";
-import { IUserModel } from "../database/models/user";
+import urlJoin from "../../utils/urlJoin";
+import { IUserModel } from "../../database/models/user";
 
 const jwtSecret = nconf.get("JWT_SECRET");
 const successRedirect = urlJoin(nconf.get("DOMAIN"), "/discord/redirect");

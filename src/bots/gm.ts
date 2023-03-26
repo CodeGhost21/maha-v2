@@ -7,6 +7,7 @@ import { PointTransaction } from "../database/models/pointTransaction";
 import { Organization } from "../database/models/organization";
 import { completeTask } from "../controller/task";
 import { Message } from "../database/models/message";
+
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 const total_icons = [

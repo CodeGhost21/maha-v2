@@ -1,10 +1,10 @@
 import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
-import { IUser } from "./user";
 import { ITaskModel } from "./tasks";
+import { IServerProfileModel } from "./serverProfile";
 
 export interface IPointTransaction {
-  userId: IUser;
+  profileId: IServerProfileModel;
   taskId: ITaskModel;
   metadata: any;
   type: string;
@@ -20,7 +20,7 @@ export interface IPointTransaction {
 
 const schema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
+    profileId: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
     taskId: { type: Schema.Types.ObjectId, ref: "Task" },
     metadata: { type: Object, default: {} },
     type: { type: String, default: "" },

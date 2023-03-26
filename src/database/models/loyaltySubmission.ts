@@ -3,8 +3,7 @@
 // user -> loyaltySubmissions = one-to-many
 
 import mongoose, { Document, Schema } from "mongoose";
-import { IUser, IUserModel } from "./user";
-import { ILoyaltyTaskModel } from "./loyaltyTasks";
+import { IUserModel } from "./user";
 import { IOrganizationModel } from "./organization";
 
 export interface ILoyaltySubmission {
@@ -12,6 +11,8 @@ export interface ILoyaltySubmission {
   type: string;
   totalWeight: number;
   instructions: string;
+
+  profile: IUserModel;
   approvedBy: IUserModel;
   organizationId: IOrganizationModel;
 }
@@ -26,7 +27,9 @@ const loyaltySubmission = new Schema(
     },
     totalWeight: Number,
     instructions: String,
-    approvedBy: { type: Schema.Types.ObjectId, ref: "User" },
+
+    approvedBy: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
+    profile: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
   },
   { timestamps: true }
