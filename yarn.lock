@@ -1960,11 +1960,6 @@
   resolved "https://registry.npmjs.org/@types/chai/-/chai-4.3.1.tgz"
   integrity sha512-/zPMqDkzSZ8t3VtxOa4KPq7uzzW978M9Tvh+j7GHKuo6k6GTLxPJ4J5gE5cjfJ26pnXst0N5Hax8Sr0T2Mi9zQ==
 
-"@types/coingecko-api@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.npmjs.org/@types/coingecko-api/-/coingecko-api-1.0.10.tgz"
-  integrity sha512-ENJO5JzV7qTj8GfrRWAy8lom4RPQv03stvw2z9riz0z7WOXcaorc8OPov8JEekoGQ397O1BbvgPjZj7bWgqdgg==
-
 "@types/connect@*":
   version "3.4.35"
   resolved "https://registry.npmjs.org/@types/connect/-/connect-3.4.35.tgz"
@@ -2103,42 +2098,10 @@
   resolved "https://registry.npmjs.org/@types/numeral/-/numeral-2.0.2.tgz"
   integrity sha512-A8F30k2gYJ/6e07spSCPpkuZu79LCnkPTvqmIWQzNGcrzwFKpVOydG41lNt5wZXjSI149qjyzC2L1+F2PD/NUA==
 
-"@types/oauth@*":
-  version "0.9.1"
-  resolved "https://registry.npmjs.org/@types/oauth/-/oauth-0.9.1.tgz"
-  integrity sha512-a1iY62/a3yhZ7qH7cNUsxoI3U/0Fe9+RnuFrpTKr+0WVOzbKlSLojShCKe20aOD1Sppv+i8Zlq0pLDuTJnwS4A==
-  dependencies:
-    "@types/node" "*"
-
 "@types/parse-json@^4.0.0":
   version "4.0.0"
   resolved "https://registry.npmjs.org/@types/parse-json/-/parse-json-4.0.0.tgz"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
-
-"@types/passport-discord@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.npmjs.org/@types/passport-discord/-/passport-discord-0.1.6.tgz"
-  integrity sha512-fB9JMzNDzx9ToIsd5fGYpYrwGmqhPhebyFFb3eFL3u5dY1R8K42pszAXSeCXTZxbf1WZpLsydTUNbciqmDkqCg==
-  dependencies:
-    "@types/express" "*"
-    "@types/passport" "*"
-    "@types/passport-oauth2" "*"
-
-"@types/passport-oauth2@*":
-  version "1.4.12"
-  resolved "https://registry.npmjs.org/@types/passport-oauth2/-/passport-oauth2-1.4.12.tgz"
-  integrity sha512-RZg6cYTyEGinrZn/7REYQds6zrTxoBorX1/fdaz5UHzkG8xdFE7QQxkJagCr2ETzGII58FAFDmnmbTUVMrltNA==
-  dependencies:
-    "@types/express" "*"
-    "@types/oauth" "*"
-    "@types/passport" "*"
-
-"@types/passport@*", "@types/passport@^1.0.12":
-  version "1.0.12"
-  resolved "https://registry.npmjs.org/@types/passport/-/passport-1.0.12.tgz"
-  integrity sha512-QFdJ2TiAEoXfEQSNDISJR1Tm51I78CymqcBa8imbjo6dNNu+l2huDxxbDEIoFIwOSKMkOfHEikyDuZ38WwWsmw==
-  dependencies:
-    "@types/express" "*"
 
 "@types/pbkdf2@^3.0.0":
   version "3.1.0"
@@ -2643,11 +2606,6 @@ base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
-
-base64url@3.x.x:
-  version "3.0.1"
-  resolved "https://registry.npmjs.org/base64url/-/base64url-3.0.1.tgz"
-  integrity sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==
 
 bcrypt-pbkdf@^1.0.0:
   version "1.0.2"
@@ -3172,11 +3130,6 @@ clone@^1.0.2:
   version "1.0.4"
   resolved "https://registry.npmjs.org/clone/-/clone-1.0.4.tgz"
   integrity sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==
-
-coingecko-api@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.npmjs.org/coingecko-api/-/coingecko-api-1.0.10.tgz"
-  integrity sha512-7YLLC85+daxAw5QlBWoHVBVpJRwoPr4HtwanCr8V/WRjoyHTa1Lb9DQAvv4MDJZHiz4no6HGnDQnddtjV35oRA==
 
 color-convert@^1.9.0:
   version "1.9.3"
@@ -6986,7 +6939,7 @@ oauth-sign@~0.9.0:
   resolved "https://registry.npmjs.org/oauth-sign/-/oauth-sign-0.9.0.tgz"
   integrity sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==
 
-oauth@0.9.x, oauth@^0.9.15:
+oauth@^0.9.15:
   version "0.9.15"
   resolved "https://registry.npmjs.org/oauth/-/oauth-0.9.15.tgz"
   integrity sha1-vR/vr2hslrdUda7VGWQS/2DPucE=
@@ -7267,38 +7220,6 @@ parseurl@~1.3.3:
   resolved "https://registry.npmjs.org/parseurl/-/parseurl-1.3.3.tgz"
   integrity sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==
 
-passport-discord@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.npmjs.org/passport-discord/-/passport-discord-0.1.4.tgz"
-  integrity sha512-VJWPYqSOmh7SaCLw/C+k1ZqCzJnn2frrmQRx1YrcPJ3MQ+Oa31XclbbmqFICSvl8xv3Fqd6YWQ4H4p1MpIN9rA==
-  dependencies:
-    passport-oauth2 "^1.5.0"
-
-passport-oauth2@^1.5.0:
-  version "1.6.1"
-  resolved "https://registry.npmjs.org/passport-oauth2/-/passport-oauth2-1.6.1.tgz"
-  integrity sha512-ZbV43Hq9d/SBSYQ22GOiglFsjsD1YY/qdiptA+8ej+9C1dL1TVB+mBE5kDH/D4AJo50+2i8f4bx0vg4/yDDZCQ==
-  dependencies:
-    base64url "3.x.x"
-    oauth "0.9.x"
-    passport-strategy "1.x.x"
-    uid2 "0.0.x"
-    utils-merge "1.x.x"
-
-passport-strategy@1.x.x:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/passport-strategy/-/passport-strategy-1.0.0.tgz"
-  integrity sha512-CB97UUvDKJde2V0KDWWB3lyf6PC3FaZP7YxZ2G8OAtn9p4HI9j9JLP9qjOGZFvyl8uwNT8qM+hGnz/n16NI7oA==
-
-passport@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.npmjs.org/passport/-/passport-0.6.0.tgz"
-  integrity sha512-0fe+p3ZnrWRW74fe8+SvCyf4a3Pb2/h7gFkQ8yTJpAO50gDzlfjZUZTO1k5Eg9kUct22OxHLqDZoKUWRHOh9ug==
-  dependencies:
-    passport-strategy "1.x.x"
-    pause "0.0.1"
-    utils-merge "^1.0.1"
-
 path-exists@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/path-exists/-/path-exists-3.0.0.tgz"
@@ -7350,11 +7271,6 @@ pathval@^1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/pathval/-/pathval-1.1.1.tgz"
   integrity sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==
-
-pause@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.npmjs.org/pause/-/pause-0.0.1.tgz"
-  integrity sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==
 
 pbkdf2@^3.0.17, pbkdf2@^3.0.3:
   version "3.1.2"
@@ -8859,11 +8775,6 @@ uid-safe@~2.1.5:
   dependencies:
     random-bytes "~1.0.0"
 
-uid2@0.0.x:
-  version "0.0.4"
-  resolved "https://registry.npmjs.org/uid2/-/uid2-0.0.4.tgz"
-  integrity sha512-IevTus0SbGwQzYh3+fRsAMTVVPOoIVufzacXcHPmdlle1jUpq7BRL+mw3dgeLanvGZdwwbWhRV6XrcFNdBmjWA==
-
 ultron@~1.1.0:
   version "1.1.1"
   resolved "https://registry.npmjs.org/ultron/-/ultron-1.1.1.tgz"
@@ -8993,7 +8904,7 @@ util@^0.12.0:
     safe-buffer "^5.1.2"
     which-typed-array "^1.1.2"
 
-utils-merge@1.0.1, utils-merge@1.x.x, utils-merge@^1.0.1:
+utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
