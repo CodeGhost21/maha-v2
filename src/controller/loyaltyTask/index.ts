@@ -43,7 +43,9 @@ export const completeLoyaltyTask = async (
   });
 
   if (!profile) throw new NotFoundError("profile not found");
-  if (!loyaltyTask) throw new NotFoundError("loyaltyTask not found");
+
+  // if there was no loyalty task here; then we skip. no points given
+  if (!loyaltyTask) return true;
 
   const checkLoyaltySubmission = await LoyaltySubmission.findOne({
     type: type,
