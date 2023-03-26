@@ -1,6 +1,6 @@
 import { Router } from "express";
 import ensureLoggedIn from "../middleware/ensureLoggedIn";
-import { getLoyalty } from "../controller/loyalty";
+import { getLoyalty } from "../../controller/admin/loyalty";
 
 const router = Router();
 

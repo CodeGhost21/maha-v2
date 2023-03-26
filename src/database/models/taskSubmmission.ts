@@ -1,13 +1,16 @@
 import mongoose, { Schema } from "mongoose";
-import { IUserModel } from "./user";
+
 import { IOrganizationModel } from "./organization";
+import { IServerProfileModel } from "./serverProfile";
 
 export interface ITaskSubmission {
   name: string;
   type: string;
   instructions: string;
   points: number;
-  approvedBy: IUserModel; // moderator
+
+  profileId: IServerProfileModel;
+  approvedBy: IServerProfileModel; // moderator
   organizationId: IOrganizationModel;
 }
 
@@ -22,8 +25,18 @@ const taskSubmissionSchema = new mongoose.Schema(
     },
     instructions: String,
     points: Number,
-    approvedBy: { type: Schema.Types.ObjectId, ref: "User" }, // moderator
-    organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
+
+    profileId: {
+      type: Schema.Types.ObjectId,
+      ref: "ServerProfile",
+      required: true,
+    },
+    approvedBy: { type: Schema.Types.ObjectId, ref: "ServerProfile" }, // moderator
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
   },
   {
     timestamps: true,

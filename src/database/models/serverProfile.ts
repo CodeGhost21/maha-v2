@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-import { IOrganizationModel } from "./organization";
+import BadRequestError from "../../errors/BadRequestError";
+import { IOrganizationModel, Organization } from "./organization";
 import { IUserModel, User } from "./user";
 
 export interface IServerProfile {
@@ -75,8 +76,62 @@ schema.methods.getUser = async function () {
   return await User.findById(this.userID);
 };
 
+schema.index({ userId: 1, organizationId: 1 }, { unique: true });
+
 export type IServerProfileModel = IServerProfile & mongoose.Document;
 export const ServerProfile = mongoose.model<IServerProfileModel>(
   "ServerProfile",
   schema
 );
+
+export const findOrCreateWithDiscordId = async (
+  discordId: string,
+  guildId: string
+) => {
+  const org = await Organization.findOne({ guildId });
+  if (!org) throw new BadRequestError("org not registered");
+
+  const user = await User.findOne({ discordId });
+  if (user) {
+    const profile = await ServerProfile.findOne({
+      userId: user.id,
+      organizationId: org.id,
+    });
+
+    if (profile)
+      return {
+        profile,
+        userCreated: false,
+        profileCreated: false,
+        user,
+        organization: org,
+      };
+
+    const newProfile = await ServerProfile.create({
+      userId: user.id,
+      organizationId: org.id,
+    });
+
+    return {
+      profile: newProfile,
+      userCreated: false,
+      profileCreated: true,
+      user,
+      organization: org,
+    };
+  }
+
+  const newUser = await User.create({ discordId });
+  const profile = await ServerProfile.create({
+    userId: newUser.id,
+    organizationId: org.id,
+  });
+
+  return {
+    profile,
+    userCreated: true,
+    profileCreated: true,
+    user: newUser,
+    organization: org,
+  };
+};

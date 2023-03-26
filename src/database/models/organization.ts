@@ -5,6 +5,7 @@ export interface IOrganization {
   msgChannelId: string;
   feedChannelId: string;
   guildId: string;
+  gmChannelId: string;
   maxBoost: number;
 }
 
@@ -14,6 +15,7 @@ const organization = new mongoose.Schema(
     guildId: String, // Discord server id
     maxBoost: { type: Number, min: 0, max: 100 }, // eg: 10
     msgChannelId: String,
+    gmChannelId: String,
     feedChannelId: String,
   },
   {

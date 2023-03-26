@@ -8,6 +8,10 @@ import {
 import { PointTransaction } from "../database/models/pointTransaction";
 import { Organization } from "../database/models/organization";
 import { getTasks } from "./admin/organization";
+import {
+  IServerProfile,
+  IServerProfileModel,
+} from "../database/models/serverProfile";
 
 const taskTypes = ["gm", "hold_nft", "follow_twitter"];
 
@@ -64,8 +68,11 @@ export const deleteTask = async (req: Request, res: Response) => {
   }
 };
 
-export const completeTask = async (user: IUserModel, taskType: string) => {
-  const org = await Organization.findById(user.organizationId);
+export const completeTask = async (
+  profile: IServerProfileModel,
+  taskType: string
+) => {
+  const org = await Organization.findById(profile.organizationId);
   if (!org) return;
 
   const taskDetails = await Task.findOne({
@@ -79,24 +86,24 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
       type: taskDetails.type,
       instruction: taskDetails.instruction,
       points: taskDetails.points,
-      approvedBy: user.id,
-      organizationId: user.organizationId,
+      profileId: profile.id,
+      organizationId: profile.organizationId,
     });
     await newTaskSubmission.save();
 
     const taskTotalPoints =
-      taskDetails.points * (org.maxBoost * user.loyaltyWeight + 1);
-    user.totalPoints += taskTotalPoints;
-    await user.save();
+      taskDetails.points * (org.maxBoost * profile.loyaltyWeight + 1);
+    profile.totalPoints += taskTotalPoints;
+    await profile.save();
 
     const newPointTransaction = new PointTransaction({
-      userId: user.id,
+      userId: profile.id,
       taskId: taskDetails.id,
       type: taskDetails.type,
       totalPoints: taskTotalPoints,
       addPoints: taskDetails.points,
-      boost: org.maxBoost * user.loyaltyWeight,
-      loyalty: user.loyaltyWeight,
+      boost: org.maxBoost * profile.loyaltyWeight,
+      loyalty: profile.loyaltyWeight,
     });
     await newPointTransaction.save();
 

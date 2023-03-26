@@ -1,7 +1,6 @@
 import * as http from "http";
 import bodyParser from "body-parser";
 import cors from "cors";
-import cron from "node-cron";
 import express, { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import session from "express-session";
@@ -12,10 +11,11 @@ import * as database from "./database";
 import "./bots/gm";
 import "./strategies/discord";
 import routes from "./routes";
-import { dailyMahaXRewards } from "./controller/rewards";
+import * as cron from "./cron";
 import HttpError from "./errors/HttpError";
 
 database.open();
+cron.init();
 
 const app = express();
 const server = new http.Server(app);
@@ -23,11 +23,6 @@ const server = new http.Server(app);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-cron.schedule("0 0 * * *", async () => {
-  console.log("running a task every minute");
-  dailyMahaXRewards();
-});
 
 app.use(
   session({

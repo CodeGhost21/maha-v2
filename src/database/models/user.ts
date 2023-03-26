@@ -11,15 +11,17 @@ export interface IUser {
   twitterBanner: string;
 
   walletAddress: string;
-  discordVerify: boolean;
+
+  discordVerify: string;
   discordName: string;
   discordId: string;
+  discordTag: string;
   discordDiscriminator: string;
+  discordAvatar: string;
 
   discordOauthAccessToken: string;
   discordOauthAccessTokenExpiry: Date;
   discordOauthRefreshToken: string;
-  discordAvatar: string;
 
   twitterOauthAccessToken: string;
   twitterOauthAccessTokenSecret: string;
@@ -41,6 +43,7 @@ const schema = new mongoose.Schema(
     discordVerify: String,
     discordName: String,
     discordId: String,
+    discordTag: String,
     discordDiscriminator: String,
     discordAvatar: String,
 

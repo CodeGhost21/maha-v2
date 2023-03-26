@@ -6,8 +6,9 @@ import {
 import { LoyaltyTask } from "../../database/models/loyaltyTasks";
 import { Organization } from "../../database/models/organization";
 import { PointTransaction } from "../../database/models/pointTransaction";
+import { IServerProfileModel } from "../../database/models/serverProfile";
 import { IUserModel, User } from "../../database/models/user";
-import { getLoyaltyTasks } from "./organization";
+import BadRequestError from "../../errors/BadRequestError";
 
 const loyaltyTypes = ["twitter_profile", "discord_profile"];
 
@@ -18,50 +19,27 @@ export const allLoyaltyTask = async (req: Request, res: Response) => {
 };
 
 export const addLoyaltyTask = async (req: Request, res: Response) => {
-  console.log(req.body);
+  const profile = req.user as IServerProfileModel;
 
-  const user = req.user as IUserModel;
-  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
-  if (userDetails) {
-    const checkLoyaltyTask = await LoyaltyTask.findOne({
-      $and: [
-        { organizationId: userDetails.organizationId },
-        { type: req.body.type },
-      ],
-    });
-    if (!checkLoyaltyTask) {
-      const newLoyaltyTask = new LoyaltyTask({
-        name: req.body.name,
-        type: req.body.type,
-        instruction: req.body.instruction,
-        weight: req.body.weight,
-        organizationId: userDetails.organizationId,
-      });
-      await newLoyaltyTask.save();
-      res.send(newLoyaltyTask);
-    } else {
-      res.send("already added");
-    }
-  } else {
-    res.send("not authorized");
-  }
+  const checkLoyaltyTask = await LoyaltyTask.findOne({
+    $and: [{ organizationId: profile.organizationId }, { type: req.body.type }],
+  });
+
+  if (checkLoyaltyTask) throw new BadRequestError("already added");
+
+  const newLoyaltyTask = await LoyaltyTask.create({
+    name: req.body.name,
+    type: req.body.type,
+    instruction: req.body.instruction,
+    weight: req.body.weight,
+    organizationId: profile.organizationId,
+  });
+
+  res.json(newLoyaltyTask);
 };
 
 export const deleteLoyaltyTask = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
-  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
-
-  if (userDetails) {
-    const checkLoyaltyTask = await LoyaltyTask.findOne({
-      _id: req.body.taskId,
-    });
-    if (checkLoyaltyTask) {
-      await LoyaltyTask.deleteOne({ _id: checkLoyaltyTask._id });
-      res.send({ success: true });
-    }
-  } else {
-    res.send({ success: false });
-  }
 };
 
 export const completeLoyaltyTask = async (

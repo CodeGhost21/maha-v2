@@ -3,23 +3,21 @@ import {
   addLoyaltyTask,
   deleteLoyaltyTask,
   allLoyaltyTask,
-  // completeLoyaltyTask,
   userLoyaltyTask,
   types,
   updateLoyalty,
-} from "../controller/loyaltyTask";
-import ensureLoggedIn from "../middleware/ensureLoggedIn";
+} from "../../controller/admin/loyalty";
+import ensureLoggedIn from "../../middleware/ensureLoggedIn";
 
 const router = Router();
 
 router.get("/types", types);
 
 router.use(ensureLoggedIn);
-router.post("/add", addLoyaltyTask);
-router.delete("/delete", deleteLoyaltyTask);
-router.get("/get", allLoyaltyTask);
-// router.post("/completeLoyalty", completeLoyaltyTask);
-router.get("/userLoyalties", userLoyaltyTask);
-router.put("/update", updateLoyalty);
+router.post("/", addLoyaltyTask);
+router.delete("/:id", deleteLoyaltyTask);
+router.get("/", allLoyaltyTask);
+router.get("/user/:id", userLoyaltyTask);
+router.put("/:id", updateLoyalty);
 
 export default router;
