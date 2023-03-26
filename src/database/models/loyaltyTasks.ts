@@ -4,9 +4,15 @@ import mongoose, { Document, Schema } from "mongoose";
 import { IOrganizationModel } from "./organization";
 import { IUserModel } from "./user";
 
+export type LoyaltyTaskType =
+  | "twitter_profile"
+  | "discord_profile"
+  | "revoke_opensea"
+  | "gm";
+
 export interface ILoyaltyTask {
   name: string;
-  type: "twitter_profile" | "discord_profile" | "revoke_opensea" | "gm";
+  type: LoyaltyTaskType;
   instruction: string;
   weight: number;
   needsModeration: boolean;

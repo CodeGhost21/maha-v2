@@ -1,6 +1,9 @@
 import { Router } from "express";
 
-import { loginWithDiscord, verifyWithDiscord } from "../controller/admin/login";
+import {
+  loginWithDiscord,
+  verifyWithDiscord,
+} from "../../controller/admin/login";
 
 const router = Router();
 

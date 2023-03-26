@@ -3,7 +3,10 @@ import {
   ILoyaltySubmission,
   LoyaltySubmission,
 } from "../../database/models/loyaltySubmission";
-import { LoyaltyTask } from "../../database/models/loyaltyTasks";
+import {
+  LoyaltyTask,
+  LoyaltyTaskType,
+} from "../../database/models/loyaltyTasks";
 import { Organization } from "../../database/models/organization";
 import { PointTransaction } from "../../database/models/pointTransaction";
 import { IUserModel, User } from "../../database/models/user";
@@ -12,6 +15,7 @@ import { getLoyaltyTasks } from "../admin/organization";
 import { profileImageComparing } from "../../utils/image";
 import {
   IServerProfile,
+  IServerProfileModel,
   ServerProfile,
 } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
@@ -36,14 +40,11 @@ const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
 };
 
 export const completeLoyaltyTask = async (
-  userId: string,
-  organizationId: string,
-  type: string
+  profile: IServerProfileModel,
+  type: LoyaltyTaskType
 ) => {
-  const profile = await ServerProfile.findOne({ userId, organizationId });
-
   const loyaltyTask = await LoyaltyTask.findOne({
-    organizationId,
+    organizationId: profile.organizationId,
     type,
   });
 

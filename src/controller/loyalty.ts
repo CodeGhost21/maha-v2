@@ -1,37 +1,71 @@
-import { sendRequest } from "../library/sendRequest";
-import { fetchTwitterProfile } from "./user";
-import { imageComparing } from "../library/imageComparer";
-import * as web3 from "../utils/web3";
 import { Request, Response } from "express";
-import { IUserModel } from "../database/models/user";
+import {
+  ILoyaltySubmission,
+  LoyaltySubmission,
+} from "../database/models/loyaltySubmission";
+import { LoyaltyTask } from "../database/models/loyaltyTasks";
+import { Organization } from "../database/models/organization";
+import { PointTransaction } from "../database/models/pointTransaction";
+import { IServerProfileModel } from "../database/models/serverProfile";
+import { IUserModel, User } from "../database/models/user";
+import BadRequestError from "../errors/BadRequestError";
 
-const profileImageComparing = async (
-  profileImageUrl: string,
-  size: number,
-  walletAddress: string
+export const completeLoyaltyTask = async (
+  userDiscordId: string,
+  type: string
 ) => {
-  // resize image for image comparing
-  const noOfNFTs = await web3.balanceOf(walletAddress);
+  const userDetails = await User.findOne({ userID: userDiscordId });
+  if (userDetails) {
+    const checkLoyaltySubmission = await LoyaltySubmission.findOne({
+      type: type,
+      approvedBy: userDetails.id,
+      organizationId: userDetails.organizationId,
+    });
+    if (!checkLoyaltySubmission) {
+      const verifyLoyalty = await checkLoyalty(userDetails, type);
+      if (verifyLoyalty) {
+        const organizationDetails: any = await Organization.findOne({
+          _id: userDetails.organizationId,
+        });
+        const fetchLoyaltyTask: any = await LoyaltyTask.findOne({
+          organizationId: userDetails.organizationId,
+          type: type,
+        });
+        const newLoyaltySubmission = new LoyaltySubmission({
+          approvedBy: userDetails.id,
+          organizationId: organizationDetails.id,
+          type: fetchLoyaltyTask.type,
+          totalWeight: fetchLoyaltyTask.weight,
+          boost: organizationDetails.maxBoost * userDetails.loyaltyWeight,
+          loyalty: userDetails.loyaltyWeight,
+        });
 
-  if (noOfNFTs == 0) return false;
+        await newLoyaltySubmission.save();
+        const totalLoyaltyWeight =
+          userDetails.loyaltyWeight + fetchLoyaltyTask.weight;
 
-  for (let i = 0; i < noOfNFTs; i++) {
-    const nftId = await web3.tokenOfOwnerByIndex(walletAddress, i);
-    const tokenUri = await web3.tokenURI(nftId);
+        userDetails.loyaltyWeight = totalLoyaltyWeight;
+        await userDetails.save();
 
-    const data = await sendRequest<string>("get", tokenUri);
-    const nftMetadata = JSON.parse(data);
+        const newPointTransaction = new PointTransaction({
+          userId: userDetails.id,
+          taskId: fetchLoyaltyTask.id,
+          type: fetchLoyaltyTask.type,
+          totalPoints: totalLoyaltyWeight,
+          addPoints: fetchLoyaltyTask.weight,
+          boost: organizationDetails.maxBoost * userDetails.loyaltyWeight,
+          loyalty: userDetails.loyaltyWeight,
+        });
+        await newPointTransaction.save();
 
-    const response = await imageComparing(
-      profileImageUrl,
-      nftMetadata.image,
-      size
-    );
-
-    if (response) return true;
+        // res.send("done");
+        return "Task completed successfully.";
+      }
+      return "Task failed. Please check if you have completed the task.";
+    }
+    return "You have already completed this task";
   }
-
-  return false;
+  return "Something went wrong. Please try again.";
 };
 
 const calculateLoyaltyPoints = (loyalty: any) => {

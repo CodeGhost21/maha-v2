@@ -5,10 +5,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { IUserModel } from "./user";
 import { IOrganizationModel } from "./organization";
+import { LoyaltyTaskType } from "./loyaltyTasks";
 
 export interface ILoyaltySubmission {
   name: string;
-  type: string;
+  type: LoyaltyTaskType;
   totalWeight: number;
   instructions: string;
 

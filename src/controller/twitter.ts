@@ -2,7 +2,7 @@ import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { IUserModel } from "./../database/models/user";
 
 import { Request, Response } from "express";
-import twiiterOauth from "../library/twitter-oauth";
+import twiiterOauth from "../library/twitterOauth";
 import BadRequestError from "../errors/BadRequestError";
 
 export const requestToken = async (req: Request, res: Response) => {
