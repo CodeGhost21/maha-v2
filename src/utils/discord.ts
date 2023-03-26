@@ -1,3 +1,4 @@
+import { LoyaltyTask } from "./../database/models/loyaltyTasks";
 import nconf from "nconf";
 import {
   Client,
@@ -14,8 +15,10 @@ import DiscordOauth2 from "discord-oauth2";
 import { IUserModel, User } from "../database/models/user";
 import * as jwt from "jsonwebtoken";
 import urlJoin from "./urlJoin";
-import { Organization } from "../database/models/organisation";
-
+import { Organization } from "../database/models/organization";
+import { completeLoyaltyTask } from "../controller/loyaltyTask";
+import { sendFeedDiscord } from "./sendFeedDiscord";
+import { Task } from "../database/models/tasks";
 const jwtSecret = nconf.get("JWT_SECRET");
 const total_icons = [
   "🥇",
@@ -34,29 +37,6 @@ const total_icons = [
   "✋",
 ];
 let commands;
-
-const row = new MessageActionRow().addComponents(
-  new MessageSelectMenu()
-    .setCustomId("taskSelect")
-    .setPlaceholder("Select a task")
-    .addOptions([
-      {
-        label: "First",
-        description: "First",
-        value: "First",
-      },
-      {
-        label: "Second",
-        description: "Second",
-        value: "Second",
-      },
-      {
-        label: "Third",
-        description: "Third",
-        value: "Third",
-      },
-    ])
-);
 
 export const client = new Client({
   intents: [
@@ -89,146 +69,264 @@ client.once("ready", () => {
     name: "profile",
     description: "Shows your profile for Gift of Eden",
   });
-  // commands?.create({
-  //   name: "tasks",
-  //   description: "Shows your loyalty tasks status",
-  // });
+
   commands?.create({
     name: "verify",
     description: "Verify you twitter and wallet",
   });
+
   commands?.create({
-    name: "dropdown",
-    description: "Dropdown list for tasks",
+    name: "tasks",
+    description: "Get your daily tasks here.",
+  });
+
+  commands?.create({
+    name: "leaderboard",
+    description: "View the leaderboard.",
   });
 });
 
 // Required to clean this code and make it work
 client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
+  try {
+    if (!interaction.isCommand()) return;
 
-  const { commandName } = interaction;
+    const { commandName } = interaction;
 
-  if (commandName === "profile") {
-    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
-      if (user) {
-        // const userLoyalty = await user.getLoyalty();
+    if (commandName === "profile") {
+      await User.findOne({ userID: interaction.user.id }).then(async (user) => {
+        if (user) {
+          let content: string;
 
-        await interaction.reply({
-          content:
-            `Hello ${user.discordName}${total_icons[13]} \n\n` +
-            `Total points earned: ${user.totalPoints}\n` +
-            // `Current Loyalty Completed: ${userLoyalty.totalLoyalty}%\n\n` +
-            `Your current GM rank: ${user.gmRank}${total_icons[3]}\n` +
-            `Total number of GM said: ${user.totalGMs}\n` +
-            `Highest GM Streak Record: ${user.maxStreak}\n` +
-            `Twitter Verify: ${
-              user.signTwitter
-                ? `Completed!!${total_icons[11]}`
-                : `Pending${total_icons[10]}`
-            }\n` +
-            `Wallet Connected: ${
-              user.walletAddress
-                ? `Completed!!${total_icons[11]}`
-                : `Pending${total_icons[10]}`
-            }\n`,
-        });
-      }
-    });
-  } else if (commandName === "tasks") {
-    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
-      // const userLoyalty = await user?.getLoyalty();
+          const organization = await Organization.findOne({
+            guildId: interaction.guild?.id,
+          });
+          const allLoyalties = await LoyaltyTask.find({
+            organizationId: organization?.id,
+          });
+          const rowItem: any[] = [];
+          allLoyalties.map((item) => {
+            rowItem.push({
+              label: item.name,
+              description: "description",
+              value: item.type,
+            });
+          });
 
-      await interaction.reply({
-        // content: `Loyalty Tasks${total_icons[5]} \n\n` +
-        //   `Say GM: ${userLoyalty?.gm ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n` +
-        //   `Change Twitter Profile: ${userLoyalty?.twitterProfile ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n` +
-        //   `Change Discord Profile: ${userLoyalty?.discordProfile ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n` +
-        //   `Revoke Opensea Access: ${userLoyalty?.opensea ? `Completed!!${total_icons[11]}` : `Pending${total_icons[10]}`}\n`,
-        // ephemeral: true
+          const row = new MessageActionRow().addComponents(
+            new MessageSelectMenu()
+              .setCustomId("taskSelect")
+              .setPlaceholder("Select a task")
+              .addOptions(rowItem)
+          );
+
+          if (!user?.signTwitter || !user?.walletAddress) {
+            content =
+              `Hello ${interaction.user}${total_icons[13]} \n\n` +
+              `***Seems like you have not verified😞 your Twitter and wallet. Verify yourself using /verify command and you will get perform the amazing tasks.***\n\n` +
+              `Total points earned: ${user.totalPoints}\n` +
+              `Current Loyalty Completed: 0%\n\n` +
+              `Highest GM Streak Record: ${user.maxStreak}\n` +
+              `Twitter Verify: ${
+                user.signTwitter
+                  ? `Completed!!${total_icons[11]}`
+                  : `Pending${total_icons[10]}`
+              }\n` +
+              `Wallet Connected: ${
+                user.walletAddress
+                  ? `Completed!!${total_icons[11]}`
+                  : `Pending${total_icons[10]}`
+              }\n`;
+          } else {
+            content =
+              `Hello ${interaction.user}${total_icons[13]} \n\n` +
+              `***You have earned ${
+                user.loyaltyWeight * 100
+              }% loyalty which will boost your points by 10x and you have earned a total of ${
+                user.totalPoints
+              } points*** \n` +
+              `***hey good going you have ${user.maxStreak} days of gm streak 😮, keep going*** \n\n` +
+              `Your Wallet and Twitter both are verified 🥳 \n\n` +
+              `**Loyalty Tasks**`;
+
+            // `Total points earned: ${user.totalPoints}\n` +
+            // `Your current GM rank: ${user.gmRank}${total_icons[3]}\n` +
+            // `Total number of GM said: ${user.totalGMs}\n` +
+            // `Highest GM Streak Record: ${user.maxStreak}\n` +
+            // `Twitter Verify: ${user.signTwitter
+            //   ? `Completed!!${total_icons[11]}`
+            //   : `Pending${total_icons[10]}`
+            // }\n` +
+            // `Wallet Connected: ${user.walletAddress
+            //   ? `Completed!!${total_icons[11]}`
+            //   : `Pending${total_icons[10]}`
+            // }\n`
+          }
+
+          if (
+            !user?.signTwitter ||
+            !user?.walletAddress ||
+            rowItem.length < 1
+          ) {
+            await interaction.reply({
+              content: content,
+              ephemeral: true,
+            });
+          } else {
+            await interaction.reply({
+              content: content,
+              ephemeral: true,
+              components: [row],
+            });
+          }
+
+          const collector =
+            interaction.channel?.createMessageComponentCollector({
+              componentType: "SELECT_MENU",
+            });
+
+          collector?.on("collect", async (collected: any) => {
+            let msg;
+            const value = collected.values[0];
+            const taskResponse = await completeLoyaltyTask(
+              interaction.user.id,
+              value
+            );
+            if (value === "twitter_profile") {
+              msg = `Looking fresh with that NFT profile pic!`;
+            }
+            await sendFeedDiscord(`${collected?.user}, ${msg}`);
+            await collected.reply({
+              content: `${collected?.user}, ${taskResponse}`,
+              ephemeral: true,
+            });
+          });
+        }
       });
-    });
-  } else if (commandName === "verify") {
-    const expiry = Date.now() + 86400000 * 7;
+    } else if (commandName === "verify") {
+      const expiry = Date.now() + 86400000 * 7;
 
-    await User.findOne({ userID: interaction.user.id }).then(async (user) => {
-      const token = await jwt.sign({ id: user?.id, expiry }, jwtSecret);
-      const frontendUrl = urlJoin(
-        nconf.get("FRONTEND_URL"),
-        `/verify?token=${token}`
-      );
+      await User.findOne({ userID: interaction.user.id }).then(async (user) => {
+        const token = await jwt.sign({ id: user?.id, expiry }, jwtSecret);
+
+        const frontendUrl = urlJoin(
+          nconf.get("FRONTEND_URL"),
+          `/verify?token=${token}`
+        );
+        const row = new MessageActionRow().addComponents(
+          new MessageButton()
+            .setLabel("Verify Twitter")
+            .setStyle("LINK")
+            .setDisabled(user?.signTwitter)
+            .setURL(urlJoin(frontendUrl, `&type=twitter`)),
+
+          new MessageButton()
+            .setLabel("Verify Wallet")
+            .setStyle("LINK")
+            .setDisabled(!!user?.walletAddress)
+            .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`))
+        );
+
+        const discordMsgEmbed = new MessageEmbed()
+          .setColor("#F07D55")
+          .setThumbnail("https://i.imgur.com/xYG5x9G.png")
+          .setAuthor({
+            name: "Gift of Eden",
+            iconURL: "https://i.imgur.com/xYG5x9G.png",
+            url: "https://peopleofeden.com/",
+          })
+          .setTitle("Title here")
+          .setDescription(
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,"
+          );
+
+        const discordSuccessEmbed = new MessageEmbed()
+          .setColor("#4ffa02")
+          .setDescription("You have been successfully verified.");
+
+        if (!user?.signTwitter || !user?.walletAddress) {
+          await interaction.reply({
+            embeds: [discordMsgEmbed],
+            components: [row],
+            ephemeral: true,
+          });
+        } else {
+          await interaction.reply({
+            embeds: [discordSuccessEmbed],
+            ephemeral: true,
+          });
+        }
+      });
+    } else if (commandName === "tasks") {
+      const rowItem: any[] = [];
+
+      const organization = await Organization.findOne({
+        guildId: interaction.guild?.id,
+      });
+      const allTasks = await Task.find({ organizationId: organization?.id });
+      allTasks.map((item) => {
+        rowItem.push({
+          label: item.name,
+          description: "description",
+          value: item.type,
+        });
+      });
+
       const row = new MessageActionRow().addComponents(
-        new MessageButton()
-          .setLabel("Verify Twitter")
-          .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=twitter`)),
-
-        new MessageButton()
-          .setLabel("Verify Wallet")
-          .setStyle("LINK")
-          .setURL(urlJoin(frontendUrl, `&type=wallet&_id=${user?._id}`))
+        new MessageSelectMenu()
+          .setCustomId("taskSelect")
+          .setPlaceholder("Select a task")
+          .addOptions(rowItem)
       );
-
-      const discordMsgEmbed = new MessageEmbed()
-        .setColor("#F07D55")
-        .setDescription("Verify yourself by clicking below");
-
-      const discordSuccessEmbed = new MessageEmbed()
-        .setColor("#4ffa02")
-        .setDescription("You have been successfully verified.");
-
-      if (!user?.signTwitter && !user?.walletAddress) {
+      if (rowItem.length < 1) {
         await interaction.reply({
-          embeds: [discordMsgEmbed],
-          components: [row],
+          content: "No tasks have been listed yet.",
           ephemeral: true,
         });
       } else {
         await interaction.reply({
-          embeds: [discordSuccessEmbed],
+          content: "**Daily Tasks**",
           ephemeral: true,
+          components: [row],
         });
       }
-    });
-  } else if (commandName === "dropdown") {
-    const embed = new MessageEmbed()
-      .setTitle("Welcome to task selector")
-      .setColor("GREEN");
 
-    await interaction.reply({
-      content: " ",
-      ephemeral: true,
-      embeds: [embed],
-      components: [row],
-    });
+      const taskCollector =
+        interaction.channel?.createMessageComponentCollector({
+          componentType: "SELECT_MENU",
+        });
 
-    const embed1 = new MessageEmbed()
-      .setTitle("Selected option 1")
-      .setColor("GREEN");
+      taskCollector?.on("collect", async (collected: any) => {
+        let msg;
+        const value = collected.values[0];
+        if (value === "gm") {
+          msg = `Go and say GM in the GM channel`;
+        }
+        await collected.reply({
+          content: `Hey ${collected?.user}, ${msg}`,
+          ephemeral: true,
+        });
+      });
+    } else if (commandName === "leaderboard") {
+      User.find({})
+        .lean()
+        .then((users) => {
+          const top = users
+            .sort((a, b) => b.totalPoints - a.totalPoints)
+            .slice(0, 10)
+            .map(
+              (u, i) =>
+                `${total_icons[i]} **${u.userTag}** - **${u.totalPoints}** points!`
+            )
+            .join("\n");
 
-    const embed2 = new MessageEmbed()
-      .setTitle("Selected option 2")
-      .setColor("GREEN");
+          const text = "__Top 10 rankers__ 🏆\n" + top;
 
-    const embed3 = new MessageEmbed()
-      .setTitle("Selected option 3")
-      .setColor("GREEN");
-
-    const collector = interaction.channel?.createMessageComponentCollector({
-      componentType: "SELECT_MENU",
-    });
-
-    collector?.on("collect", async (collected) => {
-      const value = collected.values[0];
-
-      if (value === "First") {
-        collected.reply({ embeds: [embed1], ephemeral: true });
-      } else if (value === "Second") {
-        collected.reply({ embeds: [embed2], ephemeral: true });
-      } else if (value === "Third") {
-        collected.reply({ embeds: [embed3], ephemeral: true });
-      }
-    });
+          interaction.reply(text);
+        });
+    }
+  } catch (error) {
+    console.error(error);
   }
 });
 

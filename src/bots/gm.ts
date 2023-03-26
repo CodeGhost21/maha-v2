@@ -4,9 +4,9 @@ import { client } from "../utils/discord";
 import { IUserModel, User } from "../database/models/user";
 import { assignRank } from "../utils/upadteRank";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { Organization } from "../database/models/organisation";
+import { Organization } from "../database/models/organization";
 import { completeTask } from "../controller/task";
-
+import { Message } from "../database/models/message";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 const total_icons = [
@@ -105,14 +105,14 @@ client.on("messageCreate", async (message) => {
 
     // good morning?
     if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
-      // const newMessage = new Message({
-      //   content: message.cleanContent,
-      //   userTag: message.author.tag,
-      //   userID: message.author.id,
-      //   dateTime: message.createdAt,
-      // });
+      const newMessage = new Message({
+        content: message.cleanContent,
+        userTag: message.author.tag,
+        userID: message.author.id,
+        dateTime: message.createdAt,
+      });
 
-      // await newMessage.save();
+      await newMessage.save();
 
       User.findOne({ userID: message.author.id }).then(async (user) => {
         if (!user) return;
@@ -133,26 +133,32 @@ client.on("messageCreate", async (message) => {
 
         // If user's last gm was yesterday, then continue streak
         if (isYesterday(lastGM)) {
-          await completeTask(user, "gm");
-          user.streak += 1;
-          user.maxStreak =
-            user.streak > user.maxStreak ? user.streak : user.maxStreak;
-          user.totalGMs += 1;
-          user.save();
+          const response = await completeTask(user, "gm");
+          if (response) {
+            user.streak += 1;
+            user.maxStreak =
+              user.streak > user.maxStreak ? user.streak : user.maxStreak;
+            user.totalGMs += 1;
+            user.save();
+          }
         }
 
         // If user's last gm was older than yesterday, then break streak
         else if (!isToday(lastGM)) {
-          await completeTask(user, "gm");
-          user.streak = 1;
-          user.totalGMs += 1;
-          user.save();
+          const response = await completeTask(user, "gm");
+          if (response) {
+            user.streak = 1;
+            user.totalGMs += 1;
+            user.save();
+          }
         } else if (isToday(lastGM) && user.totalGMs == 0) {
-          await completeTask(user, "gm");
-          user.streak = 1;
-          user.totalGMs = 1;
-          user.maxStreak = 1;
-          user.save();
+          const response = await completeTask(user, "gm");
+          if (response) {
+            user.streak = 1;
+            user.totalGMs = 1;
+            user.maxStreak = 1;
+            user.save();
+          }
         }
         const rankResult = await assignRank(user.userID || "");
         const text = `gm <@${message.author.id}>!\nYou've said gm for **${

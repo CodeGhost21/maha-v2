@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IUserModel } from "./user";
-import { IOrganizationModel } from "./organisation";
+import { IOrganizationModel } from "./organization";
 
 export interface ITaskSubmission {
   name: string;

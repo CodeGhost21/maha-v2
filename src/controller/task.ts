@@ -6,9 +6,8 @@ import {
   TaskSubmission,
 } from "../database/models/taskSubmmission";
 import { PointTransaction } from "../database/models/pointTransaction";
-import { sendFeedDiscord } from "../utils/sendFeedDiscord";
-import { Organization } from "../database/models/organisation";
-import { organizationTask } from "./organization";
+import { Organization } from "../database/models/organization";
+import { orgTask } from "./organization";
 
 const taskTypes = ["gm", "hold_nft", "follow_twitter"];
 
@@ -28,7 +27,10 @@ export const addTask = async (req: Request, res: Response) => {
   const userDetails = await User.findOne({ _id: user.id, isModerator: true });
   if (userDetails) {
     const checkTask = await Task.findOne({
-      $or: [{ name: req.body.name }, { type: req.body.type }],
+      $and: [
+        { organizationId: userDetails.organizationId },
+        { type: req.body.type },
+      ],
     });
     if (!checkTask) {
       const newTask = new Task({
@@ -98,10 +100,9 @@ export const completeTask = async (user: IUserModel, taskType: string) => {
     });
     await newPointTransaction.save();
 
-    await sendFeedDiscord(
-      `${user.discordName} has completed ${taskDetails.name} `
-    );
+    return true;
   }
+  return false;
 };
 
 export const userTasks = async (req: Request, res: Response) => {
@@ -110,7 +111,7 @@ export const userTasks = async (req: Request, res: Response) => {
   if (!org) return;
 
   if (user) {
-    const tasks = await organizationTask(org.id);
+    const tasks = await orgTask(org.id);
     const allTaskSubmission = await TaskSubmission.find({
       organizationId: user.organizationId,
       approvedBy: user.id,

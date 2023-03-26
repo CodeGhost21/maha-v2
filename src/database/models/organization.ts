@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 export interface IOrganization {
   name: string;
-  // channelId: string;
+  msgChannelId: string;
+  feedChannelId: string;
   guildId: string;
   maxBoost: number;
 }
@@ -10,9 +11,10 @@ export interface IOrganization {
 const organization = new mongoose.Schema(
   {
     name: String,
-    // channelId: String,
     guildId: String, // Discord server id
-    maxBoost: { type: Number, min: 0, max: 100 }, //eg: 10
+    maxBoost: { type: Number, min: 0, max: 100 }, // eg: 10
+    msgChannelId: String,
+    feedChannelId: String,
   },
   {
     timestamps: true,
