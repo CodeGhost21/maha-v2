@@ -1,28 +1,22 @@
-import { Request, Response } from "express";
-import {
-  ILoyaltySubmission,
-  LoyaltySubmission,
-} from "../../database/models/loyaltySubmission";
+import { LoyaltySubmission } from "../../database/models/loyaltySubmission";
 import {
   LoyaltyTask,
   LoyaltyTaskType,
 } from "../../database/models/loyaltyTasks";
 import { Organization } from "../../database/models/organization";
 import { PointTransaction } from "../../database/models/pointTransaction";
-import { IUserModel, User } from "../../database/models/user";
 import { fetchTwitterProfile } from "../user";
-import { getLoyaltyTasks } from "../admin/organization";
 import { profileImageComparing } from "../../utils/image";
 import {
   IServerProfile,
   IServerProfileModel,
-  ServerProfile,
 } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
 
-const loyaltyTypes = ["twitter_profile", "discord_profile"];
-
-const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
+export const checkLoyalty = async (
+  profile: IServerProfile,
+  loyaltyType: string
+) => {
   if (loyaltyType === "gm") {
     if (profile.totalGMs > 0) return true;
   } else if (loyaltyType === "twitter_profile") {
@@ -63,7 +57,7 @@ export const completeLoyaltyTask = async (
   const verifyLoyalty = await checkLoyalty(profile, type);
   if (!verifyLoyalty) return false;
 
-  const organization = await Organization.findById(organizationId);
+  const organization = await Organization.findById(profile.organizationId);
   if (!organization) throw new NotFoundError("organization not found");
 
   await LoyaltySubmission.create({
@@ -89,30 +83,15 @@ export const completeLoyaltyTask = async (
     boost: organization.maxBoost * profile.loyaltyWeight,
     loyalty: profile.loyaltyWeight,
   });
+
+  return true;
 };
 
-export const userLoyaltyTask = async (req: Request, res: Response) => {};
+const calculateLoyaltyPoints = (loyalty: any) => {
+  const discordPoints = loyalty.discordProfile ? 0.25 : 0;
+  const twitterPoints = loyalty.twitterProfile ? 0.25 : 0;
+  const gmPoints = loyalty.gm ? 0.25 : 0;
+  const openseaPoints = loyalty.opensea ? 0.25 : 0;
 
-export const types = async (req: Request, res: Response) => {
-  res.json(loyaltyTypes);
-};
-
-export const updateLoyalty = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
-  const userDetails: any = await User.findOne({ _id: user.id });
-  if (userDetails) {
-    const loyalty = await LoyaltyTask.findOne({
-      _id: req.body.taskId,
-      organizationId: userDetails.organizationId,
-    });
-    if (loyalty) {
-      loyalty.name = req.body.name || loyalty.name;
-      loyalty.type = req.body.type || loyalty.type;
-      loyalty.weight = req.body.weight || loyalty.weight;
-      loyalty.instruction = req.body.instruction || loyalty.instruction;
-
-      await loyalty.save();
-      res.json({ success: true });
-    } else res.json({ success: false, message: "loyalty not found" });
-  }
+  return openseaPoints + gmPoints + twitterPoints + discordPoints;
 };

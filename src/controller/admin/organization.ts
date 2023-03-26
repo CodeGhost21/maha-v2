@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
+import { LoyaltyTask } from "../../database/models/loyaltyTasks";
 import { Organization } from "../../database/models/organization";
 import { IServerProfileModel } from "../../database/models/serverProfile";
+import { ITask, Task } from "../../database/models/tasks";
 import NotFoundError from "../../errors/NotFoundError";
 
 export const updateOrg = async (req: Request, res: Response) => {
@@ -27,4 +29,14 @@ export const getOrg = async (req: Request, res: Response) => {
   const org = await Organization.findById(serverProfile.organizationId);
   if (!org) throw new NotFoundError("org not found");
   res.json(org);
+};
+
+export const getTasks = async (organizationId: string) => {
+  const allTask = await Task.find({ organizationId });
+  return allTask.map((item: ITask) => item.type);
+};
+
+export const getLoyaltyTasks = async (organizationId: string) => {
+  const allLoyaltyTask = await LoyaltyTask.find({ organizationId });
+  return allLoyaltyTask.map((item) => item.type);
 };

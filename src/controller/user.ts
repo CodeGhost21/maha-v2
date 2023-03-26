@@ -1,9 +1,7 @@
-import Bluebird from "bluebird";
 import { ethers } from "ethers";
 import { Request, Response } from "express";
 import { sendRequest } from "../library/sendRequest";
-import { IUserModel, User } from "../database/models/user";
-// import { Loyalty } from "../database/models/loyaltySubmission";
+import { IUserModel } from "../database/models/user";
 import { PointTransaction } from "../database/models/pointTransaction";
 import NotFoundError from "../errors/NotFoundError";
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
@@ -13,26 +11,6 @@ export const fetchMe = async (req: Request, res: Response) => {
   const user = req.user as IUserModel;
   if (user) return res.json(user);
   throw new NotFoundError();
-};
-
-//users leaderBoard
-export const getLeaderBoard = async (req: Request, res: Response) => {
-  const users = await User.find()
-    .select("discordName totalPoints discordAvatar userID")
-    .sort({ totalPoints: -1 })
-    .limit(100);
-
-  const allUsers = await Bluebird.mapSeries(users, async (user) => {
-    // const userLoyalty = await Loyalty.findOne({ userId: user._id });
-    return {
-      discordName: user.discordName,
-      totalPoints: user.totalPoints,
-      imageUrl: `https://cdn.discordapp.com/avatars/${user.userID}/${user.discordAvatar}`,
-      // loyaltyPoints: userLoyalty != null ? userLoyalty.totalLoyalty : 0,
-    };
-  });
-
-  res.json(allUsers);
 };
 
 // get latest rewards of a user
@@ -96,16 +74,4 @@ export const fetchDiscordProfile = async (user: IUserModel) => {
   }
 
   return avatar;
-};
-
-export const allUsers = async (req: Request, res: Response) => {
-  const user = req.user as IUserModel;
-  const userDetails = await User.findOne({ _id: user.id, isModerator: true });
-  if (userDetails) {
-    const users = await User.find({
-      organizationId: userDetails.organizationId,
-    });
-
-    res.json(users);
-  }
 };

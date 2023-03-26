@@ -57,7 +57,6 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
   user.twitterOauthAccessToken = oauthAccessToken;
   user.twitterOauthAccessTokenSecret = oauthAccessTokenSecret;
 
-  user.signTwitter = true; // todo this is really not needed tbh
   await user.save();
 
   sendFeedDiscord(`${user.discordName} has verified their twitter account`);
