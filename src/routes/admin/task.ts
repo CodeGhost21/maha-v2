@@ -1,23 +1,11 @@
 import { Router } from "express";
-import {
-  addTask,
-  deleteTask,
-  allTask,
-  userTasks,
-  types,
-  updateTask,
-} from "../controller/task";
-import ensureLoggedIn from "../middleware/ensureLoggedIn";
+import * as tasks from "../../controller/admin/task";
 
 const router = Router();
-
-router.get("/types", types);
-
-router.use(ensureLoggedIn);
-router.post("/add", addTask);
-router.delete("/delete", deleteTask);
-router.get("/get", allTask);
-router.get("/userTasks", userTasks);
-router.put("/update", updateTask);
+router.get("/", tasks.allTasks);
+router.get("/types", tasks.types);
+router.post("/", tasks.addTask);
+router.delete("/:id", tasks.deleteTask);
+router.put("/:id", tasks.updateTask);
 
 export default router;

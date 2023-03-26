@@ -1,10 +1,8 @@
 import { Router } from "express";
 
 import { authenticateJWT } from "../middleware/authenticateJWT";
-import user from "./user";
+import admin from "./admin";
 import twitter from "./twitter";
-import loyalty from "./loyalty";
-import task from "./task";
 
 const router = Router();
 router.get("/", (_req, res) => {
@@ -13,9 +11,7 @@ router.get("/", (_req, res) => {
 
 router.use(authenticateJWT);
 
-router.use("/user", user);
+router.use("/admin", admin);
 router.use("/twitter", twitter);
-router.use("/loyalty", loyalty);
-router.use("/task", task);
 
 export default router;

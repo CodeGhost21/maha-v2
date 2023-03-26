@@ -3,10 +3,11 @@ import passport from "passport";
 import nconf from "nconf";
 import * as jwt from "jsonwebtoken";
 import urlJoin from "../../utils/urlJoin";
-import { IUserModel } from "../../database/models/user";
+
+import { IServerProfileModel } from "../../database/models/serverProfile";
 
 const jwtSecret = nconf.get("JWT_SECRET");
-const successRedirect = urlJoin(nconf.get("DOMAIN"), "/discord/redirect");
+const successRedirect = urlJoin(nconf.get("DOMAIN"), "/admin/login/redirect");
 
 export const loginWithDiscord = passport.authenticate("discord", {
   successRedirect,
@@ -17,10 +18,10 @@ export const verifyWithDiscord = [
   async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) return next();
 
+    // 7 day expiry
     const expiry = Date.now() + 86400000 * 7;
 
-    const user = req.user as IUserModel;
-
+    const user = req.user as IServerProfileModel;
     const token = await jwt.sign({ id: user.id, expiry }, jwtSecret);
 
     const frontendUrl = urlJoin(

@@ -1,9 +1,10 @@
 import { Router } from "express";
-import ensureLoggedIn from "../middleware/ensureLoggedIn";
-import { getLoyalty } from "../../controller/admin/loyalty";
+import * as loyalty from "../../controller/admin/loyalty";
 
 const router = Router();
+router.get("/", loyalty.allLoyaltyTask);
+router.put("/:id", loyalty.updateLoyalty);
+router.post("/", loyalty.addLoyaltyTask);
+router.delete("/:id", loyalty.deleteLoyaltyTask);
 
-router.use(ensureLoggedIn);
-router.get("/:org", getLoyalty);
 export default router;

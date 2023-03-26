@@ -1,11 +1,8 @@
 import { Router } from "express";
-import { updateOrg, getOrg } from "../../controller/admin/organization";
-import ensureLoggedIn from "../../middleware/ensureLoggedIn";
+import * as organization from "../../controller/admin/organization";
 
 const router = Router();
-
-router.use(ensureLoggedIn);
-router.put("/:orgId", updateOrg);
-router.get("/:orgId", getOrg);
+router.get("/", organization.getOrg);
+router.put("/", organization.updateOrg);
 
 export default router;
