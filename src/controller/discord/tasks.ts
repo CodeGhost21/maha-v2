@@ -19,6 +19,11 @@ export const executeTasksCommand = async (
     guildId
   );
 
+  const content: string =
+    `**Hey there, ${interaction.user}** \n\n` +
+    `**Are you ready to explore the tasks available in our Gifts of Eden loyalty program? Check out the list below and start earning points! 💪**\n\n` +
+    `Happy task hunting, and let's keep growing together! 🌱💖`;
+
   const allTasks = await Task.find({ organizationId: organization?.id });
   const rowItem = allTasks.map((item) => ({
     label: item.name,
@@ -32,6 +37,9 @@ export const executeTasksCommand = async (
       .setPlaceholder("Select a task")
       .addOptions(rowItem)
   );
+
+
+
   if (rowItem.length < 1) {
     await interaction.reply({
       content: "No quests have been created yet.",
@@ -39,7 +47,7 @@ export const executeTasksCommand = async (
     });
   } else {
     await interaction.reply({
-      content: "**Daily Tasks**",
+      content: content,
       ephemeral: true,
       components: [row],
     });
