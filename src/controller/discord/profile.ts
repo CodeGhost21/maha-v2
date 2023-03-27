@@ -43,28 +43,26 @@ export const executeProfileCommand = async (
       .addOptions(rowItem)
   );
 
-  if (!user.twitterID || !user.walletAddress) {
+  if (!user.twitterID && !user.walletAddress) {
     content =
-      `Hello ${interaction.user} 🤲 \n\n` +
-      `***Seems like you have not verified your Twitter and wallet. Verify yourself using /verify command and you will get perform the amazing tasks.***\n\n` +
-      `Total points earned: ${profile.totalPoints}\n` +
-      `Current Loyalty Completed: 0%\n\n` +
-      `Highest GM Streak Record: ${profile.maxStreak}\n` +
-      `Twitter Verify: ${user.twitterID ? `Completed!! 🚀` : `Pending ❌`}\n` +
-      `Wallet Connected: ${
-        user.walletAddress ? `Completed!!🚀` : `Pending ❌`
-      }\n`;
+      `**Hey there, ${interaction.user}! 👋 **\n\n` +
+      `**We noticed that your account hadn't been verified yet. To get started with our awesome Gifts of Eden loyalty program, use the */verify* command to verify your account. 🔓**\n\n` +
+      `**Once you're verified, you can start boosting your loyalty score, which is currently at 0%. Use the */loyalty* command to boost your loyalty score.**\n\n` +
+      `**You've earned a total of 0 points so far, but by checking out all the tasks available to earn points, you'll be on your way to racking up that score in no time. Just use the */quests* command to discover more! 🚀**`
+  } else if (!user.twitterID || !user.walletAddress) {
+    content =
+      `**Hey there, ${interaction.user}! 👋 **\n\n` +
+      `**We noticed that your account is just partially verified. To get started with our awesome Gifts of Eden loyalty program, use the */verify* command to verify your account. 🔓**\n\n` +
+      `**Once you're verified, you can start boosting your loyalty score, which is currently at 0%. Don't worry, there are plenty of tasks to help you increase it! 🌟**\n\n` +
+      `**You've earned a total of 0 points so far, but by checking out all the tasks available to earn points, you'll be on your way to racking up that score in no time. Just use the */quests* command to discover more! 🚀**\n\n` +
+      `**Don't forget to verify your account and dive into these tasks to start earning points and boosting your loyalty score! 💪**`
   } else {
     content =
-      `Hello ${interaction.user}🤲 \n\n` +
-      `***You have earned ${
-        profile.loyaltyWeight * 100
-      }% loyalty which will boost your points by 10x and you have earned a total of ${
-        profile.totalPoints
-      } points*** \n` +
-      `***hey good going you have ${profile.maxStreak} days of gm streak 😮, keep going*** \n\n` +
-      `Your Wallet and Twitter both are verified 🥳 \n\n` +
-      `**Loyalty Tasks**`;
+      `**Hey there, ${interaction.user}! 👋 **\n\n` +
+      `**Congratulations your account is verified! 🎉 You're all set to enjoy the benefits of our Gifts of Eden.**\n\n` +
+      `**Your current loyalty score is ${profile.loyaltyWeight * 100}%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty even more! 🚀**\n\n` +
+      `**You've earned a total of ${profile.totalPoints} points so far. Remember, you can always check all the tasks available to earn points using the */quests* command. Keep up the great work! 💪**\n\n` +
+      `**Continue exploring these tasks to earn more points and boost your loyalty score even further! 💖**`
   }
 
   if (!user.twitterID || !user.walletAddress || rowItem.length < 1) {
