@@ -26,9 +26,12 @@ export const executeSetupCommand = async (
 
   // TODO gate this only to admins. if the user is not an admin then redirect to the install page.
 
+  const isOwner = interaction.user.id === interaction.guild?.ownerId
+
   const { profile } = await findOrCreateServerProfile(
     interaction.user.id,
-    guildId
+    guildId,
+    isOwner
   );
 
   // 7 day expiry

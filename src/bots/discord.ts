@@ -41,7 +41,6 @@ client.once("ready", () => {
   });
 });
 
-// Required to clean this code and make it work
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 

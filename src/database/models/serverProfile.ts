@@ -86,7 +86,8 @@ export const ServerProfile = mongoose.model<IServerProfileModel>(
 
 export const findOrCreateServerProfile = async (
   discordId: string,
-  guildId: string
+  guildId: string,
+  isModerator?: boolean,
 ) => {
   const org = await Organization.findOne({ guildId });
   if (!org) throw new BadRequestError("org not registered");
@@ -125,6 +126,7 @@ export const findOrCreateServerProfile = async (
   const profile = await ServerProfile.create({
     userId: newUser.id,
     organizationId: org.id,
+    isModerator: !isModerator ? false : isModerator
   });
 
   return {
