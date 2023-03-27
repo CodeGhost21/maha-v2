@@ -33,7 +33,9 @@ export const extractServerProfile = (req: Request) => {
         if (Date.now() > decoded.expiry)
           return reject(new InvalidJWTError("jwt expired"));
 
-        const user = await ServerProfile.findOne({ _id: String(decoded.id) });
+        const user = await ServerProfile.findOne({
+          userId: String(decoded.id),
+        });
         if (!user) reject(new NotAuthorizedError());
         else resolve(user);
       }

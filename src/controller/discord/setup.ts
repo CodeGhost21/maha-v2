@@ -26,7 +26,7 @@ export const executeSetupCommand = async (
 
   // TODO gate this only to admins. if the user is not an admin then redirect to the install page.
 
-  const isOwner = interaction.user.id === interaction.guild?.ownerId
+  const isOwner = interaction.user.id === interaction.guild?.ownerId;
 
   const { profile } = await findOrCreateServerProfile(
     interaction.user.id,
@@ -41,7 +41,7 @@ export const executeSetupCommand = async (
 
   const frontendUrl = urlJoin(
     nconf.get("FRONTEND_URL"),
-    `#/settings?token=${token}`
+    `settings?token=${token}`
   );
 
   const row = new MessageActionRow().addComponents(

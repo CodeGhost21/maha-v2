@@ -73,7 +73,7 @@ const schema = new mongoose.Schema(
 );
 
 schema.methods.getUser = async function () {
-  return await User.findById(this.userID);
+  return await User.findById(this.userId);
 };
 
 schema.index({ userId: 1, organizationId: 1 }, { unique: true });
@@ -87,7 +87,7 @@ export const ServerProfile = mongoose.model<IServerProfileModel>(
 export const findOrCreateServerProfile = async (
   discordId: string,
   guildId: string,
-  isModerator?: boolean,
+  isModerator?: boolean
 ) => {
   const org = await Organization.findOne({ guildId });
   if (!org) throw new BadRequestError("org not registered");
@@ -126,7 +126,7 @@ export const findOrCreateServerProfile = async (
   const profile = await ServerProfile.create({
     userId: newUser.id,
     organizationId: org.id,
-    isModerator: !isModerator ? false : isModerator
+    isModerator: !isModerator ? false : isModerator,
   });
 
   return {
