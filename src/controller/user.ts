@@ -18,7 +18,7 @@ export const walletVerify = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
   const user = await profile.getUser();
 
-  const message = `Login into Gifts of Eden: ${profile.id}`;
+  const message = `Login into Gifts of Eden: ${profile.userId}`;
   const result = ethers.utils.verifyMessage(message, req.body.hash);
 
   if (result === req.body.address) {

@@ -19,14 +19,14 @@ export const executeVerifyCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { user } = await findOrCreateServerProfile(
+  const { user, profile } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );
 
   const expiry = Date.now() + 86400000 * 7;
 
-  const token = await jwt.sign({ id: user.id, expiry }, jwtSecret);
+  const token = await jwt.sign({ id: profile.id, expiry }, jwtSecret);
 
   const frontendUrl = urlJoin(
     nconf.get("FRONTEND_URL"),
