@@ -73,7 +73,7 @@ export const executeGMstatement = async (
   if (lbKeywords.includes(content)) {
     const profiles = await ServerProfile.find({
       organizationId: profile.organizationId,
-    }).populate("userId.discordTag");
+    }).populate("userId");
 
     const top = profiles
       .sort((a, b) => b.streak - a.streak)
