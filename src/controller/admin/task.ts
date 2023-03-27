@@ -45,7 +45,7 @@ export const addTask = async (req: Request, res: Response) => {
 export const deleteTask = async (req: Request, res: Response) => {
   const user = await extractServerProfile(req);
   await Task.deleteOne({
-    _id: req.body.taskId,
+    _id: req.params.id,
     organizationId: user.organizationId,
   });
   res.json({ success: true });
@@ -129,7 +129,7 @@ export const updateTask = async (req: Request, res: Response) => {
   const user = await extractServerProfile(req);
 
   const task = await Task.findOne({
-    _id: req.body.taskId,
+    _id: req.params.id,
     organizationId: user.organizationId,
   });
 

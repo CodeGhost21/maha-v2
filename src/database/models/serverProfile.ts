@@ -42,13 +42,6 @@ const schema = new mongoose.Schema(
     lastGM: Date,
     gmRank: { type: Number, default: 0 },
 
-    walletAddress: { type: String, default: "" },
-
-    discordVerify: { type: Boolean, default: false },
-    discordName: { type: String, default: "" },
-    discordDiscriminator: { type: String, default: "" },
-    discordAvatar: { type: String, default: "" },
-
     // adding a point => totalPoints += points * ((maxBoost * loyalty) + 1)
     // eg: MaxBoost = 5; loyalty = 0%; points = 100
     // ---> totalPoints += 100 * (2.5 + 1) => 100 * 3.5 => 350
@@ -58,14 +51,21 @@ const schema = new mongoose.Schema(
     loyaltyWeight: { type: Number, default: 0 }, // 0-1
     stakedMaha: { type: Boolean, default: false },
 
-    twitterOauthAccessToken: String,
-    twitterOauthAccessTokenSecret: String,
-    twitterRequestTokenSecret: String,
-    twitterRequestToken: String,
+    // walletAddress: { type: String, default: "" },
 
-    discordOauthAccessToken: { type: String },
-    discordOauthAccessTokenSecret: { type: String },
-    discordOauthAccessTokenExpiry: Date,
+    // discordVerify: { type: Boolean, default: false },
+    // discordName: { type: String, default: "" },
+    // discordDiscriminator: { type: String, default: "" },
+    // discordAvatar: { type: String, default: "" },
+
+    // twitterOauthAccessToken: String,
+    // twitterOauthAccessTokenSecret: String,
+    // twitterRequestTokenSecret: String,
+    // twitterRequestToken: String,
+
+    // discordOauthAccessToken: { type: String },
+    // discordOauthAccessTokenSecret: { type: String },
+    // discordOauthAccessTokenExpiry: Date,
   },
   {
     timestamps: true,

@@ -6,5 +6,5 @@ router.get("/", loyalty.allLoyaltyTask);
 router.put("/:id", loyalty.updateLoyalty);
 router.post("/", loyalty.addLoyaltyTask);
 router.delete("/:id", loyalty.deleteLoyaltyTask);
-
+router.get("/types", loyalty.types);
 export default router;

@@ -1,17 +1,6 @@
 import mongoose from "mongoose";
 
 export interface IUser {
-  isModerator: boolean;
-
-  twitterID: string;
-  twitterName: string;
-  twitterScreenName: string;
-  twitterBio: string;
-  twitterProfileImg: string;
-  twitterBanner: string;
-
-  walletAddress: string;
-
   discordVerify: string;
   discordName: string;
   discordId: string;
@@ -23,23 +12,23 @@ export interface IUser {
   discordOauthAccessTokenExpiry: Date;
   discordOauthRefreshToken: string;
 
+  twitterID: string;
+  twitterName: string;
+  twitterScreenName: string;
+  twitterBio: string;
+  twitterProfileImg: string;
+  twitterBanner: string;
+
   twitterOauthAccessToken: string;
   twitterOauthAccessTokenSecret: string;
   twitterRequestToken: string;
   twitterRequestTokenSecret: string;
+
+  walletAddress: string;
 }
 
 const schema = new mongoose.Schema(
   {
-    twitterID: String,
-    twitterName: String,
-    twitterScreenName: String,
-    twitterBio: String,
-    twitterProfileImg: String,
-    twitterBanner: String,
-
-    walletAddress: String,
-
     discordVerify: String,
     discordName: String,
     discordId: String,
@@ -47,14 +36,23 @@ const schema = new mongoose.Schema(
     discordDiscriminator: String,
     discordAvatar: String,
 
+    discordOauthAccessToken: String,
+    discordOauthAccessTokenSecret: String,
+    discordOauthAccessTokenExpiry: Date,
+
+    twitterID: String,
+    twitterName: String,
+    twitterScreenName: String,
+    twitterBio: String,
+    twitterProfileImg: String,
+    twitterBanner: String,
+
     twitterOauthAccessToken: String,
     twitterOauthAccessTokenSecret: String,
     twitterRequestTokenSecret: String,
     twitterRequestToken: String,
 
-    discordOauthAccessToken: String,
-    discordOauthAccessTokenSecret: String,
-    discordOauthAccessTokenExpiry: Date,
+    walletAddress: String,
   },
   {
     timestamps: true,

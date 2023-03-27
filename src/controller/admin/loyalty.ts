@@ -4,9 +4,14 @@ import { LoyaltyTask } from "../../database/models/loyaltyTasks";
 import BadRequestError from "../../errors/BadRequestError";
 import { extractServerProfile } from "../../utils/jwt";
 
+const loyaltyTypes = ["twitter_profile", "discord_profile"];
+
 export const allLoyaltyTask = async (req: Request, res: Response) => {
-  const organizationId = req.params.orgId;
-  const loyaltyTasks = await LoyaltyTask.find({ organizationId });
+  // const organizationId = req.params.orgId;
+  const user = await extractServerProfile(req);
+  const loyaltyTasks = await LoyaltyTask.find({
+    organizationId: user.organizationId,
+  });
   res.json(loyaltyTasks);
 };
 
@@ -25,6 +30,7 @@ export const addLoyaltyTask = async (req: Request, res: Response) => {
     instruction: req.body.instruction,
     weight: req.body.weight,
     organizationId: profile.organizationId,
+    createdBy: profile.id,
   });
 
   res.json(newLoyaltyTask);
@@ -32,13 +38,18 @@ export const addLoyaltyTask = async (req: Request, res: Response) => {
 
 export const deleteLoyaltyTask = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
+  await LoyaltyTask.deleteOne({
+    _id: req.params.id,
+    organizationId: profile.organizationId,
+  });
+  res.json({ success: true });
 };
 
 export const updateLoyalty = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
 
   const loyalty = await LoyaltyTask.findOne({
-    _id: req.body.taskId,
+    _id: req.params.id,
     organizationId: profile.organizationId,
   });
   if (loyalty) {
@@ -50,4 +61,8 @@ export const updateLoyalty = async (req: Request, res: Response) => {
     await loyalty.save();
     res.json({ success: true });
   } else res.json({ success: false, message: "loyalty not found" });
+};
+
+export const types = async (req: Request, res: Response) => {
+  res.json(loyaltyTypes);
 };

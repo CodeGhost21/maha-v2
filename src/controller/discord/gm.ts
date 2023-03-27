@@ -38,7 +38,6 @@ export const executeGMstatement = async (
   const results = await findOrCreateServerProfile(message.author.id, guildId);
   const user = results.user;
   const profile = results.profile;
-
   // if it was a new user; then we capture the discord details
   if (results.userCreated) {
     user.discordTag = message.author.tag;
@@ -131,6 +130,7 @@ export const executeGMstatement = async (
             ? profile.streak
             : profile.maxStreak;
         profile.totalGMs += 1;
+        profile.totalPoints = 10;
         profile.save();
       }
     }
@@ -141,6 +141,7 @@ export const executeGMstatement = async (
       if (response) {
         profile.streak = 1;
         profile.totalGMs += 1;
+        profile.totalPoints = 10;
         profile.save();
       }
     } else if (isToday(lastGM) && profile.totalGMs == 0) {
@@ -149,6 +150,7 @@ export const executeGMstatement = async (
         profile.streak = 1;
         profile.totalGMs = 1;
         profile.maxStreak = 1;
+        profile.totalPoints = 10;
         profile.save();
       }
     }

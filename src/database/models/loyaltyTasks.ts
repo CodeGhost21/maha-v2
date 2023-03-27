@@ -34,7 +34,7 @@ const loyaltyTask = new Schema(
       enum: ["twitter_profile", "discord_profile", "revoke_opensea", "gm"],
       required: true,
     },
-    weight: { type: Number, min: 0, max: 0, required: true }, // 0-1  // validation every loyalty task for an org should add upto 1
+    weight: { type: Number, min: 0, max: 1, required: true }, // 0-1  // validation every loyalty task for an org should add upto 1
     createdBy: {
       type: Schema.Types.ObjectId,
       required: true,
