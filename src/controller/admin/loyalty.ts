@@ -4,7 +4,7 @@ import { LoyaltyTask } from "../../database/models/loyaltyTasks";
 import BadRequestError from "../../errors/BadRequestError";
 import { extractServerProfile } from "../../utils/jwt";
 
-const loyaltyTypes = ["twitter_profile", "discord_profile"];
+const loyaltyTypes = ["twitter_profile", "discord_profile", "gm"];
 
 export const allLoyaltyTask = async (req: Request, res: Response) => {
   // const organizationId = req.params.orgId;
