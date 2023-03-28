@@ -62,7 +62,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
 
   await user.save();
 
-  sendFeedDiscord(`${user.discordName} has verified their twitter account`);
+  sendFeedDiscord(`@${user.discordName} has verified their twitter account`);
 
   res.json({ success: true });
 };
