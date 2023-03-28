@@ -27,7 +27,6 @@ export const executeTasksCommand = async (
   const allTasks = await Task.find({ organizationId: organization?.id });
   const rowItem = allTasks.map((item) => ({
     label: item.name,
-    description: "description",
     value: item.type,
   }));
 

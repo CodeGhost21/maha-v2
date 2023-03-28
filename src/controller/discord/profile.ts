@@ -83,16 +83,23 @@ export const executeProfileCommand = async (
   });
 
   collector?.on("collect", async (collected) => {
-    let msg;
+    let msg, botMsg;
     const value = collected.values[0] as LoyaltyTaskType;
     const taskResponse = await completeLoyaltyTask(profile, value);
 
-    if (value === "twitter_profile")
-      msg = `Looking fresh with that NFT profile pic!`;
+
+    if (taskResponse) botMsg = `Task completed successfully.`;
+    else botMsg = `Task failed! Please check and try again later.`
+
+    if (value === "twitter_profile") msg = `Looking fresh with that NFT profile pic!`;
+    else if (value === "discord_profile") msg = `Rocking with that NFT Profile pic!`;
+    else if (value === "gm") msg = `Early Bird!!`;
+    else msg = `is a Keeper!!`
+
 
     await sendFeedDiscord(`${collected?.user}, ${msg}`);
     await collected.reply({
-      content: `${collected?.user}, ${taskResponse}`,
+      content: `${collected?.user}, ${botMsg}`,
       ephemeral: true,
     });
   });
