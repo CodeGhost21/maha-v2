@@ -5,7 +5,9 @@ import {
 } from "../database/models/serverProfile";
 
 export const assignRank = async (profile: IServerProfileModel) => {
-  const users = await ServerProfile.find().sort({ streak: -1, lastGM: 1 });
+  const users = await ServerProfile.find({
+    organizationId: profile.organizationId,
+  }).sort({ streak: -1, lastGM: 1 });
   let rank = 0;
 
   await Bluebird.mapSeries(users, async (user) => {
