@@ -54,14 +54,16 @@ export const executeVerifyCommand = async (
       iconURL: "https://i.imgur.com/xYG5x9G.png",
       url: "https://peopleofeden.com/",
     })
-    .setTitle("Title here")
+    .setTitle("Verify your account")
     .setDescription(
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,"
+      `Hey there, ${interaction?.user} \n\n` +
+      `Before you start enjoying the full benefits of our Gifts of Eden, you'll need to verify both your Twitter and Discord accounts. This quick and easy process ensures you're a genuine member of our community, and helps us provide a safe and engaging experience for everyone. \n\n` +
+      `Once both of your accounts are verified, you'll unlock all the amazing features of Gifts of Eden`
     );
 
   const discordSuccessEmbed = new MessageEmbed()
     .setColor("#4ffa02")
-    .setDescription("You have been successfully verified.");
+    .setDescription("**Congratulations on verifying your account! 🎉 You're all set to enjoy the benefits of our Gifts of Eden.**");
 
   if (!user.twitterID || !user.walletAddress) {
     await interaction.reply({

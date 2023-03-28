@@ -4,6 +4,8 @@ import { executeVerifyCommand } from "../controller/discord/verify";
 import { executeTasksCommand } from "../controller/discord/tasks";
 import { executeLeaderboardCommand } from "../controller/discord/leaderboard";
 import { executeSetupCommand } from "../controller/discord/setup";
+import { executeLoyaltyCommand } from "../controller/discord/loyalty";
+
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -53,6 +55,7 @@ client.on("interactionCreate", async (interaction) => {
     else if (commandName === "leaderboard")
       executeLeaderboardCommand(interaction);
     else if (commandName === "setup") executeSetupCommand(interaction);
+    else if (commandName === "loyalty") executeLoyaltyCommand(interaction);
   } catch (error) {
     console.log(error);
     // TODO capture error on sentry
