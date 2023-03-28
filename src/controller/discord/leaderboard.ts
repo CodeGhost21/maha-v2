@@ -34,7 +34,7 @@ export const executeLeaderboardCommand = async (
 
   const profiles = await ServerProfile.find({
     organizationId: profile.organizationId,
-  }).populate("userId.discordTag");
+  }).populate("userId");
 
   const top = profiles
     .sort((a, b) => b.totalPoints - a.totalPoints)
