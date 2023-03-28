@@ -39,14 +39,15 @@ export const executeGMstatement = async (
   const user = results.user;
   const profile = results.profile;
   // if it was a new user; then we capture the discord details
-  if (results.userCreated) {
-    user.discordTag = message.author.tag;
-    user.discordId = message.author.id;
-    user.discordName = message.author.username;
-    if (message.author.avatar) user.discordAvatar = message.author.avatar;
-    user.discordDiscriminator = message.author.discriminator;
-    await user.save();
-  }
+  // if (results.userCreated) {
+  //capture discord details for old users and new users
+  user.discordTag = message.author.tag;
+  user.discordId = message.author.id;
+  user.discordName = message.author.username;
+  if (message.author.avatar) user.discordAvatar = message.author.avatar;
+  user.discordDiscriminator = message.author.discriminator;
+  await user.save();
+  // }
 
   // if this user's first time in this server then we intro the gm chat.
   if (results.profileCreated) {

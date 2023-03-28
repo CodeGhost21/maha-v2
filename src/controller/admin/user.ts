@@ -5,7 +5,12 @@ import { extractServerProfile } from "../../utils/jwt";
 
 export const fetchMe = async (req: Request, res: Response) => {
   const user = await extractServerProfile(req);
-  if (user) return res.json(user);
+  if (user) {
+    const serverProfile = await ServerProfile.findOne({
+      _id: user.id,
+    }).populate("userId");
+    return res.json(serverProfile);
+  }
   throw new NotFoundError();
 };
 
@@ -15,8 +20,8 @@ export const allUsers = async (req: Request, res: Response) => {
   const users = await ServerProfile.find({
     organizationId: user.organizationId,
   })
-    .limit(100)
-    .populate("userId");
+    .populate("userId")
+    .limit(100);
 
   res.json(users);
 };
