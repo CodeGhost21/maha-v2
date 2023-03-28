@@ -14,7 +14,9 @@ export const allUsers = async (req: Request, res: Response) => {
 
   const users = await ServerProfile.find({
     organizationId: user.organizationId,
-  }).limit(100);
+  })
+    .limit(100)
+    .populate("userId");
 
   res.json(users);
 };

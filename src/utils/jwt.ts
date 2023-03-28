@@ -35,7 +35,7 @@ export const extractServerProfile = (req: Request) => {
 
         const user = await ServerProfile.findOne({
           _id: String(decoded.id),
-        }).populate("userId");
+        });
         if (!user) reject(new NotAuthorizedError());
         else resolve(user);
       }
