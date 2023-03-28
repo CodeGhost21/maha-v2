@@ -12,6 +12,8 @@ import {
   IServerProfileModel,
 } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
+import { TaskSubmission } from "../../database/models/taskSubmmission";
+import { Task } from "../../database/models/tasks";
 
 export const checkLoyalty = async (
   profile: IServerProfile,
@@ -37,24 +39,7 @@ export const completeLoyaltyTask = async (
   profile: IServerProfileModel,
   type: LoyaltyTaskType
 ) => {
-  const loyaltyTask = await LoyaltyTask.findOne({
-    organizationId: profile.organizationId,
-    type,
-  });
-
   if (!profile) throw new NotFoundError("profile not found");
-
-  // if there was no loyalty task here; then we skip. no points given
-  if (!loyaltyTask) return true;
-
-  const checkLoyaltySubmission = await LoyaltySubmission.findOne({
-    type: type,
-    approvedBy: profile.id,
-    organizationId: profile.organizationId,
-  });
-
-  // task already completed
-  if (checkLoyaltySubmission) return true;
 
   const verifyLoyalty = await checkLoyalty(profile, type);
   if (!verifyLoyalty) return false;
@@ -62,29 +47,84 @@ export const completeLoyaltyTask = async (
   const organization = await Organization.findById(profile.organizationId);
   if (!organization) throw new NotFoundError("organization not found");
 
-  await LoyaltySubmission.create({
-    profileId: profile.id,
-    organizationId: organization.id,
-    type: loyaltyTask.type,
-    totalWeight: loyaltyTask.weight,
-    boost: organization.maxBoost * profile.loyaltyWeight,
-    loyalty: profile.loyaltyWeight,
+  //loyalty tasks
+  const loyaltyTask = await LoyaltyTask.findOne({
+    organizationId: profile.organizationId,
+    type,
   });
 
-  // recalculate profile loyalty weight
-  const totalLoyaltyWeight = profile.loyaltyWeight + loyaltyTask.weight;
-  profile.loyaltyWeight = totalLoyaltyWeight;
-  await profile.save();
+  if (loyaltyTask) {
+    const checkLoyaltySubmission = await LoyaltySubmission.findOne({
+      type: type,
+      approvedBy: profile.id,
+      organizationId: profile.organizationId,
+    });
 
-  await PointTransaction.create({
-    userId: profile.id,
-    taskId: loyaltyTask.id,
-    type: loyaltyTask.type,
-    totalPoints: totalLoyaltyWeight,
-    addPoints: loyaltyTask.weight,
-    boost: organization.maxBoost * profile.loyaltyWeight,
-    loyalty: profile.loyaltyWeight,
+    if (!checkLoyaltySubmission) {
+      await LoyaltySubmission.create({
+        profileId: profile.id,
+        organizationId: organization.id,
+        type: loyaltyTask.type,
+        totalWeight: loyaltyTask.weight,
+        boost: organization.maxBoost * profile.loyaltyWeight,
+        loyalty: profile.loyaltyWeight,
+      });
+
+      // recalculate profile loyalty weight
+      const totalLoyaltyWeight = profile.loyaltyWeight + loyaltyTask.weight;
+      profile.loyaltyWeight = totalLoyaltyWeight;
+      await profile.save();
+
+      await PointTransaction.create({
+        userId: profile.id,
+        taskId: loyaltyTask.id,
+        type: loyaltyTask.type,
+        totalPoints: totalLoyaltyWeight,
+        addPoints: loyaltyTask.weight,
+        boost: organization.maxBoost * profile.loyaltyWeight,
+        loyalty: profile.loyaltyWeight,
+      });
+    }
+  }
+
+  //tasks
+  const task = await Task.findOne({
+    organizationId: profile.organizationId,
+    type,
   });
+
+  if (task) {
+    const checkTaskSubmission = await TaskSubmission.findOne({
+      type: type,
+      approvedBy: profile.id,
+      organizationId: profile.organizationId,
+    });
+    if (!checkTaskSubmission) {
+      await TaskSubmission.create({
+        profileId: profile.id,
+        organizationId: organization.id,
+        type: task.type,
+        points: task.points,
+        boost: organization.maxBoost * profile.loyaltyWeight,
+        loyalty: profile.loyaltyWeight,
+      });
+
+      // recalculate profile total  points
+      const totalPoints = task.points * (profile.loyaltyWeight + 1);
+      profile.totalPoints += totalPoints;
+      await profile.save();
+
+      await PointTransaction.create({
+        userId: profile.id,
+        taskId: task.id,
+        type: task.type,
+        totalPoints: profile.totalPoints,
+        addPoints: totalPoints,
+        boost: organization.maxBoost * profile.loyaltyWeight,
+        loyalty: profile.loyaltyWeight,
+      });
+    }
+  }
 
   return true;
 };

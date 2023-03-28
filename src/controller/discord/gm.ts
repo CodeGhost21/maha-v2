@@ -7,7 +7,6 @@ import {
 } from "../../database/models/serverProfile";
 import { Task } from "../../database/models/tasks";
 import { completeLoyaltyTask } from "../../controller/loyaltyTask";
-import { completeTask } from "../../controller/task";
 import * as discord from "discord.js";
 import { Message } from "../../database/models/message";
 
@@ -133,9 +132,7 @@ export const executeGMstatement = async (
             ? profile.streak
             : profile.maxStreak;
         profile.totalGMs += 1;
-        profile.totalPoints += 10 * (profile.loyaltyWeight + 1);
         profile.save();
-        // await completeTask(profile, "gm");
       }
     }
 
@@ -145,9 +142,7 @@ export const executeGMstatement = async (
       if (response) {
         profile.streak = 1;
         profile.totalGMs += 1;
-        profile.totalPoints += 10 * (profile.loyaltyWeight + 1);
         profile.save();
-        // await completeTask(profile, "gm");
       }
     } else if (isToday(lastGM) && profile.totalGMs == 0) {
       const response = await completeLoyaltyTask(profile, "gm");
@@ -155,9 +150,7 @@ export const executeGMstatement = async (
         profile.streak = 1;
         profile.totalGMs = 1;
         profile.maxStreak = 1;
-        profile.totalPoints += 10 * (profile.loyaltyWeight + 1);
         profile.save();
-        // await completeTask(profile, "gm");
       }
     }
     const rankResult = await assignRank(profile);
