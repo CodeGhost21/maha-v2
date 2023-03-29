@@ -2,6 +2,7 @@ import {
   CacheType,
   CommandInteraction,
   MessageActionRow,
+  MessageButton,
   MessageSelectMenu,
 } from "discord.js";
 
@@ -61,10 +62,24 @@ export const executeTasksCommand = async (
     const value = collected.values[0];
     if (value === "gm") {
       msg = `Go and say GM in the GM channel`;
+      await collected.reply({
+        content: `Hey ${collected?.user}, ${msg}`,
+        ephemeral: true,
+      });
+    } else if (value === "twitter_follow") {
+      msg = `Follow the MAHADAO twitter page.`
+      const row = new MessageActionRow().addComponents(
+        new MessageButton()
+          .setLabel("Follow @MAHADAO")
+          .setStyle("LINK")
+          .setURL('https://twitter.com/TheMahaDAO'),
+      );
+      await collected.reply({
+        content: `Hey ${collected?.user}, ${msg}`,
+        ephemeral: true,
+        components: [row],
+      });
     }
-    await collected.reply({
-      content: `Hey ${collected?.user}, ${msg}`,
-      ephemeral: true,
-    });
+
   });
 };
