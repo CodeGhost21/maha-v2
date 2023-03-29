@@ -10,16 +10,11 @@ import {
   IServerProfileModel,
 } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
-import { TaskSubmission } from "../../database/models/taskSubmission";
-import { Task } from "../../database/models/tasks";
-import { gmLoyalty } from "./gm";
 import { twitterProfileLoyalty } from "./twitterProfile";
 import { discordProfileLoyalty } from "./discordProfile";
 
 const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
-  if (loyaltyType === "gm") return await gmLoyalty(profile);
-  else if (loyaltyType === "twitter_profile")
-    return twitterProfileLoyalty(profile);
+  if (loyaltyType === "twitter_profile") return twitterProfileLoyalty(profile);
   else if (loyaltyType === "discord_profile")
     return discordProfileLoyalty(profile);
   return false;
