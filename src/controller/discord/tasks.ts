@@ -67,7 +67,7 @@ export const executeTasksCommand = async (
         ephemeral: true,
       });
     } else if (value === "twitter_follow") {
-      msg = `Follow the MAHADAO twitter page.`
+      msg = `Follow the MAHADAO twitter page and earn points daily.`
       const row = new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel("Follow @MAHADAO")
