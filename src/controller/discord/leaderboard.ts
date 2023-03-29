@@ -24,28 +24,33 @@ const total_icons = [
 export const executeLeaderboardCommand = async (
   interaction: CommandInteraction<CacheType>
 ) => {
-  const guildId = interaction.guildId;
-  if (!guildId) return;
+  try {
+    const guildId = interaction.guildId;
+    if (!guildId) return;
 
-  const { profile } = await findOrCreateServerProfile(
-    interaction.user.id,
-    guildId
-  );
+    const { profile } = await findOrCreateServerProfile(
+      interaction.user.id,
+      guildId
+    );
 
-  const profiles = await ServerProfile.find({
-    organizationId: profile.organizationId,
-  }).populate("userId");
+    const profiles = await ServerProfile.find({
+      organizationId: profile.organizationId,
+    }).populate("userId");
 
-  const top = profiles
-    .sort((a, b) => b.totalPoints - a.totalPoints)
-    .slice(0, 10)
-    .map(
-      (u, i) =>
-        `${total_icons[i]} **${u.userId.discordTag}** - **${u.totalPoints}** points!`
-    )
-    .join("\n");
+    const top = profiles
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .slice(0, 10)
+      .map(
+        (u, i) =>
+          `${total_icons[i]} **${u.userId.discordTag}** - **${u.totalPoints}** points!`
+      )
+      .join("\n");
 
-  const text = "__Top 10 rankers__ 🏆\n" + top;
+    const text = "__Top 10 rankers__ 🏆\n" + top;
 
-  interaction.reply(text);
+    interaction.reply(text);
+  } catch (error) {
+    console.error(error)
+  }
+
 };
