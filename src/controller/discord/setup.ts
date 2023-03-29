@@ -20,6 +20,7 @@ export const executeSetupCommand = async (
   try {
     const guildId = interaction.guildId;
     if (!guildId) return;
+    let frontendUrl: string;
 
     // find or create the org if it doesn't exist
     const org = await Organization.findOne({ guildId });
@@ -40,10 +41,15 @@ export const executeSetupCommand = async (
 
     const token = await jwt.sign({ id: profile.id, expiry }, jwtSecret);
 
-    const frontendUrl = urlJoin(
-      nconf.get("FRONTEND_URL"),
-      `settings?token=${token}`
-    );
+    if (isOwner) {
+      frontendUrl = urlJoin(
+        nconf.get("FRONTEND_URL"),
+        `settings?token=${token}`
+      );
+    } else {
+      frontendUrl = nconf.get("FRONTEND_URL")
+    }
+
 
     const row = new MessageActionRow().addComponents(
       new MessageButton().setLabel("Login").setStyle("LINK").setURL(frontendUrl)
