@@ -106,7 +106,7 @@ export const executeProfileCommand = async (
       await sendFeedDiscord(org.feedChannelId, `${collected?.user}, ${msg}`);
     } else botMsg = `Task failed! Please check and try again later.`;
 
-    await collected.reply({
+    await collected?.reply({
       content: `${collected?.user}, ${botMsg}`,
       ephemeral: true,
     });

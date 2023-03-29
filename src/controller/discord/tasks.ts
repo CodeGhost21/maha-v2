@@ -38,8 +38,6 @@ export const executeTasksCommand = async (
       .addOptions(rowItem)
   );
 
-
-
   if (rowItem.length < 1) {
     await interaction.reply({
       content: "No quests have been created yet.",
@@ -62,36 +60,35 @@ export const executeTasksCommand = async (
     const value = collected.values[0];
     if (value === "gm") {
       msg = `Go and say GM in the GM channel`;
-      await collected.reply({
+      await collected?.reply({
         content: `Hey ${collected?.user}, ${msg}`,
         ephemeral: true,
       });
     } else if (value === "twitter_follow") {
-      msg = `Follow the MAHADAO twitter page and earn points daily.`
+      msg = `Follow the MAHADAO twitter page and earn points daily.`;
       const row = new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel("Follow @MAHADAO")
           .setStyle("LINK")
-          .setURL('https://twitter.com/TheMahaDAO'),
+          .setURL("https://twitter.com/TheMahaDAO")
       );
-      await collected.reply({
+      await collected?.reply({
         content: `Hey ${collected?.user}, ${msg}`,
         ephemeral: true,
         components: [row],
       });
-    } else if (value === 'hold_nft') {
+    } else if (value === "hold_nft") {
       msg = `You have to hold a citizenship and you would earn points daily.`;
-      await collected.reply({
+      await collected?.reply({
         content: `Hey ${collected?.user}, ${msg}`,
         ephemeral: true,
       });
     } else {
       msg = `Task failed! Please check and try again later.`;
-      await collected.reply({
+      await collected?.reply({
         content: `Hey ${collected?.user}, ${msg}`,
         ephemeral: true,
       });
     }
-
   });
 };

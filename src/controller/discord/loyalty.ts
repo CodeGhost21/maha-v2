@@ -40,8 +40,9 @@ export const executeLoyaltyCommand = async (
   if (profile.loyaltyWeight === 1) {
     content = `**Congratulations your loyalty is 100%! 🎉 You're all set to enjoy the max boost on the tasks you perform. Just use the */quests* command to discover more! **`;
   } else {
-    content = `Your current loyalty score is ${profile.loyaltyWeight * 100
-      }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
+    content = `Your current loyalty score is ${
+      profile.loyaltyWeight * 100
+    }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
   }
 
   const row = new MessageActionRow().addComponents(
@@ -88,7 +89,7 @@ export const executeLoyaltyCommand = async (
       await sendFeedDiscord(org.feedChannelId, `${collected?.user}, ${msg}`);
     } else botMsg = `Task failed! Please check and try again later.`;
 
-    await collected.reply({
+    await collected?.reply({
       content: `${collected?.user}, ${botMsg}`,
       ephemeral: true,
     });
