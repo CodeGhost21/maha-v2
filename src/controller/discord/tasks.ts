@@ -15,7 +15,7 @@ export const executeTasksCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { organization } = await findOrCreateServerProfile(
+  const { organization, user } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );
@@ -44,11 +44,18 @@ export const executeTasksCommand = async (
       ephemeral: true,
     });
   } else {
-    await interaction.reply({
-      content: content,
-      ephemeral: true,
-      components: [row],
-    });
+    if (!user.twitterID || !user.walletAddress) {
+      await interaction.reply({
+        content: "Verify yourself using /verify to perform any tasks.",
+        ephemeral: true,
+      });
+    } else {
+      await interaction.reply({
+        content: content,
+        ephemeral: true,
+        components: [row],
+      });
+    }
   }
 
   const taskCollector = interaction.channel?.createMessageComponentCollector({

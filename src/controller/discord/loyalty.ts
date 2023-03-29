@@ -20,7 +20,7 @@ export const executeLoyaltyCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { profile } = await findOrCreateServerProfile(
+  const { profile, user } = await findOrCreateServerProfile(
     interaction.user.id,
     guildId
   );
@@ -40,9 +40,8 @@ export const executeLoyaltyCommand = async (
   if (profile.loyaltyWeight === 1) {
     content = `**Congratulations your loyalty is 100%! 🎉 You're all set to enjoy the max boost on the tasks you perform. Just use the */quests* command to discover more! **`;
   } else {
-    content = `Your current loyalty score is ${
-      profile.loyaltyWeight * 100
-    }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
+    content = `Your current loyalty score is ${profile.loyaltyWeight * 100
+      }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
   }
 
   const row = new MessageActionRow().addComponents(
@@ -58,11 +57,18 @@ export const executeLoyaltyCommand = async (
       ephemeral: true,
     });
   } else {
-    await interaction.reply({
-      content: content,
-      components: [row],
-      ephemeral: true,
-    });
+    if (!user.twitterID || !user.walletAddress) {
+      await interaction.reply({
+        content: "Verify yourself using /verify to perform any tasks.",
+        ephemeral: true,
+      });
+    } else {
+      await interaction.reply({
+        content: content,
+        components: [row],
+        ephemeral: true,
+      });
+    }
   }
 
   const collector = interaction.channel?.createMessageComponentCollector({
