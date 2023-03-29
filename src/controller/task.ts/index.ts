@@ -42,7 +42,8 @@ export const completeTask = async (
   });
 
   // recalculate profile total  points
-  const totalPoints = task.points * (profile.loyaltyWeight + 1);
+  const totalPoints =
+    task.points * (organization.maxBoost * profile.loyaltyWeight + 1);
   profile.totalPoints += totalPoints;
   await profile.save();
 
