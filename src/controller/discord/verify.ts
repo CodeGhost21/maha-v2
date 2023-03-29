@@ -57,7 +57,7 @@ export const executeVerifyCommand = async (
     .setTitle("Verify your account")
     .setDescription(
       `Hey there, ${interaction?.user} \n\n` +
-      `Before you start enjoying the full benefits of our Gifts of Eden, you'll need to verify both your Twitter and Discord accounts. This quick and easy process ensures you're a genuine member of our community, and helps us provide a safe and engaging experience for everyone. \n\n` +
+      `Before you start enjoying the full benefits of our Gifts of Eden, you'll need to verify both your Twitter and Wallet accounts. This quick and easy process ensures you're a genuine member of our community, and helps us provide a safe and engaging experience for everyone. \n\n` +
       `Once both of your accounts are verified, you'll unlock all the amazing features of Gifts of Eden`
     );
 
