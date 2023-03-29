@@ -79,6 +79,18 @@ export const executeTasksCommand = async (
         ephemeral: true,
         components: [row],
       });
+    } else if (value === 'hold_nft') {
+      msg = `You have to hold a citizenship and you would earn points daily.`;
+      await collected.reply({
+        content: `Hey ${collected?.user}, ${msg}`,
+        ephemeral: true,
+      });
+    } else {
+      msg = `Task failed! Please check and try again later.`;
+      await collected.reply({
+        content: `Hey ${collected?.user}, ${msg}`,
+        ephemeral: true,
+      });
     }
 
   });
