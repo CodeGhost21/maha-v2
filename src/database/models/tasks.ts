@@ -17,7 +17,7 @@ const task = new Schema(
     name: String,
     type: {
       type: String,
-      enum: ["form", "twitter_follow", "hold_nft", "revoke_opensea", "gm"],
+      enum: ["form", "twitter_follow", "hold_nft", "gm"],
       required: true,
     },
     instruction: String,

@@ -10,13 +10,16 @@ import {
   IServerProfileModel,
 } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
+
 import { twitterProfileLoyalty } from "./twitterProfile";
 import { discordProfileLoyalty } from "./discordProfile";
+import { openseaLoyalty } from "./openseaRevoke";
 
 const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
   if (loyaltyType === "twitter_profile") return twitterProfileLoyalty(profile);
   else if (loyaltyType === "discord_profile")
     return discordProfileLoyalty(profile);
+  else if (loyaltyType === "revoke_opensea") return openseaLoyalty(profile);
   return false;
 };
 
