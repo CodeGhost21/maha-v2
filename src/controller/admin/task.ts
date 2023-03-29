@@ -6,13 +6,7 @@ import BadRequestError from "../../errors/BadRequestError";
 import NotFoundError from "../../errors/NotFoundError";
 import { extractServerProfile } from "../../utils/jwt";
 
-const taskTypes: TaskTypes[] = [
-  "form",
-  "twitter_follow",
-  "hold_nft",
-  "revoke_opensea",
-  "gm",
-];
+const taskTypes: TaskTypes[] = ["form", "twitter_follow", "hold_nft", "gm"];
 
 export const allTasks = async (req: Request, res: Response) => {
   const user = await extractServerProfile(req);
