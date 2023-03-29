@@ -5,33 +5,23 @@ import {
 } from "../../database/models/loyaltyTasks";
 import { Organization } from "../../database/models/organization";
 import { PointTransaction } from "../../database/models/pointTransaction";
-import { fetchTwitterProfile } from "../user";
-import { profileImageComparing } from "../../utils/image";
 import {
   IServerProfile,
   IServerProfileModel,
 } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
-import { TaskSubmission } from "../../database/models/taskSubmmission";
+import { TaskSubmission } from "../../database/models/taskSubmission";
 import { Task } from "../../database/models/tasks";
+import { gmLoyalty } from "./gm";
+import { twitterProfileLoyalty } from "./twitterProfile";
+import { discordProfileLoyalty } from "./discordProfile";
 
-export const checkLoyalty = async (
-  profile: IServerProfile,
-  loyaltyType: string
-) => {
-  if (loyaltyType === "gm") {
-    if (profile.totalGMs > 0) return true;
-  } else if (loyaltyType === "twitter_profile") {
-    const user = await profile.getUser();
-
-    const twitterProfile = await fetchTwitterProfile(user);
-    const twitterCheck = await profileImageComparing(
-      twitterProfile,
-      48,
-      user.walletAddress
-    );
-    return twitterCheck;
-  }
+const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
+  if (loyaltyType === "gm") return await gmLoyalty(profile);
+  else if (loyaltyType === "twitter_profile")
+    return twitterProfileLoyalty(profile);
+  else if (loyaltyType === "discord_profile")
+    return discordProfileLoyalty(profile);
   return false;
 };
 
@@ -39,101 +29,54 @@ export const completeLoyaltyTask = async (
   profile: IServerProfileModel,
   type: LoyaltyTaskType
 ) => {
-  console.log("completeLoyaltyTask");
-  console.log(profile.organizationId, type);
-
-  if (!profile) throw new NotFoundError("profile not found");
-
-  const organization = await Organization.findById(profile.organizationId);
-  if (!organization) throw new NotFoundError("organization not found");
-
-  //loyalty tasks
-
   const loyaltyTask = await LoyaltyTask.findOne({
     organizationId: profile.organizationId,
     type,
   });
-  if (loyaltyTask) {
-    const checkLoyaltySubmission = await LoyaltySubmission.findOne({
-      type: type,
-      approvedBy: profile.id,
-      organizationId: profile.organizationId,
-    });
-    if (!checkLoyaltySubmission) {
-      await LoyaltySubmission.create({
-        profileId: profile.id,
-        organizationId: organization.id,
-        type: loyaltyTask.type,
-        totalWeight: loyaltyTask.weight,
-        boost: organization.maxBoost * profile.loyaltyWeight,
-        loyalty: profile.loyaltyWeight,
-      });
 
-      // recalculate profile loyalty weight
-      const totalLoyaltyWeight = profile.loyaltyWeight + loyaltyTask.weight;
-      profile.loyaltyWeight = totalLoyaltyWeight;
-      await profile.save();
+  if (!profile) throw new NotFoundError("profile not found");
 
-      await PointTransaction.create({
-        userId: profile.id,
-        taskId: loyaltyTask.id,
-        type: loyaltyTask.type,
-        totalPoints: totalLoyaltyWeight,
-        addPoints: loyaltyTask.weight,
-        boost: organization.maxBoost * profile.loyaltyWeight,
-        loyalty: profile.loyaltyWeight,
-      });
-    }
-    const verifyLoyalty = await checkLoyalty(profile, type);
-    if (!verifyLoyalty) return false;
-  }
+  // if there was no loyalty task here; then we skip. no points given
+  if (!loyaltyTask) return true;
 
-  //tasks
-  const task = await Task.findOne({
+  const checkLoyaltySubmission = await LoyaltySubmission.findOne({
+    type: type,
+    approvedBy: profile.id,
     organizationId: profile.organizationId,
-    type,
   });
-  if (task) {
-    const checkTaskSubmission = await TaskSubmission.findOne({
-      type: type,
-      approvedBy: profile.id,
-      organizationId: profile.organizationId,
-    });
-    if (!checkTaskSubmission) {
-      await TaskSubmission.create({
-        profileId: profile.id,
-        organizationId: organization.id,
-        type: task.type,
-        points: task.points,
-        boost: organization.maxBoost * profile.loyaltyWeight,
-        loyalty: profile.loyaltyWeight,
-      });
 
-      // recalculate profile total  points
-      const totalPoints = task.points * (profile.loyaltyWeight + 1);
-      profile.totalPoints += totalPoints;
-      await profile.save();
-      console.log({
-        userId: profile.id,
-        taskId: task.id,
-        type: task.type,
-        totalPoints: profile.totalPoints,
-        addPoints: totalPoints,
-        boost: organization.maxBoost * profile.loyaltyWeight,
-        loyalty: profile.loyaltyWeight,
-      });
+  // task already completed
+  if (checkLoyaltySubmission) return true;
 
-      await PointTransaction.create({
-        userId: profile.id,
-        taskId: task.id,
-        type: task.type,
-        totalPoints: profile.totalPoints,
-        addPoints: totalPoints,
-        boost: organization.maxBoost * profile.loyaltyWeight,
-        loyalty: profile.loyaltyWeight,
-      });
-    }
-  }
+  const verifyLoyalty = await checkLoyalty(profile, type);
+  if (!verifyLoyalty) return false;
+
+  const organization = await Organization.findById(profile.organizationId);
+  if (!organization) throw new NotFoundError("organization not found");
+
+  await LoyaltySubmission.create({
+    profileId: profile.id,
+    organizationId: organization.id,
+    type: loyaltyTask.type,
+    totalWeight: loyaltyTask.weight,
+    boost: organization.maxBoost * profile.loyaltyWeight,
+    loyalty: profile.loyaltyWeight,
+  });
+
+  // recalculate profile loyalty weight
+  const totalLoyaltyWeight = profile.loyaltyWeight + loyaltyTask.weight;
+  profile.loyaltyWeight = totalLoyaltyWeight;
+  await profile.save();
+
+  await PointTransaction.create({
+    userId: profile.id,
+    taskId: loyaltyTask.id,
+    type: loyaltyTask.type,
+    totalPoints: totalLoyaltyWeight,
+    addPoints: loyaltyTask.weight,
+    boost: organization.maxBoost * profile.loyaltyWeight,
+    loyalty: profile.loyaltyWeight,
+  });
 
   return true;
 };

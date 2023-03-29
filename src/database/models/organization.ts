@@ -28,3 +28,6 @@ export const Organization = mongoose.model<IOrganizationModel>(
   "Organization",
   organization
 );
+
+//add twitter handle to keep a check user follow the organization
+//add nft locker address for checking hold_NFT

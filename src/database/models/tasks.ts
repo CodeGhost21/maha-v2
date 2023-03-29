@@ -1,12 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IOrganizationModel } from "./organization";
 
-export type TaskTypes =
-  | "form"
-  | "twitter_follow"
-  | "gm"
-  | "hold_nft"
-  | "revoke_opensea";
+export type TaskTypes = "form" | "twitter_follow" | "gm" | "hold_nft";
 
 export interface ITask {
   name: string;
