@@ -90,21 +90,22 @@ export const executeProfileCommand = async (
     const value = collected.values[0] as LoyaltyTaskType;
     const taskResponse = await completeLoyaltyTask(profile, value);
 
-    if (taskResponse) botMsg = `Task completed successfully.`;
-    else botMsg = `Task failed! Please check and try again later.`;
+    if (taskResponse) {
+      botMsg = `Task completed successfully.`;
+      if (value === "twitter_profile")
+        msg = `Looking fresh with that NFT profile pic!`;
+      else if (value === "discord_profile")
+        msg = `Rocking with that NFT Profile pic!`;
+      else if (value === "gm") msg = `Early Bird!!`;
+      else msg = `is a Keeper!!`;
 
-    if (value === "twitter_profile")
-      msg = `Looking fresh with that NFT profile pic!`;
-    else if (value === "discord_profile")
-      msg = `Rocking with that NFT Profile pic!`;
-    else if (value === "gm") msg = `Early Bird!!`;
-    else msg = `is a Keeper!!`;
+      const org: any = await Organization.findOne({
+        _id: profile.organizationId,
+      });
 
-    const org: any = await Organization.findOne({
-      _id: profile.organizationId,
-    });
+      await sendFeedDiscord(org.feedChannelId, `${collected?.user}, ${msg}`);
+    } else botMsg = `Task failed! Please check and try again later.`;
 
-    await sendFeedDiscord(org.feedChannelId, `${collected?.user}, ${msg}`);
     await collected.reply({
       content: `${collected?.user}, ${botMsg}`,
       ephemeral: true,
