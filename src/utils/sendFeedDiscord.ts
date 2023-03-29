@@ -1,6 +1,6 @@
 import nconf from "nconf";
 import { sendMessage } from "./discord";
 
-export const sendFeedDiscord = async (msg: string) => {
-  sendMessage(nconf.get("CHANNEL_FEED"), msg);
+export const sendFeedDiscord = async (feedChannelId: string, msg: string) => {
+  sendMessage(feedChannelId, msg);
 };

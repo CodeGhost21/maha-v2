@@ -21,7 +21,7 @@ export const allUsers = async (req: Request, res: Response) => {
     organizationId: user.organizationId,
   })
     .populate("userId")
+    .sort({ gmRank: 1 })
     .limit(100);
-
   res.json(users);
 };

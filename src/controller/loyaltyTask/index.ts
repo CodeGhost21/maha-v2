@@ -39,27 +39,26 @@ export const completeLoyaltyTask = async (
   profile: IServerProfileModel,
   type: LoyaltyTaskType
 ) => {
-  if (!profile) throw new NotFoundError("profile not found");
+  console.log("completeLoyaltyTask");
+  console.log(profile.organizationId, type);
 
-  const verifyLoyalty = await checkLoyalty(profile, type);
-  if (!verifyLoyalty) return false;
+  if (!profile) throw new NotFoundError("profile not found");
 
   const organization = await Organization.findById(profile.organizationId);
   if (!organization) throw new NotFoundError("organization not found");
 
   //loyalty tasks
+
   const loyaltyTask = await LoyaltyTask.findOne({
     organizationId: profile.organizationId,
     type,
   });
-
   if (loyaltyTask) {
     const checkLoyaltySubmission = await LoyaltySubmission.findOne({
       type: type,
       approvedBy: profile.id,
       organizationId: profile.organizationId,
     });
-
     if (!checkLoyaltySubmission) {
       await LoyaltySubmission.create({
         profileId: profile.id,
@@ -85,6 +84,8 @@ export const completeLoyaltyTask = async (
         loyalty: profile.loyaltyWeight,
       });
     }
+    const verifyLoyalty = await checkLoyalty(profile, type);
+    if (!verifyLoyalty) return false;
   }
 
   //tasks
@@ -92,7 +93,6 @@ export const completeLoyaltyTask = async (
     organizationId: profile.organizationId,
     type,
   });
-
   if (task) {
     const checkTaskSubmission = await TaskSubmission.findOne({
       type: type,
@@ -113,6 +113,15 @@ export const completeLoyaltyTask = async (
       const totalPoints = task.points * (profile.loyaltyWeight + 1);
       profile.totalPoints += totalPoints;
       await profile.save();
+      console.log({
+        userId: profile.id,
+        taskId: task.id,
+        type: task.type,
+        totalPoints: profile.totalPoints,
+        addPoints: totalPoints,
+        boost: organization.maxBoost * profile.loyaltyWeight,
+        loyalty: profile.loyaltyWeight,
+      });
 
       await PointTransaction.create({
         userId: profile.id,

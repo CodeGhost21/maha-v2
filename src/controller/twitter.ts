@@ -4,6 +4,10 @@ import { Request, Response } from "express";
 import twiiterOauth from "../library/twitterOauth";
 import BadRequestError from "../errors/BadRequestError";
 import { extractServerProfile } from "../utils/jwt";
+import { Organization } from "../database/models/organization";
+import { use } from "nconf";
+import { Serializer } from "v8";
+import { ServerProfile } from "../database/models/serverProfile";
 
 export const requestToken = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
@@ -61,8 +65,15 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
   user.twitterOauthAccessTokenSecret = oauthAccessTokenSecret;
 
   await user.save();
+  const userProfile: any = await ServerProfile.findOne({ userId: user.id });
+  const org: any = await Organization.findOne({
+    _id: userProfile.organizationId,
+  });
 
-  sendFeedDiscord(`@${user.discordName} has verified their twitter account`);
+  sendFeedDiscord(
+    org.feedChannelId,
+    `@${user.discordName} has verified their twitter account`
+  );
 
   res.json({ success: true });
 };

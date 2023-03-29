@@ -6,6 +6,8 @@ import NotFoundError from "../errors/NotFoundError";
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { fetchDiscordAvatar } from "../utils/discord";
 import { extractServerProfile } from "../utils/jwt";
+import { ServerProfile } from "../database/models/serverProfile";
+import { Organization } from "../database/models/organization";
 
 export const fetchMe = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
@@ -24,7 +26,14 @@ export const walletVerify = async (req: Request, res: Response) => {
   if (result === req.body.address) {
     user.walletAddress = req.body.address;
     await user.save();
-    sendFeedDiscord(`@${user.discordName} has verified their wallet address`);
+    const userProfile: any = await ServerProfile.findOne({ userId: user.id });
+    const org: any = await Organization.findOne({
+      _id: userProfile.organizationId,
+    });
+    sendFeedDiscord(
+      org.feedChannelId,
+      `@${user.discordName} has verified their wallet address`
+    );
     res.json({ success: true });
   } else {
     res.json({ success: false });
