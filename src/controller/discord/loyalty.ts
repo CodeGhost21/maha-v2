@@ -33,16 +33,15 @@ export const executeLoyaltyCommand = async (
 
   const rowItem = allLoyalties.map((item) => ({
     label: item.name,
-    description: "description",
+    description: item.instruction,
     value: item.type,
   }));
 
   if (profile.loyaltyWeight === 1) {
     content = `**Congratulations your loyalty is 100%! 🎉 You're all set to enjoy the max boost on the tasks you perform. Just use the */quests* command to discover more! **`;
   } else {
-    content = `Your current loyalty score is ${
-      profile.loyaltyWeight * 100
-    }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
+    content = `Your current loyalty score is ${profile.loyaltyWeight * 100
+      }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
   }
 
   const row = new MessageActionRow().addComponents(
@@ -80,7 +79,6 @@ export const executeLoyaltyCommand = async (
         msg = `Looking fresh with that NFT profile pic!`;
       else if (value === "discord_profile")
         msg = `Rocking with that NFT Profile pic!`;
-      else if (value === "gm") msg = `Early Bird!!`;
       else msg = `is a Keeper!!`;
 
       const org: any = await Organization.findOne({
