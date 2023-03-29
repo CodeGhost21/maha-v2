@@ -72,7 +72,7 @@ export const verifyAccessToken = async (req: Request, res: Response) => {
 
   sendFeedDiscord(
     org.feedChannelId,
-    `@${user.discordId} has verified their twitter account`
+    `${user.discordName} has verified their twitter account`
   );
 
   res.json({ success: true });

@@ -32,7 +32,7 @@ export const walletVerify = async (req: Request, res: Response) => {
     });
     sendFeedDiscord(
       org.feedChannelId,
-      `@${user.discordId} has verified their wallet address`
+      `${user.discordName} has verified their wallet address`
     );
     res.json({ success: true });
   } else {
