@@ -9,6 +9,8 @@ export interface ITask {
   instruction: string;
   points: number;
   organizationId: IOrganizationModel;
+  twitterScreenName: string;
+  contractAddress: string;
 }
 
 // task are things that you can do that gives you points
@@ -23,6 +25,8 @@ const task = new Schema(
     instruction: String,
     points: Number,
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
+    twitterScreenName: String,
+    contractAddress: String,
   },
   {
     timestamps: true,
