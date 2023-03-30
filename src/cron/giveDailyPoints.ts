@@ -1,8 +1,8 @@
 // todo
 const cron = require("node-cron");
 
-import { nftHoldTask } from "../controller/task.ts/nftHold";
-import { twitterFollowTask } from "../controller/task.ts/twitterFollow";
+import { nftHoldTask } from "../controller/task/nftHold";
+import { twitterFollowTask } from "../controller/task/twitterFollow";
 
 export const dailyPoints = async () => {
   cron.schedule("0 0 * * *", () => {

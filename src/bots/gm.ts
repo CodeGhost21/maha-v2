@@ -1,6 +1,6 @@
 import { client } from "../utils/discord";
 import { Organization } from "../database/models/organization";
-import { executeGMstatement } from "../controller/task.ts/gm";
+import { executeGMstatement } from "../controller/task/gm";
 
 client.on("messageCreate", async (message) => {
   const guildId = message.guildId;
