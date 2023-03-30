@@ -13,8 +13,6 @@ export const twitterFollowTask = async () => {
   console.log("twitterFollowTask");
 
   const orgTwitterFollowTask = await Task.find({ type: "twitter_follow" });
-  console.log(16, orgTwitterFollowTask);
-
   if (orgTwitterFollowTask.length > 0) {
     Bluebird.mapSeries(orgTwitterFollowTask, async (singleTask: ITaskModel) => {
       const organization: any = await Organization.findOne({
