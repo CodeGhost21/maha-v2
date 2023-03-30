@@ -31,7 +31,7 @@ export const addTask = async (req: Request, res: Response) => {
     type: req.body.type,
     points: req.body.points,
     organizationId: user.organizationId,
-    twitterScreenName: req.body?.twitterScreenName,
+    twitterScreenName: req.body?.screenName,
     contractAddress: req.body?.contractAddress,
   });
   await newTask.save();

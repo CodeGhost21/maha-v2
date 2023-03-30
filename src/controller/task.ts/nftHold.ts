@@ -20,17 +20,9 @@ export const nftHoldTask = async () => {
         Bluebird.mapSeries(orgUsers, async (user: IServerProfileModel) => {
           if (user.userId.walletAddress !== undefined) {
             const noOfNft = await web3.balanceOf(user.userId.walletAddress);
-            let totalMahaX = 0;
-            for (let i = 0; i < noOfNft; i++) {
-              const nftId = await web3.tokenOfOwnerByIndex(
-                user.userId.walletAddress,
-                i
-              );
-              const lockedData: any = await web3.locked(nftId);
-              totalMahaX += lockedData.amount / 10 ** 18;
+            if (noOfNft > 0) {
+              await completeTask(user, "hold_nft");
             }
-            console.log("totalMahaX", totalMahaX);
-            await completeTask(user, "hold_nft");
           }
         });
       }
