@@ -5,7 +5,8 @@ import {
   ServerProfile,
 } from "../../database/models/serverProfile";
 import { ITaskModel, Task } from "../../database/models/tasks";
-import * as web3 from "../../utils/web3";
+// import * as web3 from "../../utils/web3";
+import { contract } from "../../utils/web3";
 import { completeTask } from ".";
 
 export const nftHoldTask = async () => {
@@ -19,7 +20,11 @@ export const nftHoldTask = async () => {
         }).populate("userId");
         Bluebird.mapSeries(orgUsers, async (user: IServerProfileModel) => {
           if (user.userId.walletAddress !== undefined) {
-            const noOfNft = await web3.balanceOf(user.userId.walletAddress);
+            const { noOfNft } = await contract(
+              task.contractAddress,
+              user.userId.walletAddress
+            );
+            // const noOfNft = await web3.balanceOf(user.userId.walletAddress);
             if (noOfNft > 0) {
               await completeTask(user, "hold_nft");
             }

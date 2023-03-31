@@ -18,6 +18,8 @@ export interface ILoyaltyTask {
 
   createdBy: IServerProfileModel;
   organizationId: IOrganizationModel;
+  contractAddress: string;
+  operatorAddress: string;
 }
 
 // only added by org moderators
@@ -44,6 +46,8 @@ const loyaltyTask = new Schema(
       required: true,
       ref: "Organization",
     },
+    contractAddress: String,
+    operatorAddress: String,
   },
   { timestamps: true }
 );

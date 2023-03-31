@@ -1,5 +1,6 @@
 import { LoyaltySubmission } from "../../database/models/loyaltySubmission";
 import {
+  ILoyaltyTaskModel,
   LoyaltyTask,
   LoyaltyTaskType,
 } from "../../database/models/loyaltyTasks";
@@ -15,11 +16,17 @@ import { twitterProfileLoyalty } from "./twitterProfile";
 import { discordProfileLoyalty } from "./discordProfile";
 import { openseaLoyalty } from "./openseaRevoke";
 
-const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
-  if (loyaltyType === "twitter_profile") return twitterProfileLoyalty(profile);
+const checkLoyalty = async (
+  task: ILoyaltyTaskModel,
+  profile: IServerProfile,
+  loyaltyType: string
+) => {
+  if (loyaltyType === "twitter_profile")
+    return twitterProfileLoyalty(task, profile);
   else if (loyaltyType === "discord_profile")
-    return discordProfileLoyalty(profile);
-  else if (loyaltyType === "revoke_opensea") return openseaLoyalty(profile);
+    return discordProfileLoyalty(task, profile);
+  else if (loyaltyType === "revoke_opensea")
+    return openseaLoyalty(task, profile);
   return false;
 };
 
@@ -46,7 +53,7 @@ export const completeLoyaltyTask = async (
   // task already completed
   if (checkLoyaltySubmission) return true;
 
-  const verifyLoyalty = await checkLoyalty(profile, type);
+  const verifyLoyalty = await checkLoyalty(loyaltyTask, profile, type);
   if (!verifyLoyalty) return false;
 
   const organization = await Organization.findById(profile.organizationId);

@@ -31,6 +31,8 @@ export const addLoyaltyTask = async (req: Request, res: Response) => {
     weight: req.body.weight,
     organizationId: profile.organizationId,
     createdBy: profile.id,
+    contractAddress: req.body.contractAddress,
+    operatorAddress: req.body.operatorAddress,
   });
 
   res.json(newLoyaltyTask);
