@@ -9,6 +9,10 @@ import { ITaskModel, Task } from "../../database/models/tasks";
 import { sendRequest } from "../../library/sendRequest";
 import { completeTask } from ".";
 
+/**
+ * This is a one-time task that checks if the user holds a nft of a given type
+ * and gives points.
+ */
 export const twitterFollowTask = async () => {
   console.log("twitterFollowTask");
 

@@ -51,6 +51,7 @@ export const fetchTwitterProfile = async (user: IUserModel) => {
 
 export const fetchDiscordProfile = async (user: IUserModel) => {
   const avatar = await fetchDiscordAvatar(user);
+
   if (avatar) {
     user.discordAvatar = avatar;
     user.save();

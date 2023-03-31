@@ -1,3 +1,5 @@
+// This is the controller for the gm task
+
 import { isYesterday, isToday } from "date-fns";
 import { User } from "../../database/models/user";
 import { assignRank } from "../../utils/upadteRank";
