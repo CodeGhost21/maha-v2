@@ -31,9 +31,7 @@ export const executeProfileCommand = async (
     });
 
     if (interaction.isCommand()) {
-
       let content: string;
-
 
       const rowItem = allLoyalties.map((item) => ({
         label: item.name,
@@ -65,7 +63,8 @@ export const executeProfileCommand = async (
         content =
           `**Hey there, ${interaction.user}! 👋 **\n\n` +
           `**Congratulations your account is verified! 🎉 You're all set to enjoy the benefits of our Gifts of Eden.**\n\n` +
-          `**Your current loyalty score is ${profile.loyaltyWeight * 100
+          `**Your current loyalty score is ${
+            profile.loyaltyWeight * 100
           }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty even more! 🚀**\n\n` +
           `**You've earned a total of ${profile.totalPoints} points so far. Remember, you can always check all the tasks available to earn points using the */quests* command. Keep up the great work! 💪**\n\n` +
           `**Continue exploring these tasks to earn more points and boost your loyalty score even further! 💖**`;
@@ -84,6 +83,7 @@ export const executeProfileCommand = async (
         });
       }
     } else if (interaction.isSelectMenu()) {
+      await interaction.reply({ content: "Checking..", ephemeral: true });
       let msg, botMsg;
       const value = interaction.values[0] as LoyaltyTaskType;
       const taskResponse = await completeLoyaltyTask(profile, value);
@@ -101,12 +101,14 @@ export const executeProfileCommand = async (
           _id: profile.organizationId,
         });
 
-        await sendFeedDiscord(org.feedChannelId, `${interaction?.user}, ${msg}`);
+        await sendFeedDiscord(
+          org.feedChannelId,
+          `${interaction?.user}, ${msg}`
+        );
       } else botMsg = `Task failed! Please check and try again later.`;
 
-      await interaction?.reply({
+      await interaction?.editReply({
         content: `${interaction?.user}, ${botMsg}`,
-        ephemeral: true,
       });
     }
   } catch (error) {

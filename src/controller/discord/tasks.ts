@@ -60,13 +60,13 @@ export const executeTasksCommand = async (
         }
       }
     } else if (interaction.isSelectMenu()) {
+      await interaction.reply({ content: "Checking..", ephemeral: true });
       let msg;
       const value = interaction.values[0];
       if (value === "gm") {
         msg = `Go and say GM in the GM channel`;
-        await interaction?.reply({
+        await interaction?.editReply({
           content: `Hey ${interaction?.user}, ${msg}`,
-          ephemeral: true,
         });
       } else if (value === "twitter_follow") {
         msg = `Follow the MAHADAO twitter page and earn points daily.`;
@@ -76,22 +76,19 @@ export const executeTasksCommand = async (
             .setStyle("LINK")
             .setURL("https://twitter.com/TheMahaDAO")
         );
-        await interaction?.reply({
+        await interaction?.editReply({
           content: `Hey ${interaction?.user}, ${msg}`,
-          ephemeral: true,
           components: [row],
         });
       } else if (value === "hold_nft") {
         msg = `You have to hold a citizenship and you would earn points daily.`;
-        await interaction?.reply({
+        await interaction?.editReply({
           content: `Hey ${interaction?.user}, ${msg}`,
-          ephemeral: true,
         });
       } else {
         msg = `Task failed! Please check and try again later.`;
-        await interaction?.reply({
+        await interaction?.editReply({
           content: `Hey ${interaction?.user}, ${msg}`,
-          ephemeral: true,
         });
       }
     }
