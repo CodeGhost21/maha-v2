@@ -11,8 +11,8 @@ import {
 } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
 
-import { twitterProfileLoyalty } from "./twitterProfile";
-import { discordProfileLoyalty } from "./discordProfile";
+import { twitterProfileLoyalty } from "./twitterPFP";
+import { discordProfileLoyalty } from "./discordPFP";
 import { openseaLoyalty } from "./openseaRevoke";
 
 const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
@@ -66,24 +66,43 @@ export const completeLoyaltyTask = async (
   profile.loyaltyWeight = totalLoyaltyWeight;
   await profile.save();
 
-  await PointTransaction.create({
-    userId: profile.id,
-    taskId: loyaltyTask.id,
-    type: loyaltyTask.type,
-    totalPoints: totalLoyaltyWeight,
-    addPoints: loyaltyTask.weight,
-    boost: organization.maxBoost * profile.loyaltyWeight,
-    loyalty: profile.loyaltyWeight,
-  });
+  // todo: inform feed
 
   return true;
 };
 
-const calculateLoyaltyPoints = (loyalty: any) => {
-  const discordPoints = loyalty.discordProfile ? 0.25 : 0;
-  const twitterPoints = loyalty.twitterProfile ? 0.25 : 0;
-  const gmPoints = loyalty.gm ? 0.25 : 0;
-  const openseaPoints = loyalty.opensea ? 0.25 : 0;
+export const undoLoyaltyTask = async (
+  profile: IServerProfileModel,
+  type: LoyaltyTaskType
+) => {
+  const loyaltyTask = await LoyaltyTask.findOne({
+    organizationId: profile.organizationId,
+    type,
+  });
 
-  return openseaPoints + gmPoints + twitterPoints + discordPoints;
+  if (!profile) throw new NotFoundError("profile not found");
+
+  // if there was no loyalty task here; then we skip. no points given
+  if (!loyaltyTask) return true;
+
+  const checkLoyaltySubmission = await LoyaltySubmission.findOne({
+    type: type,
+    approvedBy: profile.id,
+    organizationId: profile.organizationId,
+  });
+
+  // task was not complete; hence we skip
+  if (!checkLoyaltySubmission) return false;
+
+  // task was compelte before; so we recalculate loyalty
+  checkLoyaltySubmission.delete();
+
+  // recalculate profile loyalty weight
+  const totalLoyaltyWeight = profile.loyaltyWeight - loyaltyTask.weight;
+  profile.loyaltyWeight = totalLoyaltyWeight;
+  await profile.save();
+
+  // todo: inform feed
+
+  return true;
 };

@@ -10,7 +10,6 @@ import {
   LoyaltyTask,
   LoyaltyTaskType,
 } from "../../database/models/loyaltyTasks";
-import { Organization } from "../../database/models/organization";
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 import { completeLoyaltyTask } from "../loyaltyTask";
@@ -18,93 +17,96 @@ import { completeLoyaltyTask } from "../loyaltyTask";
 export const executeLoyaltyCommand = async (
   interaction: CommandInteraction<CacheType> | SelectMenuInteraction<CacheType>
 ) => {
-  try {
-    const guildId = interaction.guildId;
-    if (!guildId) return;
+  const guildId = interaction.guildId;
+  if (!guildId) return;
 
-    const { profile, user } = await findOrCreateServerProfile(
-      interaction.user.id,
-      guildId
+  const { profile, user, organization } = await findOrCreateServerProfile(
+    interaction.user.id,
+    guildId
+  );
+
+  const allLoyalties = await LoyaltyTask.find({
+    organizationId: profile.organizationId,
+  });
+
+  // process the /loyalty command
+  if (interaction.isCommand()) {
+    let content: string;
+
+    if (allLoyalties.length === 0) {
+      await interaction.reply({
+        content: "No loyalty tasks have been created yet.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    if (!user.twitterID || !user.walletAddress) {
+      await interaction.reply({
+        content: "Verify yourself using /verify to perform any tasks.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const rowItem = allLoyalties.map((item) => ({
+      label: item.name,
+      description: item.instruction,
+      value: item.type,
+    }));
+
+    if (profile.loyaltyWeight === 1) {
+      content = `Congratulations 🎉! Your loyalty is now **100%**. You are now earning the max boost (${organization.maxBoost}x) on all your quests. Use the */quests* command to see what is you can do!`;
+    } else {
+      content = `Your current loyalty score is ${
+        profile.loyaltyWeight * 100
+      }%. Complete all loyalty tasks to get 100% loyalty and earn a boost on all your points! 🚀`;
+    }
+
+    const row = new MessageActionRow().addComponents(
+      new MessageSelectMenu()
+        .setCustomId("loyalty-select")
+        .setPlaceholder("View pending loyalty tasks")
+        .addOptions(rowItem)
     );
 
-    const allLoyalties = await LoyaltyTask.find({
-      organizationId: profile.organizationId,
+    await interaction.reply({
+      content: content,
+      components: [row],
+      ephemeral: true,
     });
+    return;
+  }
 
-    if (interaction.isCommand()) {
+  // step 2. when the user clicks on the dropdown menu; shoot out the loyalty tasks
+  if (interaction.isSelectMenu()) {
+    let msg;
+    const value = interaction.values[0] as LoyaltyTaskType;
 
-      let content: string;
+    const taskResponse = await completeLoyaltyTask(profile, value);
 
-      const rowItem = allLoyalties.map((item) => ({
-        label: item.name,
-        description: item.instruction,
-        value: item.type,
-      }));
+    if (!taskResponse) {
+      await interaction.reply({
+        content: `We could not verify this task. Please try again later.`,
+        ephemeral: true,
+      });
+      return;
+    }
 
-      if (profile.loyaltyWeight === 1) {
-        content = `**Congratulations your loyalty is 100%! 🎉 You're all set to enjoy the max boost on the tasks you perform. Just use the */quests* command to discover more! **`;
-      } else {
-        content = `Your current loyalty score is ${profile.loyaltyWeight * 100
-          }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
-      }
+    if (value === "twitter_profile") msg = `updated their Twitter PFP.`;
+    else if (value === "discord_profile") msg = `updated their Discord PFP.`;
+    else if (value === "revoke_opensea")
+      msg = `delisted their NFTs from Opensea 🤘.`;
 
-      const row = new MessageActionRow().addComponents(
-        new MessageSelectMenu()
-          .setCustomId("loyalty-select")
-          .setPlaceholder("Select a task")
-          .addOptions(rowItem)
+    if (msg)
+      await sendFeedDiscord(
+        organization.feedChannelId,
+        `<@${interaction?.user.id}> ${msg}`
       );
 
-      if (rowItem.length < 1) {
-        await interaction.reply({
-          content: "No loyalty tasks have been created yet.",
-          ephemeral: true,
-        });
-      } else {
-        if (!user.twitterID || !user.walletAddress) {
-          await interaction.reply({
-            content: "Verify yourself using /verify to perform any tasks.",
-            ephemeral: true,
-          });
-        } else {
-          await interaction.reply({
-            content: content,
-            components: [row],
-            ephemeral: true,
-          });
-        }
-      }
-    } else if (interaction.isSelectMenu()) {
-      let msg, botMsg;
-      const value = interaction.values[0] as LoyaltyTaskType;
-      const taskResponse = await completeLoyaltyTask(profile, value);
-      if (taskResponse) {
-        botMsg = `Task completed successfully.`;
-        if (value === "twitter_profile")
-          msg = `Looking fresh with that NFT profile pic!`;
-        else if (value === "discord_profile")
-          msg = `Rocking with that NFT Profile pic!`;
-        else msg = `is a Keeper!!`;
-
-        const org: any = await Organization.findOne({
-          _id: profile.organizationId,
-        });
-
-        await sendFeedDiscord(org.feedChannelId, `${interaction?.user}, ${msg}`);
-        await interaction.reply({
-          content: `${interaction.user}, ${botMsg}`,
-          ephemeral: true,
-        });
-      }
-      else {
-        botMsg = `Task failed! Please check and try again later.`
-        await interaction.reply({
-          content: `${interaction.user}, ${botMsg}`,
-          ephemeral: true,
-        });
-      }
-    }
-  } catch (error) {
-    console.error(error)
+    await interaction.reply({
+      content: `You have completed this task. Well done!`,
+      ephemeral: true,
+    });
   }
 };

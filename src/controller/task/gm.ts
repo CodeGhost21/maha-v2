@@ -1,6 +1,8 @@
 // This is the controller for the gm task
 
 import { isYesterday, isToday } from "date-fns";
+import * as discord from "discord.js";
+
 import { User } from "../../database/models/user";
 import { assignRank } from "../../utils/upadteRank";
 import {
@@ -8,8 +10,7 @@ import {
   ServerProfile,
 } from "../../database/models/serverProfile";
 import { Task } from "../../database/models/tasks";
-import { completeTask } from ".";
-import * as discord from "discord.js";
+import { completeTask } from "./index";
 import { Message } from "../../database/models/message";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];

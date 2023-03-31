@@ -1,0 +1,44 @@
+import Bluebird from "bluebird";
+import { LoyaltyTask } from "../../database/models/loyaltyTasks";
+
+import {
+  IServerProfileModel,
+  ServerProfile,
+} from "../../database/models/serverProfile";
+import { sendRequest } from "../../library/sendRequest";
+import { completeLoyaltyTask, undoLoyaltyTask } from "./index";
+
+/**
+ * This is a one-time task that checks if the user holds a nft of a given type
+ * and gives points.
+ */
+export const checkTwitterFollowTaskForEveryone = async () => {
+  const tasks = await LoyaltyTask.find({
+    type: "twitter_follow",
+  });
+
+  return Bluebird.mapSeries(tasks, async (task) => {
+    const profiles = await ServerProfile.find({
+      organizationId: task.organizationId,
+    }).populate("userId.twitterScreenName");
+
+    return Bluebird.mapSeries(profiles, checkTwitterFollowLoyaltyTask);
+  });
+};
+
+export const checkTwitterFollowLoyaltyTask = async (
+  profile: IServerProfileModel
+) => {
+  // check for twitter follow
+  if (!profile.userId.twitterScreenName) return false;
+
+  const response = await sendRequest<string>(
+    "get",
+    `https://api.twitter.com/1.1/friendships/show.json?source_screen_name=${task.twitterScreenName}&target_screen_name=${profile.userId.twitterScreenName}`
+  );
+  const parseResponse = JSON.parse(response);
+
+  if (parseResponse.relationship.source.followed_by)
+    return completeLoyaltyTask(profile, "twitter_follow");
+  return undoLoyaltyTask(profile, "twitter_follow");
+};

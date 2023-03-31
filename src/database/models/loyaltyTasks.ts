@@ -6,6 +6,7 @@ import { IServerProfileModel } from "./serverProfile";
 
 export type LoyaltyTaskType =
   | "twitter_profile"
+  | "twitter_follow"
   | "hold_nft"
   | "discord_profile"
   | "revoke_opensea";
@@ -32,6 +33,7 @@ const loyaltyTask = new Schema(
     type: {
       type: String,
       enum: [
+        "twitter_follow",
         "twitter_profile",
         "hold_nft",
         "discord_profile",

@@ -14,7 +14,7 @@ import { completeLoyaltyTask } from "./index";
 export const nftHoldTask = async () => {
   const nftHoldTasks = await LoyaltyTask.find({ type: "hold_nft" });
 
-  Bluebird.mapSeries(nftHoldTasks, async (task) => {
+  return Bluebird.mapSeries(nftHoldTasks, async (task) => {
     // get all the users of this org
     const profiles = await ServerProfile.find({
       organizationId: task.organizationId,
