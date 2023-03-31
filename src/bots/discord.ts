@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageSelectMenu } from 'discord.js';
+import { MessageActionRow, MessageSelectMenu } from "discord.js";
 import { client } from "../utils/discord";
 import { executeProfileCommand } from "../controller/discord/profile";
 import { executeVerifyCommand } from "../controller/discord/verify";
@@ -6,7 +6,6 @@ import { executeTasksCommand } from "../controller/discord/tasks";
 import { executeLeaderboardCommand } from "../controller/discord/leaderboard";
 import { executeSetupCommand } from "../controller/discord/setup";
 import { executeLoyaltyCommand } from "../controller/discord/loyalty";
-
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -49,8 +48,7 @@ client.once("ready", () => {
   });
 });
 
-
-client.on('interactionCreate', async (interaction) => {
+client.on("interactionCreate", async (interaction) => {
   if (interaction.isCommand()) {
     const { commandName } = interaction;
 
@@ -63,13 +61,12 @@ client.on('interactionCreate', async (interaction) => {
     else if (commandName === "loyalty") executeLoyaltyCommand(interaction);
   } else if (interaction.isSelectMenu()) {
     const { customId } = interaction;
-    if (customId === 'profile-loyalty') executeProfileCommand(interaction)
-    else if (customId === 'task-select') executeTasksCommand(interaction);
-    else if (customId === 'loyalty-select') executeLoyaltyCommand(interaction);
+    if (customId === "profile-loyalty") executeProfileCommand(interaction);
+    else if (customId === "task-select") executeTasksCommand(interaction);
+    else if (customId === "loyalty-select") executeLoyaltyCommand(interaction);
   }
-
 });
 
-client.on("error", (e) => console.error(e));
-client.on("warn", (e) => console.warn(e));
-client.on("debug", (e) => console.info(e));
+// client.on("error", (e) => console.error(e));
+// client.on("warn", (e) => console.warn(e));
+// client.on("debug", (e) => console.info(e));
