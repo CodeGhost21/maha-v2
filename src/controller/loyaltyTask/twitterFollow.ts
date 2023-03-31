@@ -1,5 +1,8 @@
 import Bluebird from "bluebird";
-import { LoyaltyTask } from "../../database/models/loyaltyTasks";
+import {
+  ILoyaltyTaskModel,
+  LoyaltyTask,
+} from "../../database/models/loyaltyTasks";
 
 import {
   IServerProfileModel,
@@ -22,12 +25,15 @@ export const checkTwitterFollowTaskForEveryone = async () => {
       organizationId: task.organizationId,
     }).populate("userId.twitterScreenName");
 
-    return Bluebird.mapSeries(profiles, checkTwitterFollowLoyaltyTask);
+    return Bluebird.mapSeries(profiles, (p) =>
+      checkTwitterFollowLoyaltyTask(p, task)
+    );
   });
 };
 
 export const checkTwitterFollowLoyaltyTask = async (
-  profile: IServerProfileModel
+  profile: IServerProfileModel,
+  task: ILoyaltyTaskModel
 ) => {
   // check for twitter follow
   if (!profile.userId.twitterScreenName) return false;

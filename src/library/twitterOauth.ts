@@ -7,7 +7,7 @@ const twitterOauth = oauthCallback(
   "https://api.twitter.com/oauth/access_token",
   nconf.get("TWITTER_CONSUMER_KEY"), // consumer key
   nconf.get("TWITTER_CONSUMER_SECRET"), // consumer secret
-  urlJoin(nconf.get("FRONTEND_URL"), "twitterCallback")
+  urlJoin(nconf.get("FRONTEND_URL"), "/callback-twitter")
 );
 
 export default twitterOauth;

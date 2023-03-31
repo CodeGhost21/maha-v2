@@ -4,7 +4,10 @@ import { executeVerifyCommand } from "../controller/discord/verify";
 import { executeTasksCommand } from "../controller/discord/tasks";
 import { executeLeaderboardCommand } from "../controller/discord/leaderboard";
 import { executeSetupCommand } from "../controller/discord/setup";
-import { executeLoyaltyCommand } from "../controller/discord/loyalty";
+import {
+  executeLoyaltyCommand,
+  executeLoyaltySelectInput,
+} from "../controller/discord/loyalty";
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -17,13 +20,13 @@ client.once("ready", () => {
 
   commands?.create({
     name: "verify",
-    description: "Verify you twitter/wallet and increase your loyalty.",
+    description:
+      "Verify your profile and increase your loyalty to get a boost in points.",
   });
 
   commands?.create({
     name: "loyalty",
-    description:
-      "View your loyalty score. More loyalty earns you more points for every quest.",
+    description: "Complete loyalty tasks and earn a boost in points.",
   });
 
   commands?.create({
@@ -33,17 +36,12 @@ client.once("ready", () => {
 
   commands?.create({
     name: "leaderboard",
-    description: "View the leaderboard. See where you stand amongst others.",
+    description: "See where you stand amongst others.",
   });
 
   commands?.create({
     name: "setup",
-    description: "Setup your server (Server owners only)",
-  });
-
-  commands?.create({
-    name: "test",
-    description: "test",
+    description: "Setup your server (admin only)",
   });
 });
 
@@ -65,12 +63,13 @@ client.on("interactionCreate", async (interaction) => {
   // dropdown
   if (interaction.isSelectMenu()) {
     const { customId } = interaction;
+
     if (customId === "profile-loyalty") executeProfileCommand(interaction);
     if (customId === "task-select") executeTasksCommand(interaction);
-    if (customId === "loyalty-select") executeLoyaltyCommand(interaction);
+    if (customId === "loyalty-select") executeLoyaltySelectInput(interaction);
   }
 });
 
-client.on("error", (e) => console.error(e));
-client.on("warn", (e) => console.warn(e));
-client.on("debug", (e) => console.info(e));
+// client.on("error", (e) => console.error(e));
+// client.on("warn", (e) => console.warn(e));
+// client.on("debug", (e) => console.info(e));

@@ -1,3 +1,4 @@
+import { CacheType, Interaction } from "discord.js";
 import mongoose, { Schema } from "mongoose";
 import BadRequestError from "../../errors/BadRequestError";
 import { IOrganizationModel, Organization } from "./organization";
@@ -136,4 +137,11 @@ export const findOrCreateServerProfile = async (
     user: newUser,
     organization: org,
   };
+};
+
+export const findOrCreateServerProfileFromDiscordInteraction = async (
+  interaction: Interaction<CacheType>,
+  isModerator?: boolean
+) => {
+  // const userId
 };

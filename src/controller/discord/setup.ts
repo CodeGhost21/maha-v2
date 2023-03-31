@@ -44,12 +44,11 @@ export const executeSetupCommand = async (
     if (isOwner) {
       frontendUrl = urlJoin(
         nconf.get("FRONTEND_URL"),
-        `settings?token=${token}`
+        `/settings?token=${token}`
       );
     } else {
-      frontendUrl = nconf.get("FRONTEND_URL")
+      frontendUrl = nconf.get("FRONTEND_URL");
     }
-
 
     const row = new MessageActionRow().addComponents(
       new MessageButton().setLabel("Login").setStyle("LINK").setURL(frontendUrl)
@@ -65,7 +64,6 @@ export const executeSetupCommand = async (
       ephemeral: true,
     });
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-
 };

@@ -18,6 +18,9 @@ export interface ILoyaltyTask {
   weight: number;
   needsModeration: boolean;
 
+  twitterScreenName: string;
+  contractAddress: string;
+
   createdBy: IServerProfileModel;
   organizationId: IOrganizationModel;
 }
@@ -52,6 +55,9 @@ const loyaltyTask = new Schema(
       required: true,
       ref: "Organization",
     },
+
+    twitterScreenName: String,
+    contractAddress: String,
   },
   { timestamps: true }
 );
