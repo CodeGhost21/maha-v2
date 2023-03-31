@@ -1,3 +1,4 @@
+import { MessageActionRow, MessageSelectMenu } from 'discord.js';
 import { client } from "../utils/discord";
 import { executeProfileCommand } from "../controller/discord/profile";
 import { executeVerifyCommand } from "../controller/discord/verify";
@@ -41,14 +42,18 @@ client.once("ready", () => {
     name: "setup",
     description: "Setup your server (Server owners only)",
   });
+
+  commands?.create({
+    name: "test",
+    description: "test",
+  });
 });
 
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
 
-  const { commandName } = interaction;
+client.on('interactionCreate', async (interaction) => {
+  if (interaction.isCommand()) {
+    const { commandName } = interaction;
 
-  try {
     if (commandName === "profile") executeProfileCommand(interaction);
     else if (commandName === "verify") executeVerifyCommand(interaction);
     else if (commandName === "quests") executeTasksCommand(interaction);
@@ -56,8 +61,15 @@ client.on("interactionCreate", async (interaction) => {
       executeLeaderboardCommand(interaction);
     else if (commandName === "setup") executeSetupCommand(interaction);
     else if (commandName === "loyalty") executeLoyaltyCommand(interaction);
-  } catch (error) {
-    console.log(error);
-    // TODO capture error on sentry
+  } else if (interaction.isSelectMenu()) {
+    const { customId } = interaction;
+    if (customId === 'profile-loyalty') executeProfileCommand(interaction)
+    else if (customId === 'task-select') executeTasksCommand(interaction);
+    else if (customId === 'loyalty-select') executeLoyaltyCommand(interaction);
   }
+
 });
+
+client.on("error", (e) => console.error(e));
+client.on("warn", (e) => console.warn(e));
+client.on("debug", (e) => console.info(e));

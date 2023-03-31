@@ -4,13 +4,14 @@ import {
   MessageActionRow,
   MessageButton,
   MessageSelectMenu,
+  SelectMenuInteraction,
 } from "discord.js";
 
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { Task } from "../../database/models/tasks";
 
 export const executeTasksCommand = async (
-  interaction: CommandInteraction<CacheType>
+  interaction: CommandInteraction<CacheType> | SelectMenuInteraction<CacheType>
 ) => {
   try {
     const guildId = interaction.guildId;
@@ -20,56 +21,54 @@ export const executeTasksCommand = async (
       interaction.user.id,
       guildId
     );
-
-    const content: string =
-      `**Hey there, ${interaction.user}** \n\n` +
-      `**Are you ready to explore the tasks available in our Gifts of Eden loyalty program? Check out the list below and start earning points! 💪**\n\n` +
-      `Happy task hunting, and let's keep growing together! 🌱💖`;
-
     const allTasks = await Task.find({ organizationId: organization?.id });
     const rowItem = allTasks.map((item) => ({
       label: item.name,
       value: item.type,
     }));
 
-    const row = new MessageActionRow().addComponents(
-      new MessageSelectMenu()
-        .setCustomId("taskSelect")
-        .setPlaceholder("Select a task")
-        .addOptions(rowItem)
-    );
+    if (interaction.isCommand()) {
+      const content: string =
+        `**Hey there, ${interaction.user}** \n\n` +
+        `**Are you ready to explore the tasks available in our Gifts of Eden loyalty program? Check out the list below and start earning points! 💪**\n\n` +
+        `Happy task hunting, and let's keep growing together! 🌱💖`;
 
-    if (rowItem.length < 1) {
-      await interaction.reply({
-        content: "No quests have been created yet.",
-        ephemeral: true,
-      });
-    } else {
-      if (!user.twitterID || !user.walletAddress) {
+
+
+      const row = new MessageActionRow().addComponents(
+        new MessageSelectMenu()
+          .setCustomId("task-select")
+          .setPlaceholder("Select a task")
+          .addOptions(rowItem)
+      );
+
+      if (rowItem.length < 1) {
         await interaction.reply({
-          content: "Verify yourself using /verify to perform any tasks.",
+          content: "No quests have been created yet.",
           ephemeral: true,
         });
       } else {
-        await interaction.reply({
-          content: content,
-          ephemeral: true,
-          components: [row],
-        });
+        if (!user.twitterID || !user.walletAddress) {
+          await interaction.reply({
+            content: "Verify yourself using /verify to perform any tasks.",
+            ephemeral: true,
+          });
+        } else {
+          await interaction.reply({
+            content: content,
+            ephemeral: true,
+            components: [row],
+          });
+        }
       }
-    }
 
-    const taskCollector = interaction.channel?.createMessageComponentCollector({
-      componentType: "SELECT_MENU",
-    });
-
-    taskCollector?.on("collect", async (collected: any) => {
+    } else if (interaction.isSelectMenu()) {
       let msg;
-      const value = collected.values[0];
+      const value = interaction.values[0];
       if (value === "gm") {
         msg = `Go and say GM in the GM channel`;
-        await collected?.reply({
-          content: `Hey ${collected?.user}, ${msg}`,
+        await interaction?.reply({
+          content: `Hey ${interaction?.user}, ${msg}`,
           ephemeral: true,
         });
       } else if (value === "twitter_follow") {
@@ -80,25 +79,25 @@ export const executeTasksCommand = async (
             .setStyle("LINK")
             .setURL("https://twitter.com/TheMahaDAO")
         );
-        await collected?.reply({
-          content: `Hey ${collected?.user}, ${msg}`,
+        await interaction?.reply({
+          content: `Hey ${interaction?.user}, ${msg}`,
           ephemeral: true,
           components: [row],
         });
       } else if (value === "hold_nft") {
         msg = `You have to hold a citizenship and you would earn points daily.`;
-        await collected?.reply({
-          content: `Hey ${collected?.user}, ${msg}`,
+        await interaction?.reply({
+          content: `Hey ${interaction?.user}, ${msg}`,
           ephemeral: true,
         });
       } else {
         msg = `Task failed! Please check and try again later.`;
-        await collected?.reply({
-          content: `Hey ${collected?.user}, ${msg}`,
+        await interaction?.reply({
+          content: `Hey ${interaction?.user}, ${msg}`,
           ephemeral: true,
         });
       }
-    });
+    }
   } catch (error) {
     console.error(error)
   }
