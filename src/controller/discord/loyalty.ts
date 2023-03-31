@@ -32,7 +32,6 @@ export const executeLoyaltyCommand = async (
     });
 
     if (interaction.isCommand()) {
-
       let content: string;
 
       const rowItem = allLoyalties.map((item) => ({
@@ -44,8 +43,9 @@ export const executeLoyaltyCommand = async (
       if (profile.loyaltyWeight === 1) {
         content = `**Congratulations your loyalty is 100%! 🎉 You're all set to enjoy the max boost on the tasks you perform. Just use the */quests* command to discover more! **`;
       } else {
-        content = `Your current loyalty score is ${profile.loyaltyWeight * 100
-          }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
+        content = `Your current loyalty score is ${
+          profile.loyaltyWeight * 100
+        }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
       }
 
       const row = new MessageActionRow().addComponents(
@@ -75,6 +75,7 @@ export const executeLoyaltyCommand = async (
         }
       }
     } else if (interaction.isSelectMenu()) {
+      await interaction.reply({ content: "Checking..", ephemeral: true });
       let msg, botMsg;
       const value = interaction.values[0] as LoyaltyTaskType;
       const taskResponse = await completeLoyaltyTask(profile, value);
@@ -90,21 +91,21 @@ export const executeLoyaltyCommand = async (
           _id: profile.organizationId,
         });
 
-        await sendFeedDiscord(org.feedChannelId, `${interaction?.user}, ${msg}`);
-        await interaction.reply({
+        await sendFeedDiscord(
+          org.feedChannelId,
+          `${interaction?.user}, ${msg}`
+        );
+        await interaction.editReply({
           content: `${interaction.user}, ${botMsg}`,
-          ephemeral: true,
         });
-      }
-      else {
-        botMsg = `Task failed! Please check and try again later.`
-        await interaction.reply({
+      } else {
+        botMsg = `Task failed! Please check and try again later.`;
+        await interaction.editReply({
           content: `${interaction.user}, ${botMsg}`,
-          ephemeral: true,
         });
       }
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 };

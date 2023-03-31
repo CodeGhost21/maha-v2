@@ -14,7 +14,7 @@ export const contract = async (
 
   const noOfNft = await mahaXContract.methods.balanceOf(walletAddress).call();
 
-  const allTokenURI = [];
+  const allTokenURI: any = [];
   const mahaLocked = [];
   for (let i = 0; i < noOfNft; i++) {
     const nftId = await mahaXContract.methods

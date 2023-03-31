@@ -6,6 +6,7 @@ import { executeTasksCommand } from "../controller/discord/tasks";
 import { executeLeaderboardCommand } from "../controller/discord/leaderboard";
 import { executeSetupCommand } from "../controller/discord/setup";
 import { executeLoyaltyCommand } from "../controller/discord/loyalty";
+import { User } from "../database/models/user";
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -49,6 +50,17 @@ client.once("ready", () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
+  const user = await User.findOne({ discordId: interaction.user.id });
+
+  if (user && user.discordName !== "") {
+    user.discordName = interaction.user.username;
+    user.discordDiscriminator = interaction.user.discriminator;
+    user.discordAvatar = interaction.user.avatar || "";
+    user.discordTag = `${interaction.user.username}#${interaction.user.discriminator}`;
+
+    await user.save();
+  }
+
   if (interaction.isCommand()) {
     const { commandName } = interaction;
 

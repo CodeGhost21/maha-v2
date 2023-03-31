@@ -33,8 +33,6 @@ export const executeTasksCommand = async (
         `**Are you ready to explore the tasks available in our Gifts of Eden loyalty program? Check out the list below and start earning points! 💪**\n\n` +
         `Happy task hunting, and let's keep growing together! 🌱💖`;
 
-
-
       const row = new MessageActionRow().addComponents(
         new MessageSelectMenu()
           .setCustomId("task-select")
@@ -61,7 +59,6 @@ export const executeTasksCommand = async (
           });
         }
       }
-
     } else if (interaction.isSelectMenu()) {
       let msg;
       const value = interaction.values[0];
@@ -99,6 +96,6 @@ export const executeTasksCommand = async (
       }
     }
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 };
