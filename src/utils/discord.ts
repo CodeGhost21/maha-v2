@@ -1,21 +1,25 @@
 import nconf from "nconf";
-import { Client, Intents, TextChannel, MessageOptions } from "discord.js";
+import {
+  Client,
+  IntentsBitField,
+  TextChannel,
+  MessageReplyOptions,
+} from "discord.js";
 import DiscordOauth2 from "discord-oauth2";
 
 import { IUserModel } from "../database/models/user";
 
 export const client = new Client({
   intents: [
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MESSAGES,
-    Intents.FLAGS.GUILD_MEMBERS,
-    Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
-    Intents.FLAGS.GUILD_INTEGRATIONS,
-    Intents.FLAGS.GUILD_PRESENCES,
-    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-    Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
-    Intents.FLAGS.DIRECT_MESSAGES,
-    Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+    IntentsBitField.Flags.Guilds,
+    IntentsBitField.Flags.GuildMessages,
+    IntentsBitField.Flags.GuildEmojisAndStickers,
+    IntentsBitField.Flags.GuildIntegrations,
+    IntentsBitField.Flags.GuildPresences,
+    IntentsBitField.Flags.GuildMessageReactions,
+    IntentsBitField.Flags.GuildScheduledEvents,
+    IntentsBitField.Flags.GuildMessages,
+    IntentsBitField.Flags.GuildMessageReactions,
   ],
 });
 
@@ -23,7 +27,7 @@ client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
 
 export const sendMessage = (
   channelName: string,
-  messageMarkdown?: MessageOptions | string
+  messageMarkdown?: MessageReplyOptions | string
 ) => {
   if (!messageMarkdown) return;
   const channel = client.channels.cache.get(channelName);

@@ -1,9 +1,10 @@
 import {
   CacheType,
   CommandInteraction,
-  MessageActionRow,
-  MessageButton,
-  MessageEmbed,
+  EmbedBuilder,
+  ButtonBuilder,
+  ActionRowBuilder,
+  ButtonStyle,
 } from "discord.js";
 import nconf from "nconf";
 import * as jwt from "jsonwebtoken";
@@ -30,21 +31,21 @@ export const executeVerifyCommand = async (
 
   const frontendUrl = nconf.get("FRONTEND_URL");
 
-  const row = new MessageActionRow().addComponents(
-    new MessageButton()
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
       .setLabel(user.twitterID ? "Twitter Verified" : "Verify Twitter")
-      .setStyle("LINK")
+      .setStyle(ButtonStyle.Link)
       .setDisabled(!!user.twitterID)
       .setURL(urlJoin(frontendUrl, `/verify-twitter?token=${token}`)),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setLabel(user.walletAddress ? "Wallet Verified" : "Verify Wallet")
-      .setStyle("LINK")
+      .setStyle(ButtonStyle.Link)
       .setDisabled(!!user.walletAddress)
       .setURL(urlJoin(frontendUrl, `/verify-wallet?token=${token}`))
   );
 
-  const discordMsgEmbed = new MessageEmbed()
+  const discordMsgEmbed = new EmbedBuilder()
     .setColor("#F07D55")
     .setThumbnail("https://i.imgur.com/xYG5x9G.png")
     .setAuthor({
@@ -59,7 +60,7 @@ export const executeVerifyCommand = async (
         `Let's get started 🚀`
     );
 
-  const discordSuccessEmbed = new MessageEmbed()
+  const discordSuccessEmbed = new EmbedBuilder()
     .setColor("#4ffa02")
     .setDescription(
       "**Congratulations on verifying your account! 🎉** You're all set to start earning points and completing your loyalty tasks."

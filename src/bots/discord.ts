@@ -1,7 +1,10 @@
 import { client } from "../utils/discord";
 import { executeProfileCommand } from "../controller/discord/profile";
 import { executeVerifyCommand } from "../controller/discord/verify";
-import { executeTasksCommand } from "../controller/discord/tasks";
+import {
+  executeTasksCommand,
+  executeTaskSelectInput,
+} from "../controller/discord/tasks";
 import { executeLeaderboardCommand } from "../controller/discord/leaderboard";
 import { executeSetupCommand } from "../controller/discord/setup";
 import {
@@ -64,8 +67,7 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isSelectMenu()) {
     const { customId } = interaction;
 
-    if (customId === "profile-loyalty") executeProfileCommand(interaction);
-    if (customId === "task-select") executeTasksCommand(interaction);
+    if (customId === "task-select") executeTaskSelectInput(interaction);
     if (customId === "loyalty-select") executeLoyaltySelectInput(interaction);
   }
 });

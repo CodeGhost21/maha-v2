@@ -1,9 +1,9 @@
 import {
   CacheType,
   CommandInteraction,
-  MessageActionRow,
-  MessageSelectMenu,
-  SelectMenuInteraction,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuInteraction,
 } from "discord.js";
 
 import {
@@ -54,8 +54,8 @@ export const executeLoyaltyCommand = async (
     }%. Complete all loyalty tasks to get 100% loyalty and earn a boost on all your points! 🚀`;
   }
 
-  const row = new MessageActionRow().addComponents(
-    new MessageSelectMenu()
+  const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+    new StringSelectMenuBuilder()
       .setCustomId("loyalty-select")
       .setPlaceholder("View pending loyalty tasks")
       .addOptions(rowItem)
@@ -71,7 +71,7 @@ export const executeLoyaltyCommand = async (
 
 // step 2. when the user clicks on the dropdown menu; shoot out the loyalty tasks
 export const executeLoyaltySelectInput = async (
-  interaction: SelectMenuInteraction<CacheType>
+  interaction: StringSelectMenuInteraction<CacheType>
 ) => {
   const guildId = interaction.guildId;
   if (!guildId) return;
