@@ -15,7 +15,6 @@ import {
   LoyaltyTaskType,
 } from "../../database/models/loyaltyTasks";
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
-import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 import { completeLoyaltyTask } from "../loyaltyTask";
 
 export const executeLoyaltyCommand = async (
@@ -123,7 +122,7 @@ export const executeLoyaltySelectInput = async (
     );
 
     await interaction.reply({
-      content: `You have already completed this loyalty task. Try another one?`,
+      content: `You have already completed this loyalty task. Well done 💪! Would you like to try another one?`,
       ephemeral: true,
       components: [row],
     });
@@ -135,28 +134,48 @@ export const executeLoyaltySelectInput = async (
     if (!user.twitterID) toVerify.push("Twitter");
     if (!user.walletAddress) toVerify.push("Wallet");
 
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId("verify")
+        .setLabel("Verify Profile")
+        .setStyle(ButtonStyle.Primary)
+    );
+
     await interaction.reply({
       content: `Your ${toVerify.join(
         " and "
-      )} is not yet verified. Verify using \`/verify\` to complete this loyalty task.`,
+      )} is not yet verified. Verify your profile first before you can complete this task.`,
       ephemeral: true,
+      components: [row],
     });
     return;
   }
 
-  try {
-    const taskResponse = await completeLoyaltyTask(profile, value);
-    if (!taskResponse) {
-      await interaction.reply({
-        content: `We could not verify this loyalty task. Please try again later.`,
-        ephemeral: true,
-      });
-      return;
+  const success = await completeLoyaltyTask(profile, value);
+  if (!success) {
+    let content = `We could not verify this loyalty task. Please try again later.`;
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents();
+
+    if (value === "twitter_pfp")
+      content = `You do not have a PFP on your twitter that matches the NFTs in your wallet.`;
+    else if (value === "hold_nft")
+      content = `You are not holding a NFT. Make sure you have a NFT in your wallet and redo this task`;
+    else if (value === "discord_pfp")
+      content = `You do not have a PFP on your discord profile that matches the NFTs in your wallet.`;
+    else if (value === "revoke_opensea") {
+      content = `Opensea still has access to spend your NFTs. Revoke opensea access first and then redo this task.`;
+      row.addComponents(
+        new ButtonBuilder()
+          .setLabel("Revoke Opensea")
+          .setStyle(ButtonStyle.Link)
+          .setURL(`https://etherscan.io/tokenapprovalchecker`)
+      );
     }
-  } catch (error) {
-    console.log(error);
+
     await interaction.reply({
-      content: `We could not verify this loyalty task. Please try again later.`,
+      content: content,
+      components: [row],
       ephemeral: true,
     });
     return;

@@ -5,10 +5,10 @@ import { IOrganizationModel } from "./organization";
 import { IServerProfileModel } from "./serverProfile";
 
 export type LoyaltyTaskType =
-  | "twitter_profile"
+  | "twitter_pfp"
   | "twitter_follow"
   | "hold_nft"
-  | "discord_profile"
+  | "discord_pfp"
   | "revoke_opensea";
 
 export interface ILoyaltyTask {
@@ -20,6 +20,10 @@ export interface ILoyaltyTask {
 
   twitterScreenName: string;
   contractAddress: string;
+  operatorAddress: string;
+
+  successMessage: string;
+  failureMessage: string;
 
   createdBy: IServerProfileModel;
   organizationId: IOrganizationModel;
@@ -37,9 +41,9 @@ const loyaltyTask = new Schema(
       type: String,
       enum: [
         "twitter_follow",
-        "twitter_profile",
+        "twitter_pfp",
         "hold_nft",
-        "discord_profile",
+        "discord_pfp",
         "revoke_opensea",
       ],
       required: true,
@@ -56,8 +60,12 @@ const loyaltyTask = new Schema(
       ref: "Organization",
     },
 
+    successMessage: String,
+    failureMessage: String,
+
     twitterScreenName: String,
     contractAddress: String,
+    operatorAddress: String,
   },
   { timestamps: true }
 );

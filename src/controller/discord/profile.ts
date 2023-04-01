@@ -34,10 +34,6 @@ export const executeProfileCommand = async (
   const row = new ActionRowBuilder<
     ButtonBuilder | StringSelectMenuBuilder
   >().addComponents(
-    // new StringSelectMenuBuilder()
-    //   .setCustomId("loyalty-select")
-    //   .setPlaceholder("View pending loyalty tasks")
-    //   .addOptions(rowItem),
     new ButtonBuilder()
       .setCustomId("loyalty")
       .setLabel("View Loyalty Tasks")
@@ -46,23 +42,7 @@ export const executeProfileCommand = async (
       .setCustomId("quests")
       .setLabel("View Quests")
       .setStyle(ButtonStyle.Primary)
-    // new ButtonBuilder()
-    //   .setLabel(user.twitterID ? "Verify Account" : "Verify Twitter")
-    //   .setStyle("LINK")
-    //   .setDisabled(!!user.twitterID),
-    // // .setURL(urlJoin(frontendUrl, `/verify-twitter?token=${token}`))
-    // new ButtonBuilder()
-    //   .setLabel("View Loyalty Tasks")
-    //   .setStyle("LINK")
-    //   .setDisabled(!!user.twitterID)
-    // .setURL(urlJoin(frontendUrl, `/verify-twitter?token=${token}`))
   );
-
-  //   verify
-  // quests
-  // loyalty
-
-  // ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
 
   let welcome;
   if (!user.twitterID && !user.walletAddress) {

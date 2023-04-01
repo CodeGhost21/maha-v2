@@ -6,9 +6,9 @@ import { extractServerProfile } from "../../utils/jwt";
 
 const loyaltyTypes = [
   "twitter_follow",
-  "twitter_profile",
+  "twitter_pfp",
   "hold_nft",
-  "discord_profile",
+  "discord_pfp",
   "revoke_opensea",
 ];
 

@@ -19,12 +19,15 @@ const checkLoyalty = async (
   profile: IServerProfileModel,
   loyaltyType: LoyaltyTaskType
 ) => {
-  if (loyaltyType === "twitter_profile")
+  if (loyaltyType === "twitter_pfp")
     return twitterProfileLoyalty(task, profile);
-  else if (loyaltyType === "discord_profile")
+
+  if (loyaltyType === "discord_pfp")
     return discordProfileLoyalty(task, profile);
-  else if (loyaltyType === "revoke_opensea") return openseaLoyalty(profile);
-  else if (loyaltyType === "hold_nft") return checkNftHoldTask(profile);
+
+  if (loyaltyType === "revoke_opensea") return openseaLoyalty(task, profile);
+
+  if (loyaltyType === "hold_nft") return checkNftHoldTask(profile);
   return false;
 };
 
@@ -74,9 +77,9 @@ export const completeLoyaltyTask = async (
 
   // todo: inform feed
   let msg;
-  if (type === "twitter_profile") msg = `updated their Twitter PFP 🐤`;
+  if (type === "twitter_pfp") msg = `updated their Twitter PFP 🐤`;
   else if (type === "hold_nft") msg = `is holding a NFT 💪`;
-  else if (type === "discord_profile") msg = `updated their Discord PFP 🤖`;
+  else if (type === "discord_pfp") msg = `updated their Discord PFP 🤖`;
   else if (type === "revoke_opensea")
     msg = `delisted their NFTs from Opensea ⛴`;
 

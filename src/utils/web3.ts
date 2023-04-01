@@ -14,13 +14,16 @@ export const tokenURI = async (nftId: number): Promise<string> => {
   return await mahaXContract.methods.tokenURI(nftId).call();
 };
 
-export const isOpenseaApproved = async (address: string): Promise<boolean> => {
-  const operator = nconf.get("OPENSEA_SEAPORT_ADDRESS");
-  return await mahaXContract.methods.isApprovedForAll(address, operator).call();
+export const isOpenseaApproved = async (
+  addr: string,
+  who: string,
+  whom: string
+): Promise<boolean> => {
+  const contract = new web3.eth.Contract(MAHAX as any[], addr);
+  return await contract.methods.isApprovedForAll(who, whom).call();
 };
 
 export const balanceOf = async (addr: string, who: string): Promise<number> => {
-  console.log(addr, who);
   const contract = new web3.eth.Contract(MAHAX as any[], addr);
   return await contract.methods.balanceOf(who).call();
 };
