@@ -4,6 +4,7 @@ import { IServerProfileModel } from "../../database/models/serverProfile";
 import { Task, TaskTypes } from "../../database/models/tasks";
 import { TaskSubmission } from "../../database/models/taskSubmission";
 import NotFoundError from "../../errors/NotFoundError";
+import { calculateBoost } from "../../utils/boost";
 
 export const completeTask = async (
   profile: IServerProfileModel,
@@ -28,18 +29,19 @@ export const completeTask = async (
   const organization = await Organization.findById(profile.organizationId);
   if (!organization) throw new NotFoundError("organization not found");
 
+  const boost = calculateBoost(profile.loyaltyWeight, organization.maxBoost);
+
   await TaskSubmission.create({
     profileId: profile.id,
     organizationId: organization.id,
     type: task.type,
     points: task.points,
-    boost: organization.maxBoost * profile.loyaltyWeight,
+    boost,
     loyalty: profile.loyaltyWeight,
   });
 
   // calculate points after boost
-  const points =
-    task.points * (organization.maxBoost * profile.loyaltyWeight + 1);
+  const points = task.points * boost;
   profile.totalPoints += points;
   await profile.save();
 
