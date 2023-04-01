@@ -31,7 +31,7 @@ export const executeLoyaltyCommand = async (
   });
 
   // process the /loyalty command
-  let content: string;
+  let loyaltyMsg: string;
 
   if (allLoyalties.length === 0) {
     await interaction.reply({
@@ -47,12 +47,14 @@ export const executeLoyaltyCommand = async (
     value: item.type,
   }));
 
+  const score = (profile.loyaltyWeight * 100).toFixed(2);
+
   if (profile.loyaltyWeight === 1) {
-    content = `Congratulations 🎉! Your loyalty is now **100%**. You are now earning the max boost (${organization.maxBoost}x) on all your quests. Use the */quests* command to see what is you can do!`;
+    loyaltyMsg = `Congratulations 🎉! Your loyalty is now \`100%\`. You are now earning the max boost (${organization.maxBoost}x) on all your quests. Use the */quests* command to see what is you can do!`;
   } else {
-    content = `Your current loyalty score is ${
-      profile.loyaltyWeight * 100
-    }%. Complete all loyalty tasks to get 100% loyalty and earn a boost on all your points! 🚀`;
+    loyaltyMsg =
+      `Your current loyalty score is \`${score}%\`. Complete all loyalty tasks to get a \`100%\` loyalty score and ` +
+      `earn a max boost of \`${organization.maxBoost}x\` on all your points! 🚀`;
   }
 
   const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
@@ -62,8 +64,15 @@ export const executeLoyaltyCommand = async (
       .addOptions(rowItem)
   );
 
+  const content =
+    `This is your loyalty score. It is used to represent how loyal you are to ${organization.name}. ` +
+    `You can improve your loyalty score by completing loyalty tasks. The more loyalty score you have, the more` +
+    ` boost you will earn. \n\n` +
+    loyaltyMsg +
+    "\n";
+
   await interaction.reply({
-    content: content,
+    content,
     components: [row],
     ephemeral: true,
   });
@@ -99,26 +108,33 @@ export const executeLoyaltySelectInput = async (
   let msg;
   const value = interaction.values[0] as LoyaltyTaskType;
 
-  const taskResponse = await completeLoyaltyTask(profile, value);
+  try {
+    const taskResponse = await completeLoyaltyTask(profile, value);
+    if (!taskResponse) {
+      await interaction.reply({
+        content: `We could not verify this loyalty task. Please try again later.`,
+        ephemeral: true,
+      });
+      return;
+    }
 
-  if (!taskResponse) {
+    if (value === "twitter_profile") msg = `updated their Twitter PFP.`;
+    else if (value === "discord_profile") msg = `updated their Discord PFP.`;
+    else if (value === "revoke_opensea")
+      msg = `delisted their NFTs from Opensea 🤘.`;
+
+    if (msg)
+      await sendFeedDiscord(
+        organization.feedChannelId,
+        `<@${interaction?.user.id}> ${msg}`
+      );
+  } catch (error) {
+    console.log(error);
     await interaction.reply({
       content: `We could not verify this loyalty task. Please try again later.`,
       ephemeral: true,
     });
-    return;
   }
-
-  if (value === "twitter_profile") msg = `updated their Twitter PFP.`;
-  else if (value === "discord_profile") msg = `updated their Discord PFP.`;
-  else if (value === "revoke_opensea")
-    msg = `delisted their NFTs from Opensea 🤘.`;
-
-  if (msg)
-    await sendFeedDiscord(
-      organization.feedChannelId,
-      `<@${interaction?.user.id}> ${msg}`
-    );
 
   await interaction.reply({
     content: `You have completed this task. Well done!`,

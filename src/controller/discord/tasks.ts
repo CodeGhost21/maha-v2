@@ -27,12 +27,12 @@ export const executeTasksCommand = async (
     value: item.type,
   }));
 
+  const score = profile.loyaltyWeight.toFixed(2);
+
   const content: string =
-    `Welcome ${interaction.user}! These are your available quests. You can complete them to earn points.\n\n` +
-    ` You currently have ${profile.loyaltyWeight.toFixed(
-      2
-    )}% loyalty earning a 0x boost. You can earn more boost by completing loyalty tasks using \`/loyalty\`.` +
-    `Happy points hunting! 🌱💖`;
+    `These are your available quests. You can complete them to earn points.\n\n` +
+    `You currently have \`${score}%\` loyalty earning a \`0x\` boost. You can earn more boost by completing loyalty tasks using \`/loyalty\`. ` +
+    `Happy point farming! 🌱👩‍🌾💖\n`;
 
   const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()

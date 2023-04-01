@@ -13,7 +13,7 @@ import { Task } from "../../database/models/tasks";
 import { completeTask } from "./index";
 import { Message } from "../../database/models/message";
 
-const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
+const gmKeywords = ["goodmorning", "gm", "morning", "good morning", "gn"];
 const lbKeywords = ["!leaderboard", "!lb"];
 const total_icons = [
   "🥇",
@@ -47,7 +47,6 @@ export const executeGMstatement = async (
     organizationId: profile.organizationId,
   });
 
-  console.log(checkTask);
   if (!checkTask) return;
 
   // if this user's first time in this server then we intro the gm chat.
@@ -108,15 +107,14 @@ export const executeGMstatement = async (
   }
 
   // good morning?
-  if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
-    const newMessage = new Message({
+  // if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
+  if (true) {
+    await Message.create({
       content: message.cleanContent,
       profileId: profile.id,
       organizationId: profile.organizationId,
       dateTime: message.createdAt,
     });
-
-    await newMessage.save();
 
     const lastGM = new Date(profile.lastGM || 0);
 
@@ -124,34 +122,29 @@ export const executeGMstatement = async (
 
     // If user's last gm was yesterday, then continue streak
     if (isYesterday(lastGM)) {
-      const response = await completeTask(profile, "gm");
-      if (response) {
-        profile.streak += 1;
-        profile.maxStreak =
-          profile.streak > profile.maxStreak
-            ? profile.streak
-            : profile.maxStreak;
-        profile.totalGMs += 1;
-        profile.save();
-      }
+      await completeTask(profile, "gm");
+
+      profile.streak += 1;
+      profile.maxStreak =
+        profile.streak > profile.maxStreak ? profile.streak : profile.maxStreak;
+      profile.totalGMs += 1;
+      profile.save();
     }
 
     // If user's last gm was older than yesterday, then break streak
     else if (!isToday(lastGM)) {
-      const response = await completeTask(profile, "gm");
-      if (response) {
-        profile.streak = 1;
-        profile.totalGMs += 1;
-        profile.save();
-      }
+      await completeTask(profile, "gm");
+
+      profile.streak = 1;
+      profile.totalGMs += 1;
+      profile.save();
     } else if (isToday(lastGM) && profile.totalGMs == 0) {
-      const response = await completeTask(profile, "gm");
-      if (response) {
-        profile.streak = 1;
-        profile.totalGMs = 1;
-        profile.maxStreak = 1;
-        profile.save();
-      }
+      await completeTask(profile, "gm");
+
+      profile.streak = 1;
+      profile.totalGMs = 1;
+      profile.maxStreak = 1;
+      profile.save();
     }
     const rankResult = await assignRank(profile);
     const text = `gm <@${message.author.id}>!\nYou've said gm for **${
@@ -162,6 +155,6 @@ export const executeGMstatement = async (
       rankResult.rank
     } out of ${rankResult.totalUsers}`;
 
-    message.channel.send(text).then().catch(console.log);
+    message.channel.send(text);
   }
 };
