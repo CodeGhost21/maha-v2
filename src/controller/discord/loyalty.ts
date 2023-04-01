@@ -5,6 +5,8 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuInteraction,
   ButtonInteraction,
+  ButtonStyle,
+  ButtonBuilder,
 } from "discord.js";
 
 import {
@@ -47,7 +49,7 @@ export const executeLoyaltyCommand = async (
     value: item.type,
   }));
 
-  const score = (profile.loyaltyWeight * 100).toFixed(2);
+  const score = (profile.loyaltyWeight * 100).toFixed(0);
 
   if (profile.loyaltyWeight === 1) {
     loyaltyMsg = `Congratulations 🎉! Your loyalty is now \`100%\`. You are now earning the max boost (${organization.maxBoost}x) on all your quests. Use the */quests* command to see what is you can do!`;
@@ -125,8 +127,25 @@ export const executeLoyaltySelectInput = async (
     return;
   }
 
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId("loyalty")
+      .setLabel("View Loyalty Tasks")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId("quests")
+      .setLabel("View Quests")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  const action = value == "hold_nft" ? "held a NFT and" : "";
+
+  const content =
+    `<@${user.discordId}> has succesfully ${action} completed a loyalty task 🎉. Well done!\n\n` +
+    `You can continue to do more loyalty tasks or complete some quests to farm points.\n\n`;
+
   await interaction.reply({
-    content: `You have completed this task. Well done!`,
-    ephemeral: true,
+    content,
+    components: [row],
   });
 };

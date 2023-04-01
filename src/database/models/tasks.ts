@@ -11,12 +11,17 @@ export interface ITask {
   organizationId: IOrganizationModel;
   twitterScreenName: string;
   contractAddress: string;
+
+  isTwitterRequired: boolean;
+  isWalletRequired: boolean;
 }
 
 // task are things that you can do that gives you points
 const task = new Schema(
   {
     name: { type: String, required: true },
+    isTwitterRequired: { type: Boolean, default: false },
+    isWalletRequired: { type: Boolean, default: false },
     type: {
       type: String,
       enum: ["form", "gm"],

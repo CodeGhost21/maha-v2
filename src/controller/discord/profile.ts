@@ -9,6 +9,7 @@ import {
 
 import { LoyaltyTask } from "../../database/models/loyaltyTasks";
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
+import { calculateBoost } from "../../utils/boost";
 
 export const executeProfileCommand = async (
   interaction: CommandInteraction<CacheType>
@@ -16,7 +17,7 @@ export const executeProfileCommand = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { profile, user } = await findOrCreateServerProfile(
+  const { profile, user, organization } = await findOrCreateServerProfile(
     interaction.user,
     guildId
   );
@@ -66,20 +67,35 @@ export const executeProfileCommand = async (
   let welcome;
   if (!user.twitterID && !user.walletAddress) {
     welcome =
-      `You are not verified yet. Use the \`/verify\` command to verify your verification. 🔓\n\n` +
+      `You are not verified yet. Use the verify button below to complete your profile. 🔓\n\n` +
       `Once you are verified, you can start boosting your loyalty score to earn more points.`;
+
+    row.addComponents(
+      new ButtonBuilder()
+        .setCustomId("verify")
+        .setLabel("Verify Profile")
+        .setStyle(ButtonStyle.Primary)
+    );
   } else if (!user.twitterID || !user.walletAddress) {
     welcome =
-      `Your account is only partially verified. Use the \`/verify\` command to complete your verification. 🔓\n\n` +
+      `Your account is only partially verified. Use the verify button below to complete your profile. 🔓\n\n` +
       `Once you are fully verified, you can start boosting your points. 🌟`;
+
+    row.addComponents(
+      new ButtonBuilder()
+        .setCustomId("verify")
+        .setLabel("Verify Profile")
+        .setStyle(ButtonStyle.Primary)
+    );
   } else {
     welcome = `Congratulations 🎉 ! Your account is fully verified. Keep up the great work! 💪`;
   }
 
-  const loyaltyScore = (profile.loyaltyWeight * 100).toFixed(2);
+  const loyaltyScore = (profile.loyaltyWeight * 100).toFixed(0);
+  const boost = calculateBoost(profile.loyaltyWeight, organization.maxBoost);
   const loyalty =
-    `Your current loyalty score is \`${loyaltyScore}%\`. Complete loyalty tasks` +
-    ` to start earning a boost on your points. 💖`;
+    `Your current loyalty score is \`${loyaltyScore}%\` and you are earning a \`${boost}x\` boost on your points. Complete loyalty tasks` +
+    ` to earning more boost. 💖`;
 
   const points = `You've earned a total of \`${profile.totalPoints} points\` so far.`;
 

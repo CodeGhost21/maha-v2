@@ -20,6 +20,7 @@ export const isOpenseaApproved = async (address: string): Promise<boolean> => {
 };
 
 export const balanceOf = async (addr: string, who: string): Promise<number> => {
+  console.log(addr, who);
   const contract = new web3.eth.Contract(MAHAX as any[], addr);
   return await contract.methods.balanceOf(who).call();
 };

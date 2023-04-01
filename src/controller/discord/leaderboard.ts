@@ -42,7 +42,7 @@ export const executeLeaderboardCommand = async (
       .slice(0, 10)
       .map(
         (u, i) =>
-          `${total_icons[i]} **${u.userId.discordTag}** - **${u.totalPoints}** points!`
+          `${total_icons[i]} **<@${u.userId.discordId}>** - **${u.totalPoints}** points!`
       )
       .join("\n");
 

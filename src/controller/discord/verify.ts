@@ -48,7 +48,7 @@ export const executeVerifyCommand = async (
 
   const verifyMsg =
     `Okay we are ready to verify your wallet and Twitter account! 👍\n\n` +
-    `Verifying yourself will allow us to give you to start earning a loyalty score which can be used to earn a boost on your points.\n`;
+    `Use the buttons below to start the process. You will be taken to a webpage where we will ask you to connect your accounts.\n`;
 
   const successMsg =
     "**Congratulations on verifying your account! 🎉** You're all set to start earning points and completing your loyalty tasks.";

@@ -10,8 +10,11 @@ import { LoyaltyTaskType } from "./loyaltyTasks";
 export interface ILoyaltySubmission {
   name: string;
   type: LoyaltyTaskType;
-  totalWeight: number;
-  instructions: string;
+
+  taskWeight: number;
+
+  oldProfileLoyalty: number;
+  newProfileLoyalty: number;
 
   profileId: IUserModel;
   approvedBy: IUserModel;
@@ -23,15 +26,31 @@ const loyaltySubmission = new Schema(
     name: String,
     type: {
       type: String,
-      enum: ["twitter_profile", "discord_profile", "revoke_opensea", "gm"],
+      enum: [
+        "twitter_profile",
+        "hold_nft",
+        "discord_profile",
+        "revoke_opensea",
+        "gm",
+      ],
       required: true,
     },
-    totalWeight: Number,
-    instructions: String,
+
+    taskWeight: Number,
+    oldProfileLoyalty: Number,
+    newProfileLoyalty: Number,
 
     approvedBy: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
-    profileId: { type: Schema.Types.ObjectId, ref: "ServerProfile" },
-    organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
+    profileId: {
+      type: Schema.Types.ObjectId,
+      ref: "ServerProfile",
+      required: true,
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
   },
   { timestamps: true }
 );

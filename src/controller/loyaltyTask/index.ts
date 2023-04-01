@@ -61,9 +61,10 @@ export const completeLoyaltyTask = async (
     profileId: profile.id,
     organizationId: organization.id,
     type: loyaltyTask.type,
-    totalWeight: loyaltyTask.weight,
-    boost: organization.maxBoost * profile.loyaltyWeight,
-    loyalty: profile.loyaltyWeight,
+
+    taskWeight: loyaltyTask.weight,
+    oldProfileLoyalty: profile.loyaltyWeight,
+    newProfileLoyalty: profile.loyaltyWeight + loyaltyTask.weight,
   });
 
   // recalculate profile loyalty weight
@@ -73,16 +74,17 @@ export const completeLoyaltyTask = async (
 
   // todo: inform feed
   let msg;
-  if (type === "twitter_profile") msg = `updated their Twitter PFP 🐤.`;
-  else if (type === "discord_profile") msg = `updated their Discord PFP 🤖.`;
+  if (type === "twitter_profile") msg = `updated their Twitter PFP 🐤`;
+  else if (type === "hold_nft") msg = `is holding a NFT 💪`;
+  else if (type === "discord_profile") msg = `updated their Discord PFP 🤖`;
   else if (type === "revoke_opensea")
-    msg = `delisted their NFTs from Opensea ⛴.`;
+    msg = `delisted their NFTs from Opensea ⛴`;
 
   if (msg) {
     const user = await profile.getUser();
     await sendFeedDiscord(
       organization.feedChannelId,
-      `<@${user.discordId}> ${msg}`
+      `<@${user.discordId}> ${msg} and completed a loyalty task! `
     );
   }
 

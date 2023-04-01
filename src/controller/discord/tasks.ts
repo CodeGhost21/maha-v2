@@ -5,10 +5,13 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuInteraction,
   ButtonInteraction,
+  ButtonBuilder,
+  ButtonStyle,
 } from "discord.js";
 
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { Task, TaskTypes } from "../../database/models/tasks";
+import { calculateBoost } from "../../utils/boost";
 
 export const executeTasksCommand = async (
   interaction: CommandInteraction<CacheType> | ButtonInteraction<CacheType>
@@ -27,12 +30,13 @@ export const executeTasksCommand = async (
     value: item.type,
   }));
 
-  const score = profile.loyaltyWeight.toFixed(2);
+  const boost = calculateBoost(profile.loyaltyWeight, organization.maxBoost);
 
   const content: string =
-    `These are your available quests. You can complete them to earn points.\n\n` +
-    `You currently have \`${score}%\` loyalty earning a \`0x\` boost. You can earn more boost by completing loyalty tasks using \`/loyalty\`. ` +
-    `Happy point farming! 🌱👩‍🌾💖\n`;
+    `These are your available quests.\n\n` +
+    `You currently have \`${profile.totalPoints} points\`. You can earn more points by completing the quests below.\n\n` +
+    `You also have a \`${boost}x\` boost. You can earn more boost by completing loyalty tasks using the \`/loyalty\` command. ` +
+    `\n\nHappy point farming! 🌱👩‍🌾💖\n\n`;
 
   const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
@@ -44,14 +48,6 @@ export const executeTasksCommand = async (
   if (rowItem.length < 1) {
     await interaction.reply({
       content: "No quests have been created yet.",
-      ephemeral: true,
-    });
-    return;
-  }
-
-  if (!user.twitterID || !user.walletAddress) {
-    await interaction.reply({
-      content: "Verify yourself using `/verify` to perform any quests.",
       ephemeral: true,
     });
     return;
@@ -72,10 +68,12 @@ export const executeTaskSelectInput = async (
 
   const value = interaction.values[0] as TaskTypes;
 
-  const { organization } = await findOrCreateServerProfile(
+  const { organization, profile, user } = await findOrCreateServerProfile(
     interaction.user,
     guildId
   );
+
+  const boost = calculateBoost(profile.loyaltyWeight, organization.maxBoost);
 
   const quest = await Task.findOne({
     organizationId: organization.id,
@@ -90,15 +88,34 @@ export const executeTaskSelectInput = async (
     return;
   }
 
+  const hasInvalidTwitter = quest.isTwitterRequired && !user.twitterID;
+  const hasInvalidWallet = quest.isWalletRequired && !user.walletAddress;
+
+  if (hasInvalidTwitter || hasInvalidWallet) {
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId("verify")
+        .setLabel("Verify Profile")
+        .setStyle(ButtonStyle.Primary)
+    );
+
+    await interaction.reply({
+      content:
+        "You need to verify your twitter/wallet first before you can perform this quest.",
+      ephemeral: true,
+      components: [row],
+    });
+    return;
+  }
+
   // send instructions for gm
   if (value === "gm") {
     const content =
       `Hey ${interaction?.user}! Go and say "GM" in the <#${organization.gmChannelId}> channel. You will automatically get` +
-      ` \`${quest.points} points\` every day for a good morning 🌞.`;
+      ` \`${quest.points} points\` (with a \`${boost}x\` boost) every day for a good morning 🌞.`;
 
     await interaction?.reply({
       content,
-      ephemeral: true,
     });
     return;
   }

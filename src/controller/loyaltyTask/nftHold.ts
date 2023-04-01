@@ -56,10 +56,9 @@ export const checkNftHoldTask = async (profile: IServerProfileModel) => {
 
   const noOfNft = await web3.balanceOf(
     task.contractAddress,
-    profile.userId.walletAddress
+    user.walletAddress
   );
-  if (noOfNft == 0) return false;
 
   // if the user is holding the nft then give daily points
-  return true;
+  return noOfNft > 0;
 };
