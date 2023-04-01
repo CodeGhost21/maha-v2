@@ -22,7 +22,7 @@ export const executeLoyaltyCommand = async (
   if (!guildId) return;
 
   const { profile, organization } = await findOrCreateServerProfile(
-    interaction.user.id,
+    interaction.user,
     guildId
   );
 
@@ -78,7 +78,7 @@ export const executeLoyaltySelectInput = async (
   if (!guildId) return;
 
   const { profile, user, organization } = await findOrCreateServerProfile(
-    interaction.user.id,
+    interaction.user,
     guildId
   );
 

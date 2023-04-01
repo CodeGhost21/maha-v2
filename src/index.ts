@@ -7,7 +7,6 @@ import nconf from "nconf";
 
 import * as database from "./database";
 
-import "./bots/gm";
 import "./bots/discord";
 import routes from "./routes";
 import * as cron from "./cron";

@@ -12,6 +12,8 @@ import {
   executeLoyaltySelectInput,
 } from "../controller/discord/loyalty";
 import { Events } from "discord.js";
+import { Organization } from "../database/models/organization";
+import { executeGMstatement } from "../controller/task/gm";
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -75,6 +77,26 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (customId === "quests") executeTasksCommand(interaction);
     if (customId === "verify") executeVerifyCommand(interaction);
     if (customId === "loyalty") executeLoyaltyCommand(interaction);
+  }
+});
+
+client.on(Events.MessageCreate, async (message) => {
+  const guildId = message.guildId;
+
+  if (!guildId) return;
+  if (message.author.bot) return;
+
+  const org = await Organization.findOne({ guildId });
+  if (!org) return;
+
+  // make sure we are in the gm chat
+  if (message.channelId !== org.gmChannelId) return;
+
+  try {
+    await executeGMstatement(guildId, message);
+  } catch (error) {
+    console.log(error);
+    // todo capture on sentry
   }
 });
 

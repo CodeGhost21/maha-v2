@@ -31,7 +31,7 @@ export const executeSetupCommand = async (
     const isOwner = interaction.user.id === interaction.guild?.ownerId;
 
     const { profile } = await findOrCreateServerProfile(
-      interaction.user.id,
+      interaction.user,
       guildId,
       isOwner
     );

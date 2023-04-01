@@ -1,4 +1,4 @@
-import { CacheType, Interaction } from "discord.js";
+import { CacheType, Interaction, User as DiscordUser } from "discord.js";
 import mongoose, { Schema } from "mongoose";
 import BadRequestError from "../../errors/BadRequestError";
 import { IOrganizationModel, Organization } from "./organization";
@@ -86,14 +86,14 @@ export const ServerProfile = mongoose.model<IServerProfileModel>(
 );
 
 export const findOrCreateServerProfile = async (
-  discordId: string,
+  author: DiscordUser,
   guildId: string,
   isModerator?: boolean
 ) => {
   const org = await Organization.findOne({ guildId });
   if (!org) throw new BadRequestError("org not registered");
 
-  const user = await User.findOne({ discordId });
+  const user = await User.findOne({ discordId: author.id });
   if (user) {
     const profile = await ServerProfile.findOne({
       userId: user.id,
@@ -114,6 +114,14 @@ export const findOrCreateServerProfile = async (
       organizationId: org.id,
     });
 
+    // capture discord details for old users
+    user.discordTag = author.tag;
+    user.discordId = author.id;
+    user.discordName = author.username;
+    if (author.avatar) user.discordAvatar = author.avatar;
+    user.discordDiscriminator = author.discriminator;
+    await user.save();
+
     return {
       profile: newProfile,
       userCreated: false,
@@ -123,7 +131,14 @@ export const findOrCreateServerProfile = async (
     };
   }
 
-  const newUser = await User.create({ discordId });
+  const newUser = await User.create({
+    discordTag: author.tag,
+    discordId: author.id,
+    discordName: author.username,
+    discordAvatar: author.avatar,
+    discordDiscriminator: author.discriminator,
+  });
+
   const profile = await ServerProfile.create({
     userId: newUser.id,
     organizationId: org.id,
@@ -137,11 +152,4 @@ export const findOrCreateServerProfile = async (
     user: newUser,
     organization: org,
   };
-};
-
-export const findOrCreateServerProfileFromDiscordInteraction = async (
-  interaction: Interaction<CacheType>,
-  isModerator?: boolean
-) => {
-  // const userId
 };

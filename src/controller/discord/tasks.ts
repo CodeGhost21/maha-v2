@@ -17,7 +17,7 @@ export const executeTasksCommand = async (
   if (!guildId) return;
 
   const { organization, user, profile } = await findOrCreateServerProfile(
-    interaction.user.id,
+    interaction.user,
     guildId
   );
   const allTasks = await Task.find({ organizationId: organization?.id });
@@ -73,7 +73,7 @@ export const executeTaskSelectInput = async (
   const value = interaction.values[0] as TaskTypes;
 
   const { organization } = await findOrCreateServerProfile(
-    interaction.user.id,
+    interaction.user,
     guildId
   );
 

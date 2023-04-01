@@ -17,7 +17,7 @@ export const executeProfileCommand = async (
   if (!guildId) return;
 
   const { profile, user } = await findOrCreateServerProfile(
-    interaction.user.id,
+    interaction.user,
     guildId
   );
   const allLoyalties = await LoyaltyTask.find({

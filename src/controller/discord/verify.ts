@@ -22,7 +22,7 @@ export const executeVerifyCommand = async (
   if (!guildId) return;
 
   const { user, profile } = await findOrCreateServerProfile(
-    interaction.user.id,
+    interaction.user,
     guildId
   );
 

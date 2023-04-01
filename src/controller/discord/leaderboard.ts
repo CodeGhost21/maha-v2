@@ -29,7 +29,7 @@ export const executeLeaderboardCommand = async (
     if (!guildId) return;
 
     const { profile } = await findOrCreateServerProfile(
-      interaction.user.id,
+      interaction.user,
       guildId
     );
 
@@ -50,7 +50,6 @@ export const executeLeaderboardCommand = async (
 
     interaction.reply(text);
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-
 };
