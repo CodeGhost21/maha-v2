@@ -11,6 +11,7 @@ import {
   executeLoyaltyCommand,
   executeLoyaltySelectInput,
 } from "../controller/discord/loyalty";
+import { Events } from "discord.js";
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -48,7 +49,7 @@ client.once("ready", () => {
   });
 });
 
-client.on("interactionCreate", async (interaction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
   // slash commands
   if (interaction.isCommand()) {
     const { commandName } = interaction;
@@ -59,16 +60,21 @@ client.on("interactionCreate", async (interaction) => {
     if (commandName === "leaderboard") executeLeaderboardCommand(interaction);
     if (commandName === "setup") executeSetupCommand(interaction);
     if (commandName === "loyalty") executeLoyaltyCommand(interaction);
-
-    return;
   }
 
   // dropdown
-  if (interaction.isSelectMenu()) {
+  if (interaction.isStringSelectMenu()) {
     const { customId } = interaction;
-
     if (customId === "task-select") executeTaskSelectInput(interaction);
     if (customId === "loyalty-select") executeLoyaltySelectInput(interaction);
+  }
+
+  // button checks
+  if (interaction.isButton()) {
+    const { customId } = interaction;
+    if (customId === "quests") executeTasksCommand(interaction);
+    if (customId === "verify") executeVerifyCommand(interaction);
+    if (customId === "loyalty") executeLoyaltyCommand(interaction);
   }
 });
 

@@ -5,6 +5,7 @@ import {
   ButtonBuilder,
   ActionRowBuilder,
   ButtonStyle,
+  ButtonInteraction,
 } from "discord.js";
 import nconf from "nconf";
 import * as jwt from "jsonwebtoken";
@@ -15,7 +16,7 @@ import urlJoin from "../../utils/urlJoin";
 const jwtSecret = nconf.get("JWT_SECRET");
 
 export const executeVerifyCommand = async (
-  interaction: CommandInteraction<CacheType>
+  interaction: CommandInteraction<CacheType> | ButtonInteraction<CacheType>
 ) => {
   const guildId = interaction.guildId;
   if (!guildId) return;

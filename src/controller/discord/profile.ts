@@ -24,8 +24,6 @@ export const executeProfileCommand = async (
     organizationId: profile.organizationId,
   });
 
-  let content: string;
-
   const rowItem = allLoyalties.map((item) => ({
     label: item.name,
     description: item.instruction,
@@ -35,13 +33,17 @@ export const executeProfileCommand = async (
   const row = new ActionRowBuilder<
     ButtonBuilder | StringSelectMenuBuilder
   >().addComponents(
-    new StringSelectMenuBuilder()
-      .setCustomId("loyalty-select")
-      .setPlaceholder("View pending loyalty tasks")
-      .addOptions(rowItem),
+    // new StringSelectMenuBuilder()
+    //   .setCustomId("loyalty-select")
+    //   .setPlaceholder("View pending loyalty tasks")
+    //   .addOptions(rowItem),
     new ButtonBuilder()
-      .setCustomId("primary")
-      .setLabel("Click me!")
+      .setCustomId("loyalty")
+      .setLabel("View Loyalty Tasks")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId("quests")
+      .setLabel("View Quests")
       .setStyle(ButtonStyle.Primary)
     // new ButtonBuilder()
     //   .setLabel(user.twitterID ? "Verify Account" : "Verify Twitter")
@@ -55,42 +57,41 @@ export const executeProfileCommand = async (
     // .setURL(urlJoin(frontendUrl, `/verify-twitter?token=${token}`))
   );
 
+  //   verify
+  // quests
+  // loyalty
+
   // ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
 
+  let welcome;
   if (!user.twitterID && !user.walletAddress) {
-    content =
-      `Hey there, ${interaction.user}! 👋 \n\n` +
-      `Your account isn't verified yet. To get started with our awesome Gifts of Eden loyalty program, use the \`/verify\` command to verify your account. 🔓\n\n` +
-      `Once you're verified, you can start boosting your loyalty score, which is currently at 0%. Use the */loyalty* command to boost your loyalty score.\n\n` +
-      `You've earned a total of 0 points so far, but by checking out all the tasks available to earn points, you'll be on your way to racking up that score in no time. Just use the */quests* command to discover more! 🚀`;
+    welcome =
+      `You are not verified yet. Use the \`/verify\` command to verify your verification. 🔓\n\n` +
+      `Once you are verified, you can start boosting your loyalty score to earn more points.`;
   } else if (!user.twitterID || !user.walletAddress) {
-    content =
-      `Hey there, ${interaction.user}! 👋 \n\n` +
-      `We noticed that your account is just partially verified. To get started with our awesome Gifts of Eden loyalty program, use the */verify* command to verify your account. 🔓\n\n` +
-      `Once you're verified, you can start boosting your loyalty score, which is currently at 0%. Don't worry, there are plenty of tasks to help you increase it! 🌟\n\n` +
-      `You've earned a total of 0 points so far, but by checking out all the tasks available to earn points, you'll be on your way to racking up that score in no time. Just use the */quests* command to discover more! 🚀\n\n` +
-      `Don't forget to verify your account and dive into these tasks to start earning points and boosting your loyalty score! 💪`;
+    welcome =
+      `Your account is only partially verified. Use the \`/verify\` command to complete your verification. 🔓\n\n` +
+      `Once you are fully verified, you can start boosting your points. 🌟`;
   } else {
-    content =
-      `Hey there, ${interaction.user}! 👋 \n\n` +
-      `Congratulations your account is verified! 🎉 You're all set to enjoy the benefits of our Gifts of Eden.\n\n` +
-      `Your current loyalty score is ${(profile.loyaltyWeight * 100).toFixed(
-        2
-      )}%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty even more! 🚀\n\n` +
-      `You've earned a total of ${profile.totalPoints} points so far. Remember, you can always check all the tasks available to earn points using the */quests* command. Keep up the great work! 💪\n\n` +
-      `Continue exploring these tasks to earn more points and boost your loyalty score even further! 💖`;
+    welcome = `Congratulations 🎉 ! Your account is fully verified. Keep up the great work! 💪`;
   }
 
-  if (!user.twitterID || !user.walletAddress || rowItem.length < 1) {
-    await interaction.reply({
-      content,
-      ephemeral: true,
-    });
-  } else {
-    await interaction.reply({
-      content,
-      ephemeral: true,
-      components: [row],
-    });
-  }
+  const loyaltyScore = (profile.loyaltyWeight * 100).toFixed(2);
+  const loyalty =
+    `Your current loyalty score is \`${loyaltyScore}%\`. Complete loyalty tasks` +
+    ` to start earning a boost on your points. 💖`;
+
+  const points = `You've earned a total of \`${profile.totalPoints} points\` so far.`;
+
+  const d =
+    `Hello ${interaction.user}! 👋\n\n` +
+    `${welcome}\n\n` +
+    `${loyalty}\n\n` +
+    `${points}\n`;
+
+  await interaction.reply({
+    content: d,
+    ephemeral: true,
+    components: rowItem.length < 1 ? [] : [row],
+  });
 };

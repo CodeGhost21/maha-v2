@@ -4,6 +4,7 @@ import {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuInteraction,
+  ButtonInteraction,
 } from "discord.js";
 
 import {
@@ -15,7 +16,7 @@ import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 import { completeLoyaltyTask } from "../loyaltyTask";
 
 export const executeLoyaltyCommand = async (
-  interaction: CommandInteraction<CacheType>
+  interaction: CommandInteraction<CacheType> | ButtonInteraction<CacheType>
 ) => {
   const guildId = interaction.guildId;
   if (!guildId) return;

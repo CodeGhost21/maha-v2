@@ -4,13 +4,14 @@ import {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuInteraction,
+  ButtonInteraction,
 } from "discord.js";
 
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { Task, TaskTypes } from "../../database/models/tasks";
 
 export const executeTasksCommand = async (
-  interaction: CommandInteraction<CacheType>
+  interaction: CommandInteraction<CacheType> | ButtonInteraction<CacheType>
 ) => {
   const guildId = interaction.guildId;
   if (!guildId) return;
@@ -93,7 +94,7 @@ export const executeTaskSelectInput = async (
   if (value === "gm") {
     const content =
       `Hey ${interaction?.user}! Go and say "GM" in the <#${organization.gmChannelId}> channel. You will automatically get` +
-      `${quest.points} points every day for a good morning 🌞.`;
+      ` \`${quest.points} points\` every day for a good morning 🌞.`;
 
     await interaction?.reply({
       content,
