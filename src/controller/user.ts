@@ -6,7 +6,6 @@ import NotFoundError from "../errors/NotFoundError";
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { fetchDiscordAvatar } from "../utils/discord";
 import { extractServerProfile } from "../utils/jwt";
-import { ServerProfile } from "../database/models/serverProfile";
 import { Organization } from "../database/models/organization";
 import BadRequestError from "../errors/BadRequestError";
 
@@ -22,7 +21,6 @@ export const walletVerify = async (req: Request, res: Response) => {
   const user = await profile.getUser();
 
   const message = `Login into Gifts of Eden: ${profile.id}`;
-  console.log(message);
   const result = ethers.utils.verifyMessage(message, req.body.hash);
 
   if (req.body.address === user.walletAddress)
@@ -30,6 +28,7 @@ export const walletVerify = async (req: Request, res: Response) => {
 
   if (result === req.body.address) {
     user.walletAddress = req.body.address;
+    user.walletSignature = req.body.hash;
     await user.save();
 
     const org = await Organization.findById(profile.organizationId);
