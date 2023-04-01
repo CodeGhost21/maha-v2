@@ -86,7 +86,7 @@ export const executeLoyaltySelectInput = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { profile, user, organization } = await findOrCreateServerProfile(
+  const { profile, user } = await findOrCreateServerProfile(
     interaction.user,
     guildId
   );
@@ -105,7 +105,6 @@ export const executeLoyaltySelectInput = async (
     return;
   }
 
-  let msg;
   const value = interaction.values[0] as LoyaltyTaskType;
 
   try {
@@ -117,23 +116,13 @@ export const executeLoyaltySelectInput = async (
       });
       return;
     }
-
-    if (value === "twitter_profile") msg = `updated their Twitter PFP.`;
-    else if (value === "discord_profile") msg = `updated their Discord PFP.`;
-    else if (value === "revoke_opensea")
-      msg = `delisted their NFTs from Opensea 🤘.`;
-
-    if (msg)
-      await sendFeedDiscord(
-        organization.feedChannelId,
-        `<@${interaction?.user.id}> ${msg}`
-      );
   } catch (error) {
     console.log(error);
     await interaction.reply({
       content: `We could not verify this loyalty task. Please try again later.`,
       ephemeral: true,
     });
+    return;
   }
 
   await interaction.reply({

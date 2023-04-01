@@ -3,12 +3,13 @@ import { sendRequest } from "../library/sendRequest";
 import { imageComparing } from "../library/imageComparer";
 
 export const profileImageComparing = async (
+  addr: string,
   profileImageUrl: string,
   size: number,
   walletAddress: string
 ) => {
   // resize image for image comparing
-  const noOfNFTs = await web3.balanceOf(walletAddress);
+  const noOfNFTs = await web3.balanceOf(addr, walletAddress);
 
   if (noOfNFTs == 0) return false;
 

@@ -11,7 +11,7 @@ import { completeLoyaltyTask } from "./index";
  * This is a daily task that checks if the user holds a nft of a given type
  * and gives points.
  */
-export const nftHoldTask = async () => {
+export const checkNftHoldTaskForAll = async () => {
   const nftHoldTasks = await LoyaltyTask.find({ type: "hold_nft" });
 
   return Bluebird.mapSeries(nftHoldTasks, async (task) => {
@@ -26,7 +26,10 @@ export const nftHoldTask = async () => {
       async (profile: IServerProfileModel) => {
         if (!profile.userId.walletAddress) return;
 
-        const noOfNft = await web3.balanceOf(profile.userId.walletAddress);
+        const noOfNft = await web3.balanceOf(
+          task.contractAddress,
+          profile.userId.walletAddress
+        );
         if (noOfNft == 0) return;
 
         // if the user is holding the nft then give daily points
@@ -34,4 +37,29 @@ export const nftHoldTask = async () => {
       }
     );
   });
+};
+
+export const checkNftHoldTask = async (profile: IServerProfileModel) => {
+  const task = await LoyaltyTask.findOne({
+    type: "hold_nft",
+    organizationId: profile.organizationId,
+  });
+
+  if (!task) return false;
+
+  // get all the users of this org
+  const user = await profile.getUser();
+
+  // go through every one and check if they meet the condtion
+
+  if (!user.walletAddress) return false;
+
+  const noOfNft = await web3.balanceOf(
+    task.contractAddress,
+    profile.userId.walletAddress
+  );
+  if (noOfNft == 0) return false;
+
+  // if the user is holding the nft then give daily points
+  return true;
 };

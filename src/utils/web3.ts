@@ -19,8 +19,9 @@ export const isOpenseaApproved = async (address: string): Promise<boolean> => {
   return await mahaXContract.methods.isApprovedForAll(address, operator).call();
 };
 
-export const balanceOf = async (address: string): Promise<number> => {
-  return await mahaXContract.methods.balanceOf(address).call();
+export const balanceOf = async (addr: string, who: string): Promise<number> => {
+  const contract = new web3.eth.Contract(MAHAX as any[], addr);
+  return await contract.methods.balanceOf(who).call();
 };
 
 export const locked = async (

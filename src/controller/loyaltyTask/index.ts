@@ -1,25 +1,30 @@
 import { LoyaltySubmission } from "../../database/models/loyaltySubmission";
 import {
+  ILoyaltyTaskModel,
   LoyaltyTask,
   LoyaltyTaskType,
 } from "../../database/models/loyaltyTasks";
 import { Organization } from "../../database/models/organization";
-import { PointTransaction } from "../../database/models/pointTransaction";
-import {
-  IServerProfile,
-  IServerProfileModel,
-} from "../../database/models/serverProfile";
+import { IServerProfileModel } from "../../database/models/serverProfile";
 import NotFoundError from "../../errors/NotFoundError";
 
 import { twitterProfileLoyalty } from "./twitterPFP";
 import { discordProfileLoyalty } from "./discordPFP";
 import { openseaLoyalty } from "./openseaRevoke";
+import { checkNftHoldTask } from "./nftHold";
+import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 
-const checkLoyalty = async (profile: IServerProfile, loyaltyType: string) => {
-  if (loyaltyType === "twitter_profile") return twitterProfileLoyalty(profile);
+const checkLoyalty = async (
+  task: ILoyaltyTaskModel,
+  profile: IServerProfileModel,
+  loyaltyType: LoyaltyTaskType
+) => {
+  if (loyaltyType === "twitter_profile")
+    return twitterProfileLoyalty(task, profile);
   else if (loyaltyType === "discord_profile")
-    return discordProfileLoyalty(profile);
+    return discordProfileLoyalty(task, profile);
   else if (loyaltyType === "revoke_opensea") return openseaLoyalty(profile);
+  else if (loyaltyType === "hold_nft") return checkNftHoldTask(profile);
   return false;
 };
 
@@ -46,7 +51,7 @@ export const completeLoyaltyTask = async (
   // task already completed
   if (checkLoyaltySubmission) return true;
 
-  const verifyLoyalty = await checkLoyalty(profile, type);
+  const verifyLoyalty = await checkLoyalty(loyaltyTask, profile, type);
   if (!verifyLoyalty) return false;
 
   const organization = await Organization.findById(profile.organizationId);
@@ -67,6 +72,19 @@ export const completeLoyaltyTask = async (
   await profile.save();
 
   // todo: inform feed
+  let msg;
+  if (type === "twitter_profile") msg = `updated their Twitter PFP 🐤.`;
+  else if (type === "discord_profile") msg = `updated their Discord PFP 🤖.`;
+  else if (type === "revoke_opensea")
+    msg = `delisted their NFTs from Opensea ⛴.`;
+
+  if (msg) {
+    const user = await profile.getUser();
+    await sendFeedDiscord(
+      organization.feedChannelId,
+      `<@${user.discordId}> ${msg}`
+    );
+  }
 
   return true;
 };

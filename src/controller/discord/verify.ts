@@ -46,36 +46,22 @@ export const executeVerifyCommand = async (
       .setURL(urlJoin(frontendUrl, `/verify-wallet?token=${token}`))
   );
 
-  const discordMsgEmbed = new EmbedBuilder()
-    .setColor("#F07D55")
-    .setThumbnail("https://i.imgur.com/xYG5x9G.png")
-    .setAuthor({
-      name: "Gift of Eden",
-      iconURL: "https://i.imgur.com/xYG5x9G.png",
-      url: "https://peopleofeden.com/",
-    })
-    .setTitle("Verify your account")
-    .setDescription(
-      `Hey there, ${interaction?.user} \n\n` +
-        `Before you start earning points, you'll need to verify both your Twitter and your ETH wallet. This ensures that you are a genuine member of our community and helps us provide a smooth experience for everyone. ` +
-        `Let's get started 🚀`
-    );
+  const verifyMsg =
+    `Okay we are ready to verify your wallet and Twitter account! 👍\n\n` +
+    `Verifying yourself will allow us to give you to start earning a loyalty score which can be used to earn a boost on your points.\n`;
 
-  const discordSuccessEmbed = new EmbedBuilder()
-    .setColor("#4ffa02")
-    .setDescription(
-      "**Congratulations on verifying your account! 🎉** You're all set to start earning points and completing your loyalty tasks."
-    );
+  const successMsg =
+    "**Congratulations on verifying your account! 🎉** You're all set to start earning points and completing your loyalty tasks.";
 
   if (!user.twitterID || !user.walletAddress) {
     await interaction.reply({
-      embeds: [discordMsgEmbed],
+      content: verifyMsg,
       components: [row],
       ephemeral: true,
     });
   } else {
     await interaction.reply({
-      embeds: [discordSuccessEmbed],
+      content: successMsg,
       ephemeral: true,
     });
   }

@@ -100,6 +100,6 @@ client.on(Events.MessageCreate, async (message) => {
   }
 });
 
-// client.on("error", (e) => console.error(e));
+client.on("error", (e) => console.error(e)); // todo use sentry
 // client.on("warn", (e) => console.warn(e));
 // client.on("debug", (e) => console.info(e));
