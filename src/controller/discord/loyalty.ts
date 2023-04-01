@@ -8,6 +8,7 @@ import {
   ButtonStyle,
   ButtonBuilder,
 } from "discord.js";
+import { LoyaltySubmission } from "../../database/models/loyaltySubmission";
 
 import {
   LoyaltyTask,
@@ -88,10 +89,46 @@ export const executeLoyaltySelectInput = async (
   const guildId = interaction.guildId;
   if (!guildId) return;
 
-  const { profile, user } = await findOrCreateServerProfile(
+  const value = interaction.values[0] as LoyaltyTaskType;
+
+  const { profile, user, organization } = await findOrCreateServerProfile(
     interaction.user,
     guildId
   );
+
+  // check if the user has already completed this task or not
+  const submitted = await LoyaltySubmission.findOne({
+    profileId: profile.id,
+    organizationId: organization.id,
+    type: value,
+  });
+
+  // if the user already completed this task; then show the tasks again and bail.
+  if (submitted) {
+    const allLoyalties = await LoyaltyTask.find({
+      organizationId: profile.organizationId,
+    });
+
+    const rowItem = allLoyalties.map((item) => ({
+      label: item.name,
+      description: item.instruction,
+      value: item.type,
+    }));
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId("loyalty-select")
+        .setPlaceholder("View loyalty tasks")
+        .addOptions(rowItem)
+    );
+
+    await interaction.reply({
+      content: `You have already completed this loyalty task. Try another one?`,
+      ephemeral: true,
+      components: [row],
+    });
+    return;
+  }
 
   if (!user.twitterID || !user.walletAddress) {
     const toVerify = [];
@@ -106,8 +143,6 @@ export const executeLoyaltySelectInput = async (
     });
     return;
   }
-
-  const value = interaction.values[0] as LoyaltyTaskType;
 
   try {
     const taskResponse = await completeLoyaltyTask(profile, value);
