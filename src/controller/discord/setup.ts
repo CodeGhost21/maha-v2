@@ -43,7 +43,7 @@ export const executeSetupCommand = async (
 
     let content, buttonText;
 
-    if (isOwner) {
+    if (isOwner || profile.isModerator) {
       frontendUrl = urlJoin(
         nconf.get("FRONTEND_URL"),
         `/settings?token=${token}`
