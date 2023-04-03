@@ -85,6 +85,10 @@ export const executeLoyaltyCommand = async (
 export const executeLoyaltySelectInput = async (
   interaction: StringSelectMenuInteraction<CacheType>
 ) => {
+  await interaction.reply({
+    content: "Checking...",
+    ephemeral: true,
+  });
   const guildId = interaction.guildId;
   if (!guildId) return;
 
@@ -121,9 +125,8 @@ export const executeLoyaltySelectInput = async (
         .addOptions(rowItem)
     );
 
-    await interaction.reply({
+    await interaction.editReply({
       content: `You have already completed this loyalty task. Well done 💪! Would you like to try another one?`,
-      ephemeral: true,
       components: [row],
     });
     return;
@@ -141,17 +144,17 @@ export const executeLoyaltySelectInput = async (
         .setStyle(ButtonStyle.Primary)
     );
 
-    await interaction.reply({
+    await interaction.editReply({
       content: `Your ${toVerify.join(
         " and "
       )} is not yet verified. Verify your profile first before you can complete this task.`,
-      ephemeral: true,
       components: [row],
     });
     return;
   }
 
   const success = await completeLoyaltyTask(profile, value);
+
   if (!success) {
     let content = `We could not verify this loyalty task. Please try again later.`;
 
@@ -173,10 +176,9 @@ export const executeLoyaltySelectInput = async (
       );
     }
 
-    await interaction.reply({
+    await interaction.editReply({
       content: content,
       components: [row],
-      ephemeral: true,
     });
     return;
   }
@@ -198,7 +200,7 @@ export const executeLoyaltySelectInput = async (
     `<@${user.discordId}> has succesfully ${action} completed a loyalty task 🎉. Well done!\n\n` +
     `You can continue to do more loyalty tasks or complete some quests to farm points.\n\n`;
 
-  await interaction.reply({
+  await interaction.editReply({
     content,
     components: [row],
   });
