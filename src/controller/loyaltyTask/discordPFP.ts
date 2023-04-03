@@ -9,7 +9,8 @@ export const discordProfileLoyalty = async (
 ) => {
   const user = await profile.getUser();
 
-  const discordProfile: any = await fetchDiscordProfile(user);
+  // const discordProfile: any = await fetchDiscordProfile(user);
+  const discordProfile: any = `https://cdn.discordapp.com/avatars/${user.discordId}/${user.discordAvatar}`; //user.discordAvatar;
   const discordCheck = await profileImageComparing(
     task.contractAddress,
     discordProfile,

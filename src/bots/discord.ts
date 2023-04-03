@@ -14,6 +14,7 @@ import {
 import { Events } from "discord.js";
 import { Organization } from "../database/models/organization";
 import { executeGMstatement } from "../controller/task/gm";
+import { User } from "../database/models/user";
 
 client.once("ready", () => {
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`);
@@ -52,6 +53,16 @@ client.once("ready", () => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  const user = await User.findOne({ discordId: interaction.user.id });
+
+  if (user) {
+    user.discordName = interaction.user.username;
+    user.discordDiscriminator = interaction.user.discriminator;
+    user.discordAvatar = interaction.user.avatar || "";
+    user.discordTag = `${interaction.user.username}#${interaction.user.discriminator}`;
+
+    await user.save();
+  }
   // slash commands
   if (interaction.isCommand()) {
     const { commandName } = interaction;
