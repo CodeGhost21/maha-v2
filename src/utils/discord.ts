@@ -20,6 +20,7 @@ export const client = new Client({
     IntentsBitField.Flags.GuildScheduledEvents,
     IntentsBitField.Flags.GuildMessages,
     IntentsBitField.Flags.GuildMessageReactions,
+    IntentsBitField.Flags.MessageContent,
   ],
 });
 
