@@ -5,8 +5,10 @@ import { IOrganizationModel } from "./organization";
 import { IServerProfileModel } from "./serverProfile";
 
 export type LoyaltyTaskType =
-  | "twitter_profile"
-  | "discord_profile"
+  | "twitter_pfp"
+  | "twitter_follow"
+  | "hold_nft"
+  | "discord_pfp"
   | "revoke_opensea";
 
 export interface ILoyaltyTask {
@@ -16,10 +18,15 @@ export interface ILoyaltyTask {
   weight: number;
   needsModeration: boolean;
 
-  createdBy: IServerProfileModel;
-  organizationId: IOrganizationModel;
+  twitterScreenName: string;
   contractAddress: string;
   operatorAddress: string;
+
+  successMessage: string;
+  failureMessage: string;
+
+  createdBy: IServerProfileModel;
+  organizationId: IOrganizationModel;
 }
 
 // only added by org moderators
@@ -32,7 +39,13 @@ const loyaltyTask = new Schema(
     needsModeration: { type: Boolean, required: true, default: false },
     type: {
       type: String,
-      enum: ["twitter_profile", "discord_profile", "revoke_opensea"],
+      enum: [
+        "twitter_follow",
+        "twitter_pfp",
+        "hold_nft",
+        "discord_pfp",
+        "revoke_opensea",
+      ],
       required: true,
     },
     weight: { type: Number, min: 0, max: 1, required: true }, // 0-1  // validation every loyalty task for an org should add upto 1
@@ -46,6 +59,11 @@ const loyaltyTask = new Schema(
       required: true,
       ref: "Organization",
     },
+
+    successMessage: String,
+    failureMessage: String,
+
+    twitterScreenName: String,
     contractAddress: String,
     operatorAddress: String,
   },

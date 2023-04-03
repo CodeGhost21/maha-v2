@@ -1,23 +1,20 @@
 import * as web3 from "./web3";
-import { contract } from "./web3";
 import { sendRequest } from "../library/sendRequest";
 import { imageComparing } from "../library/imageComparer";
-import { ILoyaltyTaskModel } from "../database/models/loyaltyTasks";
 import Bluebird from "bluebird";
 
 export const profileImageComparing = async (
-  task: ILoyaltyTaskModel,
+  addr: string,
   profileImageUrl: string,
   size: number,
   walletAddress: string
 ) => {
   // resize image for image comparing
-  const { noOfNft, allTokenURI } = await contract(
-    task.contractAddress,
-    walletAddress
-  );
+  const noOfNFTs = await web3.balanceOf(addr, walletAddress);
 
-  if (noOfNft == 0) return false;
+  if (noOfNFTs == 0) return false;
+
+  const allTokenURI = await web3.tokenURI(addr, walletAddress);
   const imageCompareResponse: any = [];
   await Bluebird.mapSeries(allTokenURI, async (imgURI: string) => {
     const data = await sendRequest<string>("get", imgURI);

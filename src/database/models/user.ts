@@ -25,6 +25,7 @@ export interface IUser {
   twitterRequestTokenSecret: string;
 
   walletAddress: string;
+  walletSignature: string;
 }
 
 const schema = new mongoose.Schema(
@@ -53,6 +54,7 @@ const schema = new mongoose.Schema(
     twitterRequestToken: String,
 
     walletAddress: String,
+    walletSignature: String,
   },
   {
     timestamps: true,

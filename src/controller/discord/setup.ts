@@ -3,9 +3,9 @@ import jwt from "jsonwebtoken";
 import {
   CacheType,
   CommandInteraction,
-  MessageActionRow,
-  MessageButton,
-  MessageEmbed,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
 } from "discord.js";
 
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
@@ -31,7 +31,7 @@ export const executeSetupCommand = async (
     const isOwner = interaction.user.id === interaction.guild?.ownerId;
 
     const { profile } = await findOrCreateServerProfile(
-      interaction.user.id,
+      interaction.user,
       guildId,
       isOwner
     );
@@ -41,31 +41,38 @@ export const executeSetupCommand = async (
 
     const token = await jwt.sign({ id: profile.id, expiry }, jwtSecret);
 
+    let content, buttonText;
+
     if (isOwner) {
       frontendUrl = urlJoin(
         nconf.get("FRONTEND_URL"),
-        `settings?token=${token}`
+        `/settings?token=${token}`
       );
+
+      buttonText = "Login";
+      content = "Login into the dashboard to customize the bot using this link";
     } else {
-      frontendUrl = nconf.get("FRONTEND_URL")
+      frontendUrl = nconf.get("FRONTEND_URL");
+      content =
+        "You are not an admin of this server. To access the setup page of " +
+        "this bot, inform one of the admins to give you moderator permissions or " +
+        "install the bot into your own server.";
+      buttonText = "Install Bot";
     }
 
-
-    const row = new MessageActionRow().addComponents(
-      new MessageButton().setLabel("Login").setStyle("LINK").setURL(frontendUrl)
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setLabel(buttonText)
+        .setStyle(ButtonStyle.Link)
+        .setURL(frontendUrl)
     );
 
-    const discordMsgEmbed = new MessageEmbed()
-      .setColor("#4ffa02")
-      .setDescription("Login to the dashboard using this link");
-
     await interaction.reply({
-      embeds: [discordMsgEmbed],
+      content,
       components: [row],
       ephemeral: true,
     });
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-
 };

@@ -13,35 +13,31 @@ export const contract = async (
   const mahaXContract = new web3.eth.Contract(MAHAX as any[], contractAddress);
 
   const noOfNft = await mahaXContract.methods.balanceOf(walletAddress).call();
-
-  const allTokenURI: any = [];
-  const mahaLocked = [];
-  for (let i = 0; i < noOfNft; i++) {
-    const nftId = await mahaXContract.methods
-      .tokenOfOwnerByIndex(walletAddress, i)
-      .call();
-    const tokenURI = await mahaXContract.methods.tokenURI(nftId).call();
-    allTokenURI.push(tokenURI);
-    const locked = await mahaXContract.methods.locked(nftId).call();
-    mahaLocked.push([nftId, locked.amount / 10 ** 18]);
-  }
-  if (operatorAddress !== undefined) {
-    const isOpenseaApproved = await mahaXContract.methods
-      .isApprovedForAll(walletAddress, operatorAddress)
-      .call();
-    return { isOpenseaApproved };
-  }
-  return { allTokenURI, mahaLocked, noOfNft };
+};
+export const isOpenseaApproved = async (
+  addr: string,
+  who: string,
+  whom: string
+): Promise<boolean> => {
+  const contract = new web3.eth.Contract(MAHAX as any[], addr);
+  return await contract.methods.isApprovedForAll(who, whom).call();
 };
 
-// const mahaXContract = new web3.eth.Contract(
-//   MAHAX as any[],
-//   nconf.get("CONTRACT_LOCKER")
-// );
+export const balanceOf = async (addr: string, who: string): Promise<number> => {
+  const contract = new web3.eth.Contract(MAHAX as any[], addr);
+  return await contract.methods.balanceOf(who).call();
+};
 
-// export const tokenURI = async (nftId: number): Promise<string> => {
-//   return await mahaXContract.methods.tokenURI(nftId).call();
-// };
+export const tokenURI = async (addr: string, who: string): Promise<string> => {
+  const contract = new web3.eth.Contract(MAHAX as any[], addr);
+  const noOfNFTs = await contract.methods.balanceOf(who).call();
+  const allTokenURI: any = [];
+  for (let i = 0; i < noOfNFTs; i++) {
+    const nftId = await contract.methods.tokenOfOwnerByIndex(who, i).call();
+    allTokenURI.push(await contract.methods.tokenURI(nftId).call());
+  }
+  return allTokenURI;
+};
 
 // export const isOpenseaApproved = async (address: string): Promise<boolean> => {
 //   const operator = nconf.get("OPENSEA_SEAPORT_ADDRESS");

@@ -1,111 +1,205 @@
 import {
   CacheType,
   CommandInteraction,
-  MessageActionRow,
-  MessageSelectMenu,
-  SelectMenuInteraction,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuInteraction,
+  ButtonInteraction,
+  ButtonStyle,
+  ButtonBuilder,
 } from "discord.js";
+import { LoyaltySubmission } from "../../database/models/loyaltySubmission";
 
 import {
   LoyaltyTask,
   LoyaltyTaskType,
 } from "../../database/models/loyaltyTasks";
-import { Organization } from "../../database/models/organization";
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
-import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 import { completeLoyaltyTask } from "../loyaltyTask";
 
 export const executeLoyaltyCommand = async (
-  interaction: CommandInteraction<CacheType> | SelectMenuInteraction<CacheType>
+  interaction: CommandInteraction<CacheType> | ButtonInteraction<CacheType>
 ) => {
-  try {
-    const guildId = interaction.guildId;
-    if (!guildId) return;
+  const guildId = interaction.guildId;
+  if (!guildId) return;
 
-    const { profile, user } = await findOrCreateServerProfile(
-      interaction.user.id,
-      guildId
-    );
+  const { profile, organization } = await findOrCreateServerProfile(
+    interaction.user,
+    guildId
+  );
 
+  const allLoyalties = await LoyaltyTask.find({
+    organizationId: profile.organizationId,
+  });
+
+  // process the /loyalty command
+  let loyaltyMsg: string;
+
+  if (allLoyalties.length === 0) {
+    await interaction.reply({
+      content: "No loyalty tasks have been created yet.",
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const rowItem = allLoyalties.map((item) => ({
+    label: item.name,
+    description: item.instruction,
+    value: item.type,
+  }));
+
+  const score = (profile.loyaltyWeight * 100).toFixed(0);
+
+  if (profile.loyaltyWeight === 1) {
+    loyaltyMsg = `Congratulations 🎉! Your loyalty is now \`100%\`. You are now earning the max boost (${organization.maxBoost}x) on all your quests. Use the */quests* command to see what is you can do!`;
+  } else {
+    loyaltyMsg =
+      `Your current loyalty score is \`${score}%\`. Complete all loyalty tasks to get a \`100%\` loyalty score and ` +
+      `earn a max boost of \`${organization.maxBoost}x\` on all your points! 🚀`;
+  }
+
+  const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+    new StringSelectMenuBuilder()
+      .setCustomId("loyalty-select")
+      .setPlaceholder("View pending loyalty tasks")
+      .addOptions(rowItem)
+  );
+
+  const content =
+    `This is your loyalty score. It is used to represent how loyal you are to ${organization.name}. ` +
+    `You can improve your loyalty score by completing loyalty tasks. The more loyalty score you have, the more` +
+    ` boost you will earn. \n\n` +
+    loyaltyMsg +
+    "\n";
+
+  await interaction.reply({
+    content,
+    components: [row],
+    ephemeral: true,
+  });
+  return;
+};
+
+// step 2. when the user clicks on the dropdown menu; shoot out the loyalty tasks
+export const executeLoyaltySelectInput = async (
+  interaction: StringSelectMenuInteraction<CacheType>
+) => {
+  const guildId = interaction.guildId;
+  if (!guildId) return;
+
+  const value = interaction.values[0] as LoyaltyTaskType;
+
+  const { profile, user, organization } = await findOrCreateServerProfile(
+    interaction.user,
+    guildId
+  );
+
+  // check if the user has already completed this task or not
+  const submitted = await LoyaltySubmission.findOne({
+    profileId: profile.id,
+    organizationId: organization.id,
+    type: value,
+  });
+
+  // if the user already completed this task; then show the tasks again and bail.
+  if (submitted) {
     const allLoyalties = await LoyaltyTask.find({
       organizationId: profile.organizationId,
     });
 
-    if (interaction.isCommand()) {
-      let content: string;
+    const rowItem = allLoyalties.map((item) => ({
+      label: item.name,
+      description: item.instruction,
+      value: item.type,
+    }));
 
-      const rowItem = allLoyalties.map((item) => ({
-        label: item.name,
-        description: item.instruction,
-        value: item.type,
-      }));
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId("loyalty-select")
+        .setPlaceholder("View loyalty tasks")
+        .addOptions(rowItem)
+    );
 
-      if (profile.loyaltyWeight === 1) {
-        content = `**Congratulations your loyalty is 100%! 🎉 You're all set to enjoy the max boost on the tasks you perform. Just use the */quests* command to discover more! **`;
-      } else {
-        content = `Your current loyalty score is ${
-          profile.loyaltyWeight * 100
-        }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty score even more! 🚀`;
-      }
-
-      const row = new MessageActionRow().addComponents(
-        new MessageSelectMenu()
-          .setCustomId("loyalty-select")
-          .setPlaceholder("Select a task")
-          .addOptions(rowItem)
-      );
-
-      if (rowItem.length < 1) {
-        await interaction.reply({
-          content: "No loyalty tasks have been created yet.",
-          ephemeral: true,
-        });
-      } else {
-        if (!user.twitterID || !user.walletAddress) {
-          await interaction.reply({
-            content: "Verify yourself using /verify to perform any tasks.",
-            ephemeral: true,
-          });
-        } else {
-          await interaction.reply({
-            content: content,
-            components: [row],
-            ephemeral: true,
-          });
-        }
-      }
-    } else if (interaction.isSelectMenu()) {
-      await interaction.reply({ content: "Checking..", ephemeral: true });
-      let msg, botMsg;
-      const value = interaction.values[0] as LoyaltyTaskType;
-      const taskResponse = await completeLoyaltyTask(profile, value);
-      if (taskResponse) {
-        botMsg = `Task completed successfully.`;
-        if (value === "twitter_profile")
-          msg = `Looking fresh with that NFT profile pic!`;
-        else if (value === "discord_profile")
-          msg = `Rocking with that NFT Profile pic!`;
-        else msg = `is a Keeper!!`;
-
-        const org: any = await Organization.findOne({
-          _id: profile.organizationId,
-        });
-
-        await sendFeedDiscord(
-          org.feedChannelId,
-          `${interaction?.user}, ${msg}`
-        );
-        await interaction.editReply({
-          content: `${interaction.user}, ${botMsg}`,
-        });
-      } else {
-        botMsg = `Task failed! Please check and try again later.`;
-        await interaction.editReply({
-          content: `${interaction.user}, ${botMsg}`,
-        });
-      }
-    }
-  } catch (error) {
-    console.error(error);
+    await interaction.reply({
+      content: `You have already completed this loyalty task. Well done 💪! Would you like to try another one?`,
+      ephemeral: true,
+      components: [row],
+    });
+    return;
   }
+
+  if (!user.twitterID || !user.walletAddress) {
+    const toVerify = [];
+    if (!user.twitterID) toVerify.push("Twitter");
+    if (!user.walletAddress) toVerify.push("Wallet");
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId("verify")
+        .setLabel("Verify Profile")
+        .setStyle(ButtonStyle.Primary)
+    );
+
+    await interaction.reply({
+      content: `Your ${toVerify.join(
+        " and "
+      )} is not yet verified. Verify your profile first before you can complete this task.`,
+      ephemeral: true,
+      components: [row],
+    });
+    return;
+  }
+
+  const success = await completeLoyaltyTask(profile, value);
+  if (!success) {
+    let content = `We could not verify this loyalty task. Please try again later.`;
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents();
+
+    if (value === "twitter_pfp")
+      content = `You do not have a PFP on your twitter that matches the NFTs in your wallet.`;
+    else if (value === "hold_nft")
+      content = `You are not holding a NFT. Make sure you have a NFT in your wallet and redo this task`;
+    else if (value === "discord_pfp")
+      content = `You do not have a PFP on your discord profile that matches the NFTs in your wallet.`;
+    else if (value === "revoke_opensea") {
+      content = `Opensea still has access to spend your NFTs. Revoke opensea access first and then redo this task.`;
+      row.addComponents(
+        new ButtonBuilder()
+          .setLabel("Revoke Opensea")
+          .setStyle(ButtonStyle.Link)
+          .setURL(`https://etherscan.io/tokenapprovalchecker`)
+      );
+    }
+
+    await interaction.reply({
+      content: content,
+      components: [row],
+      ephemeral: true,
+    });
+    return;
+  }
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId("loyalty")
+      .setLabel("View Loyalty Tasks")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId("quests")
+      .setLabel("View Quests")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  const action = value == "hold_nft" ? "held a NFT and" : "";
+
+  const content =
+    `<@${user.discordId}> has succesfully ${action} completed a loyalty task 🎉. Well done!\n\n` +
+    `You can continue to do more loyalty tasks or complete some quests to farm points.\n\n`;
+
+  await interaction.reply({
+    content,
+    components: [row],
+  });
 };

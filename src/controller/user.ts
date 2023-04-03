@@ -6,8 +6,8 @@ import NotFoundError from "../errors/NotFoundError";
 import { sendFeedDiscord } from "../utils/sendFeedDiscord";
 import { fetchDiscordAvatar } from "../utils/discord";
 import { extractServerProfile } from "../utils/jwt";
-import { ServerProfile } from "../database/models/serverProfile";
 import { Organization } from "../database/models/organization";
+import BadRequestError from "../errors/BadRequestError";
 
 export const fetchMe = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
@@ -20,24 +20,29 @@ export const walletVerify = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
   const user = await profile.getUser();
 
-  const message = `Login into Gifts of Eden: ${profile.userId}`;
+  const message = `Login into Gifts of Eden: ${profile.id}`;
   const result = ethers.utils.verifyMessage(message, req.body.hash);
+
+  if (req.body.address === user.walletAddress)
+    throw new BadRequestError("already verified");
 
   if (result === req.body.address) {
     user.walletAddress = req.body.address;
+    user.walletSignature = req.body.hash;
     await user.save();
-    const userProfile: any = await ServerProfile.findOne({ userId: user.id });
-    const org: any = await Organization.findOne({
-      _id: userProfile.organizationId,
-    });
-    sendFeedDiscord(
-      org.feedChannelId,
-      `${user.discordName} has verified their wallet address`
-    );
+
+    const org = await Organization.findById(profile.organizationId);
+    if (org && org.feedChannelId)
+      sendFeedDiscord(
+        org.feedChannelId,
+        `<@${user.discordId}> has just verified their wallet address. 💳`
+      );
+
     res.json({ success: true });
-  } else {
-    res.json({ success: false });
+    return;
   }
+
+  res.json({ success: false });
 };
 
 export const fetchTwitterProfile = async (user: IUserModel) => {
@@ -51,6 +56,7 @@ export const fetchTwitterProfile = async (user: IUserModel) => {
 
 export const fetchDiscordProfile = async (user: IUserModel) => {
   const avatar = await fetchDiscordAvatar(user);
+
   if (avatar) {
     user.discordAvatar = avatar;
     user.save();

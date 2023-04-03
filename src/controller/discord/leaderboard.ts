@@ -29,7 +29,7 @@ export const executeLeaderboardCommand = async (
     if (!guildId) return;
 
     const { profile } = await findOrCreateServerProfile(
-      interaction.user.id,
+      interaction.user,
       guildId
     );
 
@@ -42,7 +42,7 @@ export const executeLeaderboardCommand = async (
       .slice(0, 10)
       .map(
         (u, i) =>
-          `${total_icons[i]} **${u.userId.discordTag}** - **${u.totalPoints}** points!`
+          `${total_icons[i]} **<@${u.userId.discordId}>** - **${u.totalPoints}** points!`
       )
       .join("\n");
 
@@ -50,7 +50,6 @@ export const executeLeaderboardCommand = async (
 
     interaction.reply(text);
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-
 };

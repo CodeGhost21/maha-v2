@@ -1,117 +1,93 @@
 import {
   CacheType,
+  ButtonStyle,
+  ButtonBuilder,
   CommandInteraction,
-  MessageActionRow,
-  MessageSelectMenu,
-  SelectMenuInteraction,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
 } from "discord.js";
 
-import {
-  LoyaltyTask,
-  LoyaltyTaskType,
-} from "../../database/models/loyaltyTasks";
-import { Organization } from "../../database/models/organization";
+import { LoyaltyTask } from "../../database/models/loyaltyTasks";
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
-import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
-import { completeLoyaltyTask } from "../loyaltyTask";
+import { calculateBoost } from "../../utils/boost";
 
 export const executeProfileCommand = async (
-  interaction: CommandInteraction<CacheType> | SelectMenuInteraction<CacheType>
+  interaction: CommandInteraction<CacheType>
 ) => {
-  try {
-    const guildId = interaction.guildId;
-    if (!guildId) return;
+  const guildId = interaction.guildId;
+  if (!guildId) return;
 
-    const { profile, user } = await findOrCreateServerProfile(
-      interaction.user.id,
-      guildId
+  const { profile, user, organization } = await findOrCreateServerProfile(
+    interaction.user,
+    guildId
+  );
+  const allLoyalties = await LoyaltyTask.find({
+    organizationId: profile.organizationId,
+  });
+
+  const rowItem = allLoyalties.map((item) => ({
+    label: item.name,
+    description: item.instruction,
+    value: item.type,
+  }));
+
+  const row = new ActionRowBuilder<
+    ButtonBuilder | StringSelectMenuBuilder
+  >().addComponents(
+    new ButtonBuilder()
+      .setCustomId("loyalty")
+      .setLabel("View Loyalty Tasks")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId("quests")
+      .setLabel("View Quests")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  let welcome;
+  if (!user.twitterID && !user.walletAddress) {
+    welcome =
+      `You are not verified yet. Use the verify button below to complete your profile. 🔓\n\n` +
+      `Once you are verified, you can start boosting your loyalty score to earn more points.`;
+
+    row.addComponents(
+      new ButtonBuilder()
+        .setCustomId("verify")
+        .setLabel("Verify Profile")
+        .setStyle(ButtonStyle.Primary)
     );
-    const allLoyalties = await LoyaltyTask.find({
-      organizationId: profile.organizationId,
-    });
+  } else if (!user.twitterID || !user.walletAddress) {
+    welcome =
+      `Your account is only partially verified. Use the verify button below to complete your profile. 🔓\n\n` +
+      `Once you are fully verified, you can start boosting your points. 🌟`;
 
-    if (interaction.isCommand()) {
-      let content: string;
-
-      const rowItem = allLoyalties.map((item) => ({
-        label: item.name,
-        description: "description",
-        value: item.type,
-      }));
-
-      const row = new MessageActionRow().addComponents(
-        new MessageSelectMenu()
-          .setCustomId("profile-loyalty")
-          .setPlaceholder("Select a task")
-          .addOptions(rowItem)
-      );
-
-      if (!user.twitterID && !user.walletAddress) {
-        content =
-          `**Hey there, ${interaction.user}! 👋 **\n\n` +
-          `**We noticed that your account hadn't been verified yet. To get started with our awesome Gifts of Eden loyalty program, use the */verify* command to verify your account. 🔓**\n\n` +
-          `**Once you're verified, you can start boosting your loyalty score, which is currently at 0%. Use the */loyalty* command to boost your loyalty score.**\n\n` +
-          `**You've earned a total of 0 points so far, but by checking out all the tasks available to earn points, you'll be on your way to racking up that score in no time. Just use the */quests* command to discover more! 🚀**`;
-      } else if (!user.twitterID || !user.walletAddress) {
-        content =
-          `**Hey there, ${interaction.user}! 👋 **\n\n` +
-          `**We noticed that your account is just partially verified. To get started with our awesome Gifts of Eden loyalty program, use the */verify* command to verify your account. 🔓**\n\n` +
-          `**Once you're verified, you can start boosting your loyalty score, which is currently at 0%. Don't worry, there are plenty of tasks to help you increase it! 🌟**\n\n` +
-          `**You've earned a total of 0 points so far, but by checking out all the tasks available to earn points, you'll be on your way to racking up that score in no time. Just use the */quests* command to discover more! 🚀**\n\n` +
-          `**Don't forget to verify your account and dive into these tasks to start earning points and boosting your loyalty score! 💪**`;
-      } else {
-        content =
-          `**Hey there, ${interaction.user}! 👋 **\n\n` +
-          `**Congratulations your account is verified! 🎉 You're all set to enjoy the benefits of our Gifts of Eden.**\n\n` +
-          `**Your current loyalty score is ${
-            profile.loyaltyWeight * 100
-          }%. If you haven't completed all the loyalty tasks yet, be sure to finish them to boost your loyalty even more! 🚀**\n\n` +
-          `**You've earned a total of ${profile.totalPoints} points so far. Remember, you can always check all the tasks available to earn points using the */quests* command. Keep up the great work! 💪**\n\n` +
-          `**Continue exploring these tasks to earn more points and boost your loyalty score even further! 💖**`;
-      }
-
-      if (!user.twitterID || !user.walletAddress || rowItem.length < 1) {
-        await interaction.reply({
-          content,
-          ephemeral: true,
-        });
-      } else {
-        await interaction.reply({
-          content,
-          ephemeral: true,
-          components: [row],
-        });
-      }
-    } else if (interaction.isSelectMenu()) {
-      await interaction.reply({ content: "Checking..", ephemeral: true });
-      let msg, botMsg;
-      const value = interaction.values[0] as LoyaltyTaskType;
-      const taskResponse = await completeLoyaltyTask(profile, value);
-
-      if (taskResponse) {
-        botMsg = `Task completed successfully.`;
-        if (value === "twitter_profile")
-          msg = `Looking fresh with that NFT profile pic!`;
-        else if (value === "discord_profile")
-          msg = `Rocking with that NFT Profile pic!`;
-        // else if (value === "gm") msg = `Early Bird!!`;
-        else msg = `is a Keeper!!`;
-
-        const org: any = await Organization.findOne({
-          _id: profile.organizationId,
-        });
-
-        await sendFeedDiscord(
-          org.feedChannelId,
-          `${interaction?.user}, ${msg}`
-        );
-      } else botMsg = `Task failed! Please check and try again later.`;
-
-      await interaction?.editReply({
-        content: `${interaction?.user}, ${botMsg}`,
-      });
-    }
-  } catch (error) {
-    console.error(error);
+    row.addComponents(
+      new ButtonBuilder()
+        .setCustomId("verify")
+        .setLabel("Verify Profile")
+        .setStyle(ButtonStyle.Primary)
+    );
+  } else {
+    welcome = `Congratulations 🎉 ! Your account is fully verified. Keep up the great work! 💪`;
   }
+
+  const loyaltyScore = (profile.loyaltyWeight * 100).toFixed(0);
+  const boost = calculateBoost(profile.loyaltyWeight, organization.maxBoost);
+  const loyalty =
+    `Your current loyalty score is \`${loyaltyScore}%\` and you are earning a \`${boost}x\` boost on your points. Complete loyalty tasks` +
+    ` to earning more boost. 💖`;
+
+  const points = `You've earned a total of \`${profile.totalPoints} points\` so far.`;
+
+  const d =
+    `Hello ${interaction.user}! 👋\n\n` +
+    `${welcome}\n\n` +
+    `${loyalty}\n\n` +
+    `${points}\n`;
+
+  await interaction.reply({
+    content: d,
+    ephemeral: true,
+    components: rowItem.length < 1 ? [] : [row],
+  });
 };

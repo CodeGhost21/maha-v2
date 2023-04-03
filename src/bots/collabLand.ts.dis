@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
 // import * as ethers from 'ethers'
 import { client, sendMessage } from "../output/discord";
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { StringSelectMenuBuilder, ButtonBuilder, MessageEmbed } from "discord.js";
 import { User } from "../database/models/user";
 
 
@@ -44,8 +44,8 @@ client.on("guildMemberAdd", async (member) => {
     await newUser.save();
   }
 
-  const row = new MessageActionRow().addComponents(
-    new MessageButton()
+  const row = new StringSelectMenuBuilder().addComponents(
+    new ButtonBuilder()
       .setLabel("Connect Wallet")
       .setStyle("LINK")
       .setURL(`${nconf.get("FRONTEND_URL")}/${token}`)

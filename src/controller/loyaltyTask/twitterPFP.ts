@@ -11,7 +11,7 @@ export const twitterProfileLoyalty = async (
   const twitterProfile = await fetchTwitterProfile(user);
 
   const twitterCheck = await profileImageComparing(
-    task,
+    task.contractAddress,
     twitterProfile,
     48,
     user.walletAddress

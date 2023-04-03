@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IOrganizationModel } from "./organization";
 
-export type TaskTypes = "form" | "twitter_follow" | "gm" | "hold_nft";
+export type TaskTypes = "form" | "gm";
 
 export interface ITask {
   name: string;
@@ -11,19 +11,24 @@ export interface ITask {
   organizationId: IOrganizationModel;
   twitterScreenName: string;
   contractAddress: string;
+
+  isTwitterRequired: boolean;
+  isWalletRequired: boolean;
 }
 
 // task are things that you can do that gives you points
 const task = new Schema(
   {
-    name: String,
+    name: { type: String, required: true },
+    isTwitterRequired: { type: Boolean, default: false },
+    isWalletRequired: { type: Boolean, default: false },
     type: {
       type: String,
-      enum: ["form", "twitter_follow", "hold_nft", "gm"],
+      enum: ["form", "gm"],
       required: true,
     },
     instruction: String,
-    points: Number,
+    points: { type: Number, min: 0, default: 0 },
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
     twitterScreenName: String,
     contractAddress: String,

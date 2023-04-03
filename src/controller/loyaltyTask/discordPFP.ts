@@ -11,7 +11,7 @@ export const discordProfileLoyalty = async (
 
   const discordProfile: any = await fetchDiscordProfile(user);
   const discordCheck = await profileImageComparing(
-    task,
+    task.contractAddress,
     discordProfile,
     48,
     user.walletAddress

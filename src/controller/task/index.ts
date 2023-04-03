@@ -15,7 +15,6 @@ export const completeTask = async (
   });
 
   if (!profile) throw new NotFoundError("profile not found");
-
   if (!task) return false;
 
   const checkTaskSubmission = await TaskSubmission.findOne({
@@ -25,9 +24,6 @@ export const completeTask = async (
   });
 
   if (checkTaskSubmission) return true;
-
-  //   const verifyLoyalty = await checkLoyalty(profile, type);
-  //   if (!verifyLoyalty) return false;
 
   const organization = await Organization.findById(profile.organizationId);
   if (!organization) throw new NotFoundError("organization not found");
@@ -41,18 +37,19 @@ export const completeTask = async (
     loyalty: profile.loyaltyWeight,
   });
 
-  // recalculate profile total  points
-  const totalPoints =
+  // calculate points after boost
+  const points =
     task.points * (organization.maxBoost * profile.loyaltyWeight + 1);
-  profile.totalPoints += totalPoints;
+  profile.totalPoints += points;
   await profile.save();
 
+  // record in the DB
   await PointTransaction.create({
     userId: profile.id,
     taskId: task.id,
     type: task.type,
     totalPoints: profile.totalPoints,
-    addPoints: totalPoints,
+    addPoints: points,
     boost: organization.maxBoost * profile.loyaltyWeight,
     loyalty: profile.loyaltyWeight,
   });

@@ -4,7 +4,13 @@ import { LoyaltyTask } from "../../database/models/loyaltyTasks";
 import BadRequestError from "../../errors/BadRequestError";
 import { extractServerProfile } from "../../utils/jwt";
 
-const loyaltyTypes = ["twitter_profile", "discord_profile", "revoke_opensea"];
+const loyaltyTypes = [
+  "twitter_follow",
+  "twitter_pfp",
+  "hold_nft",
+  "discord_pfp",
+  "revoke_opensea",
+];
 
 export const allLoyaltyTask = async (req: Request, res: Response) => {
   // const organizationId = req.params.orgId;
@@ -31,8 +37,8 @@ export const addLoyaltyTask = async (req: Request, res: Response) => {
     weight: req.body.weight,
     organizationId: profile.organizationId,
     createdBy: profile.id,
-    contractAddress: req.body.contractAddress,
-    operatorAddress: req.body.operatorAddress,
+    twitterScreenName: req.body?.screenName,
+    contractAddress: req.body?.contractAddress,
   });
 
   res.json(newLoyaltyTask);
