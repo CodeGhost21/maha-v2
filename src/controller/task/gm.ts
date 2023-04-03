@@ -107,8 +107,8 @@ export const executeGMstatement = async (
   }
 
   // good morning?
-  // if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
-  if (true) {
+  if (gmKeywords.includes(content.replace(/[^a-z]/gi, ""))) {
+    // if (gmKeywords.includes(content)) {
     await Message.create({
       content: message.cleanContent,
       profileId: profile.id,
