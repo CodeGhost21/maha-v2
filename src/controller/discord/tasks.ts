@@ -7,6 +7,11 @@ import {
   ButtonInteraction,
   ButtonBuilder,
   ButtonStyle,
+  ModalBuilder,
+  ModalActionRowComponentBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ModalSubmitInteraction
 } from "discord.js";
 
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
@@ -120,13 +125,27 @@ export const executeTaskSelectInput = async (
     return;
   }
 
-  // send instructions for gm
+  // send instructions for form
   if (value === "form") {
     const content = quest.instruction;
-    await interaction?.reply({
-      content,
-      ephemeral: true,
-    });
+
+    const modal = new ModalBuilder()
+      .setCustomId('modal')
+      .setTitle('Modal')
+
+
+    const row = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+      new TextInputBuilder()
+        .setCustomId('favoriteColorInput')
+        .setLabel("What's your favorite color?")
+        .setPlaceholder('Enter Color')
+        .setStyle(TextInputStyle.Short)
+    )
+
+    modal.addComponents(row);
+
+    interaction.showModal(modal)
+
     return;
   }
 
@@ -152,3 +171,9 @@ export const executeTaskSelectInput = async (
   //   });
   // }
 };
+
+export const executeTaskModalSubmit = (
+  interaction: ModalSubmitInteraction<CacheType>
+) => {
+  console.log(interaction.fields)
+}
