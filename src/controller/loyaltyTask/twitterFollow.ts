@@ -37,12 +37,16 @@ export const checkTwitterFollowLoyaltyTask = async (
 ) => {
   // check for twitter follow
   if (!profile.userId.twitterScreenName) return false;
+  console.log(
+    `https://api.twitter.com/1.1/friendships/show.json?source_screen_name=${task.twitterScreenName}&target_screen_name=${profile.userId.twitterScreenName}`
+  );
 
   const response = await sendRequest<string>(
     "get",
     `https://api.twitter.com/1.1/friendships/show.json?source_screen_name=${task.twitterScreenName}&target_screen_name=${profile.userId.twitterScreenName}`
   );
   const parseResponse = JSON.parse(response);
+  console.log(parseResponse);
 
   if (parseResponse.relationship.source.followed_by)
     return completeLoyaltyTask(profile, "twitter_follow");
