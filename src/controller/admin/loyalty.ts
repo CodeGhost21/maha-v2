@@ -65,7 +65,8 @@ export const updateLoyalty = async (req: Request, res: Response) => {
     loyalty.type = req.body.type || loyalty.type;
     loyalty.weight = req.body.weight || loyalty.weight;
     loyalty.instruction = req.body.instruction || loyalty.instruction;
-
+    loyalty.twitterScreenName =
+      req.body.screenName || loyalty.twitterScreenName;
     await loyalty.save();
     res.json({ success: true });
   } else res.json({ success: false, message: "loyalty not found" });
