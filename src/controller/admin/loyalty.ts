@@ -37,7 +37,7 @@ export const addLoyaltyTask = async (req: Request, res: Response) => {
     weight: req.body.weight,
     organizationId: profile.organizationId,
     createdBy: profile.id,
-    twitterScreenName: req.body?.screenName,
+    twitterScreenName: req.body?.twitterScreenName,
     contractAddress: req.body?.contractAddress,
   });
 
@@ -66,7 +66,7 @@ export const updateLoyalty = async (req: Request, res: Response) => {
     loyalty.weight = req.body.weight || loyalty.weight;
     loyalty.instruction = req.body.instruction || loyalty.instruction;
     loyalty.twitterScreenName =
-      req.body.screenName || loyalty.twitterScreenName;
+      req.body.twitterScreenName || loyalty.twitterScreenName;
     await loyalty.save();
     res.json({ success: true });
   } else res.json({ success: false, message: "loyalty not found" });
