@@ -89,6 +89,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (customId === "verify") executeVerifyCommand(interaction);
     if (customId === "loyalty") executeLoyaltyCommand(interaction);
   }
+
+  if (interaction.isModalSubmit()) {
+    console.log(interaction)
+  }
 });
 
 client.on(Events.MessageCreate, async (message) => {
