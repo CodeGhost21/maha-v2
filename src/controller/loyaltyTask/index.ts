@@ -13,6 +13,7 @@ import { discordProfileLoyalty } from "./discordPFP";
 import { openseaLoyalty } from "./openseaRevoke";
 import { checkNftHoldTask } from "./nftHold";
 import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
+import { checkTwitterFollowLoyaltyTask } from "./twitterFollow";
 
 const checkLoyalty = async (
   task: ILoyaltyTaskModel,
@@ -28,6 +29,9 @@ const checkLoyalty = async (
   if (loyaltyType === "revoke_opensea") return openseaLoyalty(task, profile);
 
   if (loyaltyType === "hold_nft") return checkNftHoldTask(profile);
+
+  if (loyaltyType === "twitter_follow") return checkTwitterFollowLoyaltyTask(task, profile);
+
   return false;
 };
 

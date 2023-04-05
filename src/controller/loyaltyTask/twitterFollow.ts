@@ -32,8 +32,8 @@ export const checkTwitterFollowTaskForEveryone = async () => {
 };
 
 export const checkTwitterFollowLoyaltyTask = async (
-  profile: IServerProfileModel,
-  task: ILoyaltyTaskModel
+  task: ILoyaltyTaskModel,
+  profile: IServerProfileModel
 ) => {
   // check for twitter follow
   if (!profile.userId.twitterScreenName) return false;
