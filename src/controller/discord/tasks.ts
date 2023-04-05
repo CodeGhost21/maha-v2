@@ -17,6 +17,7 @@ import {
 import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { Task, TaskTypes } from "../../database/models/tasks";
 import { calculateBoost } from "../../utils/boost";
+import { executeFormTask } from "../task/tweetTask";
 
 export const executeTasksCommand = async (
   interaction: CommandInteraction<CacheType> | ButtonInteraction<CacheType>
@@ -193,8 +194,29 @@ export const executeTaskModalOpen = async (
   return;
 }
 
-export const executeTaskModalSubmit = (
+export const executeTaskModalSubmit = async (
   interaction: ModalSubmitInteraction<CacheType>
 ) => {
-  console.log(interaction.fields)
+  const guildId = interaction.guildId;
+  if (!guildId) return;
+
+  const { profile } = await findOrCreateServerProfile(
+    interaction.user,
+    guildId
+  );
+
+  const data = {
+    uri: interaction.fields.getTextInputValue('twit-link')
+  }
+
+  const success = await executeFormTask(profile, 'form', data)
+
+  if (success) {
+    await interaction.reply({ content: 'Your submission was received successfully!', ephemeral: true });
+  } else {
+    await interaction.reply({ content: 'You have already submitted this task!', ephemeral: true });
+  }
+
+
+  return;
 }

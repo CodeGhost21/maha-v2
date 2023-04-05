@@ -20,7 +20,7 @@ export const completeTask = async (
 
   const checkTaskSubmission = await TaskSubmission.findOne({
     type: type,
-    approvedBy: profile.id,
+    profileId: profile.id,
     organizationId: profile.organizationId,
   });
 

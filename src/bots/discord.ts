@@ -3,6 +3,7 @@ import { executeProfileCommand } from "../controller/discord/profile";
 import { executeVerifyCommand } from "../controller/discord/verify";
 import {
   executeTaskModalOpen,
+  executeTaskModalSubmit,
   executeTasksCommand,
   executeTaskSelectInput,
 } from "../controller/discord/tasks";
@@ -93,7 +94,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.isModalSubmit()) {
-    console.log(interaction)
+    const { customId } = interaction;
+    if (customId === "modal") executeTaskModalSubmit(interaction);
   }
 });
 
