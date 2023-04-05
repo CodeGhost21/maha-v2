@@ -95,7 +95,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.isModalSubmit()) {
     const { customId } = interaction;
-    if (customId === "modal") executeTaskModalSubmit(interaction);
+    if (customId === "twit-modal") executeTaskModalSubmit(interaction);
   }
 });
 

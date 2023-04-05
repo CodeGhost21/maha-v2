@@ -146,38 +146,14 @@ export const executeTaskSelectInput = async (
     return;
   }
 
-
-
-  // // send instructions for twitter follow
-  // if (value === "twitter_follow") {
-  //   msg = `Follow the MAHADAO twitter page and earn points daily.`;
-  //   const row = new ActionRowBuilder().addComponents(
-  //     new ButtonBuilder()
-  //       .setLabel("Follow @MAHADAO")
-  //       .setStyle("LINK")
-  //       .setURL("https://twitter.com/TheMahaDAO")
-  //   );
-  //   await interaction?.reply({
-  //     content: `Hey ${interaction?.user}, ${msg}`,
-  //     ephemeral: true,
-  //     components: [row],
-  //   });
-  // } else if (value === "hold_nft") {
-  //   msg = `You have to hold a citizenship and you would earn points daily.`;
-  //   await interaction?.reply({
-  //     content: `Hey ${interaction?.user}, ${msg}`,
-  //     ephemeral: true,
-  //   });
-  // }
 };
 
 export const executeTaskModalOpen = async (
   interaction: ButtonInteraction<CacheType>
 ) => {
   const modal = new ModalBuilder()
-    .setCustomId('modal')
-    .setTitle('Modal')
-
+    .setCustomId('twit-modal')
+    .setTitle('Submission Modal')
 
   const row = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
     new TextInputBuilder()
