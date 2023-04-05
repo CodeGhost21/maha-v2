@@ -2,6 +2,7 @@ import { client } from "../utils/discord";
 import { executeProfileCommand } from "../controller/discord/profile";
 import { executeVerifyCommand } from "../controller/discord/verify";
 import {
+  executeTaskModalOpen,
   executeTasksCommand,
   executeTaskSelectInput,
 } from "../controller/discord/tasks";
@@ -88,6 +89,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (customId === "quests") executeTasksCommand(interaction);
     if (customId === "verify") executeVerifyCommand(interaction);
     if (customId === "loyalty") executeLoyaltyCommand(interaction);
+    if (customId === "open-modal") executeTaskModalOpen(interaction)
   }
 
   if (interaction.isModalSubmit()) {

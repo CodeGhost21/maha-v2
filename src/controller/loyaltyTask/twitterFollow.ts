@@ -26,14 +26,14 @@ export const checkTwitterFollowTaskForEveryone = async () => {
     }).populate("userId.twitterScreenName");
 
     return Bluebird.mapSeries(profiles, (p) =>
-      checkTwitterFollowLoyaltyTask(p, task)
+      checkTwitterFollowLoyaltyTask(task, p)
     );
   });
 };
 
 export const checkTwitterFollowLoyaltyTask = async (
   task: ILoyaltyTaskModel,
-  profile: IServerProfileModel
+  profile: IServerProfileModel,
 ) => {
   // check for twitter follow
   if (!profile.userId.twitterScreenName) return false;

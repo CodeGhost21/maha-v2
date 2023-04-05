@@ -129,25 +129,23 @@ export const executeTaskSelectInput = async (
   if (value === "form") {
     const content = quest.instruction;
 
-    const modal = new ModalBuilder()
-      .setCustomId('modal')
-      .setTitle('Modal')
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId("open-modal")
+        .setLabel("Verify Task")
+        .setStyle(ButtonStyle.Primary)
+    );
 
-
-    const row = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId('favoriteColorInput')
-        .setLabel("What's your favorite color?")
-        .setPlaceholder('Enter Color')
-        .setStyle(TextInputStyle.Short)
-    )
-
-    modal.addComponents(row);
-
-    interaction.showModal(modal)
+    await interaction.reply({
+      content: content,
+      ephemeral: true,
+      components: [row],
+    });
 
     return;
   }
+
+
 
   // // send instructions for twitter follow
   // if (value === "twitter_follow") {
@@ -171,6 +169,29 @@ export const executeTaskSelectInput = async (
   //   });
   // }
 };
+
+export const executeTaskModalOpen = async (
+  interaction: ButtonInteraction<CacheType>
+) => {
+  const modal = new ModalBuilder()
+    .setCustomId('modal')
+    .setTitle('Modal')
+
+
+  const row = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+    new TextInputBuilder()
+      .setCustomId('twit-link')
+      .setLabel("Enter the Twitter Link")
+      .setPlaceholder('Enter Link')
+      .setStyle(TextInputStyle.Short)
+  )
+
+  modal.addComponents(row);
+
+  interaction.showModal(modal)
+
+  return;
+}
 
 export const executeTaskModalSubmit = (
   interaction: ModalSubmitInteraction<CacheType>
