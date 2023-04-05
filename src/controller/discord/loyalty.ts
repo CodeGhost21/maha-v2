@@ -175,7 +175,7 @@ export const executeLoyaltySelectInput = async (
           .setURL(`https://etherscan.io/tokenapprovalchecker`)
       );
     } else if (value === "twitter_follow")
-      content = `You haven't followed MahaDAO page yet. Go and follow us on twitter;.`;
+      content = `You haven't followed MahaDAO page yet. Go and follow us on twitter.`;
 
     await interaction.editReply({
       content: content,
