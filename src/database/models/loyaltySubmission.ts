@@ -3,7 +3,7 @@
 // user -> loyaltySubmissions = one-to-many
 
 import mongoose, { Document, Schema } from "mongoose";
-import { IUserModel } from "./user";
+import { IServerProfileModel } from "./serverProfile";
 import { IOrganizationModel } from "./organization";
 import { LoyaltyTaskType } from "./loyaltyTasks";
 
@@ -16,8 +16,8 @@ export interface ILoyaltySubmission {
   oldProfileLoyalty: number;
   newProfileLoyalty: number;
 
-  profileId: IUserModel;
-  approvedBy: IUserModel;
+  profileId: IServerProfileModel;
+  approvedBy: IServerProfileModel;
   organizationId: IOrganizationModel;
 }
 
