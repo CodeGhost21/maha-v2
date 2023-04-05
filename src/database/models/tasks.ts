@@ -14,8 +14,6 @@ export interface ITask {
 
   isTwitterRequired: boolean;
   isWalletRequired: boolean;
-  moderatedBy: boolean;
-  uri: string;
 }
 
 // task are things that you can do that gives you points
@@ -34,8 +32,6 @@ const task = new Schema(
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
     twitterScreenName: String,
     contractAddress: String,
-    moderatedBy: Boolean,
-    uri: String,
   },
   {
     timestamps: true,

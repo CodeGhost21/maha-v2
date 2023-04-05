@@ -9,7 +9,9 @@ export interface ITaskSubmission {
   type: TaskTypes;
   instructions: string;
   points: number;
-
+  uri: string;
+  isModeration: boolean;
+  isApproved: "approved" | "rejected" | "pending";
   profileId: IServerProfileModel;
   approvedBy: IServerProfileModel; // moderator
   organizationId: IOrganizationModel;
@@ -26,6 +28,8 @@ const taskSubmissionSchema = new mongoose.Schema(
     },
     instructions: String,
     points: Number,
+    uri: String,
+    isModeration: Boolean,
 
     profileId: {
       type: Schema.Types.ObjectId,
@@ -38,6 +42,7 @@ const taskSubmissionSchema = new mongoose.Schema(
       ref: "Organization",
       required: true,
     },
+    isApproved: { type: String, enum: ["approved", "rejected", "pending"] },
   },
   {
     timestamps: true,
