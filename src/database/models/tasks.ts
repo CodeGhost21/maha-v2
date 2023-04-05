@@ -11,7 +11,7 @@ export interface ITask {
   organizationId: IOrganizationModel;
   twitterScreenName: string;
   contractAddress: string;
-
+  isModeration: boolean;
   isTwitterRequired: boolean;
   isWalletRequired: boolean;
 }
@@ -32,6 +32,7 @@ const task = new Schema(
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
     twitterScreenName: String,
     contractAddress: String,
+    isModeration: Boolean,
   },
   {
     timestamps: true,

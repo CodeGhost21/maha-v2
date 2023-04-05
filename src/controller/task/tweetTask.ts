@@ -1,6 +1,6 @@
 // todo
 import { IServerProfileModel } from "../../database/models/serverProfile";
-import { ITaskModel, Task } from "../../database/models/tasks";
+import { Task } from "../../database/models/tasks";
 import { TaskSubmission } from "../../database/models/taskSubmission";
 
 export const executeFormTask = async (
@@ -8,16 +8,17 @@ export const executeFormTask = async (
   type: string,
   data: any
 ) => {
-  const taskSubmissionCheck = await TaskSubmission.findOne({ type: type, profileId: profile.id, organizationId: profile.organizationId })
-  if (taskSubmissionCheck) {
-    taskSubmissionCheck.uri = data.uri
-    taskSubmissionCheck.isApproved = "pending";
+  const taskSubmissionCheck = await TaskSubmission.findOne({
+    type: type,
+    profileId: profile.id,
+    organizationId: profile.organizationId,
+  });
+  if (taskSubmissionCheck) return false;
 
-    await taskSubmissionCheck.save();
-  }
-
-
-  const task: any = await Task.findOne({ organizationId: profile.organizationId, type: type })
+  const task: any = await Task.findOne({
+    organizationId: profile.organizationId,
+    type: type,
+  });
   if (!task) return false;
   //   const user = await profile.getUser();
   await TaskSubmission.create({
@@ -27,7 +28,7 @@ export const executeFormTask = async (
     points: task.points,
     organizationId: task.organizationId,
     profileId: profile.id,
-    isModeration: true,
+    isModeration: task.isModeration,
     uri: data.uri,
     isApproved: "pending",
   });

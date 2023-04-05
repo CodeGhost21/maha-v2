@@ -32,6 +32,7 @@ export const addTask = async (req: Request, res: Response) => {
     organizationId: user.organizationId,
     twitterScreenName: req.body?.screenName,
     contractAddress: req.body?.contractAddress,
+    isModeration: req.body?.isModeration,
   });
   await newTask.save();
   res.json(newTask);
