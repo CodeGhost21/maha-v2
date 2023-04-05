@@ -6,9 +6,11 @@ import { Task } from "../../database/models/tasks";
 import { TaskSubmission } from "../../database/models/taskSubmission";
 import { calculateBoost } from "../../utils/boost";
 import { extractServerProfile } from "../../utils/jwt";
+import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 
 export const approveTask = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
+  const user = await profile.getUser();
 
   const taskSubmission = await TaskSubmission.findOne({
     _id: req.params.id,
@@ -23,10 +25,10 @@ export const approveTask = async (req: Request, res: Response) => {
     taskSubmission.approvedBy = profile.id;
     await taskSubmission.save();
 
+    const organization: any = await Organization.findById(
+      taskUser.organizationId
+    );
     if (req.body.isApproved === "approved") {
-      const organization: any = await Organization.findById(
-        taskUser.organizationId
-      );
       const boost = calculateBoost(
         taskUser.loyaltyWeight,
         organization.maxBoost
@@ -50,8 +52,24 @@ export const approveTask = async (req: Request, res: Response) => {
         boost: organization.maxBoost * taskUser.loyaltyWeight,
         loyalty: taskUser.loyaltyWeight,
       });
+      console.log(user.discordId)
+
+      sendFeedDiscord(
+        organization.feedChannelId,
+        `<@${user.discordId}> has just completed their tweet task.`
+      );
+
+      res.json({ success: true })
     } else if (req.body.isApproved === "rejected") {
       TaskSubmission.deleteOne({ _id: taskSubmission.id });
+
+      sendFeedDiscord(
+        organization.feedChannelId,
+        `<@${user.discordId}> your task was rejected. Please try again!`
+      );
+
+      res.json({ success: true })
+
     }
   }
 };
