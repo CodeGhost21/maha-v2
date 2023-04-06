@@ -16,6 +16,7 @@ export const updateOrg = async (req: Request, res: Response) => {
   org.feedChannelId = req.body.feedChannelId || org.feedChannelId;
   org.msgChannelId = req.body.msgChannelId || org.msgChannelId;
   org.gmChannelId = req.body.gmChannelId || org.gmChannelId;
+  org.questChannelId = req.body.questChannelId || org.questChannelId;
 
   await org.save();
   res.json({ success: true });

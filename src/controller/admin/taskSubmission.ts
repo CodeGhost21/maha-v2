@@ -84,7 +84,7 @@ export const approveTask = async (req: Request, res: Response) => {
 export const fetchTaskSubmission = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
 
-  const fetchTask = await Task.findOne({ _id: req.params.id });
+  const fetchTask = await Task.findOne({ _id: req.body.taskId });
 
   if (fetchTask) {
     const allTaskSubmissions = await TaskSubmission.find({

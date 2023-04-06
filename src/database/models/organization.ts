@@ -7,6 +7,7 @@ export interface IOrganization {
   guildId: string;
   gmChannelId: string;
   maxBoost: number;
+  questChannelId: string;
 }
 
 const organization = new mongoose.Schema(
@@ -17,6 +18,7 @@ const organization = new mongoose.Schema(
     msgChannelId: String,
     gmChannelId: String,
     feedChannelId: String,
+    questChannelId: String,
   },
   {
     timestamps: true,

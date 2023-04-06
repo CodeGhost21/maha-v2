@@ -1,16 +1,18 @@
 import { Request, Response } from "express";
+import { Organization } from "../../database/models/organization";
 import { Task, TaskTypes } from "../../database/models/tasks";
 
 import BadRequestError from "../../errors/BadRequestError";
 import NotFoundError from "../../errors/NotFoundError";
 import { extractServerProfile } from "../../utils/jwt";
+import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 
 const taskTypes: TaskTypes[] = ["form", "gm"];
 
 export const allTasks = async (req: Request, res: Response) => {
-  const user = await extractServerProfile(req);
+  const profile = await extractServerProfile(req);
   const tasks = await Task.find({
-    organizationId: user.organizationId,
+    organizationId: profile.organizationId,
   });
   res.json(tasks);
 };
@@ -18,10 +20,12 @@ export const allTasks = async (req: Request, res: Response) => {
 export const addTask = async (req: Request, res: Response) => {
   const user = await extractServerProfile(req);
 
+  const organization = await Organization.findById(user.organizationId);
+  if (!organization) throw new NotFoundError("org not found");
+
   const checkTask = await Task.findOne({
     $and: [{ organizationId: user.organizationId }, { type: req.body.type }],
   });
-
   if (checkTask) throw new BadRequestError("task exists");
 
   const newTask = new Task({
@@ -35,6 +39,11 @@ export const addTask = async (req: Request, res: Response) => {
     isModeration: req.body?.isModeration,
   });
   await newTask.save();
+  if (req.body.isBroadcast)
+    sendFeedDiscord(
+      organization.questChannelId,
+      `A new quest has been added, please check using /quest`
+    );
   res.json(newTask);
 };
 
