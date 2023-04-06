@@ -26,7 +26,13 @@ const loyaltySubmission = new Schema(
     name: String,
     type: {
       type: String,
-      enum: ["twitter_pfp", "hold_nft", "discord_pfp", "revoke_opensea", "gm"],
+      enum: [
+        "twitter_pfp",
+        "hold_nft",
+        "discord_pfp",
+        "revoke_opensea",
+        "twitter_follow",
+      ],
       required: true,
     },
 
