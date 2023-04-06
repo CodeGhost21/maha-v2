@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import BadRequestError from "../../errors/BadRequestError";
+import NotFoundError from "../../errors/NotFoundError";
 import { Organization } from "../../database/models/organization";
 import { PointTransaction } from "../../database/models/pointTransaction";
 import { ServerProfile } from "../../database/models/serverProfile";
@@ -18,26 +20,32 @@ export const approveTask = async (req: Request, res: Response) => {
   });
 
   if (taskSubmission) {
-    const taskUser: any = await ServerProfile.findOne({
+    const taskUser = await ServerProfile.findOne({
       _id: taskSubmission.profileId,
     });
+
+    if (!taskUser) throw new BadRequestError("user not found");
+
     taskSubmission.isApproved = req.body.isApproved;
     taskSubmission.approvedBy = profile.id;
     await taskSubmission.save();
 
-    const organization: any = await Organization.findById(
-      taskUser.organizationId
-    );
+    const organization = await Organization.findById(taskUser.organizationId);
+
+    if (!organization) throw new NotFoundError("org not found");
+
     if (req.body.isApproved === "approved") {
       const boost = calculateBoost(
         taskUser.loyaltyWeight,
         organization.maxBoost
       );
 
-      const task: any = await Task.findOne({
+      const task = await Task.findOne({
         organizationId: taskUser.organizationId,
         type: taskSubmission.type,
       });
+
+      if (!task) throw new BadRequestError("task not found");
 
       const points = task.points * boost;
       taskUser.totalPoints += points;
@@ -52,24 +60,23 @@ export const approveTask = async (req: Request, res: Response) => {
         boost: organization.maxBoost * taskUser.loyaltyWeight,
         loyalty: taskUser.loyaltyWeight,
       });
-      console.log(user.discordId)
 
       sendFeedDiscord(
         organization.feedChannelId,
         `<@${user.discordId}> has just completed their tweet task.`
       );
 
-      res.json({ success: true })
+      res.json({ success: true });
     } else if (req.body.isApproved === "rejected") {
-      TaskSubmission.deleteOne({ _id: taskSubmission.id });
+      taskSubmission.isApproved = req.body.isApproved;
+      await taskSubmission.save();
 
       sendFeedDiscord(
         organization.feedChannelId,
         `<@${user.discordId}> your task was rejected. Please try again!`
       );
 
-      res.json({ success: true })
-
+      res.json({ success: true });
     }
   }
 };

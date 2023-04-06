@@ -12,10 +12,11 @@ export const executeFormTask = async (
     type: type,
     profileId: profile.id,
     organizationId: profile.organizationId,
+    $or: [{ isApproved: "pending" }, { isApproved: "approved" }],
   });
   if (taskSubmissionCheck) return false;
 
-  const task: any = await Task.findOne({
+  const task = await Task.findOne({
     organizationId: profile.organizationId,
     type: type,
   });
