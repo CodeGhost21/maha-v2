@@ -74,7 +74,9 @@ export const executeProfileCommand = async (
   const loyaltyScore = (profile.loyaltyWeight * 100).toFixed(0);
   const boost = calculateBoost(profile.loyaltyWeight, organization.maxBoost);
   const loyalty =
-    `Your current loyalty score is \`${loyaltyScore}%\` and you are earning a \`${boost}x\` boost on your points. Complete loyalty tasks` +
+    `Your current loyalty score is \`${loyaltyScore}%\` and you are earning a \`${boost.toFixed(
+      0
+    )}x\` boost on your points. Complete loyalty tasks` +
     ` to earning more boost. 💖`;
 
   const points = `You've earned a total of \`${profile.totalPoints} points\` so far.`;
