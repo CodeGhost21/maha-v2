@@ -84,13 +84,20 @@ export const approveTask = async (req: Request, res: Response) => {
 export const fetchTaskSubmission = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
 
-  const allTaskSubmissions = await TaskSubmission.find({
-    organizationId: profile.organizationId,
-    isModeration: true,
-  }).populate({
-    path: "profileId",
-    select: "userId",
-    populate: { path: "userId", select: "discordName " },
-  });
-  res.json(allTaskSubmissions);
+  const fetchTask = await Task.findOne({ _id: req.params.id });
+
+  if (fetchTask) {
+    const allTaskSubmissions = await TaskSubmission.find({
+      type: fetchTask.type,
+      organizationId: profile.organizationId,
+      isModeration: true,
+    }).populate({
+      path: "profileId",
+      select: "userId",
+      populate: { path: "userId", select: "discordName " },
+    });
+    res.json(allTaskSubmissions);
+  } else {
+    res.json("Invalid task");
+  }
 };
