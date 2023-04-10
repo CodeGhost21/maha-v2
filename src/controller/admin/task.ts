@@ -24,7 +24,11 @@ export const addTask = async (req: Request, res: Response) => {
   if (!organization) throw new NotFoundError("org not found");
 
   const checkTask = await Task.findOne({
-    $and: [{ organizationId: user.organizationId }, { type: req.body.type }],
+    $and: [
+      { organizationId: user.organizationId },
+      { name: req.body.name },
+      { type: req.body.type },
+    ],
   });
   if (checkTask) throw new BadRequestError("task exists");
 
