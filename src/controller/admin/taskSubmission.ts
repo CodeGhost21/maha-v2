@@ -63,7 +63,7 @@ export const approveTask = async (req: Request, res: Response) => {
 
       sendFeedDiscord(
         organization.feedChannelId,
-        `<@${user.discordId}> has just completed their tweet task.`
+        `<@${user.discordId}> has just completed their tweet task and have earned ${task.points} points.`
       );
 
       res.json({ success: true });
