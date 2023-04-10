@@ -6,5 +6,8 @@ jobs:
   my-job:
     runs-on: ubuntu-latest
     steps:
-      - name: my-step
-        run: echo "Hello World!"
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Code Linting
+        run: yarn lint
