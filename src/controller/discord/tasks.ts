@@ -18,6 +18,7 @@ import { findOrCreateServerProfile } from "../../database/models/serverProfile";
 import { Task, TaskTypes } from "../../database/models/tasks";
 import { calculateBoost } from "../../utils/boost";
 import { executeFormTask } from "../task/tweetTask";
+import { isUrlValid } from "../../utils/isUrlValid";
 
 export const executeTasksCommand = async (
   interaction: CommandInteraction<CacheType> | ButtonInteraction<CacheType>
@@ -158,7 +159,7 @@ export const executeTaskModalOpen = async (
   const row = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
     new TextInputBuilder()
       .setCustomId('twit-link')
-      .setLabel("Enter the Twitter Link")
+      .setLabel("Enter the Submission Link")
       .setPlaceholder('Enter Link')
       .setStyle(TextInputStyle.Short)
   )
@@ -183,6 +184,13 @@ export const executeTaskModalSubmit = async (
 
   const data = {
     uri: interaction.fields.getTextInputValue('twit-link')
+  }
+
+  const checkUrl = isUrlValid(data.uri);
+
+  if (!checkUrl) {
+    await interaction.reply({ content: 'Your submission was invalid. Please try again!', ephemeral: true });
+    return;
   }
 
   const success = await executeFormTask(profile, 'form', data)
