@@ -1,8 +1,7 @@
 name: Sample Workflow
 on:
   push: # enabling push event on master branch to fire the workflow
-    branches:
-      - ani-dev
+    branches: ["ani-dev", "github-actions"]
 jobs:
   my-job:
     runs-on: ubuntu-latest
