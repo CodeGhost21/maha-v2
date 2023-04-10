@@ -43,4 +43,5 @@ app.use(
 
 const port = nconf.get("PORT") || 5000;
 app.set("port", port);
-server.listen(port, () => console.log(`Server started on port ${port}`));
+
+server.listen(port, () => console.log(`Server started on port : ${port}`));
