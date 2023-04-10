@@ -42,7 +42,8 @@ export const addTask = async (req: Request, res: Response) => {
   if (req.body.isBroadcast)
     sendFeedDiscord(
       organization.questChannelId,
-      `A new quest has been added, please check using /quest`
+      `A new quest has been added, please check using the button below`,
+      true
     );
   res.json(newTask);
 };
