@@ -9,7 +9,7 @@ export interface ITask {
   instruction: string;
   points: number;
   organizationId: IOrganizationModel;
-  link: string;
+  tweetLink: string;
   twitterScreenName: string;
   contractAddress: string;
   isModeration: boolean;
@@ -25,11 +25,11 @@ const task = new Schema(
     isWalletRequired: { type: Boolean, default: false },
     type: {
       type: String,
-      enum: ["form", "gm"],
+      enum: ["form", "gm", "retweet"],
       required: true,
     },
     instruction: String,
-    link: String,
+    tweetLink: String,
     points: { type: Number, min: 0, default: 0 },
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
     twitterScreenName: String,

@@ -13,7 +13,7 @@ export const dailyLoyaltyChecks = async () => {
 };
 
 export const everyFifthDayTaskCheck = async () => {
-  cron.schedule("* * */5 * *", () => {
+  cron.schedule("* * * * *", () => {
     console.log("every 5th day-of-month.");
     executeRetweetTask();
   });

@@ -17,12 +17,11 @@ export const executeRetweetTask = async () => {
   const retweetTasks = await Task.find({
     type: "retweet",
     createdAt: { $gt: new Date(Date.now() - 86400000 * 5) },
-  }).populate("organizationId._id");
-
-  console.log(retweetTasks);
+  }).populate({ path: "organizationId", select: "_id" });
 
   await Bluebird.mapSeries(retweetTasks, async (task: ITaskModel) => {
-    const tweetId: string | undefined = fetchTweetId(task.link);
+    const tweetId: string | undefined = fetchTweetId(task.tweetLink);
+
     if (tweetId !== undefined) {
       const profiles = await fetchProfilesThatRetweeted(
         tweetId,
@@ -60,10 +59,7 @@ export const fetchProfilesThatRetweeted = async (
     organizationId: orgId,
     userId: { $in: userIds },
   });
-  console.log(profiles);
-
   return profiles;
-
   // for these users mark the task as done
 };
 

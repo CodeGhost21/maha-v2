@@ -23,7 +23,7 @@ const taskSubmissionSchema = new mongoose.Schema(
     name: String,
     type: {
       type: String,
-      enum: ["form", "twitter_follow", "hold_nft", "revoke_opensea", "gm"],
+      enum: ["form", "retweet", "gm"],
       required: true,
     },
     instructions: String,

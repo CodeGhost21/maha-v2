@@ -24,21 +24,15 @@ export const addTask = async (req: Request, res: Response) => {
   const organization = await Organization.findById(user.organizationId);
   if (!organization) throw new NotFoundError("org not found");
 
-  let checkTask;
-  if (req.body.type === "form") {
-    checkTask = await Task.findOne({
-      $and: [
-        { organizationId: user.organizationId },
-        { name: req.body.name },
-        { type: req.body.type },
-      ],
-    });
-  } else {
-    checkTask = await Task.findOne({
+  if (req.body.type === "gm") {
+    const checkTask = await Task.findOne({
       $and: [{ organizationId: user.organizationId }, { type: req.body.type }],
     });
+    if (checkTask) throw new BadRequestError("task exists");
   }
-  if (checkTask) throw new BadRequestError("task exists");
+  // else {
+  //   checkTask = await Task.findOne({ organizationId: user.organizationId });
+  // }
 
   const newTask = new Task({
     name: req.body.name,
@@ -49,6 +43,7 @@ export const addTask = async (req: Request, res: Response) => {
     twitterScreenName: req.body?.screenName,
     contractAddress: req.body?.contractAddress,
     isModeration: req.body?.isModeration,
+    tweetLink: req.body?.tweetLink,
   });
   await newTask.save();
   if (req.body.isBroadcast)
