@@ -3,7 +3,6 @@ import {
   Client,
   IntentsBitField,
   TextChannel,
-  MessageReplyOptions,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,

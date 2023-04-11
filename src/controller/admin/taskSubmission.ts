@@ -12,7 +12,6 @@ import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 
 export const approveTask = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);
-  const user = await profile.getUser();
 
   const taskSubmission = await TaskSubmission.findOne({
     _id: req.params.id,
@@ -22,7 +21,7 @@ export const approveTask = async (req: Request, res: Response) => {
   if (taskSubmission) {
     const taskUser = await ServerProfile.findOne({
       _id: taskSubmission.profileId,
-    });
+    }).populate('userId');
 
     if (!taskUser) throw new BadRequestError("user not found");
 
@@ -63,7 +62,7 @@ export const approveTask = async (req: Request, res: Response) => {
 
       sendFeedDiscord(
         organization.feedChannelId,
-        `<@${user.discordId}> has just completed their tweet task and have earned ${task.points} points.`
+        `<@${taskUser.userId.discordId}> has just completed their tweet task and have earned ${task.points} points.`
       );
 
       res.json({ success: true });
@@ -73,7 +72,7 @@ export const approveTask = async (req: Request, res: Response) => {
 
       sendFeedDiscord(
         organization.feedChannelId,
-        `<@${user.discordId}> your task was rejected. Please try again!`
+        `<@${taskUser.userId.discordId}> your task was rejected. Please try again!`
       );
 
       res.json({ success: true });
