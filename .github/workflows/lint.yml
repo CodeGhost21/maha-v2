@@ -1,4 +1,4 @@
-name: Sample Workflow
+name: Lint
 on:
   push: # enabling push event on master branch to fire the workflow
     branches: ["ani-dev", "github-actions"]
