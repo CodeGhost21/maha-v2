@@ -8,7 +8,7 @@ import NotFoundError from "../../errors/NotFoundError";
 import { extractServerProfile } from "../../utils/jwt";
 import { sendFeedDiscord } from "../../utils/sendFeedDiscord";
 
-const taskTypes: TaskTypes[] = ["form", "gm"];
+const taskTypes: TaskTypes[] = ["form", "gm", "retweet"];
 
 export const allTasks = async (req: Request, res: Response) => {
   const profile = await extractServerProfile(req);

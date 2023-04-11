@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IOrganizationModel } from "./organization";
 
-export type TaskTypes = "form" | "gm";
+export type TaskTypes = "form" | "gm" | "retweet";
 
 export interface ITask {
   name: string;
@@ -9,6 +9,7 @@ export interface ITask {
   instruction: string;
   points: number;
   organizationId: IOrganizationModel;
+  link: string;
   twitterScreenName: string;
   contractAddress: string;
   isModeration: boolean;
@@ -28,6 +29,7 @@ const task = new Schema(
       required: true,
     },
     instruction: String,
+    link: String,
     points: { type: Number, min: 0, default: 0 },
     organizationId: { type: Schema.Types.ObjectId, ref: "Organization" },
     twitterScreenName: String,
