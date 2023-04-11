@@ -3,7 +3,7 @@ on:
   push: # enabling push event on master branch to fire the workflow
     branches: ["ani-dev", "github-actions"]
 jobs:
-  my-job:
+  eslint-check: #job name
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,6 +17,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install Dependencies
         run: yarn
-
       - name: Code Linting
         run: yarn lint

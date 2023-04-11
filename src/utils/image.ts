@@ -15,7 +15,7 @@ export const profileImageComparing = async (
   if (noOfNFTs == 0) return false;
 
   const allTokenURI = await web3.tokenURI(addr, walletAddress);
-  const imageCompareResponse: any = [];
+  const imageCompareResponse: boolean[] = [];
   await Bluebird.mapSeries(allTokenURI, async (imgURI: string) => {
     const data = await sendRequest<string>("get", imgURI);
     const nftMetadata = JSON.parse(data);
