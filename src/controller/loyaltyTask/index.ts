@@ -84,14 +84,14 @@ export const completeLoyaltyTask = async (
   if (type === "twitter_pfp") msg = `updated their Twitter PFP 🐤`;
   else if (type === "hold_nft") msg = `is holding a NFT 💪`;
   else if (type === "discord_pfp") msg = `updated their Discord PFP 🤖`;
-  else if (type === "revoke_opensea")
-    msg = `delisted their NFTs from Opensea ⛴`;
+  else if (type === "revoke_opensea") msg = `delisted their NFTs from Opensea ⛴`;
+  else if (type === "twitter_follow") msg = `followed our Twitter page`
 
   if (msg) {
     const user = await profile.getUser();
     await sendFeedDiscord(
       organization.feedChannelId,
-      `<@${user.discordId}> ${msg} and completed a loyalty task! `
+      `<@${user.discordId}> ${msg} and completed a loyalty task and have earned ${loyaltyTask.weight * 100}% loyalty points! `
     );
   }
 

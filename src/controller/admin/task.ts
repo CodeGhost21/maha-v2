@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { isGeneratorFunction } from "util/types";
 import { Organization } from "../../database/models/organization";
 import { Task, TaskTypes } from "../../database/models/tasks";
 
@@ -23,13 +24,20 @@ export const addTask = async (req: Request, res: Response) => {
   const organization = await Organization.findById(user.organizationId);
   if (!organization) throw new NotFoundError("org not found");
 
-  const checkTask = await Task.findOne({
-    $and: [
-      { organizationId: user.organizationId },
-      { name: req.body.name },
-      { type: req.body.type },
-    ],
-  });
+  let checkTask;
+  if (req.body.type === "form") {
+    checkTask = await Task.findOne({
+      $and: [
+        { organizationId: user.organizationId },
+        { name: req.body.name },
+        { type: req.body.type },
+      ],
+    });
+  } else {
+    checkTask = await Task.findOne({
+      $and: [{ organizationId: user.organizationId }, { type: req.body.type }],
+    });
+  }
   if (checkTask) throw new BadRequestError("task exists");
 
   const newTask = new Task({
@@ -46,7 +54,8 @@ export const addTask = async (req: Request, res: Response) => {
   if (req.body.isBroadcast)
     sendFeedDiscord(
       organization.questChannelId,
-      `A new quest has been added, please check using /quest`
+      `A new quest has been added, please check using the button below`,
+      true
     );
   res.json(newTask);
 };
