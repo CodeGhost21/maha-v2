@@ -1,7 +1,7 @@
 name: Lint
 on:
   push: # enabling push event on master branch to fire the workflow
-    branches: ["ani-dev", "el-dev"]
+    branches: ["develop", "ani-dev", "el-dev"]
 jobs:
   eslint-check: #job name
     runs-on: ubuntu-latest
