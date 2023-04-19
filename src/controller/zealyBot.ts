@@ -44,13 +44,12 @@ export const submissions = async () => {
         if (tweetId !== undefined) {
           await checkTweetMAHA(tweetId, quest.id, quest.user.twitterUsername);
         }
+      } else if (quest.name === "Shill $MAHA to an Influencer") {
+        const tweetId: any = fetchTweetId(quest.submission.value);
+        if (tweetId !== undefined) {
+          await checkShillMaha(tweetId, quest.id, quest.user.twitterUsername);
+        }
       }
-      // else if (quest.name === "Shill $MAHA to an Influencer") {
-      //   const tweetId: any = fetchTweetId(quest.submission.value);
-      //   if (tweetId !== undefined) {
-      //     await checkShillMaha(tweetId, quest.id, quest.user.twitterUsername);
-      //   }
-      // }
     }
   });
 };
