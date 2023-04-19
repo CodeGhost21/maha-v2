@@ -49,6 +49,7 @@
     "http": "^0.0.1-security",
     "nconf": "^0.12.0",
     "node-cron": "^3.0.2",
+    "request-promise": "^4.2.6",
     "web3": "^1.7.3"
   }
 }
