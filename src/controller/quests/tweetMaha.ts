@@ -29,6 +29,5 @@ export const checkTweetMAHA = async (
   } else {
     comment = tweetData.comment;
   }
-  const response = await approveQuest([questId], questStatus, comment);
-  console.log(response);
+  await approveQuest([questId], questStatus, comment);
 };
