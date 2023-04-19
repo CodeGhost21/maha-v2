@@ -8,9 +8,9 @@ nconf
   .env()
   .file({ file: path.resolve(__dirname, "./config.json") });
 
-if (
+  if (
   nconf.get("NODE_ENV") === "production" ||
   process.env.NODE_ENV === "production"
 )
-  require("./dist/index");
-else require("./src/index");
+  require("./dist/index.js");
+else require("./src/index.ts");
