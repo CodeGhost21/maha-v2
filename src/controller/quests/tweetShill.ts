@@ -9,18 +9,22 @@ export const checkShillMaha = async (
   questId: string,
   questUserName: string
 ) => {
-  const tweetData: any = await fetchTweetData(tweetId, questUserName);
-
   let questStatus = "fail";
   let comment = "";
 
+  const tweetData: any = await fetchTweetData(tweetId, questUserName);
+
   if (tweetData.success) {
-    const response = await checkTwitterUserFollowers(
-      tweetData.tweet.in_reply_to_screen_name
-    );
-    questStatus = response ? "success" : "fail";
+    if (tweetData.tweet.in_reply_to_screen_name === null) {
+      questStatus = "fail";
+      comment = "not a valid Influencer";
+    } else {
+      const response = await checkTwitterUserFollowers(
+        tweetData.tweet.in_reply_to_screen_name
+      );
+      questStatus = response ? "success" : "fail";
+    }
   } else {
-    console.log("else", tweetData);
     comment = tweetData.comment;
   }
   await approveQuest([questId], questStatus, comment);
@@ -33,7 +37,6 @@ const checkTwitterUserFollowers = async (screenName: string) => {
   };
   const userResponse: any = await sendRequest("get", url, header);
   const parseUserResponse = JSON.parse(userResponse);
-
   if (parseUserResponse.data.public_metrics.followers_count >= 5000)
     return true;
   else return false;
