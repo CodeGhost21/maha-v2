@@ -16,6 +16,7 @@ export const checkTweetMAHA = async (
     for (let i = 0; i < mahaTypes.length; i++) {
       const words: string[] = tweetData.tweet.full_text
         .toLowerCase()
+        .replace(/\./g, "")
         .split(" ");
 
       const isValid = words.findIndex((word) => mahaTypes.includes(word)) >= 0;
