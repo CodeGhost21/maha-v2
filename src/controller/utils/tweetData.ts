@@ -19,7 +19,11 @@ export const fetchTweetData = async (
         new Date(parseTweetData.created_at).getTime() >
         new Date().getTime() - 86400000
       ) {
-        return { success: true, tweet: parseTweetData };
+        return {
+          success: true,
+          tweet: parseTweetData,
+          tweetDate: parseTweetData.created_at,
+        };
       }
       return { success: false, comment: "this tweet is too old" };
     }

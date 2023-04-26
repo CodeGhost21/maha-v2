@@ -22,7 +22,7 @@
     "test": "mocha",
     "upgrade": "npx npm-check -u",
     "version": "npm run build && npm run changelog:update",
-    "start": "node index.js"
+    "start": "ts-node index.js"
   },
   "devDependencies": {
     "@types/async": "^3.2.16",
@@ -47,6 +47,7 @@
     "dotenv": "^16.0.1",
     "ethers": "^6.3.0",
     "http": "^0.0.1-security",
+    "mongoose": "^7.0.5",
     "nconf": "^0.12.0",
     "node-cron": "^3.0.2",
     "request-promise": "^4.2.6",

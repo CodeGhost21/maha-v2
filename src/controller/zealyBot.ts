@@ -47,9 +47,34 @@ export const submissions = async () => {
       } else if (quest.name === "Shill $MAHA to an Influencer") {
         const tweetId: any = fetchTweetId(quest.submission.value);
         if (tweetId !== undefined) {
-          await checkShillMaha(tweetId, quest.id, quest.user.twitterUsername);
+          await checkShillMaha(
+            tweetId,
+            quest.id,
+            quest.user.twitterUsername,
+            quest.user.id
+          );
         }
       }
     }
   });
+};
+
+export const userBonus = async (
+  userId: string,
+  points: number,
+  label: string
+) => {
+  const url = `https://api.zealy.io/communities/themahadao/users/${userId}/xp`;
+  const header = {
+    "x-api-key": `${nconf.get("ZEALY_API_KEY")}`,
+  };
+
+  const body = {
+    label: label,
+    xp: points,
+    description: "",
+  };
+
+  const submissions: any = await sendRequest("post", url, header, body);
+  return submissions;
 };
