@@ -29,7 +29,6 @@ export const fetchTweetData = async (
     }
     return { success: false, comment: "not a valid tweet" };
   } catch (e) {
-    console.log(e);
     return { success: false, comment: "no tweet" };
   }
 };
@@ -38,6 +37,7 @@ export const verifyTweet = async (
   questUserName: string,
   twitterScreenName: string
 ) => {
-  if (questUserName === twitterScreenName) return true;
+  if (questUserName.toLowerCase() === twitterScreenName.toLowerCase())
+    return true;
   else return false;
 };

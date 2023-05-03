@@ -46,6 +46,7 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.1",
     "ethers": "^6.3.0",
+    "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
     "mongoose": "^7.0.5",
     "nconf": "^0.12.0",

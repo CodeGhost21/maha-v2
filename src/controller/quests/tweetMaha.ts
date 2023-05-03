@@ -1,14 +1,25 @@
 import { fetchTweetData } from "../utils/tweetData";
 import { approveQuest } from "../reviewQuest";
+// import { userBonus } from "../zealyBot";
 
 export const checkTweetMAHA = async (
   tweetId: string,
   questId: string,
   questUserName: string
 ) => {
-  const mahaTypes = ["MAHA", "MahaDAO", "$MAHA", "$ARTH", "ARTH"].map((t) =>
-    t.toLowerCase()
-  );
+  const mahaTypes = [
+    "MAHA",
+    "MahaDAO",
+    "$MAHA",
+    "$ARTH",
+    "ARTH",
+    "#MAHA",
+    "#ARTH",
+    "@MahaDAO",
+    "#MahaDAO",
+    "@TheMahaDAO",
+    "@mahalend",
+  ].map((t) => t.toLowerCase());
   const tweetData: any = await fetchTweetData(tweetId, questUserName);
   let questStatus = "fail";
   let comment = "";
@@ -16,7 +27,7 @@ export const checkTweetMAHA = async (
     for (let i = 0; i < mahaTypes.length; i++) {
       const words: string[] = tweetData.tweet.full_text
         .toLowerCase()
-        .replace(/\./g, "")
+        .replace(/[.,\n?]/g, " ")
         .split(" ");
 
       const isValid = words.findIndex((word) => mahaTypes.includes(word)) >= 0;
@@ -30,5 +41,7 @@ export const checkTweetMAHA = async (
   } else {
     comment = tweetData.comment;
   }
-  await approveQuest([questId], questStatus, comment);
+  if (questStatus === "success") {
+    await approveQuest([questId], questStatus, comment);
+  }
 };

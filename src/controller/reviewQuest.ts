@@ -19,5 +19,7 @@ export const approveQuest = async (
   };
 
   const submissions: any = await sendRequest("post", url, header, body);
+  console.log(submissions);
+
   return submissions;
 };

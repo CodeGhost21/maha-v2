@@ -7,9 +7,16 @@ import { checkTwitterMeme } from "./quests/tweetMeme";
 import { checkTweetMAHA } from "./quests/tweetMaha";
 import { checkShillMaha } from "./quests/tweetShill";
 
-const fetchTweetId = (uri: string) => {
-  const match = uri.match("status\\/(\\d+)/?");
-  return match && match.length > 0 ? match[1] : undefined;
+export const fetchTweetId = (uri: string) => {
+  const tweetId = uri.match("status\\/(\\d+)/?");
+  return tweetId && tweetId.length > 0 ? tweetId[1] : undefined;
+};
+
+export const fetchTwitterUserName = async (uri: string) => {
+  const twitterUserName = uri.match(/https:\/\/twitter\.com\/(\w+)\//);
+  return twitterUserName && twitterUserName.length > 0
+    ? twitterUserName[1]
+    : undefined;
 };
 
 export const submissions = async () => {
@@ -37,20 +44,25 @@ export const submissions = async () => {
       //     await checkTwitterMeme(tweetId, quest.id, quest.user.twitterUsername);
       //   }
       // }
-      else if (quest.name === "Tweet about MahaDAO 🐦") {
-        console.log(quest.submission.value);
-
+      // else if (quest.name === "Tweet about MahaDAO 🐦") {
+      //   const tweetId: any = fetchTweetId(quest.submission.value);
+      //   if (tweetId !== undefined) {
+      //     const twitterUserName: any = await fetchTwitterUserName(
+      //       quest.submission.value
+      //     );
+      //     await checkTweetMAHA(tweetId, quest.id, twitterUserName);
+      //   }
+      // }
+      else if (quest.name === "Shill $MAHA to an Influencer") {
         const tweetId: any = fetchTweetId(quest.submission.value);
         if (tweetId !== undefined) {
-          await checkTweetMAHA(tweetId, quest.id, quest.user.twitterUsername);
-        }
-      } else if (quest.name === "Shill $MAHA to an Influencer") {
-        const tweetId: any = fetchTweetId(quest.submission.value);
-        if (tweetId !== undefined) {
+          const twitterUserName: any = await fetchTwitterUserName(
+            quest.submission.value
+          );
           await checkShillMaha(
             tweetId,
             quest.id,
-            quest.user.twitterUsername,
+            twitterUserName,
             quest.user.id
           );
         }
@@ -72,9 +84,29 @@ export const userBonus = async (
   const body = {
     label: label,
     xp: points,
-    description: "",
+    description: "review points",
   };
 
-  const submissions: any = await sendRequest("post", url, header, body);
-  return submissions;
+  const response: any = await sendRequest("post", url, header, body);
+  console.log(response);
+  return response;
 };
+
+// export const failedQuest = async () => {
+//   const url = "https://api.zealy.io/communities/themahadao/claimed-quests";
+//   const header = {
+//     "x-api-key": `${nconf.get("ZEALY_API_KEY")}`,
+//   };
+//   const submissions: any = await sendRequest("get", url, header);
+//   const parseSubmissions = JSON.parse(submissions);
+//   const filteredQuest = parseSubmissions.data.filter(
+//     (quest: any) =>
+//       quest.status === "fail" && quest.name === "Tweet about MahaDAO 🐦"
+//   );
+//   await Bluebird.mapSeries(filteredQuest, async (quest: any) => {
+//     const tweetId: any = fetchTweetId(quest.submission.value);
+//     if (tweetId !== undefined) {
+//       await questPoints(tweetId, quest);
+//     }
+//   });
+// };

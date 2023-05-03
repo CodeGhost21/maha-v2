@@ -39,7 +39,9 @@ export const checkShillMaha = async (
   } else {
     comment = tweetData.comment;
   }
-  await approveQuest([questId], questStatus, comment);
+  if (questStatus === "success") {
+    await approveQuest([questId], questStatus, comment);
+  }
 };
 
 const checkTwitterUserFollowers = async (screenName: string) => {

@@ -7,7 +7,7 @@ node_modules/
 config.json
 # Project files:
 *.sublime-*
-
+/test
 **/*.map
 # **/*.js
 **/*.d.ts
