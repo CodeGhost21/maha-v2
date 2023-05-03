@@ -16,4 +16,3 @@ const job = async () => {
 };
 
 job();
-submissions();
