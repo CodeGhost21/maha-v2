@@ -46,16 +46,15 @@ export const submissions = async () => {
       //     await checkTwitterMeme(tweetId, quest.id, quest.user.twitterUsername);
       //   }
       // }
-      // else if (quest.name === "Tweet about MahaDAO 🐦") {
-      //   const tweetId: any = fetchTweetId(quest.submission.value);
-      //   if (tweetId !== undefined) {
-      //     const twitterUserName: any = await fetchTwitterUserName(
-      //       quest.submission.value
-      //     );
-      //     await checkTweetMAHA(tweetId, quest.id, twitterUserName);
-      //   }
-      // }
-      else if (quest.name === "Shill $MAHA to an Influencer") {
+      else if (quest.name === "Tweet about MahaDAO 🐦") {
+        const tweetId: any = fetchTweetId(quest.submission.value);
+        if (tweetId !== undefined) {
+          const twitterUserName: any = await fetchTwitterUserName(
+            quest.submission.value
+          );
+          await checkTweetMAHA(tweetId, quest.id, twitterUserName);
+        }
+      } else if (quest.name === "Shill $MAHA to an Influencer") {
         console.log(quest.name);
         const tweetId: any = fetchTweetId(quest.submission.value);
         if (tweetId !== undefined) {
