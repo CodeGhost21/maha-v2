@@ -12,6 +12,7 @@ export const checkShillMaha = async (
   questUserName: string,
   questUserId: string
 ) => {
+  console.log(tweetId, questId, questUserName, questUserId);
   let questStatus = "fail";
   let comment = "";
 
