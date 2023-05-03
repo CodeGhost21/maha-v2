@@ -1,6 +1,5 @@
 import { fetchTweetData } from "../utils/tweetData";
 import { approveQuest } from "../reviewQuest";
-// import { userBonus } from "../zealyBot";
 
 export const checkTweetMAHA = async (
   tweetId: string,

@@ -45,3 +45,13 @@ export const verifyTweet = async (
     return true;
   else return false;
 };
+
+export const getTweet = async (url: string) => {
+  const header = {
+    Authorization: `Bearer ${nconf.get("TWITTER_TOKEN")}`,
+  };
+  const tweetData: any = await sendRequest("get", url, header);
+  const parseTweetData = JSON.parse(tweetData);
+
+  return parseTweetData;
+};

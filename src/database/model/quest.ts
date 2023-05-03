@@ -4,6 +4,7 @@ export interface IQuest {
   questId: string;
   tweetId: string;
   influencerLiked: boolean;
+  influencerRetweet: boolean;
   tweetDate: any;
   influencerName: string;
   questUserId: string;
@@ -14,6 +15,7 @@ const schema = new Schema(
     questId: String,
     tweetId: String,
     influencerLiked: { type: Boolean, default: false },
+    influencerRetweet: { type: Boolean, default: false },
     influencerName: String,
     tweetDate: Date,
     questUserId: String,

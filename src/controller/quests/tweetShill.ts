@@ -1,8 +1,5 @@
-import nconf from "nconf";
-
-import { fetchTweetData } from "../utils/tweetData";
+import { fetchTweetData, getTweet } from "../utils/tweetData";
 import { approveQuest } from "../reviewQuest";
-import { sendRequest } from "../utils/sendRequest";
 import { Quest } from "../../database/model/quest";
 import { userBonus } from "../zealyBot";
 import Bluebird from "bluebird";
@@ -46,14 +43,10 @@ export const checkShillMaha = async (
 };
 
 const checkTwitterUserFollowers = async (screenName: string) => {
-  const url = `https://api.twitter.com/2/users/by/username/${screenName}?user.fields=public_metrics`;
-  const header = {
-    Authorization: `Bearer ${nconf.get("TWITTER_TOKEN")}`,
-  };
-  const userResponse: any = await sendRequest("get", url, header);
-  const parseUserResponse = JSON.parse(userResponse);
-  if (parseUserResponse.data.public_metrics.followers_count >= 5000)
-    return true;
+  const userFollower = await getTweet(
+    `https://api.twitter.com/2/users/by/username/${screenName}?user.fields=public_metrics`
+  );
+  if (userFollower.data.public_metrics.followers_count >= 5000) return true;
   else return false;
 };
 
@@ -65,20 +58,17 @@ export const checkInfluencerLike = async () => {
   if (allQuest.length > 0) {
     await Bluebird.mapSeries(allQuest, async (quest: any) => {
       try {
-        const uri = `https://api.twitter.com/2/tweets/${quest.tweetId}/liking_users`;
-        const header = {
-          Authorization: `Bearer ${nconf.get("TWITTER_TOKEN")}`,
-        };
-        const response: any = await sendRequest("get", uri, header);
-        const parseResponse = JSON.parse(response);
-        const screenName: string[] = await parseResponse.data.map(
+        const tweetLikes = await getTweet(
+          `https://api.twitter.com/2/tweets/${quest.tweetId}/liking_users`
+        );
+        const screenName: string[] = await tweetLikes.data.map(
           (user: any) => user.username
         );
         if (screenName.includes(quest.influencerName)) {
           quest.influencerLiked = true;
           await quest.save();
-          //give extra points if the tweet is liked by influencer
-          await userBonus(quest.questUserId, 100, "tweet liked by influencer");
+          //if influencer liked the tweet assign 10 xp
+          await userBonus(quest.questUserId, 10, "tweet liked by influencer");
           // return true;
         }
       } catch (e: any) {
@@ -86,6 +76,34 @@ export const checkInfluencerLike = async () => {
           console.log(e.statusCode);
           throw new Error("rate limit exceeded");
         }
+      }
+    });
+  }
+};
+
+export const checkRetweet = async () => {
+  const allQuest = await Quest.find({
+    tweetDate: { $gt: new Date(Date.now() - 86400000 * 2) },
+    influencerRetweet: false,
+  });
+  if (allQuest.length > 0) {
+    await Bluebird.mapSeries(allQuest, async (quest: any) => {
+      const retweetData = await getTweet(
+        `https://api.twitter.com/1.1/statuses/retweets/${quest.tweetId}.json`
+      );
+      const userIds = retweetData.map(
+        (retweet: any) => retweet.user.screen_name
+      );
+      console.log(userIds);
+      if (userIds.includes(quest.influencerName)) {
+        quest.influencerRetweet = true;
+        await quest.save();
+        //if influencer retweeted the tweet assign 100 xp
+        await userBonus(
+          quest.questUserId,
+          100,
+          "tweet retweeted by influencer"
+        );
       }
     });
   }
