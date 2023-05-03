@@ -11,7 +11,7 @@ const job = async () => {
   cron.schedule("*/5 * * * *", () => {
     console.log("running every 5 minute");
     submissions();
-    checkInfluencerLike();
+    // checkInfluencerLike();
   });
 };
 
