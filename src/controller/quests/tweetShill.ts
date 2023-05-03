@@ -5,14 +5,14 @@ import { approveQuest } from "../reviewQuest";
 import { sendRequest } from "../utils/sendRequest";
 import { Quest } from "../../database/model/quest";
 import { userBonus } from "../zealyBot";
-
+import Bluebird from "bluebird";
 export const checkShillMaha = async (
   tweetId: string,
   questId: string,
   questUserName: string,
   questUserId: string
 ) => {
-  console.log(tweetId, questId, questUserName, questUserId);
+  // console.log(tweetId, questId, questUserName, questUserId);
   let questStatus = "fail";
   let comment = "";
 
@@ -58,27 +58,34 @@ const checkTwitterUserFollowers = async (screenName: string) => {
 };
 
 export const checkInfluencerLike = async () => {
-  const allquest = await Quest.find({
+  const allQuest = await Quest.find({
     tweetDate: { $gt: new Date(Date.now() - 86400000 * 2) },
     influencerLiked: false,
   });
-  if (allquest.length > 0) {
-    allquest.map(async (quest: any) => {
-      const uri = `https://api.twitter.com/2/tweets/${quest.tweetId}/liking_users`;
-      const header = {
-        Authorization: `Bearer ${nconf.get("TWITTER_TOKEN")}`,
-      };
-      const response: any = await sendRequest("get", uri, header);
-      const parseResponse = JSON.parse(response);
-      const screenName: string[] = await parseResponse.data.map(
-        (user: any) => user.username
-      );
-      if (screenName.includes(quest.influencerName)) {
-        quest.influencerLiked = true;
-        await quest.save();
-        //give extra points if the tweet is liked by influencer
-        await userBonus(quest.questUserId, 100, "tweet liked by influencer");
-        // return true;
+  if (allQuest.length > 0) {
+    await Bluebird.mapSeries(allQuest, async (quest: any) => {
+      try {
+        const uri = `https://api.twitter.com/2/tweets/${quest.tweetId}/liking_users`;
+        const header = {
+          Authorization: `Bearer ${nconf.get("TWITTER_TOKEN")}`,
+        };
+        const response: any = await sendRequest("get", uri, header);
+        const parseResponse = JSON.parse(response);
+        const screenName: string[] = await parseResponse.data.map(
+          (user: any) => user.username
+        );
+        if (screenName.includes(quest.influencerName)) {
+          quest.influencerLiked = true;
+          await quest.save();
+          //give extra points if the tweet is liked by influencer
+          await userBonus(quest.questUserId, 100, "tweet liked by influencer");
+          // return true;
+        }
+      } catch (e: any) {
+        if (e && e.statusCode === 429) {
+          console.log(e.statusCode);
+          throw new Error("rate limit exceeded");
+        }
       }
     });
   }

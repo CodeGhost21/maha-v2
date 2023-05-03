@@ -8,10 +8,10 @@ open();
 
 const job = async () => {
   console.log("job started");
-  cron.schedule("*/5 * * * *", () => {
-    console.log("running every 5 minute");
-    submissions();
-    // checkInfluencerLike();
+  cron.schedule("*/15 * * * *", async () => {
+    console.log("running every 15 minute");
+    await submissions();
+    await checkInfluencerLike();
   });
 };
 

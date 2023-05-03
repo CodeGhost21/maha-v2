@@ -26,8 +26,10 @@ export const submissions = async () => {
   };
   const submissions: any = await sendRequest("get", url, header);
   const parseSubmissions = JSON.parse(submissions);
-
-  await Bluebird.mapSeries(parseSubmissions.data, async (quest: any) => {
+  const pendingSubmissions = await parseSubmissions.data.filter(
+    (item: any) => item.status === "pending"
+  );
+  await Bluebird.mapSeries(pendingSubmissions, async (quest: any) => {
     if (quest.submission.value !== undefined) {
       if (quest.submission.value.includes("tx")) {
         const regex = /tx\/(0x[a-fA-F0-9]{64})/;
@@ -44,17 +46,20 @@ export const submissions = async () => {
       //     await checkTwitterMeme(tweetId, quest.id, quest.user.twitterUsername);
       //   }
       // }
-      else if (quest.name === "Tweet about MahaDAO 🐦") {
+      // else if (quest.name === "Tweet about MahaDAO 🐦") {
+      //   const tweetId: any = fetchTweetId(quest.submission.value);
+      //   if (tweetId !== undefined) {
+      //     const twitterUserName: any = await fetchTwitterUserName(
+      //       quest.submission.value
+      //     );
+      //     await checkTweetMAHA(tweetId, quest.id, twitterUserName);
+      //   }
+      // }
+      else if (quest.name === "Shill $MAHA to an Influencer") {
+        console.log(quest.name);
         const tweetId: any = fetchTweetId(quest.submission.value);
         if (tweetId !== undefined) {
-          const twitterUserName: any = await fetchTwitterUserName(
-            quest.submission.value
-          );
-          await checkTweetMAHA(tweetId, quest.id, twitterUserName);
-        }
-      } else if (quest.name === "Shill $MAHA to an Influencer") {
-        const tweetId: any = fetchTweetId(quest.submission.value);
-        if (tweetId !== undefined) {
+          console.log(quest.submission.value);
           const twitterUserName: any = await fetchTwitterUserName(
             quest.submission.value
           );

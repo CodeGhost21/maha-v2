@@ -28,7 +28,11 @@ export const fetchTweetData = async (
       return { success: false, comment: "this tweet is too old" };
     }
     return { success: false, comment: "not a valid tweet" };
-  } catch (e) {
+  } catch (e: any) {
+    if (e && e.statusCode === 429) {
+      console.log(e.statusCode);
+      throw new Error("rate limit exceeded");
+    }
     return { success: false, comment: "no tweet" };
   }
 };
