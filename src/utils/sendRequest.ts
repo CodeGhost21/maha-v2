@@ -1,5 +1,4 @@
 import Request from "request-promise";
-import nconf from "nconf";
 
 export const sendRequest = async <T>(
   method: string,

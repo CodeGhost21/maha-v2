@@ -1,4 +1,4 @@
-import { fetchTweetData } from "../utils/tweetData";
+import { fetchTweetData } from "../../utils/tweetData";
 import { approveQuest } from "../reviewQuest";
 
 export const checkTwitterMeme = async (

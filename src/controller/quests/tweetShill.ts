@@ -1,15 +1,15 @@
-import { fetchTweetData, getTweet } from "../utils/tweetData";
-import { approveQuest } from "../reviewQuest";
-import { Quest } from "../../database/model/quest";
-import { userBonus } from "../zealyBot";
 import Bluebird from "bluebird";
+import { fetchTweetData, getTweet } from "../../utils/tweetData";
+import { approveQuest } from "../reviewQuest";
+import { Quest } from "../../database/models/quest";
+import { userBonus } from "../zealyBot";
+import { saveZelayUser } from "../user";
+
 export const checkShillMaha = async (
   tweetId: string,
-  questId: string,
   questUserName: string,
-  questUserId: string
+  quest: any
 ) => {
-  // console.log(tweetId, questId, questUserName, questUserId);
   let questStatus = "fail";
   let comment = "";
 
@@ -26,19 +26,21 @@ export const checkShillMaha = async (
       questStatus = response ? "success" : "fail";
       if (response) {
         await Quest.create({
-          questId: questId,
+          questId: quest.id,
           tweetId: tweetId,
           tweetDate: tweetData.tweetDate,
           influencerName: tweetData.tweet.in_reply_to_screen_name,
-          questUserId: questUserId,
+          questDetails: quest,
         });
+
+        await saveZelayUser(quest.user.id, quest.user.name);
       }
     }
   } else {
     comment = tweetData.comment;
   }
   if (questStatus === "success") {
-    await approveQuest([questId], questStatus, comment);
+    await approveQuest([quest.id], questStatus, comment);
   }
 };
 
@@ -68,7 +70,12 @@ export const checkInfluencerLike = async () => {
           quest.influencerLiked = true;
           await quest.save();
           //if influencer liked the tweet assign 10 xp
-          await userBonus(quest.questUserId, 10, "tweet liked by influencer");
+          await userBonus(
+            quest.questUserId,
+            10,
+            "tweet liked by influencer",
+            "Rewards"
+          );
           // return true;
         }
       } catch (e: any) {
@@ -94,7 +101,6 @@ export const checkRetweet = async () => {
       const userIds = retweetData.map(
         (retweet: any) => retweet.user.screen_name
       );
-      console.log(userIds);
       if (userIds.includes(quest.influencerName)) {
         quest.influencerRetweet = true;
         await quest.save();
@@ -102,7 +108,8 @@ export const checkRetweet = async () => {
         await userBonus(
           quest.questUserId,
           100,
-          "tweet retweeted by influencer"
+          "tweet retweeted by influencer",
+          "Rewards"
         );
       }
     });

@@ -1,5 +1,5 @@
 import nconf from "nconf";
-import { sendRequest } from "./utils/sendRequest";
+import { sendRequest } from "../utils/sendRequest";
 
 export const approveQuest = async (
   questId: string[],
@@ -19,6 +19,5 @@ export const approveQuest = async (
   };
 
   const submissions: any = await sendRequest("post", url, header, body);
-  console.log(submissions);
   return submissions;
 };

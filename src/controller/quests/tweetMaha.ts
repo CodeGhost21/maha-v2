@@ -1,10 +1,12 @@
-import { fetchTweetData } from "../utils/tweetData";
+import { fetchTweetData } from "../../utils/tweetData";
+import { Quest } from "../../database/models/quest";
 import { approveQuest } from "../reviewQuest";
+import { saveZelayUser } from "../user";
 
 export const checkTweetMAHA = async (
   tweetId: string,
-  questId: string,
-  questUserName: string
+  questUserName: string,
+  quest: any
 ) => {
   const mahaTypes = [
     "MAHA",
@@ -33,6 +35,15 @@ export const checkTweetMAHA = async (
 
       if (isValid) {
         questStatus = "success";
+        await Quest.create({
+          questId: quest.id,
+          tweetId: tweetId,
+          tweetDate: tweetData.tweetDate,
+          questDetails: quest,
+        });
+
+        //save zelay user if doesn't exists
+        await saveZelayUser(quest.user.id, quest.user.name);
         break;
       }
       comment = "this tweet is missing maha tag";
@@ -41,6 +52,6 @@ export const checkTweetMAHA = async (
     comment = tweetData.comment;
   }
   if (questStatus === "success") {
-    await approveQuest([questId], questStatus, comment);
+    await approveQuest([quest.id], questStatus, comment);
   }
 };

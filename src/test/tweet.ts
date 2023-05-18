@@ -1,7 +1,7 @@
 import nconf, { loadFiles } from "nconf";
 import { json } from "stream/consumers";
 import { checkTweetMAHA } from "../controller/quests/tweetMaha";
-import { sendRequest } from "../controller/utils/sendRequest";
+import { sendRequest } from "../utils/sendRequest";
 import { fetchTweetId } from "../controller/zealyBot";
 
 export const tweetData = async () => {
