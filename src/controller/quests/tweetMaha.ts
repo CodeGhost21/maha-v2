@@ -20,6 +20,7 @@ export const checkTweetMAHA = async (
     "#MahaDAO",
     "@TheMahaDAO",
     "@mahalend",
+    "#mahalend",
   ].map((t) => t.toLowerCase());
   const tweetData: any = await fetchTweetData(tweetId, questUserName);
   let questStatus = "fail";

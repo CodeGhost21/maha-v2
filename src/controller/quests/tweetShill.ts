@@ -48,7 +48,7 @@ const checkTwitterUserFollowers = async (screenName: string) => {
   const userFollower = await getTweet(
     `https://api.twitter.com/2/users/by/username/${screenName}?user.fields=public_metrics`
   );
-  if (userFollower.data.public_metrics.followers_count >= 5000) return true;
+  if (userFollower.data.public_metrics.followers_count >= 10000) return true;
   else return false;
 };
 
