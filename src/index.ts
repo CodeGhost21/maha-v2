@@ -27,8 +27,8 @@ const job = async () => {
   cron.schedule("*/15 * * * *", async () => {
     console.log("running every 15 minute");
     await submissions();
-    await checkInfluencerLike();
-    await checkRetweet();
+    // await checkInfluencerLike();
+    // await checkRetweet();
   });
 };
 job();

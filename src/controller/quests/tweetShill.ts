@@ -108,7 +108,7 @@ export const checkRetweet = async () => {
         //if influencer retweeted the tweet assign 100 xp
         await userBonus(
           quest.questUserId,
-          100,
+          10,
           "Tweet retweeted by influencer",
           "Rewards"
         );
