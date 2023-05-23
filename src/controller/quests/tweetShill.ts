@@ -108,7 +108,7 @@ export const checkRetweet = async () => {
         await userBonus(
           quest.questUserId,
           100,
-          "tweet retweeted by influencer",
+          "Tweet retweeted by influencer",
           "Rewards"
         );
       }

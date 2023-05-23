@@ -9,6 +9,7 @@ export const checkTweetMAHA = async (
   quest: any
 ) => {
   const mahaTypes = [
+    "@maha",
     "MAHA",
     "MahaDAO",
     "$MAHA",
