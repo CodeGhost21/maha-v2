@@ -42,6 +42,7 @@ export const checkTweetMAHA = async (
           tweetId: tweetId,
           tweetDate: tweetData.tweetDate,
           questDetails: quest,
+          questName: quest.name,
         });
 
         //save zelay user if doesn't exists

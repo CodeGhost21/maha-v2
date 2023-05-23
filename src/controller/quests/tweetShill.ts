@@ -31,6 +31,7 @@ export const checkShillMaha = async (
           tweetDate: tweetData.tweetDate,
           influencerName: tweetData.tweet.in_reply_to_screen_name,
           questDetails: quest,
+          questName: quest.name,
         });
 
         await saveZelayUser(quest.user.id, quest.user.name);

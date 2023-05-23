@@ -8,6 +8,7 @@ export interface IQuest {
   tweetDate: any;
   influencerName: string;
   questUserId: string;
+  questName: string;
 }
 
 const schema = new Schema(
@@ -19,6 +20,7 @@ const schema = new Schema(
     influencerName: String,
     tweetDate: Date,
     questUserId: String,
+    questName: String,
   },
   { timestamps: true }
 );
