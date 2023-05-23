@@ -1,11 +1,12 @@
 import nconf from "nconf";
 import { ethers } from "ethers";
 import { approveQuest } from "../reviewQuest";
+import { Quest } from "../../database/models/quest";
 const abiCoder = new ethers.AbiCoder();
 
 const provider = new ethers.JsonRpcProvider(nconf.get("ARBI_RPC"));
 
-export const checkTransaction = async (data: string, questId: string) => {
+export const checkTransaction = async (data: string, quest: any) => {
   const transactionReceipt: any = await provider.getTransactionReceipt(data);
 
   const supplyBorrowTx = transactionReceipt.logs.filter(
@@ -31,7 +32,14 @@ export const checkTransaction = async (data: string, questId: string) => {
     questStatus = "fail";
     comment = "Supply amount is low";
   }
-  await approveQuest([questId], questStatus, comment);
+  if (questStatus === "success") {
+    await Quest.create({
+      questId: quest.id,
+      questDetails: quest,
+      questName: quest.name,
+    });
+  }
+  await approveQuest([quest.id], questStatus, comment);
   // return amount > 5;
 };
 

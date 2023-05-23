@@ -2,11 +2,11 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface IQuest {
   questId: string;
-  tweetId: string;
-  influencerLiked: boolean;
-  influencerRetweet: boolean;
-  tweetDate: any;
-  influencerName: string;
+  tweetId?: string;
+  influencerLiked?: boolean;
+  influencerRetweet?: boolean;
+  tweetDate?: any;
+  influencerName?: string;
   questUserId: string;
   questName: string;
 }

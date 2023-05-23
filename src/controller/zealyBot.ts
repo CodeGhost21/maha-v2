@@ -35,7 +35,7 @@ export const submissions = async () => {
         if (quest.submission.value.includes("tx")) {
           const regex = /tx\/(0x[a-fA-F0-9]{64})/;
           const match = quest.submission.value.match(regex);
-          await checkTransaction(match[1], quest.id);
+          await checkTransaction(match[1], quest);
         } else if (quest.name === "Tweet about MahaDAO 🐦") {
           const tweetId: any = fetchTweetId(quest.submission.value);
           if (tweetId !== undefined) {
