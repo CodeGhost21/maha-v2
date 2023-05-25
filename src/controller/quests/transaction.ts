@@ -39,8 +39,9 @@ export const checkTransaction = async (data: string, quest: any) => {
       questName: quest.name,
     });
   }
-  await approveQuest([quest.id], questStatus, comment);
-  // return amount > 5;
+  if (questStatus === "success") {
+    await approveQuest([quest.id], questStatus, comment);
+  }
 };
 
 // export const testTransaction = async () => {
