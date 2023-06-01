@@ -64,7 +64,7 @@ export const userBonus = async (
   userId: string,
   points: number,
   label: string,
-  desc: string
+  desc?: string
 ) => {
   const url = `https://api.zealy.io/communities/themahadao/users/${userId}/xp`;
   const header = {
@@ -78,6 +78,7 @@ export const userBonus = async (
   };
 
   const response: any = await sendRequest("post", url, header, body);
+  console.log(response);
   return response;
 };
 
