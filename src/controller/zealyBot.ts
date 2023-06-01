@@ -32,7 +32,7 @@ export const submissions = async () => {
     );
     await Bluebird.mapSeries(pendingSubmissions, async (quest: any) => {
       if (quest.submission.value !== undefined) {
-        if (quest.submission.value.includes("tx")) {
+        if (quest.submission.value.includes("/tx")) {
           const regex = /tx\/(0x[a-fA-F0-9]{64})/;
           const match = quest.submission.value.match(regex);
           await checkTransaction(match[1], quest);
