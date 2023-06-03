@@ -24,8 +24,6 @@ export const checkTransaction = async (data: string, quest: any) => {
 
   if (walletAddress === transactionReceipt.from) {
     const amount = Number(response[1]) / 10 ** 6;
-    console.log(walletAddress, transactionReceipt.from, amount);
-
     if (txData[0].topics[0] === nconf.get("BORROW_TOPIC") && amount < 1) {
       questStatus = "fail";
       comment = "Borrow amount is low";
