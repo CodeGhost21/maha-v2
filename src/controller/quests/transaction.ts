@@ -2,32 +2,43 @@ import nconf from "nconf";
 import { ethers } from "ethers";
 import { approveQuest } from "../reviewQuest";
 import { Quest } from "../../database/models/quest";
+import { zelayRequest } from "../../utils/zelayRequest";
 const abiCoder = new ethers.AbiCoder();
 
 const provider = new ethers.JsonRpcProvider(nconf.get("ARBI_RPC"));
 
 export const checkTransaction = async (data: string, quest: any) => {
+  const walletAddress = await getWalletAddress(quest.user.id);
   const transactionReceipt: any = await provider.getTransactionReceipt(data);
-
   const txData = transactionReceipt.logs.filter(
     (log: any) =>
       log.address === nconf.get("POOL_ADDRESS") &&
       (log.topics[0] === nconf.get("SUPPLY_TOPIC") ||
         log.topics[0] === nconf.get("BORROW_TOPIC"))
   );
-
   const dataAbi = ["address", "uint256"];
   const response = await abiCoder.decode(dataAbi, txData[0].data);
-  const amount = Number(response[1]) / 10 ** 6;
-
+  //check wallet address
   let questStatus = "success";
   let comment = "";
-  if (txData[0].topics[0] === nconf.get("BORROW_TOPIC") && amount < 1) {
+
+  if (walletAddress === transactionReceipt.from) {
+    const amount = Number(response[1]) / 10 ** 6;
+    console.log(walletAddress, transactionReceipt.from, amount);
+
+    if (txData[0].topics[0] === nconf.get("BORROW_TOPIC") && amount < 1) {
+      questStatus = "fail";
+      comment = "Borrow amount is low";
+    } else if (
+      txData[0].topics[0] === nconf.get("SUPPLY_TOPIC") &&
+      amount < 5
+    ) {
+      questStatus = "fail";
+      comment = "Supply amount is low";
+    }
+  } else {
     questStatus = "fail";
-    comment = "Borrow amount is low";
-  } else if (txData[0].topics[0] === nconf.get("SUPPLY_TOPIC") && amount < 5) {
-    questStatus = "fail";
-    comment = "Supply amount is low";
+    comment = "wallet address doesn't match";
   }
   if (questStatus === "success") {
     await Quest.create({
@@ -37,6 +48,12 @@ export const checkTransaction = async (data: string, quest: any) => {
     });
     await approveQuest([quest.id], questStatus, comment);
   }
+};
+
+export const getWalletAddress = async (userId: string) => {
+  const url = `https://api.zealy.io/communities/themahadao/users/${userId}`;
+  const response = await zelayRequest("get", url);
+  return response.data.addresses.arbitrum;
 };
 
 // export const testTransaction = async () => {
