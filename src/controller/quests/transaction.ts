@@ -51,7 +51,7 @@ export const checkTransaction = async (data: string, quest: any) => {
 export const getWalletAddress = async (userId: string) => {
   const url = `https://api.zealy.io/communities/themahadao/users/${userId}`;
   const response = await zelayRequest("get", url);
-  return response.data.addresses.arbitrum;
+  return response.data.addresses.ethereum;
 };
 
 // export const testTransaction = async () => {
