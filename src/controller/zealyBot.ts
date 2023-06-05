@@ -5,6 +5,7 @@ import { sendRequest } from "../utils/sendRequest";
 import { checkTransaction } from "./quests/transaction";
 import { checkTweetMAHA } from "./quests/tweetMaha";
 import { checkShillMaha } from "./quests/tweetShill";
+import { mahaPatronCheck } from "./quests/mahaPatron";
 
 export const fetchTweetId = (uri: string) => {
   const tweetId = uri.match("status\\/(\\d+)/?");
@@ -52,6 +53,11 @@ export const submissions = async () => {
             );
             await checkShillMaha(tweetId, twitterUserName, quest);
           }
+        } else if (quest.name === "Be a $MAHA Patron 🟠") {
+          await mahaPatronCheck(quest);
+        } else if (
+          quest.name === "Engage and Empower: Community-Sourced Tweets!"
+        ) {
         }
       }
     });
