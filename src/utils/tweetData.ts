@@ -1,28 +1,20 @@
 import { sendRequest } from "./sendRequest";
 import nconf from "nconf";
+import { twitterRequest } from "./twitterRequest";
 
-export const fetchTweetData = async (
-  tweetId: string,
-  questUserName: string
-) => {
+export const fetchTweetData = async (url: string, questUserName: string) => {
   try {
-    const url = `https://api.twitter.com/1.1/statuses/show.json?id=${tweetId}&tweet_mode=extended`;
-
-    const header = {
-      Authorization: `Bearer ${nconf.get("TWITTER_TOKEN")}`,
-    };
-    const tweetData: any = await sendRequest("get", url, header);
-    const parseTweetData = JSON.parse(tweetData);
-
-    if (await verifyTweet(questUserName, parseTweetData.user.screen_name)) {
+    const tweetData = await twitterRequest("get", url);
+    if (await verifyTweet(questUserName, tweetData.user.screen_name)) {
       if (
-        new Date(parseTweetData.created_at).getTime() >
-        new Date().getTime() - 86400000
+        true
+        // new Date(parseTweetData.created_at).getTime() >
+        // new Date().getTime() - 86400000
       ) {
         return {
           success: true,
-          tweet: parseTweetData,
-          tweetDate: parseTweetData.created_at,
+          tweet: tweetData,
+          tweetDate: tweetData.created_at,
         };
       }
       return { success: false, comment: "this tweet is too old" };
@@ -44,14 +36,4 @@ export const verifyTweet = async (
   if (questUserName.toLowerCase() === twitterScreenName.toLowerCase())
     return true;
   else return false;
-};
-
-export const getTweet = async (url: string) => {
-  const header = {
-    Authorization: `Bearer ${nconf.get("TWITTER_TOKEN")}`,
-  };
-  const tweetData: any = await sendRequest("get", url, header);
-  const parseTweetData = JSON.parse(tweetData);
-
-  return parseTweetData;
 };

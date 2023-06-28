@@ -5,7 +5,7 @@ import { saveZelayUser } from "../user";
 
 export const checkTweetMAHA = async (
   tweetId: string,
-  questUserName: string,
+  twitterUserName: string,
   quest: any
 ) => {
   const mahaTypes = [
@@ -23,7 +23,8 @@ export const checkTweetMAHA = async (
     "@mahalend",
     "#mahalend",
   ].map((t) => t.toLowerCase());
-  const tweetData: any = await fetchTweetData(tweetId, questUserName);
+  const url = `https://api.twitter.com/1.1/statuses/show.json?id=${tweetId}&tweet_mode=extended`;
+  const tweetData: any = await fetchTweetData(url, twitterUserName);
   let questStatus = "fail";
   let comment = "";
   if (tweetData.success) {
