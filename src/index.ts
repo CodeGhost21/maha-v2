@@ -7,10 +7,6 @@ import cron from "node-cron";
 import { submissions } from "./controller/zealyBot";
 
 import "./bots/gm";
-import {
-  checkInfluencerLike,
-  checkRetweet,
-} from "./controller/quests/tweetShill";
 
 import { open } from "./database";
 
