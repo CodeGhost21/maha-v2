@@ -48,44 +48,16 @@ export const checkShillMaha = async (
 
 const checkTwitterUserFollowers = async (screenName: string) => {
   try {
-    const url = `https://api.twitter.com/1.1/followers/ids.json?screen_name=${screenName}`;
+    const url = `https://api.twitter.com/1.1/users/show.json?screen_name=${screenName}`;
     const tweetData: any = await twitterRequest("get", url);
 
-    let count = tweetData.ids.length;
-    let moreIds = true;
-    let nextCursor = tweetData.next_cursor;
-    while (moreIds) {
-      const newUrl = `https://api.twitter.com/1.1/followers/ids.json?screen_name=${screenName}&cursor=${nextCursor}`;
-      const response: any = await twitterRequest("get", newUrl);
-      nextCursor = response.next_cursor;
-      count = count + response.ids.length;
-      if (response.ids.length < 5000) moreIds = false;
-      if (count >= 10000) moreIds = false;
-    }
-    console.log(count);
-
-    if (count >= 10000) return true;
+    if (tweetData.followers_count >= 10000) return true;
     else return false;
   } catch (e) {
     console.log(e);
     return false;
   }
 };
-
-//twitter v2 api to fetch users followers
-// const checkTwitterUserFollowers = async (screenName: string) => {
-//   try {
-//     const userFollower = await twitterRequest(
-//       "get",
-//       `https://api.twitter.com/2/users/by/username/${screenName}?user.fields=public_metrics`
-//     );
-//     if (userFollower.data.public_metrics.followers_count >= 10000) return true;
-//     else return false;
-//   } catch (e) {
-//     console.log(e);
-//     return false;
-//   }
-// };
 
 // export const checkInfluencerLike = async () => {
 //   const allQuest = await Quest.find({
