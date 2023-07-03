@@ -20,15 +20,15 @@ const twitterBioCheck = async (quest: any) => {
     `https://api.twitter.com/1.1/users/show.json?screen_name=${zelayUserData.data.twitterUsername}`
   );
 
-  const checkPatron = "Proud $MAHA Patron";
+  const checkPatron = "Proud $MAHA Patron 🟠";
   // console.log(">>>>>>>>>>>", twitterUserData.description);
 
   if (twitterUserData.description.includes(checkPatron)) {
     // console.log("twitter bio", true);
-    questStatus === "success";
+    questStatus = "success";
   } else {
     // console.log("twitter bio", false);
-    questStatus === "fail";
+    questStatus = "fail";
     comment = "not a $MAHA patron ";
   }
 
