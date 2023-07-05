@@ -13,7 +13,7 @@ const lbKeywords = ["!leaderboard", "!lb"];
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
 client.on("messageCreate", async (message: any) => {
-  if (message.channelId !== nconf.get("CHANNEL_GM") && !message.guild) return;
+  if (message.channelId !== nconf.get("CHANNEL_GM")) return;
   if (message.author.bot) return;
 
   const content = message.content.toLowerCase();

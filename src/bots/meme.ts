@@ -13,7 +13,7 @@ import { userBonus } from "../controller/zealyBot";
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
 client.on("messageCreate", async (message) => {
-  if (message.channelId !== nconf.get("CHANNEL_MEME") && !message.guild) return;
+  if (message.channelId !== nconf.get("CHANNEL_MEME")) return;
   if (message.author.bot) return;
 
   //   const content = message.content.toLowerCase();

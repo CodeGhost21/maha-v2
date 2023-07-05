@@ -7,7 +7,7 @@ import cron from "node-cron";
 import { submissions } from "./controller/zealyBot";
 
 import "./bots/gm";
-// import "./bots/meme";
+import "./bots/meme";
 
 import { open } from "./database";
 
