@@ -55,9 +55,6 @@ export const submissions = async () => {
           }
         } else if (quest.name === "Be a $MAHA Patron 🟠") {
           await mahaPatronCheck(quest);
-        } else if (
-          quest.name === "Engage and Empower: Community-Sourced Tweets!"
-        ) {
         }
       }
     });
@@ -86,6 +83,20 @@ export const userBonus = async (
   const response: any = await sendRequest("post", url, header, body);
   console.log(response);
   return response;
+};
+
+export const getQuestCount = async () => {
+  const url = "https://api.zealy.io/communities/themahadao/claimed-quests";
+  const header = {
+    "x-api-key": `${nconf.get("ZEALY_API_KEY")}`,
+  };
+
+  const submissions: any = await sendRequest("get", url, header);
+  const parseSubmissions = JSON.parse(submissions);
+  const patronQuest = await parseSubmissions.data.filter(
+    (item: any) => item.name === "Refer and Earn BIG! 💰"
+  );
+  console.log(patronQuest.length);
 };
 
 // export const failedQuest = async () => {

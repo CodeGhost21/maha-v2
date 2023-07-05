@@ -5,6 +5,7 @@ export interface IMessage {
   userTag: string;
   userID: string;
   dateTime: Date;
+  url: string;
 }
 
 const message = new mongoose.Schema({
@@ -12,6 +13,7 @@ const message = new mongoose.Schema({
   userTag: String,
   userID: String,
   dateTime: Date,
+  url: String,
 });
 
 export type IMessageModel = IMessage & mongoose.Document;

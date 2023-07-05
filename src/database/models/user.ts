@@ -7,6 +7,7 @@ export interface IUser {
   maxStreak: number;
   totalGMs: number;
   lastGM: Date;
+  lastImage: Date;
   gmRank: number;
   jwt: string;
   discordName: string;
@@ -24,6 +25,7 @@ const UserSchema = new mongoose.Schema(
     maxStreak: { type: Number, default: 0 },
     totalGMs: { type: Number, default: 0 },
     lastGM: Date,
+    lastImage: Date,
     gmRank: { type: Number, default: 0 },
 
     jwt: String,
