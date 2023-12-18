@@ -11,12 +11,11 @@ const accessTokenSecret = nconf.get("JWT_SECRET");
 
 //connect wallet verify
 export const walletVerify = async (req: any, res: any) => {
-  console.log(req.body);
+  // console.log(req);
   const { message, signature } = req.body;
   const siweMessage = new SiweMessage(message);
   try {
     const result = await siweMessage.verify({ signature });
-    // console.log(27, result);
     if (result.data.address === req.body.message.address) {
       const user = await User.findOne({
         walletAddress: result.data.address,
@@ -54,12 +53,12 @@ export const assignPoints = async (
   message: string,
   isAdd: boolean
 ) => {
-  console.log(43, user, isAdd);
+  // console.log(43, user, isAdd);
 
   const previousPoints = user.totalPoints;
   const currentPoints = previousPoints + points;
-  console.log("previousPoints", previousPoints);
-  console.log("currentPoints", currentPoints);
+  // console.log("previousPoints", previousPoints);
+  // console.log("currentPoints", currentPoints);
   await UserPoints.create({
     userId: user._id,
     previousPoints,
