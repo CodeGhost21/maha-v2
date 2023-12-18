@@ -6,8 +6,7 @@ import { client } from "../output/discord";
 import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
-import { zelayRequest } from "../utils/zelayRequest";
-import { userBonus } from "../controller/zealyBot";
+import { assignPoints } from "../controller/user";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 const accessTokenSecret = nconf.get("JWT_SECRET");
@@ -18,12 +17,6 @@ client.on("messageCreate", async (message: any) => {
 
   const content = message.content.toLowerCase();
   console.log(content);
-
-  // const zelayUserData = await zelayRequest(
-  //   "get",
-  //   `https://api.zealy.io/communities/themahadao/users?discordId=${message.author.id}`
-  // );
-  // console.log(zelayUserData);
 
   // find and cerate user
   await User.findOne({ userID: message.author.id }).then(async (user) => {
@@ -44,13 +37,6 @@ client.on("messageCreate", async (message: any) => {
       discordVerify: true,
     });
     await newUser.save();
-    //save zelay users data
-
-    // if (zelayUserData.success) {
-    //   newUser.zelayUserId = zelayUserData.data.id;
-    //   newUser.zelayUserName = zelayUserData.data.name;
-    //   await newUser.save();
-    // }
 
     const token = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
     newUser.jwt = token;
@@ -134,31 +120,29 @@ client.on("messageCreate", async (message: any) => {
       user.discordName = message.author.username;
       user.discordAvatar = message.author.avatar || "";
       user.discordDiscriminator = message.author.discriminator;
-      // user.zelayUserId = zelayUserData.data.id;
-      // user.zelayUserName = zelayUserData.data.name;
 
       // If user's last gm was yesterday, then continue streak
       if (isYesterday(lastGM)) {
-        // await assignGmPoints(points, user.zelayUserId);
         user.streak += 1;
         user.maxStreak =
           user.streak > user.maxStreak ? user.streak : user.maxStreak;
         user.totalGMs += 1;
         user.save();
+        await assignPoints(user, 10, "Good Morning Points", true);
       }
 
       // If user's last gm was older than yesterday, then break streak
       else if (!isToday(lastGM)) {
-        // await assignGmPoints(points, user.zelayUserId);
         user.streak = 1;
         user.totalGMs += 1;
         user.save();
+        await assignPoints(user, 10, "Good Morning Points", true);
       } else if (isToday(lastGM) && user.totalGMs == 0) {
-        // await assignGmPoints(points, user.zelayUserId);
         user.streak = 1;
         user.totalGMs = 1;
         user.maxStreak = 1;
         user.save();
+        await assignPoints(user, 10, "Good Morning Points", true);
       }
       const rankResult = await assignRank(user.userID || "");
       const text = `gm <@${message.author.id}>!\nYou've said gm for **${
@@ -178,6 +162,6 @@ client.on("messageCreate", async (message: any) => {
 
 const assignGmPoints = async (points: number, userId: string) => {
   if (userId !== "") {
-    await userBonus(userId, points, "gm points", "rewards");
+    // await userBonus(userId, points, "gm points", "rewards");
   }
 };

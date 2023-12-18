@@ -1,32 +1,13 @@
 import { fetchTweetData } from "../../utils/tweetData";
-import { Quest } from "../../database/models/quest";
-import { approveQuest } from "../reviewQuest";
-import { saveZelayUser } from "../user";
 
 export const checkTweetMAHA = async (
   tweetId: string,
   twitterUserName: string,
   quest: any
 ) => {
-  const mahaTypes = [
-    "@maha",
-    "MAHA",
-    "MahaDAO",
-    "$MAHA",
-    "$ARTH",
-    "ARTH",
-    "#MAHA",
-    "#ARTH",
-    "@MahaDAO",
-    "#MahaDAO",
-    "@TheMahaDAO",
-    "@mahalend",
-    "#mahalend",
-  ].map((t) => t.toLowerCase());
+  const mahaTypes = ["#zerolend", "@zerolend"].map((t) => t.toLowerCase());
   const url = `https://api.twitter.com/1.1/statuses/show.json?id=${tweetId}&tweet_mode=extended`;
   const tweetData: any = await fetchTweetData(url, twitterUserName);
-  let questStatus = "fail";
-  let comment = "";
   if (tweetData.success) {
     for (let i = 0; i < mahaTypes.length; i++) {
       const words: string[] = tweetData.tweet.full_text
@@ -38,25 +19,9 @@ export const checkTweetMAHA = async (
       const isValid = words.findIndex((word) => mahaTypes.includes(word)) >= 0;
 
       if (isValid) {
-        questStatus = "success";
-        await Quest.create({
-          questId: quest.id,
-          tweetId: tweetId,
-          tweetDate: tweetData.tweetDate,
-          questDetails: quest,
-          questName: quest.name,
-        });
-
         //save zelay user if doesn't exists
-        await saveZelayUser(quest.user.id, quest.user.name);
         break;
       }
-      comment = "this tweet is missing maha tag";
     }
-  } else {
-    comment = tweetData.comment;
-  }
-  if (questStatus === "success") {
-    await approveQuest([quest.id], questStatus, comment);
   }
 };

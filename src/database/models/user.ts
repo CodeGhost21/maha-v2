@@ -13,8 +13,10 @@ export interface IUser {
   discordName: string;
   discordDiscriminator: string;
   discordAvatar: string;
-  zelayUserId: string;
-  zelayUserName: string;
+  walletAddress: string;
+  discordVerify: boolean;
+  twitterVerify: boolean;
+  totalPoints: number;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -32,9 +34,10 @@ const UserSchema = new mongoose.Schema(
     discordName: { type: String, default: "" },
     discordDiscriminator: { type: String, default: "" },
     discordAvatar: { type: String, default: "" },
-
-    zelayUserId: { type: String, default: "" },
-    zelayUserName: { type: String, default: "" },
+    walletAddress: { type: String },
+    discordVerify: { type: Boolean, default: false },
+    twitterVerify: { type: Boolean, default: false },
+    totalPoints: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

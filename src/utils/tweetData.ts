@@ -1,5 +1,3 @@
-import { sendRequest } from "./sendRequest";
-import nconf from "nconf";
 import { twitterRequest } from "./twitterRequest";
 
 export const fetchTweetData = async (url: string, questUserName: string) => {
@@ -7,9 +5,8 @@ export const fetchTweetData = async (url: string, questUserName: string) => {
     const tweetData = await twitterRequest("get", url);
     if (await verifyTweet(questUserName, tweetData.user.screen_name)) {
       if (
-        true
-        // new Date(parseTweetData.created_at).getTime() >
-        // new Date().getTime() - 86400000
+        new Date(tweetData.created_at).getTime() >
+        new Date().getTime() - 86400000
       ) {
         return {
           success: true,

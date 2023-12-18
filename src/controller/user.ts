@@ -1,33 +1,70 @@
-import { Request, Response } from "express";
-import { User } from "../database/models/user";
-import { userBonus } from "./zealyBot";
-export const saveZelayUser = async (userId: string, userName: string) => {
-  const findUser = await User.findOne({ zelayUserId: userId });
-  if (!findUser) {
-    await User.create({
-      zelayUserId: userId,
-      zelayUserName: userName,
-    });
-  } else {
-    findUser.zelayUserId = userId;
-    findUser.zelayUserName = userName;
-    await findUser.save();
+import * as ethers from "ethers";
+import Bluebird, { is } from "bluebird";
+import { onezPoints } from "./quests/onez";
+import { IUserModel, User } from "../database/models/user";
+import { UserPoints } from "../database/models/userPoints";
+
+//connect wallet verify
+export const walletVerify = async (req: any, res: any) => {
+  try {
+    const userReq = req.user;
+    const userData = await User.findOne({ _id: userReq.id });
+
+    if (userData) {
+      const result = ethers.verifyMessage(userData.userID || "", req.body.hash);
+      if (result === req.body.address) {
+        userData["walletAddress"] = req.body.address;
+        await userData.save();
+        // const discordMsgEmbed = new MessageEmbed()
+        //   .setColor("#F07D55")
+        //   .setDescription("Congratulation your wallet has been connected");
+        // const payload = {
+        //   embeds: [discordMsgEmbed],
+        // };
+        // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
+        res.send({ success: true });
+      } else {
+        res.send({ success: false });
+      }
+    } else {
+      res.send({ success: false });
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 
-export const giveXp = async (req: Request, response: Response) => {
-  const findUser = await User.findOne({ zelayUserId: req.body.userId });
-  if (findUser) {
-    await userBonus(
-      req.body.userId,
-      req.body.xp,
-      req.body.label,
-      req.body.desc
-    );
-  }
+export const assignPoints = async (
+  user: IUserModel,
+  points: number,
+  message: string,
+  isAdd: boolean
+) => {
+  console.log(43, user, isAdd);
+
+  const previousPoints = user.totalPoints;
+  const currentPoints = previousPoints + points;
+  console.log("previousPoints", previousPoints);
+  console.log("currentPoints", currentPoints);
+  await UserPoints.create({
+    userId: user._id,
+    previousPoints,
+    currentPoints,
+    subPoints: isAdd ? 0 : points,
+    addPoints: !isAdd ? 0 : points,
+    message,
+  });
+
+  user["totalPoints"] = currentPoints;
+  await user.save();
 };
 
-export const fetchZelayUsers = async (req: any, res: any) => {
-  const allUsers = await User.find({ zelayUserId: { $ne: "" } });
-  res.send(allUsers);
+export const dailyPointsSystem = async () => {
+  const allUsers = await User.find({});
+
+  Bluebird.mapSeries(allUsers, async (user) => {
+    const points = await onezPoints(user.walletAddress);
+    await assignPoints(user, points.mint, "Daily Mint", true);
+    await assignPoints(user, points.liquidity, "Daily Liquidity", true);
+  });
 };
