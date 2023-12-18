@@ -1,33 +1,47 @@
-import * as ethers from "ethers";
-import Bluebird, { is } from "bluebird";
+import Bluebird from "bluebird";
+import * as jwt from "jsonwebtoken";
+import nconf from "nconf";
+import { SiweMessage } from "siwe";
+
 import { onezPoints } from "./quests/onez";
 import { IUserModel, User } from "../database/models/user";
 import { UserPoints } from "../database/models/userPoints";
 
+const accessTokenSecret = nconf.get("JWT_SECRET");
+
 //connect wallet verify
 export const walletVerify = async (req: any, res: any) => {
+  console.log(req.body);
+  const { message, signature } = req.body;
+  const siweMessage = new SiweMessage(message);
   try {
-    const userReq = req.user;
-    const userData = await User.findOne({ _id: userReq.id });
-
-    if (userData) {
-      const result = ethers.verifyMessage(userData.userID || "", req.body.hash);
-      if (result === req.body.address) {
-        userData["walletAddress"] = req.body.address;
-        await userData.save();
-        // const discordMsgEmbed = new MessageEmbed()
-        //   .setColor("#F07D55")
-        //   .setDescription("Congratulation your wallet has been connected");
-        // const payload = {
-        //   embeds: [discordMsgEmbed],
-        // };
-        // sendMessage(nconf.get("CHANNEL_WALLET_CONNECT"), payload);
-        res.send({ success: true });
+    const result = await siweMessage.verify({ signature });
+    // console.log(27, result);
+    if (result.data.address === req.body.message.address) {
+      const user = await User.findOne({
+        walletAddress: result.data.address,
+      });
+      if (user) {
+        user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+        await user.save();
+        res.send({ success: true, user });
       } else {
-        res.send({ success: false });
+        const newUser = await User.create({
+          walletAddress: req.body.message.address,
+        });
+
+        newUser.jwt = await jwt.sign(
+          { id: String(newUser.id) },
+          accessTokenSecret
+        );
+        await newUser.save();
+        res.send({ success: true, newUser });
       }
     } else {
-      res.send({ success: false });
+      res.send({
+        success: false,
+        message: "Signature verification failed. Invalid signature.",
+      });
     }
   } catch (error) {
     console.log(error);
@@ -67,4 +81,9 @@ export const dailyPointsSystem = async () => {
     await assignPoints(user, points.mint, "Daily Mint", true);
     await assignPoints(user, points.liquidity, "Daily Liquidity", true);
   });
+};
+
+export const getLeaderBoard = async (req: any, res: any) => {
+  const allUsers = await User.find({}).sort({ totalPoints: -1 });
+  res.send(allUsers);
 };

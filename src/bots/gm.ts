@@ -1,6 +1,6 @@
 import { isYesterday, isToday } from "date-fns";
 import nconf from "nconf";
-import * as jwt from "jsonwebtoken";
+// import * as jwt from "jsonwebtoken";
 
 import { client } from "../output/discord";
 import { User } from "../database/models/user";
@@ -9,7 +9,7 @@ import { assignRank } from "../helper/upadteRank";
 import { assignPoints } from "../controller/user";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
-const accessTokenSecret = nconf.get("JWT_SECRET");
+// const accessTokenSecret = nconf.get("JWT_SECRET");
 
 client.on("messageCreate", async (message: any) => {
   if (message.channelId !== nconf.get("CHANNEL_GM")) return;
@@ -38,9 +38,9 @@ client.on("messageCreate", async (message: any) => {
     });
     await newUser.save();
 
-    const token = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
-    newUser.jwt = token;
-    await newUser.save();
+    // const token = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
+    // newUser.jwt = token;
+    // await newUser.save();
 
     message.channel.send(
       `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
@@ -159,9 +159,3 @@ client.on("messageCreate", async (message: any) => {
     return;
   }
 });
-
-const assignGmPoints = async (points: number, userId: string) => {
-  if (userId !== "") {
-    // await userBonus(userId, points, "gm points", "rewards");
-  }
-};
