@@ -7,6 +7,7 @@ import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignRank } from "../helper/upadteRank";
 import { assignPoints } from "../controller/user";
+import { WalletUser } from "../database/models/walletUsers";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 const lbKeywords = ["!leaderboard", "!lb"];
 // const accessTokenSecret = nconf.get("JWT_SECRET");
@@ -37,10 +38,6 @@ client.on("messageCreate", async (message: any) => {
       discordVerify: true,
     });
     await newUser.save();
-
-    // const token = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
-    // newUser.jwt = token;
-    // await newUser.save();
 
     message.channel.send(
       `**Welcome to the good morning channel <@${message.author.id}>**!\n\n` +
@@ -128,7 +125,7 @@ client.on("messageCreate", async (message: any) => {
           user.streak > user.maxStreak ? user.streak : user.maxStreak;
         user.totalGMs += 1;
         user.save();
-        await assignPoints(user, 10, "Good Morning Points", true);
+        await gmPoints(user.userID || "");
       }
 
       // If user's last gm was older than yesterday, then break streak
@@ -136,13 +133,13 @@ client.on("messageCreate", async (message: any) => {
         user.streak = 1;
         user.totalGMs += 1;
         user.save();
-        await assignPoints(user, 10, "Good Morning Points", true);
+        await gmPoints(user.userID || "");
       } else if (isToday(lastGM) && user.totalGMs == 0) {
         user.streak = 1;
         user.totalGMs = 1;
         user.maxStreak = 1;
         user.save();
-        await assignPoints(user, 10, "Good Morning Points", true);
+        await gmPoints(user.userID || "");
       }
       const rankResult = await assignRank(user.userID || "");
       const text = `gm <@${message.author.id}>!\nYou've said gm for **${
@@ -159,3 +156,9 @@ client.on("messageCreate", async (message: any) => {
     return;
   }
 });
+
+const gmPoints = async (discordId: string) => {
+  const walletUser = await WalletUser.findOne({ discordId: discordId });
+  if (!walletUser) return;
+  await assignPoints(walletUser, 10, "Good Morning Points", true);
+};

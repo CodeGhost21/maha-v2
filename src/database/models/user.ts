@@ -15,7 +15,6 @@ export interface IUser {
   discordAvatar: string;
   walletAddress: string;
   discordVerify: boolean;
-  twitterVerify: boolean;
   totalPoints: number;
 }
 
@@ -36,7 +35,6 @@ const UserSchema = new mongoose.Schema(
     discordAvatar: { type: String, default: "" },
     walletAddress: { type: String },
     discordVerify: { type: Boolean, default: false },
-    twitterVerify: { type: Boolean, default: false },
     totalPoints: { type: Number, default: 0 },
   },
   { timestamps: true }

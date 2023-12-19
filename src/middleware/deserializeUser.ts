@@ -1,7 +1,6 @@
 import { IAppRequest } from "../utils/interfaces";
 import { Response, NextFunction } from "express";
 import { User } from "../database/models/user";
-import BadRequestError from "../errors/BadRequestError";
 import jwt from "jsonwebtoken";
 import nconf from "nconf";
 import passport from "passport";

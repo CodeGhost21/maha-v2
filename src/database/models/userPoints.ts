@@ -16,6 +16,7 @@ const UserPointsSchema = new mongoose.Schema(
     currentPoints: { type: Number },
     subPoints: { type: Number },
     addPoints: { type: Number },
+    message: { type: String },
   },
   { timestamps: true }
 );
