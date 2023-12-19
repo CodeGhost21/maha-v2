@@ -5,6 +5,7 @@ import passport from "passport";
 
 import urlJoin from "../utils/url-join";
 import { WalletUser } from "../database/models/walletUsers";
+import { checkGuildMember } from "../output/discord";
 
 const secret = nconf.get("JWT_SECRET");
 const router = Router();
@@ -29,13 +30,12 @@ router.get(
   passport.authenticate("discord"),
   async (req: any, res) => {
     const user: any = await WalletUser.findOne({ _id: req.query.state });
-    console.log("user", user);
+    const isFollow = await checkGuildMember(req.user.id);
     user.discordId = req.user.id;
     user.discordVerify = true;
+    user.discordFollow = isFollow;
     await user.save();
-    res.redirect(
-      urlJoin(nconf.get("FRONTEND_URL"), `/#/auth/redirect/callback`)
-    );
+    res.redirect(urlJoin(nconf.get("FRONTEND_URL"), `/#/`));
   }
 );
 

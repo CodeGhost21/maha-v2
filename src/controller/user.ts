@@ -112,3 +112,20 @@ export const updateRank = async () => {
     await user.save();
   });
 };
+
+export const fetchMe = async (req: any, res: any) => {
+  const user = await WalletUser.findOne({ _id: req.user.id });
+  res.json({ success: true, user });
+};
+
+export const checkTask = async (req: any, res: any) => {
+  const user = req.user;
+  if (req.body.taskId === "discordFollow") {
+    const checkDiscordFollow = await checkGuildMember(user.discordId);
+    user.discordFollow = checkDiscordFollow;
+    await user.save();
+    res.json({ success: true, user });
+  } else {
+    res.json({ success: false });
+  }
+};
