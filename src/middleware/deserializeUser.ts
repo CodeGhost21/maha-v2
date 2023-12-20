@@ -1,6 +1,6 @@
 import { IAppRequest } from "../utils/interfaces";
 import { Response, NextFunction } from "express";
-import { User } from "../database/models/user";
+import { WalletUser } from "../database/models/walletUsers";
 import jwt from "jsonwebtoken";
 import nconf from "nconf";
 import passport from "passport";
@@ -30,7 +30,7 @@ function deserializeUser(
       // Once we've extracted the payload from it, we'll try to query to the
       // DB to find the user for this session and attach it to the request.
 
-      User.findById(payload.id)
+      WalletUser.findById(payload.id)
         .then((user) => {
           // avoid deleted users
           // if (user && user) throw new BadRequestError("deleted user");

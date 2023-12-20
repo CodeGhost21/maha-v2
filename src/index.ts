@@ -29,7 +29,7 @@ app.use(
     secret: nconf.get("SESSION_SECRET"),
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true },
+    cookie: { secure: false },
   })
 );
 

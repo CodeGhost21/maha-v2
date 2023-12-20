@@ -17,8 +17,6 @@ client.on("messageCreate", async (message: any) => {
   if (message.author.bot) return;
 
   const content = message.content.toLowerCase();
-  console.log(content);
-
   // find and cerate user
   await User.findOne({ userID: message.author.id }).then(async (user) => {
     if (user) return;
@@ -160,5 +158,8 @@ client.on("messageCreate", async (message: any) => {
 const gmPoints = async (discordId: string) => {
   const walletUser = await WalletUser.findOne({ discordId: discordId });
   if (!walletUser) return;
-  await assignPoints(walletUser, 10, "Good Morning Points", true);
+  await assignPoints(walletUser, 10, "Good Morning Points", true, {
+    taskId: "gmPoints",
+    points: 10,
+  });
 };

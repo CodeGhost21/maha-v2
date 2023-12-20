@@ -1,6 +1,6 @@
 import "./discord";
+import "./twitter";
 // import "./google";
-// import "./twitter";
 import passport from "passport";
 
 passport.serializeUser((user, done) => done(null, user));
