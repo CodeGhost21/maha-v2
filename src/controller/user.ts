@@ -1,7 +1,7 @@
 import Bluebird from "bluebird";
 import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
-import { SiweMessage } from "siwe";
+import { SiweMessage } from "../siwe/lib/client";
 
 import { onezPoints } from "./quests/onez";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -81,6 +81,7 @@ export const dailyPointsSystem = async () => {
 
   Bluebird.mapSeries(allUsers, async (user) => {
     const points = await onezPoints(user.walletAddress);
+    console.log("points", points);
     if (points.mint > 0)
       await assignPoints(user, points.mint, "Daily Mint", true);
     if (points.liquidity > 0)

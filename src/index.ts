@@ -38,7 +38,6 @@ app.use(passport.session());
 
 cron.schedule("*/5 * * * *", async () => {
   console.log("running a task every 5 minutes");
-
   await dailyPointsSystem();
 });
 app.use(Routes);
