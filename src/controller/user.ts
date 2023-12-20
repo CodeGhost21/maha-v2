@@ -14,44 +14,13 @@ const LQTYHolders: any = [];
 const AAVEStakers: any = [];
 const LUSDHolders: any = [];
 
-//connect wallet verify
-export const walletVerify = async (req: any, res: any) => {
-  // console.log(req);
-  const { message, signature } = req.body;
-  const siweMessage = new SiweMessage(message);
-  try {
-    const result = await siweMessage.verify({ signature });
-    if (result.data.address === req.body.message.address) {
-      const user = await WalletUser.findOne({
-        walletAddress: result.data.address,
-      });
-      if (user) {
-        user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-        await user.save();
-        res.send({ success: true, user });
-      } else {
-        const usersCount = await WalletUser.count();
-        const newUser = await WalletUser.create({
-          walletAddress: req.body.message.address,
-          rank: usersCount + 1,
-        });
+export const updateRank = async () => {
+  const users = await WalletUser.find({}).sort({ totalPoints: -1 });
 
-        newUser.jwt = await jwt.sign(
-          { id: String(newUser.id) },
-          accessTokenSecret
-        );
-        await newUser.save();
-        res.send({ success: true, newUser });
-      }
-    } else {
-      res.send({
-        success: false,
-        message: "Signature verification failed. Invalid signature.",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  }
+  await Bluebird.mapSeries(users, async (user, index) => {
+    user.rank = index + 1;
+    await user.save();
+  });
 };
 
 export const assignPoints = async (
@@ -101,29 +70,50 @@ export const dailyPointsSystem = async () => {
   });
 };
 
+export const walletVerify = async (req: any, res: any) => {
+  // console.log(req);
+  const { message, signature } = req.body;
+  const siweMessage = new SiweMessage(message);
+  try {
+    const result = await siweMessage.verify({ signature });
+    if (result.data.address === req.body.message.address) {
+      const user = await WalletUser.findOne({
+        walletAddress: result.data.address,
+      });
+      if (user) {
+        user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+        await user.save();
+        res.send({ success: true, user });
+      } else {
+        const usersCount = await WalletUser.count();
+        const newUser = await WalletUser.create({
+          walletAddress: req.body.message.address,
+          rank: usersCount + 1,
+        });
+
+        newUser.jwt = await jwt.sign(
+          { id: String(newUser.id) },
+          accessTokenSecret
+        );
+        await newUser.save();
+        res.send({ success: true, newUser });
+      }
+    } else {
+      res.send({
+        success: false,
+        message: "Signature verification failed. Invalid signature.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const getLeaderBoard = async (req: any, res: any) => {
   const allUsers = await WalletUser.find({})
     .sort({ rank: 1 })
     .select("totalPoints rank walletAddress");
   res.send(allUsers);
-};
-
-export const addDiscordProfile = async (req: any, res: any) => {
-  const user = req.user;
-  const checkDiscordFollow = await checkGuildMember(req.body.discordId);
-  user.discordId = req.body.discordId;
-  user.discordFollow = checkDiscordFollow;
-  await user.save();
-  res.send({ success: true, user });
-};
-
-export const updateRank = async () => {
-  const users = await WalletUser.find({}).sort({ totalPoints: -1 });
-
-  await Bluebird.mapSeries(users, async (user, index) => {
-    user.rank = index + 1;
-    await user.save();
-  });
 };
 
 export const fetchMe = async (req: any, res: any) => {
