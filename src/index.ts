@@ -41,6 +41,6 @@ cron.schedule("*/5 * * * *", async () => {
   await dailyPointsSystem();
 });
 app.use(Routes);
-app.set("port", nconf.get("PORT") || 5001);
+app.set("port", nconf.get("PORT") || 5002);
 const port = app.get("port");
 server.listen(port, () => console.log(`Server started on port ${port}`));
