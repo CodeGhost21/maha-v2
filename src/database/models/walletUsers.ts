@@ -25,7 +25,7 @@ export interface IWalletUser {
   twitterFollowPoints: number;
   LQTYHolderPoints: number;
   LUSDHolderPoints: number;
-  AAVEStakersPoints: number;
+  AAVEStakerPoints: number;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -54,7 +54,7 @@ const UserSchema = new mongoose.Schema(
     twitterFollowPoints: { type: Number, default: 0 },
     LQTYHolderPoints: { type: Number, default: 0 },
     LUSDHolderPoints: { type: Number, default: 0 },
-    AAVEStakersPoints: { type: Number, default: 0 },
+    AAVEStakerPoints: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

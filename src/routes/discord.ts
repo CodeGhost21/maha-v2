@@ -31,19 +31,30 @@ router.get(
   passport.authenticate("discord"),
   async (req: any, res) => {
     const user: any = await WalletUser.findOne({ _id: req.query.state });
-    const isFollow = await checkGuildMember(req.user.id);
-    if (isFollow) {
-      user.discordFollow = true;
-      await assignPoints(user, 100, "Discord Follower", true, {
-        taskId: "discordFollowPoints",
-        points: 100,
-      });
+    const discordUser = await WalletUser.findOne({ discordId: req.user.id });
+    console.log("35", discordUser);
+
+    let url = `/#?error=409`;
+    if (!discordUser) {
+      const isFollow = await checkGuildMember(req.user.id);
+      if (isFollow) {
+        user.discordFollow = true;
+        await assignPoints(
+          user,
+          100,
+          "Discord Follower",
+          true,
+          "discordFollow"
+        );
+      }
+      user.discordId = req.user.id;
+      user.discordVerify = true;
+      user.discordFollowChecked = isFollow;
+      await user.save();
+      url = `/#/`;
     }
-    user.discordId = req.user.id;
-    user.discordVerify = true;
-    user.discordFollowChecked = isFollow;
-    await user.save();
-    res.redirect(urlJoin(nconf.get("FRONTEND_URL"), `/#/`));
+
+    res.redirect(urlJoin(nconf.get("FRONTEND_URL"), url));
   }
 );
 

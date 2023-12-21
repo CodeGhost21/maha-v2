@@ -10,9 +10,18 @@ import { checkGuildMember } from "../output/discord";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
-const LQTYHolders: any = [];
-const AAVEStakers: any = [];
-const LUSDHolders: any = [];
+const LQTYHolders: any = [
+  "0x961E45e3666029709C3ac50A26319029cde4e067",
+  "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
+];
+const AAVEStakers: any = [
+  "0x961E45e3666029709C3ac50A26319029cde4e067",
+  "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
+];
+const LUSDHolders: any = [
+  "0x961E45e3666029709C3ac50A26319029cde4e067",
+  "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
+];
 
 export const updateRank = async () => {
   const users = await WalletUser.find({}).sort({ totalPoints: -1 });
@@ -28,9 +37,9 @@ export const assignPoints = async (
   points: number,
   message: string,
   isAdd: boolean,
-  task: any
+  taskId: string
 ) => {
-  // console.log(43, user, isAdd);
+  console.log(43, points, taskId);
 
   const previousPoints = user.totalPoints;
   const currentPoints = previousPoints + points;
@@ -44,9 +53,12 @@ export const assignPoints = async (
     addPoints: !isAdd ? 0 : points,
     message,
   });
+  console.log(`${taskId}Checked`);
 
   user["totalPoints"] = currentPoints;
-  user[task.taskId] = user[task.taskId] + task.points;
+  user[`${taskId}Points`] = user[`${taskId}Points`] + points;
+  user[`${taskId}Checked`] = true;
+  console.log("user", user);
   await user.save();
   await updateRank();
 };
@@ -58,15 +70,15 @@ export const dailyPointsSystem = async () => {
     const points = await onezPoints(user.walletAddress);
     console.log("points", points);
     if (points.mint > 0)
-      await assignPoints(user, points.mint, "Daily Mint", true, {
-        taskId: "mintingONEZPoints",
-        points: points.mint,
-      });
+      await assignPoints(user, points.mint, "Daily Mint", true, "mintingONEZ");
     if (points.liquidity > 0)
-      await assignPoints(user, points.liquidity, "Daily Liquidity", true, {
-        taskId: "liquidityONEZPoints",
-        points: points.mint,
-      });
+      await assignPoints(
+        user,
+        points.liquidity,
+        "Daily Liquidity",
+        true,
+        "liquidityONEZ"
+      );
   });
 };
 
@@ -125,40 +137,31 @@ export const checkTask = async (req: any, res: any) => {
   const user = req.user;
   if (req.body.taskId === "discordFollow") {
     const checkDiscordFollow = await checkGuildMember(user.discordId);
-    if (checkDiscordFollow) {
-      await assignPoints(user, 100, "Discord Follower", true, {
-        taskeId: "discordFollowPoints",
-        points: 10,
-      });
+    if (checkDiscordFollow && !user.discordFollow) {
+      await assignPoints(user, 100, "Discord Follower", true, req.body.taskId);
       user.discordFollowChecked = checkDiscordFollow;
+      await user.save();
     }
-  } else if (req.body.taskId === "twitterFollow") {
-    user.discordFollowChecked = true;
+  } else if (req.body.taskId === "twitterFollow" && !user.twitterFollow) {
+    await assignPoints(user, 100, "Twitter Follower", true, req.body.taskId);
+    user.twitterFollowChecked = true;
+    await user.save();
   } else if (req.body.taskId === "LQTYHolder") {
-    if (LQTYHolders.includes(user.walletAddress)) {
+    if (LQTYHolders.includes(user.walletAddress) && !user.LQTYHolderChecked) {
       user.LQTYHolderChecked = true;
-      await assignPoints(user, 100, "LQTY Holder", true, {
-        taskeId: "LQTYHolderPoints",
-        points: 100,
-      });
+      await assignPoints(user, 100, "LQTY Holder", true, req.body.taskId);
     }
-  } else if (req.body.taskId === "AAVEStakers") {
+  } else if (req.body.taskId === "AAVEStaker" && !user.AAVEStakersChecked) {
     if (AAVEStakers.includes(user.walletAddress)) {
       user.AAVEStakersChecked = true;
-      await assignPoints(user, 100, "AAVE Staker", true, {
-        taskeId: "AAVEStakersPoints",
-        points: 100,
-      });
+      await assignPoints(user, 100, "AAVE Staker", true, req.body.taskId);
     }
-  } else if (req.body.taskId === "LUSDHolder") {
+  } else if (req.body.taskId === "LUSDHolder" && !user.LUSDHoldersChecked) {
     if (LUSDHolders.includes(user.walletAddress)) {
       user.LUSDHoldersChecked = true;
-      await assignPoints(user, 100, "LUSD Holder", true, {
-        taskeId: "LUSDHolderPoints",
-        points: 100,
-      });
+      await assignPoints(user, 100, "LUSD Holder", true, req.body.taskId);
     }
   }
-  await user.save();
+
   res.json({ success: true, user });
 };
