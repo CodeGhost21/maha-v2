@@ -8,7 +8,7 @@ export const assignRank = async (discordId: string) => {
     user["gmRank"] = rank;
     await user.save();
   });
-  const userRank = await User.findOne({ discordId: discordId });
+  const userRank = await User.findOne({ userID: discordId });
   return {
     rank: userRank?.gmRank,
     totalUsers: users.length,
