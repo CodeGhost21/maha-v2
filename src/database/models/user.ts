@@ -3,8 +3,6 @@ import mongoose from "mongoose";
 export interface IUser {
   userTag: string;
   userID: string;
-  streak: number;
-  maxStreak: number;
   totalGMs: number;
   lastGM: Date;
   lastImage: Date;
@@ -22,13 +20,10 @@ const UserSchema = new mongoose.Schema(
   {
     userTag: String,
     userID: String,
-    streak: { type: Number, default: 0 },
-    maxStreak: { type: Number, default: 0 },
     totalGMs: { type: Number, default: 0 },
     lastGM: Date,
     lastImage: Date,
     gmRank: { type: Number, default: 0 },
-
     jwt: String,
     discordName: { type: String, default: "" },
     discordDiscriminator: { type: String, default: "" },
