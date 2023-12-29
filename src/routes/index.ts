@@ -6,7 +6,7 @@ import twitter from "./twitter";
 export const router = Router();
 
 router.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("Healthy");
 });
 
 router.use("/discord", discord);
