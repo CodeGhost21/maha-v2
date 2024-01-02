@@ -7,6 +7,8 @@ export interface IWalletUser {
   rank: number;
   walletAddress: string;
   totalPoints: number;
+  referralCode: string;
+  referredBy: string;
   twitterOauthToken: string;
   twitterOauthTokenSecret: string;
   discordFollowChecked: boolean;
@@ -26,6 +28,7 @@ export interface IWalletUser {
   LQTYHolderPoints: number;
   LUSDHolderPoints: number;
   AAVEStakerPoints: number;
+  referralPoints: number;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -41,6 +44,8 @@ const UserSchema = new mongoose.Schema(
     twitterOauthToken: String,
     twitterOauthTokenSecret: String,
     totalPoints: { type: Number, default: 0 },
+    referralCode: { type: String },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
     rank: { type: Number },
     gmChecked: { type: Boolean, default: false },
     AAVEStakerChecked: { type: Boolean, default: false },
@@ -55,6 +60,7 @@ const UserSchema = new mongoose.Schema(
     LQTYHolderPoints: { type: Number, default: 0 },
     LUSDHolderPoints: { type: Number, default: 0 },
     AAVEStakerPoints: { type: Number, default: 0 },
+    referralPoints: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

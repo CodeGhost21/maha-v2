@@ -4,7 +4,7 @@ import nconf from "nconf";
 import { SiweMessage } from "../siwe/lib/client";
 
 import { onezPoints } from "./quests/onez";
-import { WalletUser } from "../database/models/walletUsers";
+import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { checkGuildMember } from "../output/discord";
 
@@ -15,19 +15,34 @@ const LQTYHolders: any = [
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
   "0x428c782685a1f223bAA34Eab6ea5c5D7ac6e4E8b",
+  "0x7d583D4d3404055a75640d94759A242255d9f5F8",
 ];
 const AAVEStakers: any = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
   "0x428c782685a1f223bAA34Eab6ea5c5D7ac6e4E8b",
+  "0x7d583D4d3404055a75640d94759A242255d9f5F8",
 ];
 const LUSDHolders: any = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
   "0x428c782685a1f223bAA34Eab6ea5c5D7ac6e4E8b",
+  "0x7d583D4d3404055a75640d94759A242255d9f5F8",
 ];
+
+const generateReferralCode = async () => {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let referralCode = "";
+  for (let i = 0; i < 12; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    referralCode += characters.charAt(randomIndex);
+  }
+
+  return referralCode;
+};
 
 export const updateRank = async () => {
   const users = await WalletUser.find({}).sort({ totalPoints: -1 });
@@ -38,6 +53,24 @@ export const updateRank = async () => {
   });
 };
 
+const saveUserPoints = async (
+  user: any,
+  previousPoints: number,
+  currentPoints: number,
+  isAdd: boolean,
+  points: number,
+  message: string
+) => {
+  await UserPointTransactions.create({
+    userId: user,
+    previousPoints,
+    currentPoints,
+    subPoints: isAdd ? 0 : points,
+    addPoints: !isAdd ? 0 : points,
+    message,
+  });
+};
+
 export const assignPoints = async (
   user: any,
   points: number,
@@ -45,26 +78,52 @@ export const assignPoints = async (
   isAdd: boolean,
   taskId: string
 ) => {
-  console.log(43, points, taskId);
-
   const previousPoints = user.totalPoints;
   const currentPoints = previousPoints + points;
-  // console.log("previousPoints", previousPoints);
-  // console.log("currentPoints", currentPoints);
-  await UserPointTransactions.create({
-    userId: user._id,
+  await saveUserPoints(
+    user.id,
     previousPoints,
     currentPoints,
-    subPoints: isAdd ? 0 : points,
-    addPoints: !isAdd ? 0 : points,
-    message,
-  });
-  console.log(`${taskId}Checked`);
+    isAdd,
+    points,
+    message
+  );
 
   user["totalPoints"] = currentPoints;
   user[`${taskId}Points`] = user[`${taskId}Points`] + points;
   user[`${taskId}Checked`] = true;
-  console.log("user", user);
+  if (user.referredBy !== undefined) {
+    const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
+    if (referredByUser) {
+      const referralPoints = points * 0.2;
+
+      //assign referral points to referred by user
+      referredByUser.referralPoints =
+        referredByUser.referralPoints + referralPoints;
+      await referredByUser.save();
+
+      await saveUserPoints(
+        referredByUser.id,
+        previousPoints,
+        currentPoints,
+        isAdd,
+        referralPoints,
+        "referral points"
+      );
+
+      // assign points to referred user
+      user["referralPoints"] = user["referralPoints"] + referralPoints;
+
+      await saveUserPoints(
+        user.id,
+        previousPoints,
+        currentPoints,
+        isAdd,
+        referralPoints,
+        "referral points"
+      );
+    }
+  }
   await user.save();
   await updateRank();
 };
@@ -74,7 +133,6 @@ export const dailyPointsSystem = async () => {
 
   Bluebird.mapSeries(allUsers, async (user) => {
     const points = await onezPoints(user.walletAddress);
-    console.log("points", points);
     if (points.mint > 0)
       await assignPoints(user, points.mint, "Daily Mint", true, "mintingONEZ");
     if (points.liquidity > 0)
@@ -89,7 +147,6 @@ export const dailyPointsSystem = async () => {
 };
 
 export const walletVerify = async (req: any, res: any) => {
-  // console.log(req);
   const { message, signature } = req.body;
   const siweMessage = new SiweMessage(message);
   try {
@@ -104,11 +161,31 @@ export const walletVerify = async (req: any, res: any) => {
         res.send({ success: true, user });
       } else {
         const usersCount = await WalletUser.count();
+        const referralCode = await generateReferralCode();
         const newUser = await WalletUser.create({
           walletAddress: req.body.message.address,
           rank: usersCount + 1,
+          referralCode: referralCode ? referralCode : null,
         });
 
+        //referred by user added to user model
+        if (req.body.referredByCode !== "") {
+          const referredUser = await WalletUser.findOne({
+            referralCode: req.body.referredByCode,
+          });
+          if (referredUser) {
+            newUser.referredBy = referredUser.id;
+            await newUser.save();
+          }
+          // else {
+          //   res.send({
+          //     success: false,
+          //     message: "referral code doesn't match",
+          //   });
+          // }
+        }
+
+        //add jwt token
         newUser.jwt = await jwt.sign(
           { id: String(newUser.id) },
           accessTokenSecret
