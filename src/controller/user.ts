@@ -80,17 +80,14 @@ export const assignPoints = async (
 ) => {
   const previousPoints = user.totalPoints;
   let latestPoints = points;
+  let newMessage = message;
   if (user.referredBy !== undefined) {
     const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
     if (referredByUser) {
       const referralPoints = points * 0.2;
       latestPoints = points + referralPoints;
+      newMessage = message + "plus referral points";
       //assign referral points to referred by user
-      referredByUser.referralPoints =
-        referredByUser.referralPoints + referralPoints;
-      referredByUser.totalPoints = referredByUser.totalPoints + referralPoints;
-      await referredByUser.save();
-
       await saveUserPoints(
         referredByUser.id,
         referredByUser.referralPoints,
@@ -99,6 +96,10 @@ export const assignPoints = async (
         referralPoints,
         "referral points"
       );
+      referredByUser.referralPoints =
+        referredByUser.referralPoints + referralPoints;
+      referredByUser.totalPoints = referredByUser.totalPoints + referralPoints;
+      await referredByUser.save();
     }
   }
   const currentPoints = previousPoints + latestPoints;
@@ -108,7 +109,7 @@ export const assignPoints = async (
     currentPoints,
     isAdd,
     latestPoints,
-    message
+    newMessage
   );
 
   user["totalPoints"] = currentPoints;
