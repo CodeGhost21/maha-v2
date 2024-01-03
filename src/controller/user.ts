@@ -3,7 +3,7 @@ import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
 import { SiweMessage } from "../siwe/lib/client";
 
-import { onezPoints } from "./quests/onez";
+import { onezPoints, supplyBorrowPoints } from "./onChain";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { checkGuildMember } from "../output/discord";
@@ -130,19 +130,30 @@ export const assignPoints = async (
 
 export const dailyPointsSystem = async () => {
   const allUsers = await WalletUser.find({});
-
   Bluebird.mapSeries(allUsers, async (user) => {
-    const points = await onezPoints(user.walletAddress);
-    if (points.mint > 0)
-      await assignPoints(user, points.mint, "Daily Mint", true, "mintingONEZ");
-    if (points.liquidity > 0)
-      await assignPoints(
-        user,
-        points.liquidity,
-        "Daily Liquidity",
-        true,
-        "liquidityONEZ"
-      );
+    //onez points
+    // const { mint, liquidity } = await onezPoints(user.walletAddress);
+    // if (mint > 0)
+    //   await assignPoints(user, mint, "Daily Mint", true, "mintingONEZ");
+    // if (liquidity > 0)
+    //   await assignPoints(
+    //     user,
+    //     liquidity,
+    //     "Daily Liquidity",
+    //     true,
+    //     "liquidityONEZ"
+    //   );
+
+    //supply and borrow points
+    console.log("supplyBorrowPoints");
+
+    const { supply, borrow } = await supplyBorrowPoints(user.walletAddress);
+    if (supply > 0) {
+      await assignPoints(user, supply, "Daily Supply", true, "supply");
+    }
+    if (borrow > 0) {
+      await assignPoints(user, borrow, "Daily Borrow", true, "borrow");
+    }
   });
 };
 

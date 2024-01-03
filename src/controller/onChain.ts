@@ -1,4 +1,18 @@
-import { TroveContract, PoolContract, StabilityPool } from "../contracts";
+import { PoolContract, StabilityPool, TroveContract } from "./contracts";
+
+export const supplyBorrowPoints = async (walletAddress: string) => {
+  const userAccoutnData = await PoolContract.getUserAccountData(walletAddress);
+  console.log(userAccoutnData);
+
+  //supply 1:1  &  borrow 1:4
+  const supply = Number(userAccoutnData[0] / BigInt(1e8));
+  const borrow = Number(userAccoutnData[1] / BigInt(1e8)) * 4;
+
+  return {
+    supply: (supply / 3600) * 5,
+    borrow: (borrow / 3600) * 5,
+  };
+};
 
 export const onezPoints = async (walletAddress: string) => {
   const troveResult = await TroveContract.Troves(walletAddress);
@@ -7,8 +21,6 @@ export const onezPoints = async (walletAddress: string) => {
   const mint = Number(troveResult[0] / BigInt(1e18));
 
   const debtResult = await StabilityPool.accountDeposits(walletAddress);
-  // console.log(troveResult);
-  // console.log(debtResult);
 
   const liquidity = Number(debtResult[0] / BigInt(1e18));
   console.log({

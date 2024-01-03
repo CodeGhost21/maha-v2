@@ -18,7 +18,6 @@ router.get("/verify", (_req, res, next) => {
     async (error: jwt.VerifyErrors, payload: jwt.JwtPayload) => {
       //@ts-ignore
       _req.session.userId = payload.id;
-      console.log("payload", _req.session);
       if (error) return next();
       passport.authenticate("twitter", {
         successRedirect: urlJoin(nconf.get("HOST_URL"), `/twitter/callback`),
@@ -31,7 +30,6 @@ router.get(
   "/callback",
   passport.authenticate("twitter"),
   async (req: any, res) => {
-    console.log("req", req.session);
     // const user: any = await WalletUser.findOne({ _id: req.query.state });
     // console.log("mongo user ", user);
     // console.log("twitterId", req.user.id);

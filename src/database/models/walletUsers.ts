@@ -28,6 +28,8 @@ export interface IWalletUser {
   LQTYHolderPoints: number;
   LUSDHolderPoints: number;
   AAVEStakerPoints: number;
+  supplyPoints: number;
+  borrowPoints: number;
   referralPoints: number;
 }
 
@@ -60,6 +62,8 @@ const UserSchema = new mongoose.Schema(
     LQTYHolderPoints: { type: Number, default: 0 },
     LUSDHolderPoints: { type: Number, default: 0 },
     AAVEStakerPoints: { type: Number, default: 0 },
+    supplyPoints: { type: Number, default: 0 },
+    borrowPoints: { type: Number, default: 0 },
     referralPoints: { type: Number, default: 0 },
   },
   { timestamps: true }

@@ -2,7 +2,6 @@ import { Strategy as TwitterStrategy } from "passport-twitter";
 import nconf from "nconf";
 import passport from "passport";
 import urlJoin from "../utils/url-join";
-console.log("twitter", nconf.get("TWITTER_CONSUMER_KEY"));
 
 passport.use(
   new TwitterStrategy(
