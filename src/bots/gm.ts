@@ -7,7 +7,6 @@ import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignPoints } from "../controller/user";
 import { WalletUser } from "../database/models/walletUsers";
-import { log } from "console";
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 // const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -18,6 +17,8 @@ client.on("messageCreate", async (message: any) => {
   const content = message.content.toLowerCase();
   // find and cerate user
   await User.findOne({ userID: message.author.id }).then(async (user) => {
+    console.log(20, user);
+
     if (user) return;
     // If it's the user's first message
     const usersCount = await User.count();
