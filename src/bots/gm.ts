@@ -11,6 +11,8 @@ const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 // const accessTokenSecret = nconf.get("JWT_SECRET");
 
 client.on("messageCreate", async (message: any) => {
+  console.log(14, message);
+
   if (message.channelId !== nconf.get("CHANNEL_GM")) return;
   if (message.author.bot) return;
 
