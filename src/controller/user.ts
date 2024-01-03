@@ -88,6 +88,7 @@ export const assignPoints = async (
       //assign referral points to referred by user
       referredByUser.referralPoints =
         referredByUser.referralPoints + referralPoints;
+      referredByUser.totalPoints = referredByUser.totalPoints + referralPoints;
       await referredByUser.save();
 
       await saveUserPoints(
