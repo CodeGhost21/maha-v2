@@ -86,7 +86,7 @@ export const assignPoints = async (
     if (referredByUser) {
       const referralPoints = points * 0.2;
       latestPoints = points + referralPoints;
-      newMessage = message + "plus referral points";
+      newMessage = message + " plus referral points";
       //assign referral points to referred by user
       await saveUserPoints(
         referredByUser.id,
