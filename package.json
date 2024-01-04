@@ -1,5 +1,5 @@
 {
-  "name": "notifications-bot",
+  "name": "api-airdrop",
   "version": "2.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,6 @@
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
     "postversion": "git push && git push --tags",
-    "prepare": "npm run build",
     "test": "mocha",
     "upgrade": "npx npm-check -u",
     "version": "npm run build && npm run changelog:update",
