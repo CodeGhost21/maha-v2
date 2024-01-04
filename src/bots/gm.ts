@@ -80,5 +80,5 @@ client.on("messageCreate", async (message: any) => {
 const gmPoints = async (discordId: string) => {
   const walletUser = await WalletUser.findOne({ discordId: discordId });
   if (!walletUser) return;
-  await assignPoints(walletUser, 10, "Good Morning Points", true, "gm");
+  await assignPoints(walletUser, 100, "Good Morning Points", true, "gm");
 };

@@ -16,6 +16,7 @@ const LQTYHolders: any = [
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
   "0x428c782685a1f223bAA34Eab6ea5c5D7ac6e4E8b",
   "0x7d583D4d3404055a75640d94759A242255d9f5F8",
+  "0xF152dA370FA509f08685Fa37a09BA997E41Fb65b",
 ];
 const AAVEStakers: any = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
@@ -23,8 +24,17 @@ const AAVEStakers: any = [
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
   "0x428c782685a1f223bAA34Eab6ea5c5D7ac6e4E8b",
   "0x7d583D4d3404055a75640d94759A242255d9f5F8",
+  "0xF152dA370FA509f08685Fa37a09BA997E41Fb65b",
 ];
 const LUSDHolders: any = [
+  "0x961E45e3666029709C3ac50A26319029cde4e067",
+  "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
+  "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
+  "0x428c782685a1f223bAA34Eab6ea5c5D7ac6e4E8b",
+  "0x7d583D4d3404055a75640d94759A242255d9f5F8",
+];
+
+const MAHAStakers: any = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
@@ -223,28 +233,33 @@ export const checkTask = async (req: any, res: any) => {
   if (req.body.taskId === "discordFollow") {
     const checkDiscordFollow = await checkGuildMember(user.discordId);
     if (checkDiscordFollow && !user.discordFollow) {
-      await assignPoints(user, 100, "Discord Follower", true, req.body.taskId);
+      await assignPoints(user, 1000, "Discord Follower", true, req.body.taskId);
       user.discordFollowChecked = checkDiscordFollow;
       await user.save();
     }
   } else if (req.body.taskId === "twitterFollow" && !user.twitterFollow) {
-    await assignPoints(user, 100, "Twitter Follower", true, req.body.taskId);
+    await assignPoints(user, 1000, "Twitter Follower", true, req.body.taskId);
     user.twitterFollowChecked = true;
     await user.save();
   } else if (req.body.taskId === "LQTYHolder") {
     if (LQTYHolders.includes(user.walletAddress) && !user.LQTYHolderChecked) {
       user.LQTYHolderChecked = true;
-      await assignPoints(user, 100, "LQTY Holder", true, req.body.taskId);
+      await assignPoints(user, 10000, "LQTY Holder", true, req.body.taskId);
     }
   } else if (req.body.taskId === "AAVEStaker" && !user.AAVEStakersChecked) {
     if (AAVEStakers.includes(user.walletAddress)) {
       user.AAVEStakersChecked = true;
-      await assignPoints(user, 100, "AAVE Staker", true, req.body.taskId);
+      await assignPoints(user, 10000, "AAVE Staker", true, req.body.taskId);
     }
-  } else if (req.body.taskId === "LUSDHolder" && !user.LUSDHoldersChecked) {
+  } else if (req.body.taskId === "LUSDHolder" && !user.LUSDHolderChecked) {
     if (LUSDHolders.includes(user.walletAddress)) {
-      user.LUSDHoldersChecked = true;
-      await assignPoints(user, 100, "LUSD Holder", true, req.body.taskId);
+      user.LUSDHolderChecked = true;
+      await assignPoints(user, 10000, "LUSD Holder", true, req.body.taskId);
+    }
+  } else if (req.body.taskId === "MAHAStaker" && !user.MAHAStakerChecked) {
+    if (MAHAStakers.includes(user.walletAddress)) {
+      user.MAHAStakerChecked = true;
+      await assignPoints(user, 100000, "MAHA Staker", true, req.body.taskId);
     }
   }
 

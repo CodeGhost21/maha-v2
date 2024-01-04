@@ -17,8 +17,10 @@ export interface IWalletUser {
   twitterVerify: boolean;
   gmChecked: boolean;
   AAVEStakerChecked: boolean;
+  MAHAStaker: boolean;
   LQTYHolderChecked: boolean;
   LUSDHolderChecked: boolean;
+  MAHAStakerChecked: boolean;
 
   gmPoints: number;
   mintingONEZPoints: number;
@@ -28,6 +30,7 @@ export interface IWalletUser {
   LQTYHolderPoints: number;
   LUSDHolderPoints: number;
   AAVEStakerPoints: number;
+  MAHAStakerPoints: number;
   supplyPoints: number;
   borrowPoints: number;
   referralPoints: number;
@@ -51,14 +54,17 @@ const UserSchema = new mongoose.Schema(
     rank: { type: Number },
     gmChecked: { type: Boolean, default: false },
     AAVEStakerChecked: { type: Boolean, default: false },
+    MAHAStaker: { type: Boolean, default: false },
     LQTYHolderChecked: { type: Boolean, default: false },
     LUSDHolderChecked: { type: Boolean, default: false },
+    MAHAStakerChecked: { type: Boolean, default: false },
 
     gmPoints: { type: Number, default: 0 },
     mintingONEZPoints: { type: Number, default: 0 },
     liquidityONEZPoints: { type: Number, default: 0 },
     discordFollowPoints: { type: Number, default: 0 },
     twitterFollowPoints: { type: Number, default: 0 },
+    MAHAStakerPoints: { type: Number, default: 0 },
     LQTYHolderPoints: { type: Number, default: 0 },
     LUSDHolderPoints: { type: Number, default: 0 },
     AAVEStakerPoints: { type: Number, default: 0 },
