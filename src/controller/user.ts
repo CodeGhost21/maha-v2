@@ -203,7 +203,7 @@ export const walletVerify = async (req: any, res: any) => {
           accessTokenSecret
         );
         await newUser.save();
-        res.send({ success: true, newUser });
+        res.send({ success: true, user: newUser });
       }
     } else {
       res.send({
