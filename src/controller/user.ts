@@ -146,7 +146,6 @@ export const dailyPointsSystem = async () => {
     //   );
 
     //supply and borrow points
-    console.log("supplyBorrowPoints");
 
     const { supply, borrow } = await supplyBorrowPoints(user.walletAddress);
     if (supply > 0) {
