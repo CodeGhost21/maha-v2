@@ -95,7 +95,7 @@ export const assignPoints = async (
     const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
     if (referredByUser) {
       const referralPoints = points * 0.2;
-      latestPoints = points + referralPoints;
+      latestPoints = latestPoints + referralPoints;
       newMessage = message + " plus referral points";
       //assign referral points to referred by user
       await saveUserPoints(
