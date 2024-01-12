@@ -3,11 +3,11 @@ import { PoolContract, StabilityPool, TroveContract } from "./contracts";
 export const supplyBorrowPoints = async (walletAddress: string) => {
   const userAccoutnData = await PoolContract.getUserAccountData(walletAddress);
   //supply 1:1  &  borrow 1:4
-  const supply = Number(userAccoutnData[0] / BigInt(1e8)) / 100;
-  const borrow = Number(userAccoutnData[1] / BigInt(1e8)) * 4;
+  const supply = Number(userAccoutnData[0] / BigInt(1e6)) / 100;
+  const borrow = (Number(userAccoutnData[1] / BigInt(1e6)) / 100) * 4;
   return {
-    supply: (supply / 3600) * 5,
-    borrow: (borrow / 3600) * 5,
+    supply: (supply / 1440) * 5,
+    borrow: (borrow / 1440) * 5,
   };
 };
 
