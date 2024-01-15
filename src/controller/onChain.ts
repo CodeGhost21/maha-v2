@@ -6,7 +6,7 @@ export const supplyBorrowPoints = async (walletAddress: string) => {
   const supply = Number(userAccoutnData[0] / BigInt(1e6)) / 100;
   const borrow = (Number(userAccoutnData[1] / BigInt(1e6)) / 100) * 4;
   return {
-    supply: (supply / 1440) * 5,
+    supply: supply > 100 ? (supply / 1440) * 5 : 0,
     borrow: (borrow / 1440) * 5,
   };
 };
