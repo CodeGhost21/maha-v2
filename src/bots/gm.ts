@@ -58,15 +58,16 @@ client.on("messageCreate", async (message: any) => {
       user.discordDiscriminator = message.author.discriminator;
 
       // If user's last gm was yesterday, then continue streak
-      if (isYesterday(lastGM)) {
-        await gmPoints(user.userID || "");
-      }
+      // if (isYesterday(lastGM)) {
+      //   await gmPoints(user.userID || "");
+      // }
       // If user's last gm was older than yesterday, then break streak
-      else if (!isToday(lastGM)) {
-        await gmPoints(user.userID || "");
-      } else if (isToday(lastGM) && user.totalGMs == 0) {
+      if (!isToday(lastGM)) {
         await gmPoints(user.userID || "");
       }
+      // else if (isToday(lastGM) && user.totalGMs == 0) {
+      //   await gmPoints(user.userID || "");
+      // }
     });
 
     return;
