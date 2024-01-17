@@ -41,7 +41,7 @@ router.get(
         user.discordFollow = true;
         await assignPoints(
           user,
-          100,
+          1000,
           "Discord Follower",
           true,
           "discordFollow"
