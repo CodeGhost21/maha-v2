@@ -3,7 +3,11 @@ import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
 import { SiweMessage } from "../siwe/lib/client";
 
-import { onezPoints, supplyBorrowPoints } from "./onChain";
+import {
+  onezPoints,
+  supplyBorrowPointsManta,
+  supplyBorrowPointsZksync,
+} from "./onChain";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { checkGuildMember } from "../output/discord";
@@ -146,13 +150,46 @@ export const dailyPointsSystem = async () => {
     //   );
 
     //supply and borrow points
-
-    const { supply, borrow } = await supplyBorrowPoints(user.walletAddress);
-    if (supply > 0) {
-      await assignPoints(user, supply, "Daily Supply", true, "supply");
+    //zksync chain
+    const mantaData = await supplyBorrowPointsManta(user.walletAddress);
+    if (mantaData.supply > 0) {
+      await assignPoints(
+        user,
+        mantaData.supply,
+        "Daily Supply on manta chain",
+        true,
+        "supply"
+      );
     }
-    if (borrow > 0) {
-      await assignPoints(user, borrow, "Daily Borrow", true, "borrow");
+    if (mantaData.borrow > 0) {
+      await assignPoints(
+        user,
+        mantaData.borrow,
+        "Daily Borrow on manta chain",
+        true,
+        "borrow"
+      );
+    }
+
+    //zksync chain
+    const zksyncData = await supplyBorrowPointsZksync(user.walletAddress);
+    if (zksyncData.supply > 0) {
+      await assignPoints(
+        user,
+        zksyncData.supply,
+        "Daily Supply on zksync chain",
+        true,
+        "supply"
+      );
+    }
+    if (zksyncData.borrow > 0) {
+      await assignPoints(
+        user,
+        zksyncData.borrow,
+        "Daily Borrow on zksync chain",
+        true,
+        "borrow"
+      );
     }
   });
 };
