@@ -62,11 +62,14 @@ client.on("messageCreate", async (message: any) => {
       //   await gmPoints(user.userID || "");
       // }
       // If user's last gm was older than yesterday, then break streak
+      console.log(66, !isToday(lastGM));
+      console.log(69, isToday(lastGM));
+
       if (!isToday(lastGM)) {
+        console.log(66, !isToday(lastGM));
         await gmPoints(user.userID || "");
-      } else if (isToday(lastGM) && user.totalGMs == 0) {
-        user.totalGMs = 1;
-        await user.save();
+      } else if (isToday(lastGM) && user.totalGMs === 0) {
+        console.log(69, isToday(lastGM));
         await gmPoints(user.userID || "");
       }
     });
