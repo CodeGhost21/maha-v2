@@ -7,7 +7,7 @@ import urlJoin from "../utils/url-join";
 import { WalletUser } from "../database/models/walletUsers";
 import { checkGuildMember } from "../output/discord";
 import { assignPoints } from "../controller/user";
-import { points } from "src/controller/constants";
+import { points } from "../controller/constants";
 
 const secret = nconf.get("JWT_SECRET");
 const router = Router();
