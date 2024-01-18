@@ -153,6 +153,8 @@ export const dailyPointsSystem = async () => {
     //supply and borrow points
     //zksync chain
     const mantaData = await supplyBorrowPointsManta(user.walletAddress);
+    console.log("mantaData", mantaData);
+
     if (mantaData.supply.points > 0) {
       await assignPoints(
         user,
@@ -174,6 +176,8 @@ export const dailyPointsSystem = async () => {
 
     //zksync chain
     const zksyncData = await supplyBorrowPointsZksync(user.walletAddress);
+    console.log("zksyncData", zksyncData);
+
     if (zksyncData.supply.points > 0) {
       await assignPoints(
         user,
