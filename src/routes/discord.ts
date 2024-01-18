@@ -7,6 +7,7 @@ import urlJoin from "../utils/url-join";
 import { WalletUser } from "../database/models/walletUsers";
 import { checkGuildMember } from "../output/discord";
 import { assignPoints } from "../controller/user";
+import { points } from "src/controller/constants";
 
 const secret = nconf.get("JWT_SECRET");
 const router = Router();
@@ -41,7 +42,7 @@ router.get(
         user.discordFollow = true;
         await assignPoints(
           user,
-          100,
+          points.discordFollow,
           "Discord Follower",
           true,
           "discordFollow"
