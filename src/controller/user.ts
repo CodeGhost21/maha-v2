@@ -11,6 +11,7 @@ import {
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { checkGuildMember } from "../output/discord";
+import { points, referralPercent } from "./constants";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -98,7 +99,7 @@ export const assignPoints = async (
   if (user.referredBy !== undefined) {
     const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
     if (referredByUser) {
-      const referralPoints = points * 0.2;
+      const referralPoints = points * referralPercent;
       latestPoints = latestPoints + referralPoints;
       newMessage = message + " plus referral points";
       //assign referral points to referred by user
@@ -269,35 +270,72 @@ export const checkTask = async (req: any, res: any) => {
   if (req.body.taskId === "discordFollow") {
     const checkDiscordFollow = await checkGuildMember(user.discordId);
     if (checkDiscordFollow && !user.discordFollow) {
-      await assignPoints(user, 1000, "Discord Follower", true, req.body.taskId);
+      await assignPoints(
+        user,
+        points.discordFollow,
+        "Discord Follower",
+        true,
+        req.body.taskId
+      );
       user.discordFollowChecked = checkDiscordFollow;
       await user.save();
     }
   } else if (req.body.taskId === "twitterFollow" && !user.twitterFollow) {
-    await assignPoints(user, 1000, "Twitter Follower", true, req.body.taskId);
+    await assignPoints(
+      user,
+      points.twitterFollow,
+      "Twitter Follower",
+      true,
+      req.body.taskId
+    );
     user.twitterFollowChecked = true;
     await user.save();
   } else if (req.body.taskId === "LQTYHolder") {
     if (LQTYHolders.includes(user.walletAddress) && !user.LQTYHolderChecked) {
       user.LQTYHolderChecked = true;
-      await assignPoints(user, 10000, "LQTY Holder", true, req.body.taskId);
+      await assignPoints(
+        user,
+        points.LQTYHolder,
+        "LQTY Holder",
+        true,
+        req.body.taskId
+      );
     }
   } else if (req.body.taskId === "AAVEStaker" && !user.AAVEStakersChecked) {
     if (AAVEStakers.includes(user.walletAddress)) {
       user.AAVEStakersChecked = true;
-      await assignPoints(user, 10000, "AAVE Staker", true, req.body.taskId);
-    }
-  } else if (req.body.taskId === "LUSDHolder" && !user.LUSDHolderChecked) {
-    if (LUSDHolders.includes(user.walletAddress)) {
-      user.LUSDHolderChecked = true;
-      await assignPoints(user, 10000, "LUSD Holder", true, req.body.taskId);
+      await assignPoints(
+        user,
+        points.AAVEStaker,
+        "AAVE Staker",
+        true,
+        req.body.taskId
+      );
     }
   } else if (req.body.taskId === "MAHAStaker" && !user.MAHAStakerChecked) {
     if (MAHAStakers.includes(user.walletAddress)) {
       user.MAHAStakerChecked = true;
-      await assignPoints(user, 100000, "MAHA Staker", true, req.body.taskId);
+      await assignPoints(
+        user,
+        points.MAHAStaker,
+        "MAHA Staker",
+        true,
+        req.body.taskId
+      );
     }
   }
+  // else if (req.body.taskId === "LUSDHolder" && !user.LUSDHolderChecked) {
+  //   if (LUSDHolders.includes(user.walletAddress)) {
+  //     user.LUSDHolderChecked = true;
+  //     await assignPoints(
+  //       user,
+  //       points.LUSDHolder,
+  //       "LUSD Holder",
+  //       true,
+  //       req.body.taskId
+  //     );
+  //   }
+  // }
 
   res.json({ success: true, user });
 };

@@ -1,4 +1,4 @@
-import { isYesterday, isToday } from "date-fns";
+import { isToday } from "date-fns";
 import nconf from "nconf";
 // import * as jwt from "jsonwebtoken";
 
@@ -7,6 +7,8 @@ import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
 import { assignPoints } from "../controller/user";
 import { WalletUser } from "../database/models/walletUsers";
+import { points } from "../controller/constants";
+
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 // const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -62,8 +64,6 @@ client.on("messageCreate", async (message: any) => {
       //   await gmPoints(user.userID || "");
       // }
       // If user's last gm was older than yesterday, then break streak
-      console.log(66, !isToday(lastGM));
-      console.log(69, isToday(lastGM));
 
       if (!isToday(lastGM)) {
         console.log(66, !isToday(lastGM));
@@ -85,5 +85,5 @@ client.on("messageCreate", async (message: any) => {
 const gmPoints = async (discordId: string) => {
   const walletUser = await WalletUser.findOne({ discordId: discordId });
   if (!walletUser) return;
-  await assignPoints(walletUser, 10, "Good Morning Points", true, "gm");
+  await assignPoints(walletUser, points.gm, "Good Morning Points", true, "gm");
 };
