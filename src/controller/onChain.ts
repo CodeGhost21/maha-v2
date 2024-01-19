@@ -4,7 +4,7 @@ import { contract } from "./contracts";
 import troveManagerABI from "../abis/TroveManager.json";
 import stabilityPool from "../abis/StabilityPool.json";
 import poolABI from "../abis/Pool.json";
-import { minSupplyAmount } from "./constants";
+import { minSupplyAmount, borrowPtsPerUSD } from "./constants";
 
 import { mantaProvider, zksyncProvider } from "./providers";
 
@@ -14,29 +14,30 @@ export const supplyBorrowPointsZksync = async (walletAddress: string) => {
     poolABI,
     zksyncProvider
   );
-
   const userAccoutnData = await pool.getUserAccountData(walletAddress);
-  //supply 1:1  &  borrow 1:4
   const supply = Number(userAccoutnData[0] / BigInt(1e6)) / 100;
-  const borrow = (Number(userAccoutnData[1] / BigInt(1e6)) / 100) * 4;
+  const borrow = Number(userAccoutnData[1] / BigInt(1e6)) / 100;
+
   return {
-    supply: { points: supply > 100 ? (supply / 1440) * 5 : 0, amount: supply },
-    borrow: { points: (borrow / 1440) * 5, amount: borrow },
+    supply: {
+      points: supply > minSupplyAmount ? (supply / 1440) * 5 : 0,
+      amount: supply,
+    },
+    borrow: { points: (borrow / 1440) * borrowPtsPerUSD * 5, amount: borrow },
   };
 };
 
 export const supplyBorrowPointsManta = async (walletAddress: string) => {
   const pool = await contract(nconf.get("MANTA_POOL"), poolABI, mantaProvider);
   const userAccoutnData = await pool.getUserAccountData(walletAddress);
-  //supply 1:1  &  borrow 1:4
   const supply = Number(userAccoutnData[0] / BigInt(1e6)) / 100;
-  const borrow = (Number(userAccoutnData[1] / BigInt(1e6)) / 100) * 4;
+  const borrow = Number(userAccoutnData[1] / BigInt(1e6)) / 100;
   return {
     supply: {
       points: supply > minSupplyAmount ? (supply / 1440) * 5 : 0,
       amount: supply,
     },
-    borrow: { points: (borrow / 1440) * 5, amount: borrow },
+    borrow: { points: (borrow / 1440) * borrowPtsPerUSD * 5, amount: borrow },
   };
 };
 

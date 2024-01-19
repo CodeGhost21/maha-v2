@@ -18,3 +18,5 @@ export const points = {
 export const referralPercent = 0.2;
 
 export const minSupplyAmount = 100;
+
+export const borrowPtsPerUSD = 4;
