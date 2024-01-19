@@ -132,7 +132,6 @@ export const assignPoints = async (
   user[`${taskId}Points`] = user[`${taskId}Points`] + latestPoints;
   user[`${taskId}Checked`] = true;
   await user.save();
-  await updateRank();
 };
 
 export const dailyPointsSystem = async () => {

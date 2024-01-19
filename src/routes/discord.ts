@@ -39,7 +39,7 @@ router.get(
     if (!discordUser) {
       const isFollow = await checkGuildMember(req.user.id);
       if (isFollow) {
-        user.discordFollow = true;
+        user.discordFollowChecked = true;
         await assignPoints(
           user,
           points.discordFollow,
