@@ -71,7 +71,6 @@ client.on("messageCreate", async (message: any) => {
         user.totalGMs = 1;
         await user.save();
       } else if (isToday(lastGM) && user.totalGMs === 0) {
-        console.log(69, isToday(lastGM));
         await gmPoints(user.userID || "");
         user.totalGMs = 1;
         await user.save();

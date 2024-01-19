@@ -1,15 +1,8 @@
-import Bluebird from "bluebird";
 import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
 import { SiweMessage } from "../siwe/lib/client";
 import cache from "./cache";
-
-import {
-  onezPoints,
-  supplyBorrowPointsManta,
-  supplyBorrowPointsZksync,
-} from "./onChain";
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
+import { WalletUser } from "../database/models/walletUsers";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { checkGuildMember } from "../output/discord";
 import { points, referralPercent } from "./constants";
@@ -58,15 +51,6 @@ const generateReferralCode = async () => {
   }
 
   return referralCode;
-};
-
-export const updateRank = async () => {
-  const users = await WalletUser.find({}).sort({ totalPoints: -1 });
-
-  await Bluebird.mapSeries(users, async (user, index) => {
-    user.rank = index + 1;
-    await user.save();
-  });
 };
 
 const saveUserPoints = async (
@@ -134,80 +118,17 @@ export const assignPoints = async (
   await user.save();
 };
 
-export const dailyPointsSystem = async () => {
-  const allUsers = await WalletUser.find({});
-  Bluebird.mapSeries(allUsers, async (user) => {
-    //onez points
-    // const { mint, liquidity } = await onezPoints(user.walletAddress);
-    // if (mint > 0)
-    //   await assignPoints(user, mint, "Daily Mint", true, "mintingONEZ");
-    // if (liquidity > 0)
-    //   await assignPoints(
-    //     user,
-    //     liquidity,
-    //     "Daily Liquidity",
-    //     true,
-    //     "liquidityONEZ"
-    //   );
-
-    //supply and borrow points
-    //zksync chain
-    const mantaData = await supplyBorrowPointsManta(user.walletAddress);
-    console.log("mantaData", user.walletAddress, mantaData);
-
-    if (mantaData.supply.points > 0) {
-      await assignPoints(
-        user,
-        mantaData.supply.points,
-        `Daily Supply on manta chain for ${mantaData.supply.amount}`,
-        true,
-        "supply"
-      );
-    }
-    if (mantaData.borrow.points > 0) {
-      await assignPoints(
-        user,
-        mantaData.borrow.points,
-        `Daily Borrow on manta chain for ${mantaData.borrow.amount}`,
-        true,
-        "borrow"
-      );
-    }
-
-    //zksync chain
-    const zksyncData = await supplyBorrowPointsZksync(user.walletAddress);
-    console.log("zksyncData", user.walletAddress, zksyncData);
-
-    if (zksyncData.supply.points > 0) {
-      await assignPoints(
-        user,
-        zksyncData.supply.points,
-        `Daily Supply on zksync chain for ${zksyncData.supply.amount}`,
-        true,
-        "supply"
-      );
-    }
-    if (zksyncData.borrow.points > 0) {
-      await assignPoints(
-        user,
-        zksyncData.borrow.points,
-        `Daily Borrow on zksync chain for ${zksyncData.borrow.amount}`,
-        true,
-        "borrow"
-      );
-    }
-  });
-};
-
 export const walletVerify = async (req: any, res: any) => {
   const { message, signature } = req.body;
   const siweMessage = new SiweMessage(message);
   try {
     const result = await siweMessage.verify({ signature });
+
     if (result.data.address === req.body.message.address) {
       const user = await WalletUser.findOne({
         walletAddress: result.data.address,
       });
+
       if (user) {
         user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
         await user.save();
@@ -230,12 +151,6 @@ export const walletVerify = async (req: any, res: any) => {
             newUser.referredBy = referredUser.id;
             await newUser.save();
           }
-          // else {
-          //   res.send({
-          //     success: false,
-          //     message: "referral code doesn't match",
-          //   });
-          // }
         }
 
         //add jwt token

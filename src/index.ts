@@ -3,16 +3,14 @@ import nconf from "nconf";
 import express from "express";
 import * as http from "http";
 import cors from "cors";
-import cron from "node-cron";
 import passport from "passport";
 import session from "express-session";
 
-import { dailyPointsSystem, updateRank } from "./controller/user";
 import { open } from "./database";
 import Routes from "./routes";
-
 import "./strategies";
 import "./bots/gm";
+import "./cron";
 
 const app = express();
 const server = new http.Server(app);
@@ -35,12 +33,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-cron.schedule("*/5 * * * *", async () => {
-  console.log("running a task every 5 minutes");
-  await dailyPointsSystem();
-  await updateRank();
-});
 app.use(Routes);
 app.set("port", nconf.get("PORT") || 5002);
 const port = app.get("port");

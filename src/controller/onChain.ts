@@ -1,44 +1,61 @@
-import nconf from "nconf";
+import { AbstractProvider } from "ethers";
 import { contract } from "./contracts";
-
-import troveManagerABI from "../abis/TroveManager.json";
-import stabilityPool from "../abis/StabilityPool.json";
-import poolABI from "../abis/Pool.json";
-import { minSupplyAmount, borrowPtsPerUSD } from "./constants";
-
 import { mantaProvider, zksyncProvider } from "./providers";
+import { minSupplyAmount, borrowPtsPerUSD } from "./constants";
+import { MulticallWrapper } from "ethers-multicall-provider";
+import nconf from "nconf";
+import poolABI from "../abis/Pool.json";
+import stabilityPool from "../abis/StabilityPool.json";
+import troveManagerABI from "../abis/TroveManager.json";
 
-export const supplyBorrowPointsZksync = async (walletAddress: string) => {
-  const pool = await contract(
-    nconf.get("ZKSYNC_POOL"),
-    poolABI,
+export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
+  return _supplyBorrowPointsMulticall(
+    addresses,
+    nconf.get("MANTA_POOL"),
     zksyncProvider
   );
-  const userAccoutnData = await pool.getUserAccountData(walletAddress);
-  const supply = Number(userAccoutnData[0] / BigInt(1e6)) / 100;
-  const borrow = Number(userAccoutnData[1] / BigInt(1e6)) / 100;
-
-  return {
-    supply: {
-      points: supply > minSupplyAmount ? (supply / 1440) * 5 : 0,
-      amount: supply,
-    },
-    borrow: { points: (borrow / 1440) * borrowPtsPerUSD * 5, amount: borrow },
-  };
 };
 
-export const supplyBorrowPointsManta = async (walletAddress: string) => {
-  const pool = await contract(nconf.get("MANTA_POOL"), poolABI, mantaProvider);
-  const userAccoutnData = await pool.getUserAccountData(walletAddress);
-  const supply = Number(userAccoutnData[0] / BigInt(1e6)) / 100;
-  const borrow = Number(userAccoutnData[1] / BigInt(1e6)) / 100;
-  return {
-    supply: {
-      points: supply > minSupplyAmount ? (supply / 1440) * 5 : 0,
-      amount: supply,
-    },
-    borrow: { points: (borrow / 1440) * borrowPtsPerUSD * 5, amount: borrow },
-  };
+export const supplyBorrowPointsZksyncMulticall = async (
+  addresses: string[]
+) => {
+  return _supplyBorrowPointsMulticall(
+    addresses,
+    nconf.get("ZKSYNC_POOL"),
+    mantaProvider
+  );
+};
+
+const _supplyBorrowPointsMulticall = async (
+  addresses: string[],
+  poolAddr: string,
+  p: AbstractProvider
+) => {
+  const provider = MulticallWrapper.wrap(p);
+  const pool = await contract(poolAddr, poolABI, provider);
+
+  const results = await Promise.all(
+    addresses.map((w) => pool.getUserAccountData(w))
+  );
+
+  return results.map((userAccoutnData: bigint[], index) => {
+    const supply = Number(userAccoutnData[0]) / 1e6 / 100;
+    const borrow = Number(userAccoutnData[1]) / 1e6 / 100;
+
+    if (supply < minSupplyAmount) {
+      return {
+        who: addresses[index],
+        supply: { points: 0, amount: supply },
+        borrow: { points: 0, amount: borrow },
+      };
+    }
+
+    return {
+      who: addresses[index],
+      supply: { points: (supply / 1440) * 5, amount: supply },
+      borrow: { points: (borrow / 1440) * borrowPtsPerUSD * 5, amount: borrow },
+    };
+  });
 };
 
 export const onezPoints = async (walletAddress: string) => {
