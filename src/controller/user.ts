@@ -174,14 +174,8 @@ export const walletVerify = async (req: any, res: any) => {
 
 export const getLeaderBoard = async (req: any, res: any) => {
   const cachedData: any = cache.get("lb:leaderBoard");
-  if (cachedData) res.send(cachedData);
-  else {
-    const allUsers = await WalletUser.find({})
-      .sort({ rank: 1 })
-      .select("totalPoints rank walletAddress");
-    cache.set("lb:leaderBoard", allUsers, 60 * 60);
-    res.send(allUsers);
-  }
+  if (cachedData) return res.json(JSON.parse(cachedData));
+  res.json([]);
 };
 
 export const fetchMe = async (req: any, res: any) => {
