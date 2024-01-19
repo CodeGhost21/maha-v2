@@ -12,7 +12,7 @@ export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("MANTA_POOL"),
-    zksyncProvider
+    mantaProvider
   );
 };
 
@@ -22,7 +22,7 @@ export const supplyBorrowPointsZksyncMulticall = async (
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("ZKSYNC_POOL"),
-    mantaProvider
+    zksyncProvider
   );
 };
 
@@ -50,10 +50,12 @@ const _supplyBorrowPointsMulticall = async (
       };
     }
 
+    const multiplier = 30 / (60 * 24);
+
     return {
       who: addresses[index],
-      supply: { points: (supply / 1440) * 5, amount: supply },
-      borrow: { points: (borrow / 1440) * borrowPtsPerUSD * 5, amount: borrow },
+      supply: { points: supply * multiplier, amount: supply },
+      borrow: { points: borrow * multiplier * borrowPtsPerUSD, amount: borrow },
     };
   });
 };
@@ -75,10 +77,6 @@ export const onezPoints = async (walletAddress: string) => {
   const debtResult = await stability.accountDeposits(walletAddress);
 
   const liquidity = Number(debtResult[0] / BigInt(1e18));
-  // console.log({
-  //   mint: (mint / 3600) * 5,
-  //   liquidity: (liquidity / 3600) * 5,
-  // });
 
   return {
     mint: (mint / 3600) * 5,

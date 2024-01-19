@@ -9,8 +9,10 @@ export const dailyLpPoints = async () => {
   const users = await WalletUser.find({}).select("walletAddress");
   const chunk = 1000;
 
-  const loops = Math.floor(users.length / chunk);
+  const loops = Math.floor(users.length / chunk) + 1;
+  console.log(loops, users.length);
   for (let i = 0; i < loops; i++) {
+    console.log("working on batch", i);
     // get wallets
     const userBatch = users.slice(i * chunk, (i + 1) * chunk);
     const wallets = userBatch.map((u) => u.walletAddress);
@@ -20,6 +22,7 @@ export const dailyLpPoints = async () => {
     const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
 
     for (let j = 0; j < wallets.length; j++) {
+      console.log(i, j);
       const user = userBatch[j];
 
       const zksync = zksyncData[j];

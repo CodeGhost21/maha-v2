@@ -1,16 +1,17 @@
-import bodyParser from "body-parser";
-import nconf from "nconf";
-import express from "express";
+import { open } from "./database";
+import { updateLBCache } from "./cron/updateLBCache";
 import * as http from "http";
+import bodyParser from "body-parser";
 import cors from "cors";
+import cron from "node-cron";
+import express from "express";
+import nconf from "nconf";
 import passport from "passport";
+import Routes from "./routes";
 import session from "express-session";
 
-import { open } from "./database";
-import Routes from "./routes";
 import "./strategies";
 import "./bots/gm";
-import "./cron";
 
 const app = express();
 const server = new http.Server(app);
@@ -37,3 +38,8 @@ app.use(Routes);
 app.set("port", nconf.get("PORT") || 5002);
 const port = app.get("port");
 server.listen(port, () => console.log(`Server started on port ${port}`));
+
+cron.schedule("*/10 * * * *", async () => {
+  console.log("updating leaderboard cache 10 minutes");
+  await updateLBCache();
+});

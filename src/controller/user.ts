@@ -78,13 +78,16 @@ export const assignPoints = async (
   isAdd: boolean,
   taskId: string
 ) => {
-  const previousPoints = user.totalPoints;
-  let latestPoints = points;
+  const previousPoints = Number(user.totalPoints) || 0;
+  let latestPoints = Number(points) || 0;
   let newMessage = message;
+
+  if (points < 0.01 || isNaN(points)) return;
+
   if (user.referredBy !== undefined) {
     const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
     if (referredByUser) {
-      const referralPoints = points * referralPercent;
+      const referralPoints = Number(points * referralPercent) || 0;
       latestPoints = latestPoints + referralPoints;
       newMessage = message + " plus referral points";
       //assign referral points to referred by user
@@ -102,6 +105,7 @@ export const assignPoints = async (
       await referredByUser.save();
     }
   }
+
   const currentPoints = previousPoints + latestPoints;
   await saveUserPoints(
     user.id,
@@ -113,7 +117,7 @@ export const assignPoints = async (
   );
 
   user["totalPoints"] = currentPoints;
-  user[`${taskId}Points`] = user[`${taskId}Points`] + latestPoints;
+  user[`${taskId}Points`] = Number(user[`${taskId}Points`] || 0) + latestPoints;
   user[`${taskId}Checked`] = true;
   await user.save();
 };
