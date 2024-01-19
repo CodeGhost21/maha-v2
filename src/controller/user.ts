@@ -2,6 +2,7 @@ import Bluebird from "bluebird";
 import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
 import { SiweMessage } from "../siwe/lib/client";
+import cache from "./cache";
 
 import {
   onezPoints,
@@ -258,10 +259,15 @@ export const walletVerify = async (req: any, res: any) => {
 };
 
 export const getLeaderBoard = async (req: any, res: any) => {
-  const allUsers = await WalletUser.find({})
-    .sort({ rank: 1 })
-    .select("totalPoints rank walletAddress");
-  res.send(allUsers);
+  const cachedData: any = cache.get("lb:leaderBoard");
+  if (cachedData) res.send(cachedData);
+  else {
+    const allUsers = await WalletUser.find({})
+      .sort({ rank: 1 })
+      .select("totalPoints rank walletAddress");
+    cache.set("lb:leaderBoard", allUsers, 60 * 60);
+    res.send(allUsers);
+  }
 };
 
 export const fetchMe = async (req: any, res: any) => {

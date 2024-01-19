@@ -66,6 +66,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.6.1",
     "nconf": "^0.12.0",
+    "node-cache": "^5.1.2",
     "node-cron": "^3.0.2",
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4",
