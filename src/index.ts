@@ -39,7 +39,9 @@ app.set("port", nconf.get("PORT") || 5002);
 const port = app.get("port");
 server.listen(port, () => console.log(`Server started on port ${port}`));
 
+// setup LB cache
 cron.schedule("*/10 * * * *", async () => {
   console.log("updating leaderboard cache 10 minutes");
   await updateLBCache();
 });
+updateLBCache();
