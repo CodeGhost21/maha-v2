@@ -15,12 +15,14 @@ export interface IWalletUser {
   discordVerify: boolean;
   twitterFollowChecked: boolean;
   twitterVerify: boolean;
+  twitterFollow: boolean;
   gmChecked: boolean;
   AAVEStakerChecked: boolean;
   MAHAStaker: boolean;
   LQTYHolderChecked: boolean;
   LUSDHolderChecked: boolean;
   MAHAStakerChecked: boolean;
+  AAVEStakersChecked: boolean;
 
   gmPoints: number;
   mintingONEZPoints: number;

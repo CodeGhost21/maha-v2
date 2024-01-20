@@ -2,7 +2,7 @@ import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
 import { SiweMessage } from "../siwe/lib/client";
 import cache from "./cache";
-import { WalletUser } from "../database/models/walletUsers";
+import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { checkGuildMember } from "../output/discord";
 import { points, referralPercent } from "./constants";
@@ -72,12 +72,15 @@ const saveUserPoints = async (
 };
 
 export const assignPoints = async (
-  user: any,
+  userId: string,
   points: number,
   message: string,
   isAdd: boolean,
   taskId: string
 ) => {
+  const user = await WalletUser.findById(userId);
+  if (!user) return;
+
   const previousPoints = Number(user.totalPoints) || 0;
   let latestPoints = Number(points) || 0;
   let newMessage = message;
@@ -90,7 +93,8 @@ export const assignPoints = async (
       const referralPoints = Number(points * referralPercent) || 0;
       latestPoints = latestPoints + referralPoints;
       newMessage = message + " plus referral points";
-      //assign referral points to referred by user
+
+      // assign referral points to referred by user
       await saveUserPoints(
         referredByUser.id,
         referredByUser.referralPoints,
@@ -117,8 +121,12 @@ export const assignPoints = async (
   );
 
   user["totalPoints"] = currentPoints;
-  user[`${taskId}Points`] = Number(user[`${taskId}Points`] || 0) + latestPoints;
+
+  // @ts-ignore
+  user[taskId] = Number(user[taskId] || 0) + latestPoints;
+  // @ts-ignore
   user[`${taskId}Checked`] = true;
+
   await user.save();
 };
 
@@ -188,12 +196,13 @@ export const fetchMe = async (req: any, res: any) => {
 };
 
 export const checkTask = async (req: any, res: any) => {
-  const user = req.user;
+  const user = req.user as IWalletUserModel;
+
   if (req.body.taskId === "discordFollow") {
     const checkDiscordFollow = await checkGuildMember(user.discordId);
     if (checkDiscordFollow && !user.discordFollowChecked) {
       await assignPoints(
-        user,
+        user.id,
         points.discordFollow,
         "Discord Follower",
         true,
@@ -204,7 +213,7 @@ export const checkTask = async (req: any, res: any) => {
     }
   } else if (req.body.taskId === "twitterFollow" && !user.twitterFollow) {
     await assignPoints(
-      user,
+      user.id,
       points.twitterFollow,
       "Twitter Follower",
       true,
@@ -216,7 +225,7 @@ export const checkTask = async (req: any, res: any) => {
     if (LQTYHolders.includes(user.walletAddress) && !user.LQTYHolderChecked) {
       user.LQTYHolderChecked = true;
       await assignPoints(
-        user,
+        user.id,
         points.LQTYHolder,
         "LQTY Holder",
         true,
@@ -227,7 +236,7 @@ export const checkTask = async (req: any, res: any) => {
     if (AAVEStakers.includes(user.walletAddress)) {
       user.AAVEStakersChecked = true;
       await assignPoints(
-        user,
+        user.id,
         points.AAVEStaker,
         "AAVE Staker",
         true,
@@ -238,7 +247,7 @@ export const checkTask = async (req: any, res: any) => {
     if (MAHAStakers.includes(user.walletAddress)) {
       user.MAHAStakerChecked = true;
       await assignPoints(
-        user,
+        user.id,
         points.MAHAStaker,
         "MAHA Staker",
         true,

@@ -5,12 +5,16 @@ import {
 } from "../controller/onChain";
 import { WalletUser } from "../database/models/walletUsers";
 
-export const dailyLpPoints = async () => {
-  const users = await WalletUser.find({}).select("walletAddress");
+const _dailyLpPoints = async (from: number, count: number) => {
+  const users = await WalletUser.find({})
+    .limit(count)
+    .skip(from)
+    .select(["walletAddress"]);
+
   const chunk = 1000;
 
   const loops = Math.floor(users.length / chunk) + 1;
-  console.log(loops, users.length);
+  console.log(loops, users.length, from, count);
   for (let i = 0; i < loops; i++) {
     console.log("working on batch", i);
     // get wallets
@@ -30,7 +34,7 @@ export const dailyLpPoints = async () => {
 
       if (manta.supply.points > 0) {
         await assignPoints(
-          user,
+          user.id,
           manta.supply.points,
           `Daily Supply on manta chain for ${manta.supply.amount}`,
           true,
@@ -39,7 +43,7 @@ export const dailyLpPoints = async () => {
       }
       if (manta.borrow.points > 0) {
         await assignPoints(
-          user,
+          user.id,
           manta.borrow.points,
           `Daily Borrow on manta chain for ${manta.borrow.amount}`,
           true,
@@ -49,7 +53,7 @@ export const dailyLpPoints = async () => {
 
       if (zksync.supply.points > 0) {
         await assignPoints(
-          user,
+          user.id,
           zksync.supply.points,
           `Daily Supply on zksync chain for ${zksync.supply.amount}`,
           true,
@@ -59,7 +63,7 @@ export const dailyLpPoints = async () => {
 
       if (zksync.borrow.points > 0) {
         await assignPoints(
-          user,
+          user.id,
           zksync.borrow.points,
           `Daily Borrow on zksync chain for ${zksync.borrow.amount}`,
           true,
@@ -68,4 +72,9 @@ export const dailyLpPoints = async () => {
       }
     }
   }
+};
+
+export const dailyLpPoints = async () => {
+  const count = await WalletUser.count({});
+  await _dailyLpPoints(0, count);
 };

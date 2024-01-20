@@ -31,17 +31,19 @@ router.get(
   "/callback",
   passport.authenticate("discord"),
   async (req: any, res) => {
-    const user: any = await WalletUser.findOne({ _id: req.query.state });
+    const user = await WalletUser.findById(req.query.state);
     const discordUser = await WalletUser.findOne({ discordId: req.user.id });
     console.log("35", discordUser);
 
+    if (!user) return;
     let url = `/#?error=409`;
+
     if (!discordUser) {
       const isFollow = await checkGuildMember(req.user.id);
       if (isFollow) {
         user.discordFollowChecked = true;
         await assignPoints(
-          user,
+          user.id,
           points.discordFollow,
           "Discord Follower",
           true,
