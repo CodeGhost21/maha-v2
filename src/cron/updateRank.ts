@@ -12,7 +12,7 @@ export const updateRank = async () => {
       filter: { _id: user.id },
       update: {
         $set: {
-          rank: index,
+          rank: index + 1,
         },
       },
     },
