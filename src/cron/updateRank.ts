@@ -1,4 +1,3 @@
-import Bluebird from "bluebird";
 import { WalletUser } from "../database/models/walletUsers";
 
 export const updateRank = async () => {
@@ -8,10 +7,17 @@ export const updateRank = async () => {
 
   console.log(`updating rank of over ${users.length} users`);
 
-  await Bluebird.mapSeries(users, async (user, index) => {
-    user.rank = index + 1;
-    await user.save();
-  });
+  const updateCommands = users.map((user, index) => ({
+    updateOne: {
+      filter: { _id: user.id },
+      update: {
+        $set: {
+          rank: index,
+        },
+      },
+    },
+  }));
 
+  await WalletUser.bulkWrite(updateCommands);
   console.log("done updating ranks");
 };
