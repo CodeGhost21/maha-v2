@@ -1,7 +1,5 @@
 import { isToday } from "date-fns";
 import nconf from "nconf";
-// import * as jwt from "jsonwebtoken";
-
 import { client } from "../output/discord";
 import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
@@ -10,7 +8,6 @@ import { WalletUser } from "../database/models/walletUsers";
 import { points } from "../controller/constants";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
-// const accessTokenSecret = nconf.get("JWT_SECRET");
 
 client.on("messageCreate", async (message: any) => {
   if (message.channelId !== nconf.get("CHANNEL_GM")) return;
@@ -82,7 +79,7 @@ client.on("messageCreate", async (message: any) => {
 });
 
 const gmPoints = async (discordId: string) => {
-  const walletUser = await WalletUser.findOne({ discordId: discordId });
+  const walletUser = await WalletUser.findOne({ discordId });
   if (!walletUser) return;
   await assignPoints(
     walletUser.id,

@@ -1,11 +1,3 @@
-// export type ITaskId =
-//   | "twitterFollow"
-//   | "discordFollow"
-//   | "gm"
-//   | "AAVEStaker"
-//   | "LQTYHolder"
-//   | "MAHAStaker";
-
 export const points = {
   discordFollow: 100,
   twitterFollow: 100,

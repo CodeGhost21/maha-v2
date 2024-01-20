@@ -1,12 +1,20 @@
 import { AbstractProvider } from "ethers";
-import { contract } from "./contracts";
-import { mantaProvider, zksyncProvider } from "./providers";
+import { ethers, Provider } from "ethers";
+import { mantaProvider, zksyncProvider } from "../utils/providers";
 import { minSupplyAmount, borrowPtsPerUSD } from "./constants";
 import { MulticallWrapper } from "ethers-multicall-provider";
 import nconf from "nconf";
 import poolABI from "../abis/Pool.json";
 import stabilityPool from "../abis/StabilityPool.json";
 import troveManagerABI from "../abis/TroveManager.json";
+
+const getContract = async (
+  contractAddress: string,
+  abi: any,
+  provider: Provider
+) => {
+  return new ethers.Contract(contractAddress, abi, provider);
+};
 
 export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
   return _supplyBorrowPointsMulticall(
@@ -32,7 +40,7 @@ const _supplyBorrowPointsMulticall = async (
   p: AbstractProvider
 ) => {
   const provider = MulticallWrapper.wrap(p);
-  const pool = await contract(poolAddr, poolABI, provider);
+  const pool = await getContract(poolAddr, poolABI, provider);
 
   const results = await Promise.all(
     addresses.map((w) => pool.getUserAccountData(w))
@@ -61,7 +69,7 @@ const _supplyBorrowPointsMulticall = async (
 };
 
 export const onezPoints = async (walletAddress: string) => {
-  const trove = await contract(
+  const trove = await getContract(
     nconf.get("TROVE"),
     troveManagerABI,
     zksyncProvider
@@ -69,7 +77,7 @@ export const onezPoints = async (walletAddress: string) => {
   const troveResult = await trove.Troves(walletAddress);
   const mint = Number(troveResult[0] / BigInt(1e18));
 
-  const stability = await contract(
+  const stability = await getContract(
     nconf.get("STABILITYPOOL"),
     stabilityPool,
     zksyncProvider

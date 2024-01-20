@@ -26,11 +26,21 @@ const _dailyLpPoints = async (from: number, count: number) => {
     const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
 
     for (let j = 0; j < wallets.length; j++) {
-      console.log(i, j);
       const user = userBatch[j];
 
       const zksync = zksyncData[j];
       const manta = mantaData[j];
+
+      console.log(
+        i,
+        j,
+        "manta",
+        manta.supply.points,
+        manta.borrow.points,
+        "zks",
+        zksync.supply.points,
+        zksync.borrow.points
+      );
 
       if (manta.supply.points > 0) {
         await assignPoints(
@@ -74,7 +84,17 @@ const _dailyLpPoints = async (from: number, count: number) => {
   }
 };
 
+let lock = false;
 export const dailyLpPoints = async () => {
-  const count = await WalletUser.count({});
-  await _dailyLpPoints(0, count);
+  if (lock) return;
+  lock = true;
+
+  try {
+    const count = await WalletUser.count({});
+    await _dailyLpPoints(0, count);
+  } catch (error) {
+    console.log("cron failed beacuse of", error);
+  }
+
+  lock = false;
 };

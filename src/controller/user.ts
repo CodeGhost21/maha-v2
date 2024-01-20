@@ -103,6 +103,7 @@ export const assignPoints = async (
         referralPoints,
         "referral points"
       );
+
       referredByUser.referralPoints =
         referredByUser.referralPoints + referralPoints;
       referredByUser.totalPoints = referredByUser.totalPoints + referralPoints;
@@ -185,8 +186,8 @@ export const walletVerify = async (req: any, res: any) => {
 };
 
 export const getLeaderBoard = async (req: any, res: any) => {
-  const cachedData: any = cache.get("lb:leaderBoard");
-  if (cachedData) return res.json(JSON.parse(cachedData));
+  const cachedData: string | undefined = cache.get("lb:leaderBoard");
+  if (cachedData) return res.json(JSON.parse(cachedData || ""));
   res.json([]);
 };
 
