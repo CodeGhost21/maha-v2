@@ -36,12 +36,7 @@ export const checkGuildMember = async (memberId: string) => {
   const guild = await client.guilds.fetch(nconf.get("DISCORD_GUILD_ID"));
   try {
     const response = await guild.members.fetch(memberId);
-    console.log("checkGuildMember", response);
-
-    if (response.user) {
-      return true;
-    }
-    return false;
+    return !!response.user;
   } catch (e) {
     return false;
   }

@@ -8,7 +8,7 @@ passport.use(
     {
       clientID: nconf.get("DISCORD_CLIENT_ID"),
       clientSecret: nconf.get("DISCORD_CLIENT_SECRET"),
-      callbackURL: urlJoin(nconf.get("HOST_URL"), "/discord/callback"),
+      callbackURL: urlJoin(nconf.get("FRONTEND_URL"), "/#/discord/callback"),
       scope: ["identify"],
     },
     async (accessToken, refreshToken, profile, done) => {

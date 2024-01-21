@@ -22,8 +22,6 @@ function deserializeUser(
     token,
     secret,
     (error: jwt.VerifyErrors, payload: jwt.JwtPayload) => {
-      console.log(payload);
-
       // If there was some error, we don't try to set the user
       if (error) return next();
 

@@ -2,7 +2,7 @@ import { SiweMessage } from "../siwe/lib/client";
 import { WalletUser } from "../database/models/walletUsers";
 import * as jwt from "jsonwebtoken";
 import nconf from "nconf";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 
@@ -19,50 +19,60 @@ const _generateReferralCode = () => {
   return referralCode;
 };
 
-export const walletVerify = async (req: Request, res: Response) => {
-  const { message, signature } = req.body;
-  const siweMessage = new SiweMessage(message);
+export const walletVerify = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { message, signature } = req.body;
+    const siweMessage = new SiweMessage(message);
 
-  const result = await siweMessage.verify({ signature });
+    const result = await siweMessage.verify({ signature });
 
-  // todo: verify other data
-  if (result.data.address === req.body.message.address) {
-    throw new BadRequestError(
-      "Signature verification failed. Invalid signature."
-    );
-  }
+    console.log(result, req.body);
 
-  const user = await WalletUser.findOne({
-    walletAddress: result.data.address,
-  });
+    // todo: verify other data
+    if (result.data.address !== req.body.message.address) {
+      throw new BadRequestError(
+        "Signature verification failed. Invalid signature."
+      );
+    }
 
-  if (user) {
-    user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-    await user.save();
-    return res.json({ success: true, user });
-  }
-
-  const usersCount = await WalletUser.count();
-  const referralCode = _generateReferralCode();
-
-  const newUser = await WalletUser.create({
-    walletAddress: req.body.message.address,
-    rank: usersCount + 1,
-    referralCode: referralCode ? referralCode : null,
-  });
-
-  // referred by user added to user model
-  if (req.body.referredByCode !== "") {
-    const referrer = await WalletUser.findOne({
-      referralCode: req.body.referredByCode,
+    const user = await WalletUser.findOne({
+      walletAddress: result.data.address,
     });
-    if (referrer) newUser.referredBy = referrer.id;
-  }
 
-  // add jwt token
-  newUser.jwt = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
-  await newUser.save();
-  return res.json({ success: true, user: newUser });
+    if (user) {
+      user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+      await user.save();
+      return res.json({ success: true, user });
+    }
+
+    const usersCount = await WalletUser.count();
+    const referralCode = _generateReferralCode();
+
+    const newUser = await WalletUser.create({
+      walletAddress: req.body.message.address,
+      rank: usersCount + 1,
+      referralCode: referralCode ? referralCode : null,
+    });
+
+    // referred by user added to user model
+    if (req.body.referredByCode !== "") {
+      const referrer = await WalletUser.findOne({
+        referralCode: req.body.referredByCode,
+      });
+      if (referrer) newUser.referredBy = referrer.id;
+    }
+
+    // add jwt token
+    newUser.jwt = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
+    await newUser.save();
+    return res.json({ success: true, user: newUser });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const fetchMe = async (req: any, res: any) => {

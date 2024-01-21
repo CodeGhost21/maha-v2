@@ -2,8 +2,9 @@ import { IWalletUserModel } from "../../database/models/walletUsers";
 import { checkGuildMember } from "../../output/discord";
 import { points } from "./constants";
 import { assignPoints } from "./assignPoints";
+import { Request, Response } from "express";
 
-export const checkTask = async (req: any, res: any) => {
+export const checkTask = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
 
   if (req.body.taskId === "discordFollow") {

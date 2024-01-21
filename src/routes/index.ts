@@ -24,7 +24,7 @@ router.use(
     res.json({
       success: false,
       status: err.status || 500,
-      mesage: err.message || "error",
+      message: err.message || "error",
     });
   }
 );

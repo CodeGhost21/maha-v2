@@ -1,4 +1,8 @@
-import { IWalletUser, WalletUser } from "../../database/models/walletUsers";
+import {
+  IWalletUser,
+  IWalletUserPoints,
+  WalletUser,
+} from "../../database/models/walletUsers";
 import {
   IUserPointTransactions,
   UserPointTransactions,
@@ -17,7 +21,7 @@ export const assignPoints = async (
   points: number,
   message: string,
   isAdd: boolean,
-  taskId: string
+  taskId: keyof IWalletUserPoints
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];

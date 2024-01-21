@@ -1,5 +1,33 @@
 import mongoose from "mongoose";
 
+export interface IWalletUserChecked {
+  gm: boolean;
+  AAVEStaker: boolean;
+  LQTYHolder: boolean;
+  LUSDHolder: boolean;
+  MAHAStaker: boolean;
+  AAVEStakers: boolean;
+  discordFollow: boolean;
+  discordVerify: boolean;
+  twitterVerify: boolean;
+  twitterFollow: boolean;
+}
+
+export interface IWalletUserPoints {
+  AAVEStaker: number;
+  borrow: number;
+  discordFollow: number;
+  gm: number;
+  liquidityONEZ: number;
+  LQTYHolder: number;
+  LUSDHolder: number;
+  MAHAStaker: number;
+  mintingONEZ: number;
+  referral: number;
+  supply: number;
+  twitterFollow: number;
+}
+
 export interface IWalletUser {
   discordId: string;
   jwt: string;
@@ -12,33 +40,8 @@ export interface IWalletUser {
   twitterOauthTokenSecret: string;
   walletAddress: string;
 
-  checked: {
-    gm: boolean;
-    AAVEStaker: boolean;
-    LQTYHolder: boolean;
-    LUSDHolder: boolean;
-    MAHAStaker: boolean;
-    AAVEStakers: boolean;
-    discordFollow: boolean;
-    discordVerify: boolean;
-    twitterVerify: boolean;
-    twitterFollow: boolean;
-  };
-
-  points: {
-    AAVEStaker: number;
-    borrow: number;
-    discordFollow: number;
-    gm: number;
-    liquidityONEZ: number;
-    LQTYHolder: number;
-    LUSDHolder: number;
-    MAHAStaker: number;
-    mintingONEZ: number;
-    referral: number;
-    supply: number;
-    twitterFollow: number;
-  };
+  checked: IWalletUserChecked;
+  points: IWalletUserPoints;
 }
 
 const UserSchema = new mongoose.Schema(
