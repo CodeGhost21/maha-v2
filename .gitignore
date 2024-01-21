@@ -18,4 +18,5 @@ src/test/
 
 config.backup.json
 dump
+dump-v2
 config.prod.json

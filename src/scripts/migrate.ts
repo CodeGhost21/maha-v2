@@ -13,40 +13,33 @@ import { open } from "../database";
 open();
 
 const _recalculatePoints = async (from: number, count: number) => {
-  const users = await WalletUser.find({})
-    .select(["totalPoints", "points"])
-    .limit(count)
-    .skip(from);
+  const users = await WalletUser.find({}).limit(count).skip(from);
 
   const tx = await WalletUser.bulkWrite(
     users.map((user) => {
       const points = user.points || {};
-      const totalPoints =
-        (points.borrow || 0) +
-        (points.supply || 0) +
-        (points.discordFollow || 0) +
-        (points.gm || 0) +
-        (points.referral || 0);
+      const checked = user.checked || {};
 
-      // diff valued in case
-      if (totalPoints !== user.totalPoints)
-        console.log(
-          "diff",
-          user,
-          user.id,
-          totalPoints,
-          user.totalPoints,
-          totalPoints - user.totalPoints
-        );
+      const json: any = user.toJSON();
+      points.gm = json.gmPoints || points.gm || 0;
+      points.discordFollow =
+        json.discordFollowPoints || points.discordFollow || 0;
+
+      checked.gm = json.gmChecked || checked.gm || false;
+      checked.discordVerify =
+        json.discordVerify || checked.discordVerify || false;
+      checked.discordFollow =
+        json.discordFollowChecked || checked.discordFollow || false;
 
       return {
         updateOne: {
           filter: { _id: user.id },
-          update: { $set: { totalPoints } },
+          update: { $set: { points, checked } },
         },
       };
     })
   );
+
   console.log(tx);
 };
 
