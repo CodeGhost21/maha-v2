@@ -101,7 +101,7 @@ const getUserFromAccessCode = async (code: string) => {
     });
     return user.data;
   } catch (error) {
-    throw new BadRequestError("invalid discord token");
+    throw new BadRequestError("Invalid Discord token. Try logging again");
   }
 };
 
@@ -113,12 +113,15 @@ router.post(
 
     try {
       const data = await getUserFromAccessCode(req.body.code);
-      if (!data) throw new BadRequestError("invalid discord token");
+      if (!data)
+        throw new BadRequestError("Invalid Discord token. Try logging again");
 
       // check if there is an existing user
       const existingUser = await WalletUser.findOne({ discordId: data.id });
       if (existingUser && existingUser.id !== user.id)
-        throw new BadRequestError("discord account already assigned");
+        throw new BadRequestError(
+          "Discord account already assigned to another wallet"
+        );
 
       const isGuildMember = await checkGuildMember(data.id);
       if (isGuildMember && !user.checked.discordFollow) {
@@ -143,7 +146,6 @@ router.post(
         discordUser: data,
       });
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }

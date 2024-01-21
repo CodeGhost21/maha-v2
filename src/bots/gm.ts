@@ -63,7 +63,6 @@ client.on("messageCreate", async (message: any) => {
       // If user's last gm was older than yesterday, then break streak
 
       if (!isToday(lastGM)) {
-        console.log(66, !isToday(lastGM));
         await gmPoints(user.userID || "");
         user.totalGMs = 1;
         await user.save();

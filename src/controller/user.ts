@@ -1,10 +1,11 @@
-import { SiweMessage } from "../siwe/lib/client";
-import { WalletUser } from "../database/models/walletUsers";
-import * as jwt from "jsonwebtoken";
-import nconf from "nconf";
+import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { NextFunction, Request, Response } from "express";
+import { SiweMessage } from "../siwe/lib/client";
+import * as jwt from "jsonwebtoken";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
+import nconf from "nconf";
+import NotFoundError from "../errors/NotFoundError";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -75,8 +76,13 @@ export const walletVerify = async (
   }
 };
 
-export const fetchMe = async (req: any, res: any) => {
-  const user = await WalletUser.findOne({ _id: req.user.id });
+export const fetchMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user as IWalletUserModel;
+  if (!user) return next(new NotFoundError());
   res.json({ success: true, user });
 };
 

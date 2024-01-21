@@ -71,7 +71,6 @@ export class SiweMessage {
   constructor(param: string | Partial<SiweMessage>) {
     if (typeof param === "string") {
       const parsedMessage = new ParsedMessage(param);
-      console.log(parsedMessage);
       this.domain = parsedMessage.domain;
       this.address = parsedMessage.address;
       this.statement = parsedMessage.statement;
