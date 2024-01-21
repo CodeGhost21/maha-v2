@@ -2,15 +2,15 @@ import mongoose from "mongoose";
 
 export interface IWalletUser {
   discordId: string;
-  twitterId: string;
   jwt: string;
   rank: number;
-  walletAddress: string;
-  totalPoints: number;
   referralCode: string;
   referredBy: string;
+  totalPoints: number;
+  twitterId: string;
   twitterOauthToken: string;
   twitterOauthTokenSecret: string;
+  walletAddress: string;
 
   checked: {
     gm: boolean;
@@ -26,56 +26,36 @@ export interface IWalletUser {
   };
 
   points: {
-    gm: number;
-    mintingONEZ: number;
-    liquidityONEZ: number;
+    AAVEStaker: number;
+    borrow: number;
     discordFollow: number;
-    twitterFollow: number;
+    gm: number;
+    liquidityONEZ: number;
     LQTYHolder: number;
     LUSDHolder: number;
-    AAVEStaker: number;
     MAHAStaker: number;
-    supply: number;
-    borrow: number;
+    mintingONEZ: number;
     referral: number;
+    supply: number;
+    twitterFollow: number;
   };
 }
 
 const UserSchema = new mongoose.Schema(
   {
     discordId: String,
-    twitterId: String,
     jwt: String,
-    walletAddress: { type: String },
-    discordFollowChecked: { type: Boolean, default: false },
-    discordVerify: { type: Boolean, default: false },
-    twitterFollowChecked: { type: Boolean, default: false },
-    twitterVerify: { type: Boolean, default: false },
-    twitterOauthToken: String,
-    twitterOauthTokenSecret: String,
-    totalPoints: { type: Number, default: 0 },
+    rank: { type: Number },
     referralCode: { type: String },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
-    rank: { type: Number },
-    gmChecked: { type: Boolean, default: false },
-    AAVEStakerChecked: { type: Boolean, default: false },
-    MAHAStaker: { type: Boolean, default: false },
-    LQTYHolderChecked: { type: Boolean, default: false },
-    LUSDHolderChecked: { type: Boolean, default: false },
-    MAHAStakerChecked: { type: Boolean, default: false },
+    totalPoints: { type: Number, default: 0 },
+    twitterId: String,
+    twitterOauthToken: String,
+    twitterOauthTokenSecret: String,
+    walletAddress: { type: String },
 
-    gmPoints: { type: Number, default: 0 },
-    mintingONEZPoints: { type: Number, default: 0 },
-    liquidityONEZPoints: { type: Number, default: 0 },
-    discordFollowPoints: { type: Number, default: 0 },
-    twitterFollowPoints: { type: Number, default: 0 },
-    MAHAStakerPoints: { type: Number, default: 0 },
-    LQTYHolderPoints: { type: Number, default: 0 },
-    LUSDHolderPoints: { type: Number, default: 0 },
-    AAVEStakerPoints: { type: Number, default: 0 },
-    supplyPoints: { type: Number, default: 0 },
-    borrowPoints: { type: Number, default: 0 },
-    referralPoints: { type: Number, default: 0 },
+    points: { type: Object, default: {} },
+    checked: { type: Object, default: {} },
   },
   { timestamps: true }
 );

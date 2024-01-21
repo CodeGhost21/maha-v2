@@ -27,38 +27,35 @@ router.get("/verify", (_req, res, next) => {
   );
 });
 
-router.get(
-  "/callback",
-  passport.authenticate("discord"),
-  async (req: any, res) => {
-    const user = await WalletUser.findById(req.query.state);
-    const discordUser = await WalletUser.findOne({ discordId: req.user.id });
-    console.log("35", discordUser);
+router.get("/callback", passport.authenticate("discord"), async (req, res) => {
+  const reqUser = req.user as any;
+  const user = await WalletUser.findById(req.query.state);
+  const discordUser = await WalletUser.findOne({ discordId: reqUser.id });
 
-    if (!user) return;
-    let url = `/#?error=409`;
+  if (!user) return;
+  let url = `/#?status=discord_error`;
 
-    if (!discordUser) {
-      const isFollow = await checkGuildMember(req.user.id);
-      if (isFollow) {
-        user.checked.discordFollow = true;
-        await assignPoints(
-          user.id,
-          points.discordFollow,
-          "Discord Follower",
-          true,
-          "discordFollow"
-        );
-      }
-      user.discordId = req.user.id;
-      user.checked.discordVerify = true;
-      user.checked.discordFollow = isFollow;
-      await user.save();
-      url = `/#/`;
+  if (!discordUser) {
+    const isFollow = await checkGuildMember(reqUser.id);
+    if (isFollow) {
+      user.checked.discordFollow = true;
+      await assignPoints(
+        user.id,
+        points.discordFollow,
+        "Discord Follower",
+        true,
+        "discordFollow"
+      );
     }
+    user.discordId = reqUser.id;
+    user.checked.discordVerify = true;
+    user.checked.discordFollow = isFollow;
+    await user.save();
 
-    res.redirect(urlJoin(nconf.get("FRONTEND_URL"), url));
+    url = `/#/tasks?status=discord_success`;
   }
-);
+
+  res.redirect(urlJoin(nconf.get("FRONTEND_URL"), url));
+});
 
 export default router;

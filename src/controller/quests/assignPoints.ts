@@ -37,14 +37,15 @@ export const assignPoints = async (
       const referralPoints = Number(points * referralPercent) || 0;
       latestPoints = latestPoints + referralPoints;
       newMessage = message + " plus referral points";
+      const refPoints = (referredByUser.points || {}).referral || 0;
 
       // assign referral points to referred by user
       pointsBulkWrites.push({
         insertOne: {
           document: {
             userId: referredByUser.id,
-            previousPoints: referredByUser.points.referral,
-            currentPoints: referredByUser.points.referral + referralPoints,
+            previousPoints: refPoints,
+            currentPoints: refPoints + referralPoints,
             subPoints: isAdd ? 0 : referralPoints,
             addPoints: !isAdd ? 0 : referralPoints,
             message: "referral points",
