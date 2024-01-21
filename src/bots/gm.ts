@@ -3,9 +3,9 @@ import nconf from "nconf";
 import { client } from "../output/discord";
 import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
-import { assignPoints } from "../controller/user";
 import { WalletUser } from "../database/models/walletUsers";
-import { points } from "../controller/constants";
+import { points } from "../controller/quests/constants";
+import { assignPoints } from "../controller/quests/assignPoints";
 
 const gmKeywords = ["goodmorning", "gm", "morning", "good morning"];
 
@@ -81,6 +81,7 @@ client.on("messageCreate", async (message: any) => {
 const gmPoints = async (discordId: string) => {
   const walletUser = await WalletUser.findOne({ discordId });
   if (!walletUser) return;
+
   await assignPoints(
     walletUser.id,
     points.gm,

@@ -4,8 +4,6 @@ import nconf from "nconf";
 import passport from "passport";
 
 import urlJoin from "../utils/url-join";
-import { WalletUser } from "../database/models/walletUsers";
-import { log } from "console";
 
 const secret = nconf.get("JWT_SECRET");
 const router = Router();

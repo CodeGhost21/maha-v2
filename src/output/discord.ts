@@ -20,7 +20,8 @@ client.on("ready", () =>
   console.log(`DISCORD: Logged in as ${client.user?.tag}!`)
 );
 
-client.login(nconf.get("DISCORD_CLIENT_TOKEN")); //login bot using token
+const loginToken = nconf.get("DISCORD_CLIENT_TOKEN");
+if (loginToken) client.login(loginToken); //login bot using token
 
 export const sendMessage = (
   channelName: string,

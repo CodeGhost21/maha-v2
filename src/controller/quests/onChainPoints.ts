@@ -1,12 +1,12 @@
 import { AbstractProvider } from "ethers";
 import { ethers, Provider } from "ethers";
-import { mantaProvider, zksyncProvider } from "../utils/providers";
+import { mantaProvider, zksyncProvider } from "../../utils/providers";
 import { minSupplyAmount, borrowPtsPerUSD } from "./constants";
 import { MulticallWrapper } from "ethers-multicall-provider";
 import nconf from "nconf";
-import poolABI from "../abis/Pool.json";
-import stabilityPool from "../abis/StabilityPool.json";
-import troveManagerABI from "../abis/TroveManager.json";
+import poolABI from "../../abis/Pool.json";
+import stabilityPool from "../../abis/StabilityPool.json";
+import troveManagerABI from "../../abis/TroveManager.json";
 
 const getContract = async (
   contractAddress: string,

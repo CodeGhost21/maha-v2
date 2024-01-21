@@ -11,31 +11,34 @@ export interface IWalletUser {
   referredBy: string;
   twitterOauthToken: string;
   twitterOauthTokenSecret: string;
-  discordFollowChecked: boolean;
-  discordVerify: boolean;
-  twitterFollowChecked: boolean;
-  twitterVerify: boolean;
-  twitterFollow: boolean;
-  gmChecked: boolean;
-  AAVEStakerChecked: boolean;
-  MAHAStaker: boolean;
-  LQTYHolderChecked: boolean;
-  LUSDHolderChecked: boolean;
-  MAHAStakerChecked: boolean;
-  AAVEStakersChecked: boolean;
 
-  gmPoints: number;
-  mintingONEZPoints: number;
-  liquidityONEZPoints: number;
-  discordFollowPoints: number;
-  twitterFollowPoints: number;
-  LQTYHolderPoints: number;
-  LUSDHolderPoints: number;
-  AAVEStakerPoints: number;
-  MAHAStakerPoints: number;
-  supplyPoints: number;
-  borrowPoints: number;
-  referralPoints: number;
+  checked: {
+    gm: boolean;
+    AAVEStaker: boolean;
+    LQTYHolder: boolean;
+    LUSDHolder: boolean;
+    MAHAStaker: boolean;
+    AAVEStakers: boolean;
+    discordFollow: boolean;
+    discordVerify: boolean;
+    twitterVerify: boolean;
+    twitterFollow: boolean;
+  };
+
+  points: {
+    gm: number;
+    mintingONEZ: number;
+    liquidityONEZ: number;
+    discordFollow: number;
+    twitterFollow: number;
+    LQTYHolder: number;
+    LUSDHolder: number;
+    AAVEStaker: number;
+    MAHAStaker: number;
+    supply: number;
+    borrow: number;
+    referral: number;
+  };
 }
 
 const UserSchema = new mongoose.Schema(

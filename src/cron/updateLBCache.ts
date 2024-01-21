@@ -1,5 +1,5 @@
 import { WalletUser } from "../database/models/walletUsers";
-import cache from "../controller/cache";
+import cache from "../utils/cache";
 
 export const updateLBCache = async () => {
   const allUsers = await WalletUser.find({})

@@ -7,7 +7,7 @@ import cron from "node-cron";
 import express from "express";
 import nconf from "nconf";
 import passport from "passport";
-import Routes from "./routes";
+import routes from "./routes";
 import session from "express-session";
 
 import "./strategies";
@@ -34,7 +34,7 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(Routes);
+app.use(routes);
 app.set("port", nconf.get("PORT") || 5002);
 const port = app.get("port");
 server.listen(port, () => console.log(`Server started on port ${port}`));

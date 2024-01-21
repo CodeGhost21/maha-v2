@@ -2,7 +2,7 @@ import { assignPoints } from "../controller/user";
 import {
   supplyBorrowPointsMantaMulticall,
   supplyBorrowPointsZksyncMulticall,
-} from "../controller/onChain";
+} from "../controller/quests/onChainPoints";
 import { WalletUser } from "../database/models/walletUsers";
 
 const _dailyLpPoints = async (from: number, count: number) => {

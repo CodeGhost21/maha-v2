@@ -6,8 +6,8 @@ import passport from "passport";
 import urlJoin from "../utils/url-join";
 import { WalletUser } from "../database/models/walletUsers";
 import { checkGuildMember } from "../output/discord";
-import { assignPoints } from "../controller/user";
-import { points } from "../controller/constants";
+import { points } from "../controller/quests/constants";
+import { assignPoints } from "../controller/quests/assignPoints";
 
 const secret = nconf.get("JWT_SECRET");
 const router = Router();
@@ -41,7 +41,7 @@ router.get(
     if (!discordUser) {
       const isFollow = await checkGuildMember(req.user.id);
       if (isFollow) {
-        user.discordFollowChecked = true;
+        user.checked.discordFollow = true;
         await assignPoints(
           user.id,
           points.discordFollow,
@@ -51,8 +51,8 @@ router.get(
         );
       }
       user.discordId = req.user.id;
-      user.discordVerify = true;
-      user.discordFollowChecked = isFollow;
+      user.checked.discordVerify = true;
+      user.checked.discordFollow = isFollow;
       await user.save();
       url = `/#/`;
     }
