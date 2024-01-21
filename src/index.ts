@@ -36,8 +36,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(routes);
 app.set("port", nconf.get("PORT") || 5002);
+
 const port = app.get("port");
-server.listen(port, () => console.log(`Server started on port ${port}`));
+server.listen(port, () => console.log(`server started on port ${port}`));
 
 // setup LB cache
 cron.schedule("*/10 * * * *", async () => {

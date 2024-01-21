@@ -9,13 +9,15 @@ export const checkTask = async (req: any, res: any) => {
   if (req.body.taskId === "discordFollow") {
     const checkDiscordFollow = await checkGuildMember(user.discordId);
     if (checkDiscordFollow && !user.checked.discordFollow) {
-      await assignPoints(
+      const task = await assignPoints(
         user.id,
         points.discordFollow,
         "Discord Follower",
         true,
         req.body.taskId
       );
+
+      await task?.execute();
       user.checked.discordFollow = checkDiscordFollow;
       await user.save();
     }

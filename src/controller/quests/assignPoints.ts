@@ -1,24 +1,16 @@
-import { WalletUser } from "../../database/models/walletUsers";
-import { UserPointTransactions } from "../../database/models/userPointTransactions";
+import { IWalletUser, WalletUser } from "../../database/models/walletUsers";
+import {
+  IUserPointTransactions,
+  UserPointTransactions,
+} from "../../database/models/userPointTransactions";
 import { referralPercent } from "./constants";
+import { AnyBulkWriteOperation } from "mongodb";
 
-const saveUserPoints = async (
-  userId: string,
-  previousPoints: number,
-  currentPoints: number,
-  isAdd: boolean,
-  points: number,
-  message: string
-) => {
-  await UserPointTransactions.create({
-    userId,
-    previousPoints,
-    currentPoints,
-    subPoints: isAdd ? 0 : points,
-    addPoints: !isAdd ? 0 : points,
-    message,
-  });
-};
+export interface IAssignPointsTask {
+  userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];
+  pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[];
+  execute: () => Promise<void>;
+}
 
 export const assignPoints = async (
   userId: string,
@@ -26,7 +18,10 @@ export const assignPoints = async (
   message: string,
   isAdd: boolean,
   taskId: string
-) => {
+): Promise<IAssignPointsTask | undefined> => {
+  const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+  const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
+
   const user = await WalletUser.findById(userId);
   if (!user) return;
 
@@ -36,7 +31,7 @@ export const assignPoints = async (
 
   if (points < 0.01 || isNaN(points)) return;
 
-  if (user.referredBy !== undefined) {
+  if (user.referredBy) {
     const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
     if (referredByUser) {
       const referralPoints = Number(points * referralPercent) || 0;
@@ -44,38 +39,67 @@ export const assignPoints = async (
       newMessage = message + " plus referral points";
 
       // assign referral points to referred by user
-      await saveUserPoints(
-        referredByUser.id,
-        referredByUser.points.referral,
-        referredByUser.points.referral + referralPoints,
-        isAdd,
-        referralPoints,
-        "referral points"
-      );
+      pointsBulkWrites.push({
+        insertOne: {
+          document: {
+            userId: referredByUser.id,
+            previousPoints: referredByUser.points.referral,
+            currentPoints: referredByUser.points.referral + referralPoints,
+            subPoints: isAdd ? 0 : referralPoints,
+            addPoints: !isAdd ? 0 : referralPoints,
+            message: "referral points",
+          },
+        },
+      });
 
-      referredByUser.points.referral =
-        referredByUser.points.referral + referralPoints;
-      referredByUser.totalPoints = referredByUser.totalPoints + referralPoints;
-      await referredByUser.save();
+      userBulkWrites.push({
+        updateOne: {
+          filter: { _id: referredByUser.id },
+          update: {
+            $inc: {
+              ["points.referral"]: referralPoints,
+              totalPoints: referralPoints,
+            },
+          },
+        },
+      });
     }
   }
 
-  const currentPoints = previousPoints + latestPoints;
-  await saveUserPoints(
-    user.id,
-    previousPoints,
-    currentPoints,
-    isAdd,
-    latestPoints,
-    newMessage
-  );
+  pointsBulkWrites.push({
+    insertOne: {
+      document: {
+        userId: user.id,
+        previousPoints,
+        currentPoints: previousPoints + latestPoints,
+        subPoints: isAdd ? 0 : latestPoints,
+        addPoints: !isAdd ? 0 : latestPoints,
+        message: newMessage,
+      },
+    },
+  });
 
-  user["totalPoints"] = currentPoints;
+  userBulkWrites.push({
+    updateOne: {
+      filter: { _id: user.id },
+      update: {
+        $inc: {
+          [`points.${taskId}`]: latestPoints,
+          totalPoints: latestPoints,
+        },
+        $set: {
+          [`checked.${taskId}`]: true,
+        },
+      },
+    },
+  });
 
-  // @ts-ignore
-  user[taskId] = Number(user[taskId] || 0) + latestPoints;
-  // @ts-ignore
-  user[`${taskId}Checked`] = true;
-
-  await user.save();
+  return {
+    userBulkWrites,
+    pointsBulkWrites,
+    execute: async () => {
+      await WalletUser.bulkWrite(userBulkWrites);
+      await UserPointTransactions.bulkWrite(pointsBulkWrites);
+    },
+  };
 };
