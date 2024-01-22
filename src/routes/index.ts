@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import discord from "./discord";
+import discord from "../controller/discord";
 import user from "./user";
 import twitter from "./twitter";
 import HttpError from "src/errors/HttpError";
@@ -19,6 +19,7 @@ router.use("/twitter", twitter);
 router.use("/user", user);
 
 router.use(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (err: HttpError, _req: Request, res: Response, _next: NextFunction) => {
     res.status(err.status || 500);
     res.json({

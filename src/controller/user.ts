@@ -86,7 +86,7 @@ export const fetchMe = async (
   res.json({ success: true, user });
 };
 
-export const getLeaderBoard = async (req: any, res: any) => {
+export const getLeaderBoard = async (_req: any, res: any) => {
   const cachedData: string | undefined = cache.get("lb:leaderBoard");
   if (cachedData) return res.json(JSON.parse(cachedData || ""));
   res.json([]);
