@@ -4,14 +4,22 @@ import deserializeUser from "../middleware/deserializeUser";
 
 const router = Router();
 
-import { getLeaderBoard, walletVerify, fetchMe } from "../controller/user";
+import {
+  getLeaderBoard,
+  walletVerify,
+  fetchMe,
+  getTotalUsers,
+  getTotalReferralOfUsers,
+} from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
 router.post("/login", walletVerify);
 router.get("/lb", getLeaderBoard);
+router.get("/totalUsers", getTotalUsers);
 
 router.use(deserializeUser, ensureLoggedIn);
 router.get("/me", fetchMe);
 router.post("/check", checkTask);
+router.post("/totalReferrals", getTotalReferralOfUsers);
 
 export default router;
