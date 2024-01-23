@@ -39,7 +39,7 @@ export interface IWalletUser {
   twitterOauthToken: string;
   twitterOauthTokenSecret: string;
   walletAddress: string;
-
+  role: string;
   checked: IWalletUserChecked;
   points: IWalletUserPoints;
 }
@@ -56,7 +56,7 @@ const UserSchema = new mongoose.Schema(
     twitterOauthToken: String,
     twitterOauthTokenSecret: String,
     walletAddress: { type: String },
-
+    role: { type: String },
     points: { type: Object, default: {} },
     checked: { type: Object, default: {} },
   },

@@ -13,7 +13,7 @@ export const minSupplyAmount = 100;
 
 export const borrowPtsPerUSD = 4;
 
-export const LQTYHolders: any = [
+export const LQTYHolders: string[] = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
@@ -22,7 +22,7 @@ export const LQTYHolders: any = [
   "0xF152dA370FA509f08685Fa37a09BA997E41Fb65b",
 ];
 
-export const AAVEStakers: any = [
+export const AAVEStakers: string[] = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
@@ -31,7 +31,7 @@ export const AAVEStakers: any = [
   "0xF152dA370FA509f08685Fa37a09BA997E41Fb65b",
 ];
 
-export const LUSDHolders: any = [
+export const LUSDHolders: string[] = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",
@@ -39,7 +39,7 @@ export const LUSDHolders: any = [
   "0x7d583D4d3404055a75640d94759A242255d9f5F8",
 ];
 
-export const MAHAStakers: any = [
+export const MAHAStakers: string[] = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
   "0xa50Bcd7B0B33f60FA26f2c7e7eC6eE33b683A818",

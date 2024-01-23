@@ -1,10 +1,12 @@
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { NextFunction, Request, Response } from "express";
+import axios from "axios";
+import nconf from "nconf";
 import { SiweMessage } from "../siwe/lib/client";
 import * as jwt from "jsonwebtoken";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
-import nconf from "nconf";
+import { userLpData } from "./quests/onChainPoints";
 import NotFoundError from "../errors/NotFoundError";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
@@ -40,12 +42,25 @@ export const walletVerify = async (
       );
     }
 
+    //recaptcha verify
+    // const recaptchaSecretKey = "RECAPTCHA_SECRET_KEY";
+    // const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${recaptchaToken}`;
+
+    // const response = await axios.post(verificationURL);
+    // const { success } = response.data;
+    // if (success) {
+    //   console.log(success);
+    // }
+
+    //assign role
+    const role = await userLpData(result.data.address);
     const user = await WalletUser.findOne({
       walletAddress: result.data.address,
     });
 
     if (user) {
       user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+      user.role = role;
       await user.save();
       return res.json({ success: true, user });
     }
@@ -57,6 +72,7 @@ export const walletVerify = async (
       walletAddress: req.body.message.address,
       rank: usersCount + 1,
       referralCode: referralCode ? referralCode : null,
+      role: role,
     });
 
     // referred by user added to user model
@@ -86,17 +102,18 @@ export const fetchMe = async (
   res.json({ success: true, user });
 };
 
-export const getLeaderBoard = async (req: any, res: any) => {
+export const getLeaderBoard = async (req: Request, res: Response) => {
   const cachedData: string | undefined = cache.get("lb:leaderBoard");
   if (cachedData) return res.json(JSON.parse(cachedData || ""));
   res.json([]);
 };
 
-export const getTotalUsers = async (req: any, res: any) => {
-  res.json({ totalUsers: (await WalletUser.count()) || [] });
+export const getTotalUsers = async (req: Request, res: Response) => {
+  const cachedData: string | undefined = cache.get("tu:allUsers");
+  res.json({ totalUsers: cachedData });
 };
 
-export const getTotalReferralOfUsers = async (req: any, res: any) => {
+export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
   const totalReferrals = await WalletUser.find({ referredBy: user.id });
 

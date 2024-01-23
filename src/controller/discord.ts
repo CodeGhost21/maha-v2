@@ -124,6 +124,7 @@ router.post(
         );
 
       const isGuildMember = await checkGuildMember(data.id);
+      //assign role to user using discord api
       if (isGuildMember && !user.checked.discordFollow) {
         user.checked.discordFollow = true;
         const tx = await assignPoints(
@@ -144,6 +145,7 @@ router.post(
       res.json({
         success: true,
         discordUser: data,
+        user: user,
       });
     } catch (error) {
       return next(error);

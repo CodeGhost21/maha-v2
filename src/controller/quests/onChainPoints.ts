@@ -91,3 +91,36 @@ export const onezPoints = async (walletAddress: string) => {
     liquidity: (liquidity / 3600) * 5,
   };
 };
+
+export const userLpData = async (walletAddress: string) => {
+  const poolManta = await getContract(
+    nconf.get("MANTA_POOL"),
+    poolABI,
+    mantaProvider
+  );
+
+  const poolZksync = await getContract(
+    nconf.get("ZKSYNC_POOL"),
+    poolABI,
+    zksyncProvider
+  );
+
+  const poolMantaResult = await poolManta.getUserAccountData(walletAddress);
+  const poolZksyncResult = await poolZksync.getUserAccountData(walletAddress);
+
+  const supplyManta = Number(poolMantaResult[0]) / 1e8;
+  const supplyZksync = Number(poolZksyncResult[0]) / 1e8;
+
+  const totalSupply = supplyManta + supplyZksync;
+  if (totalSupply > 100 && totalSupply <= 1000) {
+    return "shrimp";
+  } else if (totalSupply > 1000 && totalSupply <= 10000) {
+    return "shark";
+  } else if (totalSupply > 10000 && totalSupply <= 100000) {
+    return "whale";
+  } else if (totalSupply > 100000) {
+    return "gigaWhale";
+  } else {
+    return "no role";
+  }
+};
