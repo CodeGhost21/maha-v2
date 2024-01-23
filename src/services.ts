@@ -17,4 +17,4 @@ cron.schedule("*/5 * * * *", async () => {
 });
 
 // updateRank();
-dailyLpPoints();
+// dailyLpPoints();
