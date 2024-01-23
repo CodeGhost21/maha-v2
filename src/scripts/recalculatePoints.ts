@@ -14,14 +14,14 @@ open();
 
 const _recalculatePoints = async (from: number, count: number) => {
   const users = await WalletUser.find({})
-    .select(["totalPoints", "points"])
+    .select(["totalPoints", "totalPointsV2", "points"])
     .limit(count)
     .skip(from);
 
   const tx = await WalletUser.bulkWrite(
     users.map((user) => {
       const points = user.points || {};
-      const totalPoints =
+      const totalPointsV2 =
         (points.borrow || 0) +
         (points.supply || 0) +
         (points.discordFollow || 0) +
@@ -29,20 +29,20 @@ const _recalculatePoints = async (from: number, count: number) => {
         (points.referral || 0);
 
       // diff valued in case
-      if (totalPoints !== user.totalPoints)
+      if (totalPointsV2 !== user.totalPointsV2)
         console.log(
           "diff",
           user,
           user.id,
-          totalPoints,
-          user.totalPoints,
-          totalPoints - user.totalPoints
+          totalPointsV2,
+          user.totalPointsV2,
+          totalPointsV2 - user.totalPointsV2
         );
 
       return {
         updateOne: {
           filter: { _id: user.id },
-          update: { $set: { totalPoints } },
+          update: { $set: { totalPointsV2 } },
         },
       };
     })

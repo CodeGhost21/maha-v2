@@ -2,7 +2,7 @@ import { WalletUser } from "../database/models/walletUsers";
 
 export const updateRank = async () => {
   const users = await WalletUser.find({})
-    .sort({ totalPoints: -1 })
+    .sort({ totalPointsV2: -1 })
     .select("_id");
 
   console.log(`updating rank of over ${users.length} users`);

@@ -26,6 +26,7 @@ export interface IWalletUserPoints {
   referral: number;
   supply: number;
   twitterFollow: number;
+  // total: number;
 }
 
 export interface IWalletUser {
@@ -34,11 +35,12 @@ export interface IWalletUser {
   rank: number;
   referralCode: string;
   referredBy: string;
-  totalPoints: number;
+  totalPointsV2: number;
   twitterId: string;
   twitterOauthToken: string;
   twitterOauthTokenSecret: string;
   walletAddress: string;
+  epoch: number;
 
   checked: IWalletUserChecked;
   points: IWalletUserPoints;
@@ -51,12 +53,13 @@ const UserSchema = new mongoose.Schema(
     rank: { type: Number },
     referralCode: { type: String },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
-    totalPoints: { type: Number, default: 0 },
+    totalPointsV2: { type: Number, default: 0 },
     twitterId: String,
     twitterOauthToken: String,
     twitterOauthTokenSecret: String,
     walletAddress: { type: String },
 
+    epoch: { type: Number, default: 0 },
     points: { type: Object, default: {} },
     checked: { type: Object, default: {} },
   },

@@ -47,8 +47,8 @@ const _supplyBorrowPointsMulticall = async (
   );
 
   return results.map((userAccoutnData: bigint[], index) => {
-    const supply = Number(userAccoutnData[0]) / 1e6 / 100;
-    const borrow = Number(userAccoutnData[1]) / 1e6 / 100;
+    const supply = Number(userAccoutnData[0]) / 1e8;
+    const borrow = Number(userAccoutnData[1]) / 1e8;
 
     if (supply < minSupplyAmount) {
       return {
@@ -58,7 +58,8 @@ const _supplyBorrowPointsMulticall = async (
       };
     }
 
-    const multiplier = 30 / (60 * 24);
+    const multiplier = 5;
+    // const multiplier = 60 / (60 * 24);
 
     return {
       who: addresses[index],

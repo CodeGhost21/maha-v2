@@ -21,7 +21,8 @@ export const assignPoints = async (
   points: number,
   message: string,
   isAdd: boolean,
-  taskId: keyof IWalletUserPoints
+  taskId: keyof IWalletUserPoints,
+  epoch?: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
@@ -29,7 +30,7 @@ export const assignPoints = async (
   const user = await WalletUser.findById(userId);
   if (!user) return;
 
-  const previousPoints = Number(user.totalPoints) || 0;
+  const previousPoints = Number(user.totalPointsV2) || 0;
   let latestPoints = Number(points) || 0;
   let newMessage = message;
 
@@ -63,7 +64,7 @@ export const assignPoints = async (
           update: {
             $inc: {
               ["points.referral"]: referralPoints,
-              totalPoints: referralPoints,
+              totalPointsV2: referralPoints,
             },
           },
         },
@@ -90,9 +91,10 @@ export const assignPoints = async (
       update: {
         $inc: {
           [`points.${taskId}`]: latestPoints,
-          totalPoints: latestPoints,
+          totalPointsV2: latestPoints,
         },
         $set: {
+          epoch: epoch || user.epoch,
           [`checked.${taskId}`]: true,
         },
       },
