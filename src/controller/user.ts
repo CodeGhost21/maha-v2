@@ -57,6 +57,8 @@ export const walletVerify = async (
       walletAddress: req.body.message.address,
       rank: usersCount + 1,
       epoch: getEpoch(),
+      points: {},
+      checked: {},
       referralCode: referralCode ? referralCode : null,
     });
 
