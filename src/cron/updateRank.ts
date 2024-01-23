@@ -18,6 +18,6 @@ export const updateRank = async () => {
     },
   }));
 
-  await WalletUser.bulkWrite(updateCommands);
-  console.log("done updating ranks");
+  const tx = await WalletUser.bulkWrite(updateCommands);
+  console.log("done updating ranks", tx);
 };

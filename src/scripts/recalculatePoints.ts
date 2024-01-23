@@ -28,21 +28,32 @@ const _recalculatePoints = async (from: number, count: number) => {
         (points.gm || 0) +
         (points.referral || 0);
 
-      // diff valued in case
-      if (totalPointsV2 !== user.totalPointsV2)
-        console.log(
-          "diff",
-          user,
-          user.id,
-          totalPointsV2,
-          user.totalPointsV2,
-          totalPointsV2 - user.totalPointsV2
-        );
+      // @ts-ignore
+      const oldPoints = Math.max(totalPointsV2, Number(user.totalPoints || 0));
+
+      console.log(
+        "fuc",
+        oldPoints,
+        totalPointsV2,
+        // @ts-ignore
+        Number(user.totalPoints || 0)
+      );
+
+      // // diff valued in case
+      // if (totalPointsV2 !== user.totalPointsV2)
+      //   console.log(
+      //     "diff",
+      //     user,
+      //     user.id,
+      //     totalPointsV2,
+      //     user.totalPointsV2,
+      //     totalPointsV2 - user.totalPointsV2
+      //   );
 
       return {
         updateOne: {
           filter: { _id: user.id },
-          update: { $set: { totalPointsV2 } },
+          update: { $set: { totalPointsV2: oldPoints } },
         },
       };
     })
@@ -53,7 +64,7 @@ const _recalculatePoints = async (from: number, count: number) => {
 export const recalculatePoints = async () => {
   const count = await WalletUser.count({});
 
-  const chunk = 1000;
+  const chunk = 10000;
   const loops = Math.floor(count / chunk) + 1;
 
   for (let i = 0; i < loops; i++) {

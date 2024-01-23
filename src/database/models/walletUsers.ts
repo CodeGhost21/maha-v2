@@ -54,6 +54,7 @@ const UserSchema = new mongoose.Schema(
     referralCode: { type: String },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
     totalPointsV2: { type: Number, default: 0 },
+    totalPoints: { type: Number, default: 0 },
     twitterId: String,
     twitterOauthToken: String,
     twitterOauthTokenSecret: String,
