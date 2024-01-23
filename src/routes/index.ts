@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import discord from "../controller/discord";
+import discord from "./discord";
 import user from "./user";
 import twitter from "./twitter";
 import HttpError from "src/errors/HttpError";

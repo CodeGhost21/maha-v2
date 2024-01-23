@@ -9,6 +9,8 @@ export const checkTask = async (req: Request, res: Response) => {
 
   if (req.body.taskId === "discordFollow") {
     const checkDiscordFollow = await checkGuildMember(user.discordId);
+    user.checked.discordFollow = checkDiscordFollow;
+    await user.save();
     if (checkDiscordFollow && !user.checked.discordFollow) {
       const task = await assignPoints(
         user.id,
@@ -19,8 +21,6 @@ export const checkTask = async (req: Request, res: Response) => {
       );
 
       await task?.execute();
-      user.checked.discordFollow = checkDiscordFollow;
-      await user.save();
     }
   }
 
@@ -80,6 +80,5 @@ export const checkTask = async (req: Request, res: Response) => {
   //     );
   //   }
   // }
-
   res.json({ success: true, user });
 };
