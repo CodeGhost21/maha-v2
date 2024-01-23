@@ -9,6 +9,7 @@ import {
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
+import { getEpoch } from "../utils/epoch";
 
 const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
   // get wallets
@@ -36,8 +37,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       zksync.borrow.points
     );
 
-    if (manta.supply.amount === 0 && zksync.supply.amount === 0) {
-      console.log("setting poehc", user.id);
+    if (manta.supply.points === 0 && zksync.supply.points === 0) {
       tasks.push({
         userBulkWrites: [
           {
@@ -111,12 +111,12 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
 };
 
 const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
-  const epoch = Math.floor(Date.now() / (60 * 60 * 1000)); // 1 hr epochs
+  const epoch = getEpoch();
   console.log("working with epoch", epoch);
 
   const query = migrate
     ? { $or: [{ epoch: 0 }, { epoch: undefined }] }
-    : { epoch };
+    : { epoch: { $ne: epoch } };
 
   // const query = { walletAddress: "0x13FeFdD563A930F07B1aC8A2227Acc27c3C12946" };
   const users = await WalletUser.find(query)

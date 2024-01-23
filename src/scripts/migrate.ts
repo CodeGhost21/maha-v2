@@ -34,7 +34,7 @@ const _recalculatePoints = async (from: number, count: number) => {
       return {
         updateOne: {
           filter: { _id: user.id },
-          update: { $set: { points, checked } },
+          update: { $set: { points, checked, epoch: 0 } },
         },
       };
     })

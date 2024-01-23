@@ -12,4 +12,4 @@ import { open } from "../database";
 import { dailyLpPoints } from "../cron/dailyLpPoints";
 
 open();
-dailyLpPoints(true);
+dailyLpPoints();

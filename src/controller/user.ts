@@ -6,6 +6,7 @@ import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import nconf from "nconf";
 import NotFoundError from "../errors/NotFoundError";
+import { getEpoch } from "../utils/epoch";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -31,9 +32,8 @@ export const walletVerify = async (
 
     const result = await siweMessage.verify({ signature });
 
-    console.log(result, req.body);
-
     // todo: verify other data
+
     if (result.data.address !== req.body.message.address) {
       throw new BadRequestError(
         "Signature verification failed. Invalid signature."
@@ -56,6 +56,7 @@ export const walletVerify = async (
     const newUser = await WalletUser.create({
       walletAddress: req.body.message.address,
       rank: usersCount + 1,
+      epoch: getEpoch(),
       referralCode: referralCode ? referralCode : null,
     });
 
