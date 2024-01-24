@@ -8,6 +8,7 @@ import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import { userLpData } from "./quests/onChainPoints";
 import NotFoundError from "../errors/NotFoundError";
+import { getEpoch } from "../utils/epoch";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -28,42 +29,36 @@ export const walletVerify = async (
   next: NextFunction
 ) => {
   try {
-    console.log(req.body);
     const { message, signature, captcha } = req.body;
     const siweMessage = new SiweMessage(message);
 
     const result = await siweMessage.verify({ signature });
-
-    // todo: verify other data
     if (result.data.address !== req.body.message.address) {
       throw new BadRequestError(
         "Signature verification failed. Invalid signature."
       );
     }
-
     //recaptcha verify
     const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
 
     const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
     console.log(verificationURL);
 
-    const response = await axios.post(verificationURL);
-    console.log(49, response.data);
-    const { success } = response.data;
-    if (success) {
-      console.log(54, success);
-      //assign role
-      const role = await userLpData(result.data.address);
-      const user = await WalletUser.findOne({
-        walletAddress: result.data.address,
-      });
+    const usersCount = await WalletUser.count();
+    const referralCode = _generateReferralCode();
 
-      if (user) {
-        user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-        user.role = role;
-        await user.save();
-        return res.json({ success: true, user });
-      }
+    const newUser = await WalletUser.create({
+      walletAddress: req.body.message.address,
+      rank: usersCount + 1,
+      epoch: getEpoch(),
+      referralCode: referralCode ? referralCode : null,
+    });
+
+    // referred by user added to user model
+    if (req.body.referredByCode !== "") {
+      const referrer = await WalletUser.findOne({
+        referralCode: req.body.referredByCode,
+      });
 
       const usersCount = await WalletUser.count();
       const referralCode = _generateReferralCode();
@@ -72,7 +67,6 @@ export const walletVerify = async (
         walletAddress: req.body.message.address,
         rank: usersCount + 1,
         referralCode: referralCode ? referralCode : null,
-        role: role,
       });
 
       // referred by user added to user model

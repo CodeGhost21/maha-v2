@@ -6,8 +6,8 @@ import { updateRank } from "./cron/updateRank";
 // connect to database
 open();
 
-cron.schedule("*/30 * * * *", async () => {
-  console.log("running a lp points every 30 minutes");
+cron.schedule("*/20 * * * *", async () => {
+  console.log("running lp points every 20 minutes");
   await dailyLpPoints();
 });
 
@@ -17,4 +17,4 @@ cron.schedule("*/5 * * * *", async () => {
 });
 
 // updateRank();
-// dailyLpPoints();
+dailyLpPoints();
