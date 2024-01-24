@@ -28,12 +28,11 @@ export const walletVerify = async (
   next: NextFunction
 ) => {
   try {
-    const { message, signature } = req.body;
+    console.log(req.body);
+    const { message, signature, captcha } = req.body;
     const siweMessage = new SiweMessage(message);
 
     const result = await siweMessage.verify({ signature });
-
-    console.log(result, req.body);
 
     // todo: verify other data
     if (result.data.address !== req.body.message.address) {
@@ -43,50 +42,59 @@ export const walletVerify = async (
     }
 
     //recaptcha verify
-    // const recaptchaSecretKey = "RECAPTCHA_SECRET_KEY";
-    // const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${recaptchaToken}`;
+    const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
 
-    // const response = await axios.post(verificationURL);
-    // const { success } = response.data;
-    // if (success) {
-    //   console.log(success);
-    // }
+    const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
+    console.log(verificationURL);
 
-    //assign role
-    const role = await userLpData(result.data.address);
-    const user = await WalletUser.findOne({
-      walletAddress: result.data.address,
-    });
-
-    if (user) {
-      user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-      user.role = role;
-      await user.save();
-      return res.json({ success: true, user });
-    }
-
-    const usersCount = await WalletUser.count();
-    const referralCode = _generateReferralCode();
-
-    const newUser = await WalletUser.create({
-      walletAddress: req.body.message.address,
-      rank: usersCount + 1,
-      referralCode: referralCode ? referralCode : null,
-      role: role,
-    });
-
-    // referred by user added to user model
-    if (req.body.referredByCode !== "") {
-      const referrer = await WalletUser.findOne({
-        referralCode: req.body.referredByCode,
+    const response = await axios.post(verificationURL);
+    console.log(49, response.data);
+    const { success } = response.data;
+    if (success) {
+      console.log(54, success);
+      //assign role
+      const role = await userLpData(result.data.address);
+      const user = await WalletUser.findOne({
+        walletAddress: result.data.address,
       });
-      if (referrer) newUser.referredBy = referrer.id;
-    }
 
-    // add jwt token
-    newUser.jwt = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
-    await newUser.save();
-    return res.json({ success: true, user: newUser });
+      if (user) {
+        user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+        user.role = role;
+        await user.save();
+        return res.json({ success: true, user });
+      }
+
+      const usersCount = await WalletUser.count();
+      const referralCode = _generateReferralCode();
+
+      const newUser = await WalletUser.create({
+        walletAddress: req.body.message.address,
+        rank: usersCount + 1,
+        referralCode: referralCode ? referralCode : null,
+        role: role,
+      });
+
+      // referred by user added to user model
+      if (req.body.referredByCode !== "") {
+        const referrer = await WalletUser.findOne({
+          referralCode: req.body.referredByCode,
+        });
+        if (referrer) newUser.referredBy = referrer.id;
+      }
+
+      // add jwt token
+      newUser.jwt = await jwt.sign(
+        { id: String(newUser.id) },
+        accessTokenSecret
+      );
+      await newUser.save();
+      return res.json({ success: true, user: newUser });
+    } else
+      return res.json({
+        success: false,
+        message: "Captcha verification failed",
+      });
   } catch (error) {
     next(error);
   }
