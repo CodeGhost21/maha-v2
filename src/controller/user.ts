@@ -31,34 +31,33 @@ export const walletVerify = async (
   try {
     const { message, signature, captcha } = req.body;
     const siweMessage = new SiweMessage(message);
-
     const result = await siweMessage.verify({ signature });
+
+    // todo: verify other data
     if (result.data.address !== req.body.message.address) {
       throw new BadRequestError(
         "Signature verification failed. Invalid signature."
       );
     }
+
     //recaptcha verify
     const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
-
     const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
-    console.log(verificationURL);
-
-    const usersCount = await WalletUser.count();
-    const referralCode = _generateReferralCode();
-
-    const newUser = await WalletUser.create({
-      walletAddress: req.body.message.address,
-      rank: usersCount + 1,
-      epoch: getEpoch(),
-      referralCode: referralCode ? referralCode : null,
-    });
-
-    // referred by user added to user model
-    if (req.body.referredByCode !== "") {
-      const referrer = await WalletUser.findOne({
-        referralCode: req.body.referredByCode,
+    const response = await axios.post(verificationURL);
+    const { success } = response.data;
+    if (success) {
+      //assign role
+      const role = await userLpData(result.data.address);
+      const user = await WalletUser.findOne({
+        walletAddress: result.data.address,
       });
+
+      if (user) {
+        user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+        user.role = role;
+        await user.save();
+        return res.json({ success: true, user });
+      }
 
       const usersCount = await WalletUser.count();
       const referralCode = _generateReferralCode();
@@ -66,7 +65,9 @@ export const walletVerify = async (
       const newUser = await WalletUser.create({
         walletAddress: req.body.message.address,
         rank: usersCount + 1,
+        epoch: getEpoch(),
         referralCode: referralCode ? referralCode : null,
+        role: role,
       });
 
       // referred by user added to user model
