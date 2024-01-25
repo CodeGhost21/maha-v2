@@ -124,17 +124,17 @@ export const registerUser = async (
       );
 
     const isGuildMember = await checkGuildMember(data.id);
-    //assign role to user using discord api
-    console.log(133, user.checked.discordFollow, !user.checked.discordFollow);
-    const discordFollow = user.checked.discordFollow;
+
     user.discordId = data.id;
     user.checked = {
       ...user.checked,
       discordVerify: true,
       discordFollow: isGuildMember,
     };
+
     await user.save();
-    if (isGuildMember && !discordFollow) {
+
+    if (isGuildMember) {
       const tx = await assignPoints(
         user.id,
         points.discordFollow,
@@ -144,6 +144,7 @@ export const registerUser = async (
       );
       await tx?.execute();
     }
+
     res.json({
       success: true,
       discordUser: data,
