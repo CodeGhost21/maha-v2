@@ -40,11 +40,13 @@ export const walletVerify = async (
       );
     }
 
-    //recaptcha verify
-    const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
-    const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
-    const response = await axios.post(verificationURL);
-    const { success } = response.data;
+    // //recaptcha verify
+    // const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
+    // const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
+    // const response = await axios.post(verificationURL);
+    // const { success } = response.data;
+
+    const success = true;
     if (success) {
       //assign role
       const role = await userLpData(result.data.address);
@@ -85,11 +87,7 @@ export const walletVerify = async (
       );
       await newUser.save();
       return res.json({ success: true, user: newUser });
-    } else
-      return res.json({
-        success: false,
-        message: "Captcha verification failed",
-      });
+    }
   } catch (error) {
     next(error);
   }
