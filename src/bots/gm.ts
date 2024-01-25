@@ -81,11 +81,13 @@ const gmPoints = async (discordId: string) => {
   const walletUser = await WalletUser.findOne({ discordId });
   if (!walletUser) return;
 
-  await assignPoints(
+  const tx = await assignPoints(
     walletUser.id,
     points.gm,
     "Good Morning Points",
     true,
     "gm"
   );
+
+  tx?.execute();
 };
