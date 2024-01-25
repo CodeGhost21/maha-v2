@@ -1,4 +1,7 @@
-import { IWalletUserModel } from "../../database/models/walletUsers";
+import {
+  IWalletUserModel,
+  WalletUser,
+} from "../../database/models/walletUsers";
 import { checkGuildMember } from "../../output/discord";
 import { points } from "./constants";
 import { assignPoints } from "./assignPoints";
@@ -81,5 +84,7 @@ export const checkTask = async (req: Request, res: Response) => {
   //     );
   //   }
   // }
-  res.json({ success: true, user });
+
+  const newUser = await WalletUser.findById(user.id);
+  res.json({ success: true, user: newUser });
 };
