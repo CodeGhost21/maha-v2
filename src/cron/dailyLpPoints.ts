@@ -12,102 +12,106 @@ import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { getEpoch } from "../utils/epoch";
 
 const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
-  // get wallets
-  const wallets = userBatch.map((u) => u.walletAddress);
+  try {
+    // get wallets
+    const wallets = userBatch.map((u) => u.walletAddress);
 
-  // get manta data
-  const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
-  const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
+    // get manta data
+    const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
+    const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
 
-  const tasks: IAssignPointsTask[] = [];
+    const tasks: IAssignPointsTask[] = [];
 
-  for (let j = 0; j < wallets.length; j++) {
-    const user = userBatch[j];
-    const zksync = zksyncData[j];
-    const manta = mantaData[j];
+    for (let j = 0; j < wallets.length; j++) {
+      const user = userBatch[j];
+      const zksync = zksyncData[j];
+      const manta = mantaData[j];
 
-    console.log(
-      "  ",
-      j,
-      "manta",
-      manta.supply.points,
-      manta.borrow.points,
-      "zks",
-      zksync.supply.points,
-      zksync.borrow.points
-    );
-
-    if (manta.supply.points === 0 && zksync.supply.points === 0) {
-      tasks.push({
-        userBulkWrites: [
-          {
-            updateOne: {
-              filter: { _id: user.id },
-              update: { $set: { epoch } },
-            },
-          },
-        ],
-        pointsBulkWrites: [],
-        execute: async () => {
-          return;
-        },
-      });
-    }
-
-    if (manta.supply.points > 0) {
-      const t = await assignPoints(
-        user.id,
+      console.log(
+        "  ",
+        j,
+        "manta",
         manta.supply.points,
-        `Daily Supply on manta chain for ${manta.supply.amount}`,
-        true,
-        "supply",
-        epoch
-      );
-      if (t) tasks.push(t);
-    }
-
-    if (manta.borrow.points > 0) {
-      const t = await assignPoints(
-        user.id,
         manta.borrow.points,
-        `Daily Borrow on manta chain for ${manta.borrow.amount}`,
-        true,
-        "borrow",
-        epoch
-      );
-      if (t) tasks.push(t);
-    }
-
-    if (zksync.supply.points > 0) {
-      const t = await assignPoints(
-        user.id,
+        "zks",
         zksync.supply.points,
-        `Daily Supply on zksync chain for ${zksync.supply.amount}`,
-        true,
-        "supply",
-        epoch
+        zksync.borrow.points
       );
-      if (t) tasks.push(t);
+
+      if (manta.supply.points === 0 && zksync.supply.points === 0) {
+        tasks.push({
+          userBulkWrites: [
+            {
+              updateOne: {
+                filter: { _id: user.id },
+                update: { $set: { epoch } },
+              },
+            },
+          ],
+          pointsBulkWrites: [],
+          execute: async () => {
+            return;
+          },
+        });
+      }
+
+      if (manta.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          manta.supply.points,
+          `Daily Supply on manta chain for ${manta.supply.amount}`,
+          true,
+          "supply",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (manta.borrow.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          manta.borrow.points,
+          `Daily Borrow on manta chain for ${manta.borrow.amount}`,
+          true,
+          "borrow",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (zksync.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          zksync.supply.points,
+          `Daily Supply on zksync chain for ${zksync.supply.amount}`,
+          true,
+          "supply",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (zksync.borrow.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          zksync.borrow.points,
+          `Daily Borrow on zksync chain for ${zksync.borrow.amount}`,
+          true,
+          "borrow",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
     }
 
-    if (zksync.borrow.points > 0) {
-      const t = await assignPoints(
-        user.id,
-        zksync.borrow.points,
-        `Daily Borrow on zksync chain for ${zksync.borrow.amount}`,
-        true,
-        "borrow",
-        epoch
-      );
-      if (t) tasks.push(t);
-    }
+    // once all the db operators are accumulated; write into the DB
+    await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
+    await UserPointTransactions.bulkWrite(
+      _.flatten(tasks.map((r) => r.pointsBulkWrites))
+    );
+  } catch (error) {
+    console.log("processBatch error", error);
   }
-
-  // once all the db operators are accumulated; write into the DB
-  await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
-  await UserPointTransactions.bulkWrite(
-    _.flatten(tasks.map((r) => r.pointsBulkWrites))
-  );
 };
 
 const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
@@ -135,6 +139,7 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
       const userBatch = users.slice(i * chunk, (i + 1) * chunk);
       await _processBatch(userBatch, epoch);
     } catch (error) {
+      console.log("error", error);
       console.log("failure workign with batch", i);
     }
   }
