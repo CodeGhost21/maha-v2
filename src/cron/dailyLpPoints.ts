@@ -140,7 +140,7 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
       await _processBatch(userBatch, epoch);
     } catch (error) {
       console.log("error", error);
-      console.log("failure workign with batch", i);
+      console.log("failure working with batch", i);
     }
   }
 

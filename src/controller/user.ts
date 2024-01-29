@@ -41,12 +41,12 @@ export const walletVerify = async (
     }
 
     // //recaptcha verify
-    // const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
-    // const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
-    // const response = await axios.post(verificationURL);
-    // const { success } = response.data;
+    const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
+    const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
+    const response = await axios.post(verificationURL);
+    const { success } = response.data;
 
-    const success = true;
+    // const success = true;
     if (success) {
       //assign role
       const role = await userLpData(result.data.address);
