@@ -41,7 +41,9 @@ export const checkTask = async (
       console.log(req.body.taskId);
       const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
       const pythData = typedAddresses.find(
-        (item) => item.evm === user.walletAddress
+        (item) =>
+          item.evm.toLowerCase().trim() ===
+          user.walletAddress.toLowerCase().trim()
       );
       console.log(pythData);
 
