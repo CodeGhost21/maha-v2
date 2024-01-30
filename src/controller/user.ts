@@ -9,7 +9,6 @@ import cache from "../utils/cache";
 import { userLpData } from "./quests/onChainPoints";
 import NotFoundError from "../errors/NotFoundError";
 import { getEpoch } from "../utils/epoch";
-import { log } from "console";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -46,8 +45,7 @@ export const walletVerify = async (
     const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
     const response = await axios.post(verificationURL);
     const { success } = response.data;
-    log.info("recaptcha response", response.data);
-
+    console.log("recaptcha response", response.data);
     // const success = true;
     if (!success) {
       console.log("recaptcha failed");
