@@ -6,6 +6,13 @@ import { checkGuildMember } from "../../output/discord";
 import { points } from "./constants";
 import { assignPoints } from "./assignPoints";
 import { Request, Response } from "express";
+import pythAddresses from "../../addresses/pyth.json";
+
+interface IPythStaker {
+  solana: string;
+  stakedAmount: number;
+  evm: string;
+}
 
 export const checkTask = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
@@ -25,6 +32,27 @@ export const checkTask = async (req: Request, res: Response) => {
       );
 
       await task?.execute();
+    }
+  } else if (req.body.taskId === "PythStaker") {
+    console.log(req.body.taskId);
+    const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
+    const pythData = typedAddresses.find(
+      (item) => item.evm === user.walletAddress
+    );
+    console.log(pythData);
+
+    if (pythData) {
+      const stakedAmount = pythData.stakedAmount / 1e6;
+      if (stakedAmount > 0) {
+        const task = await assignPoints(
+          user.id,
+          stakedAmount,
+          "Pyth Staker",
+          true,
+          "PythStaker"
+        );
+        await task?.execute();
+      }
     }
   }
 

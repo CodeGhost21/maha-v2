@@ -11,6 +11,7 @@ export interface IWalletUserChecked {
   discordVerify: boolean;
   twitterVerify: boolean;
   twitterFollow: boolean;
+  PythStaker: boolean;
 }
 
 export interface IWalletUserPoints {
@@ -26,6 +27,7 @@ export interface IWalletUserPoints {
   referral: number;
   supply: number;
   twitterFollow: number;
+  PythStaker: number;
   // total: number;
 }
 
