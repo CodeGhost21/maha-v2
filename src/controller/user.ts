@@ -47,47 +47,46 @@ export const walletVerify = async (
     const { success } = response.data;
 
     // const success = true;
-    if (success) {
-      //assign role
-      const role = await userLpData(result.data.address);
-      const user = await WalletUser.findOne({
-        walletAddress: result.data.address,
-      });
-
-      if (user) {
-        user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
-        user.role = role;
-        await user.save();
-        return res.json({ success: true, user });
-      }
-
-      const usersCount = await WalletUser.count();
-      const referralCode = _generateReferralCode();
-
-      const newUser = await WalletUser.create({
-        walletAddress: req.body.message.address,
-        rank: usersCount + 1,
-        epoch: getEpoch(),
-        referralCode: referralCode ? referralCode : null,
-        role: role,
-      });
-
-      // referred by user added to user model
-      if (req.body.referredByCode !== "") {
-        const referrer = await WalletUser.findOne({
-          referralCode: req.body.referredByCode,
-        });
-        if (referrer) newUser.referredBy = referrer.id;
-      }
-
-      // add jwt token
-      newUser.jwt = await jwt.sign(
-        { id: String(newUser.id) },
-        accessTokenSecret
-      );
-      await newUser.save();
-      return res.json({ success: true, user: newUser });
+    if (!success) {
+      console.log("recaptcha failed");
+      throw new BadRequestError("invalid captcha");
     }
+    //assign role
+    const role = await userLpData(result.data.address);
+    const user = await WalletUser.findOne({
+      walletAddress: result.data.address,
+    });
+
+    if (user) {
+      user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
+      user.role = role;
+      await user.save();
+      return res.json({ success: true, user });
+    }
+
+    const usersCount = await WalletUser.count();
+    const referralCode = _generateReferralCode();
+
+    const newUser = await WalletUser.create({
+      walletAddress: req.body.message.address,
+      rank: usersCount + 1,
+      epoch: getEpoch(),
+      referralCode: referralCode ? referralCode : null,
+      role: role,
+    });
+
+    // referred by user added to user model
+    if (req.body.referredByCode !== "") {
+      const referrer = await WalletUser.findOne({
+        referralCode: req.body.referredByCode,
+      });
+      if (referrer) newUser.referredBy = referrer.id;
+    }
+
+    // add jwt token
+    newUser.jwt = await jwt.sign({ id: String(newUser.id) }, accessTokenSecret);
+    await newUser.save();
+    return res.json({ success: true, user: newUser });
   } catch (error) {
     next(error);
   }
