@@ -20,8 +20,9 @@ export const checkTask = async (
   next: NextFunction
 ) => {
   const user = req.user as IWalletUserModel;
+  const { taskId } = req.body;
   try {
-    if (req.body.taskId === "discordFollow") {
+    if (taskId === "discordFollow") {
       const checkDiscordFollow = await checkGuildMember(user.discordId);
       user.checked.discordFollow = checkDiscordFollow;
       await user.save();
@@ -37,18 +38,22 @@ export const checkTask = async (
 
         await task?.execute();
       }
-    } else if (req.body.taskId === "PythStaker") {
-      console.log(req.body.taskId);
+    }
+
+    if (taskId === "PythStaker") {
       const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
       const pythData = typedAddresses.find(
         (item) =>
           item.evm.toLowerCase().trim() ===
           user.walletAddress.toLowerCase().trim()
       );
-      console.log(pythData);
 
       if (pythData) {
         const stakedAmount = pythData.stakedAmount / 1e6;
+
+        // TODO: check if the user has already received points and only give the difference
+        // of the points
+
         if (stakedAmount > 0) {
           const task = await assignPoints(
             user.id,
