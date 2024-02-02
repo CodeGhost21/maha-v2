@@ -118,7 +118,7 @@ export const registerUser = async (
 
     // check if there is an existing user
     const existingUser = await WalletUser.findOne({ discordId: data.id });
-    if (existingUser && existingUser.id !== user.id)
+    if (existingUser)
       throw new BadRequestError(
         "Discord account already assigned to another wallet"
       );

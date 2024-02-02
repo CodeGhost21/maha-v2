@@ -1,4 +1,3 @@
-import e from "cors";
 import { Router } from "express";
 import { registerUser, requestToken } from "../controller/discord";
 import ensureLoggedIn from "../middleware/ensureLoggedIn";
