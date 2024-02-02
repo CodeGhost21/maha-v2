@@ -7,12 +7,7 @@ import { points } from "./constants";
 import { assignPoints } from "./assignPoints";
 import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
-
-interface IPythStaker {
-  solana: string;
-  stakedAmount: number;
-  evm: string;
-}
+import { IPythStaker } from "../interface/IPythStaker";
 
 export const checkTask = async (
   req: Request,
