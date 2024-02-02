@@ -7,12 +7,7 @@ import { points } from "./constants";
 import { assignPoints } from "./assignPoints";
 import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
-
-interface IPythStaker {
-  solana: string;
-  stakedAmount: number;
-  evm: string;
-}
+import { IPythStaker } from "../interface/IPythStaker";
 
 export const checkTask = async (
   req: Request,
@@ -21,6 +16,7 @@ export const checkTask = async (
 ) => {
   const user = req.user as IWalletUserModel;
   const { taskId } = req.body;
+  let success = false;
   try {
     if (taskId === "discordFollow") {
       const checkDiscordFollow = await checkGuildMember(user.discordId);
@@ -35,34 +31,31 @@ export const checkTask = async (
           true,
           "discordFollow"
         );
-
         await task?.execute();
+        success = true;
       }
-    }
-
-    if (taskId === "PythStaker") {
-      const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
-      const pythData = typedAddresses.find(
-        (item) =>
-          item.evm.toLowerCase().trim() ===
-          user.walletAddress.toLowerCase().trim()
-      );
-
-      if (pythData) {
-        const stakedAmount = pythData.stakedAmount / 1e6;
-
-        // TODO: check if the user has already received points and only give the difference
-        // of the points
-
-        if (stakedAmount > 0) {
-          const task = await assignPoints(
-            user.id,
-            stakedAmount,
-            "Pyth Staker",
-            true,
-            "PythStaker"
-          );
-          await task?.execute();
+    } else if (req.body.taskId === "PythStaker") {
+      //checked if user is already a pyth staker
+      if (!user.checked.PythStaker) {
+        const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
+        const pythData = typedAddresses.find(
+          (item) =>
+            item.evm.toLowerCase().trim() ===
+            user.walletAddress.toLowerCase().trim()
+        );
+        if (pythData) {
+          const stakedAmount = pythData.stakedAmount / 1e6;
+          if (stakedAmount > 0) {
+            const task = await assignPoints(
+              user.id,
+              stakedAmount,
+              "Pyth Staker",
+              true,
+              "PythStaker"
+            );
+            await task?.execute();
+            success = true;
+          }
         }
       }
     }
@@ -125,7 +118,7 @@ export const checkTask = async (
     // }
 
     const newUser = await WalletUser.findById(user.id);
-    res.json({ success: true, user: newUser });
+    res.json({ success: success, user: newUser });
   } catch (error) {
     return next(error);
   }
