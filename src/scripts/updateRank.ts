@@ -9,7 +9,7 @@ nconf
   .file({ file: path.resolve("./config.json") });
 
 import { open } from "../database";
-import { updateRank } from "../cron/updateRank";
+import { updateUsersRank } from "../cron/updateRank";
 
 open();
-updateRank();
+updateUsersRank();
