@@ -47,11 +47,12 @@ export const walletVerify = async (
     const response = await axios.post(verificationURL);
     const { success } = response.data;
     console.log("recaptcha response", response.data);
-    // const success = true;
-    if (!success) {
-      console.log("recaptcha failed");
-      throw new BadRequestError("invalid captcha");
-    }
+    // // const success = true;
+    // if (!success) {
+    //   console.log("recaptcha failed");
+    //   throw new BadRequestError("invalid captcha");
+    // }
+
     //assign role
     const role = await userLpData(result.data.address);
     const user = await WalletUser.findOne({
