@@ -51,17 +51,17 @@ export interface IWalletUser {
 
 const UserSchema = new mongoose.Schema(
   {
-    discordId: String,
+    discordId: { type: String, index: true },
     jwt: String,
-    rank: { type: Number },
-    referralCode: { type: String },
+    rank: { type: Number, index: true },
+    referralCode: { type: String, index: true },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
-    totalPointsV2: { type: Number, default: 0 },
+    totalPointsV2: { type: Number, default: 0, index: true },
     totalPoints: { type: Number, default: 0 },
     twitterId: String,
     twitterOauthToken: String,
     twitterOauthTokenSecret: String,
-    walletAddress: { type: String },
+    walletAddress: { type: String, index: true },
     role: { type: String },
 
     epoch: { type: Number, default: 0 },

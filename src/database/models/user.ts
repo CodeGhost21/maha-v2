@@ -19,7 +19,7 @@ export interface IUser {
 const UserSchema = new mongoose.Schema(
   {
     userTag: String,
-    userID: String,
+    userID: { type: String, index: true },
     totalGMs: { type: Number, default: 0 },
     lastGM: Date,
     lastImage: Date,
