@@ -38,6 +38,8 @@ async function deserializeUser(
       }
       // Cache the user data
       cache.set(userIdKey, user, CACHE_EXPIRATION_SECONDS);
+    } else {
+      user = WalletUser.hydrate(user);
     }
     // Attach user data to the request
     request.user = user;
