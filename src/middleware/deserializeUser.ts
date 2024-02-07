@@ -1,14 +1,16 @@
 import { IAppRequest } from "../utils/interfaces";
 import { Response, NextFunction } from "express";
 import { WalletUser } from "../database/models/walletUsers";
+import cache from "../utils/cache";
 import jwt from "jsonwebtoken";
 import nconf from "nconf";
 import passport from "passport";
 
 // The JWT secret, which is used to sign/verify the JWT
 const secret = nconf.get("JWT_SECRET");
+const CACHE_EXPIRATION_SECONDS = 3600;
 
-function deserializeUser(
+async function deserializeUser(
   request: IAppRequest,
   _response: Response,
   next: NextFunction
@@ -17,28 +19,32 @@ function deserializeUser(
   // If the token doesn't exist, we skip
   if (!token) return next();
 
-  // If it does, then we verify it first
-  jwt.verify(
-    token,
-    secret,
-    (error: jwt.VerifyErrors, payload: jwt.JwtPayload) => {
-      // If there was some error, we don't try to set the user
-      if (error) return next();
+  try {
+    const payload = jwt.verify(token, secret) as jwt.JwtPayload;
+    const userIdKey = `userId:${payload.id}`;
 
-      // Once we've extracted the payload from it, we'll try to query to the
-      // DB to find the user for this session and attach it to the request.
+    // Check if user data exists in cache
+    let user = cache.get(userIdKey);
+    console.log("cache data", user);
 
-      WalletUser.findById(payload.id)
-        .then((user) => {
-          // avoid deleted users
-          // if (user && user) throw new BadRequestError("deleted user");
+    if (!user) {
+      // Fetch user data from the database if not found in cache
+      user = await WalletUser.findById(payload.id);
+      console.log("non cache data", user);
 
-          request.user = user;
-          next();
-        })
-        .catch(next);
+      if (!user) {
+        // If the user doesn't exist in the database, skip
+        return next();
+      }
+      // Cache the user data
+      cache.set(userIdKey, user, CACHE_EXPIRATION_SECONDS);
     }
-  );
+    // Attach user data to the request
+    request.user = user;
+    next();
+  } catch (error) {
+    return next();
+  }
 }
 
 export default [passport.session(), deserializeUser];
