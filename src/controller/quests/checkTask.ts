@@ -23,7 +23,7 @@ export const checkTask = async (
       user.checked.discordFollow = checkDiscordFollow;
       await user.save();
 
-      if (checkDiscordFollow) {
+      if (!user.checked.discordFollow && user.points.discordFollow < 0) {
         const task = await assignPoints(
           user.id,
           points.discordFollow,
@@ -36,7 +36,7 @@ export const checkTask = async (
       }
     } else if (req.body.taskId === "PythStaker") {
       //checked if user is already a pyth staker
-      if (!user.checked.PythStaker) {
+      if (!user.checked.PythStaker && user.points.PythStaker < 0) {
         const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
         const pythData = typedAddresses.find(
           (item) =>
