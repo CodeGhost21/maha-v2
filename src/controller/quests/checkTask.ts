@@ -8,6 +8,7 @@ import { assignPoints } from "./assignPoints";
 import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
 import { IPythStaker } from "../interface/IPythStaker";
+import cache from "../../utils/cache";
 
 export const checkTask = async (
   req: Request,
@@ -23,7 +24,7 @@ export const checkTask = async (
       user.checked.discordFollow = checkDiscordFollow;
       await user.save();
 
-      if (!user.checked.discordFollow && user.points.discordFollow < 0) {
+      if (!user.checked.discordFollow && !(user.points.discordFollow > 0)) {
         const task = await assignPoints(
           user.id,
           points.discordFollow,
@@ -33,10 +34,11 @@ export const checkTask = async (
         );
         await task?.execute();
         success = true;
+        cache.del(`userId:${user._id}`);
       }
     } else if (req.body.taskId === "PythStaker") {
       //checked if user is already a pyth staker
-      if (!user.checked.PythStaker && user.points.PythStaker < 0) {
+      if (!user.checked.PythStaker && !(user.points.PythStaker > 0)) {
         const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
         const pythData = typedAddresses.find(
           (item) =>
@@ -55,6 +57,7 @@ export const checkTask = async (
             );
             await task?.execute();
             success = true;
+            cache.del(`userId:${user._id}`);
           }
         }
       }

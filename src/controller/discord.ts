@@ -10,6 +10,7 @@ import { points } from "./quests/constants";
 import { assignPoints } from "./quests/assignPoints";
 import BadRequestError from "../errors/BadRequestError";
 import qs from "qs";
+import cache from "../utils/cache";
 
 const router = Router();
 
@@ -66,7 +67,7 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
     user.checked.discordVerify = true;
     user.checked.discordFollow = isFollow;
     await user.save();
-
+    cache.del(`userId:${user._id}`);
     url = `/#/tasks?status=discord_success`;
   }
 
