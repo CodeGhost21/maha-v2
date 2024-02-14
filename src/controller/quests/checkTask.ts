@@ -21,9 +21,6 @@ export const checkTask = async (
   try {
     if (taskId === "discordFollow") {
       const checkDiscordFollow = await checkGuildMember(user.discordId);
-      user.checked.discordFollow = checkDiscordFollow;
-      await user.save();
-
       if (!user.checked.discordFollow && !(user.points.discordFollow > 0)) {
         const task = await assignPoints(
           user.id,
@@ -34,6 +31,7 @@ export const checkTask = async (
         );
         await task?.execute();
         success = true;
+        user.checked.discordFollow = checkDiscordFollow;
         cache.del(`userId:${user._id}`);
       }
     } else if (req.body.taskId === "PythStaker") {
@@ -57,11 +55,13 @@ export const checkTask = async (
             );
             await task?.execute();
             success = true;
+            user.checked.PythStaker = true;
             cache.del(`userId:${user._id}`);
           }
         }
       }
     }
+    await user.save();
 
     // } else if (req.body.taskId === "twitterFollow" && !user.checked.twitterFollow) {
     //   await assignPoints(
