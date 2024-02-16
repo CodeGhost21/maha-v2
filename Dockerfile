@@ -1,36 +1,14 @@
-# build
-# FROM node:18 as build
-# RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
-# WORKDIR /home/node/app
-# COPY package.json ./
-# COPY yarn.lock ./
-# USER node
-# RUN yarn
-# COPY --chown=node:node . .
-# RUN yarn build
-
-# # run
-# FROM node:18 as deploy
-# EXPOSE 8080
-# COPY --from=build /home/node/app /home/node/app
-# CMD [ "node", "index.js" ]
-
-# ---commands---
-# docker build . -t api
-# docker run api
-
-
-# Use an official Node.js runtime as a parent image
-FROM node:18
+# Use a smaller base image for the build stage
+FROM node:18 AS build
 
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy package.json, yarn.lock, and tsconfig.json to the working directory
-COPY package.json yarn.lock tsconfig.json ./
+# Copy package.json and yarn.lock to the working directory
+COPY package.json yarn.lock ./
 
 # Install dependencies
-RUN yarn
+RUN yarn --production
 
 # Copy the rest of the application code
 COPY . .
@@ -38,8 +16,17 @@ COPY . .
 # Build the TypeScript code
 RUN yarn build
 
+# Use a smaller base image for the final runtime stage
+FROM node:18-alpine AS deploy
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy only necessary files from the build stage
+COPY --from=build /app .
+
 # Expose the port the app runs on
-EXPOSE 80
+EXPOSE 5002
 
 # Set environment variables
 ENV NODE_ENV=production
