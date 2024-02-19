@@ -27,16 +27,16 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const zksync = zksyncData[j];
       const manta = mantaData[j];
 
-      console.log(
-        "  ",
-        j,
-        "manta",
-        manta.supply.points,
-        manta.borrow.points,
-        "zks",
-        zksync.supply.points,
-        zksync.borrow.points
-      );
+      // console.log(
+      //   "  ",
+      //   j,
+      //   "manta",
+      //   manta.supply.points,
+      //   manta.borrow.points,
+      //   "zks",
+      //   zksync.supply.points,
+      //   zksync.borrow.points
+      // );
 
       if (manta.supply.points === 0 && zksync.supply.points === 0) {
         tasks.push({
@@ -128,7 +128,7 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
     .skip(from)
     .select(["walletAddress"]);
 
-  const chunk = 1000;
+  const chunk = 100;
 
   const loops = Math.floor(users.length / chunk) + 1;
   console.log(loops, users.length, from, count);

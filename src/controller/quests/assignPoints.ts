@@ -66,6 +66,9 @@ export const assignPoints = async (
               ["points.referral"]: referralPoints,
               totalPointsV2: referralPoints,
             },
+            $set: {
+              ["pointsUpdateTimestamp.referral"]: Date.now(),
+            },
           },
         },
       });
@@ -95,6 +98,7 @@ export const assignPoints = async (
         },
         $set: {
           epoch: epoch || user.epoch,
+          [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
           [`checked.${taskId}`]: true,
         },
       },
