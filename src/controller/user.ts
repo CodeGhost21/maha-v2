@@ -124,16 +124,20 @@ export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
 };
 
 export const getPythData = async (req: Request, res: Response) => {
-  const walletAddress = req.body.walletAddress;
-  const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
-  const pythData = typedAddresses.find(
-    (item) =>
-      item.evm.toLowerCase().trim() === walletAddress.toLowerCase().trim()
-  );
+  const walletAddress: string = req.query.walletAddress as string;
+  if (walletAddress) {
+    const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
+    const pythData = typedAddresses.find(
+      (item) =>
+        item.evm.toLowerCase().trim() === walletAddress.toLowerCase().trim()
+    );
 
-  if (pythData) {
-    res.json({ success: true, pythData: pythData });
+    if (pythData) {
+      res.json({ success: true, pythData: pythData });
+    } else {
+      res.json({ success: false, message: "no data found" });
+    }
   } else {
-    res.json({ success: false, message: "no data found" });
+    res.json({ success: false, message: "please provide wallet address" });
   }
 };
