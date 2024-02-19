@@ -5,11 +5,12 @@ mongoose.set("strictQuery", false);
 mongoose.set("debug", nconf.get("NODE_ENV") === "development");
 
 export const open = () => {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve) => {
     // Setup cache for mongoose
     // cachegoose(mongoose)
     console.log("opening mongodb connection");
     mongoose.connect(nconf.get("DATABASE_URI"));
+    resolve();
   });
 };
 
