@@ -59,7 +59,8 @@ const _supplyBorrowPointsMulticall = async (
     }
 
     // const multiplier = 5; // 5 days
-    const multiplier = 0.25; // 6 hours
+    // const multiplier = 0.25; // 6 hours
+    const multiplier = 1; // 1 day
 
     return {
       who: addresses[index],
