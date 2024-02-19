@@ -4,10 +4,7 @@ import nconf from "nconf";
 import path from "path";
 import { IPythStaker } from "../controller/interface/IPythStaker";
 import pythAddresses from "../addresses/pyth.json";
-import {
-  IAssignPointsTask,
-  assignPoints,
-} from "../controller/quests/assignPoints";
+import { IAssignPointsTask } from "../controller/quests/assignPoints";
 import {
   IWalletUser,
   IWalletUserPoints,
