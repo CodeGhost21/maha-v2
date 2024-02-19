@@ -10,7 +10,8 @@ import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import nconf from "nconf";
 import NotFoundError from "../errors/NotFoundError";
-
+import pythAddresses from "../addresses/pyth.json";
+import { IPythStaker } from "./interface/IPythStaker";
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
 const _generateReferralCode = () => {
@@ -120,4 +121,19 @@ export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   const totalReferrals = await WalletUser.find({ referredBy: user.id });
 
   res.json({ totalReferrals: totalReferrals.length });
+};
+
+export const getPythData = async (req: Request, res: Response) => {
+  const walletAddress = req.body.walletAddress;
+  const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
+  const pythData = typedAddresses.find(
+    (item) =>
+      item.evm.toLowerCase().trim() === walletAddress.toLowerCase().trim()
+  );
+
+  if (pythData) {
+    res.json({ success: true, pythData: pythData });
+  } else {
+    res.json({ success: false, message: "no data found" });
+  }
 };

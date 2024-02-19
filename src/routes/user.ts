@@ -10,11 +10,13 @@ import {
   fetchMe,
   getTotalUsers,
   getTotalReferralOfUsers,
+  getPythData,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
 router.post("/login", walletVerify);
 router.get("/lb", getLeaderBoard);
+router.post("/pyth", getPythData);
 router.get("/totalUsers", getTotalUsers);
 
 router.use(deserializeUser, ensureLoggedIn);
