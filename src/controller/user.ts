@@ -1,15 +1,15 @@
+import _ from "underscore";
+import { getEpoch } from "../utils/epoch";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { NextFunction, Request, Response } from "express";
-import axios from "axios";
-import nconf from "nconf";
-import _ from "underscore";
-import * as jwt from "jsonwebtoken";
 import { SiweMessage } from "../siwe/lib/client";
+import { userLpData } from "./quests/onChainPoints";
+import * as jwt from "jsonwebtoken";
+import axios from "axios";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
-import { userLpData } from "./quests/onChainPoints";
+import nconf from "nconf";
 import NotFoundError from "../errors/NotFoundError";
-import { getEpoch } from "../utils/epoch";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -42,11 +42,11 @@ export const walletVerify = async (
     }
 
     // //recaptcha verify
-    const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
-    const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
-    const response = await axios.post(verificationURL);
-    const { success } = response.data;
-    console.log("recaptcha response", response.data);
+    // const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
+    // const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
+    // const response = await axios.post(verificationURL);
+    // const { success } = response.data;
+    // console.log("recaptcha response", response.data);
     // // const success = true;
     // if (!success) {
     //   console.log("recaptcha failed");

@@ -31,14 +31,6 @@ const _recalculatePoints = async (from: number, count: number) => {
       // @ts-ignore
       const oldPoints = Math.max(totalPointsV2, Number(user.totalPoints || 0));
 
-      console.log(
-        "fuc",
-        oldPoints,
-        totalPointsV2,
-        // @ts-ignore
-        Number(user.totalPoints || 0)
-      );
-
       // // diff valued in case
       // if (totalPointsV2 !== user.totalPointsV2)
       //   console.log(

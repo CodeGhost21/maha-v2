@@ -46,8 +46,6 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   const user = await WalletUser.findById(req.query.state);
   const discordUser = await WalletUser.findOne({ discordId: req.query.state });
 
-  console.log("gpt", user, req.query);
-
   if (!user) return;
   let url = `/#/tasks?status=discord_error`;
 

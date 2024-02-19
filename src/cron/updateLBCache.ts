@@ -7,7 +7,7 @@ export const updateLBCache = async () => {
     .select(
       "referralPoints totalPointsV2 totalPoints rank walletAddress points"
     )
-    .limit(100);
+    .limit(400);
 
   const data = JSON.stringify(allUsers);
   cache.set("lb:leaderBoard", data, 60 * 60);
