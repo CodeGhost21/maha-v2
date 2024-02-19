@@ -47,6 +47,7 @@ export interface IWalletUser {
 
   checked: IWalletUserChecked;
   points: IWalletUserPoints;
+  pointsUpdateTimestamp: IWalletUserPoints;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -67,6 +68,7 @@ const UserSchema = new mongoose.Schema(
     epoch: { type: Number, default: 0 },
     points: { type: Object, default: {} },
     checked: { type: Object, default: {} },
+    pointsUpdateTimestamp: { type: Object, default: {} },
   },
   { timestamps: true }
 );

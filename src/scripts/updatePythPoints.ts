@@ -28,7 +28,6 @@ export const updatePythPoints = async () => {
 
   do {
     batch = await WalletUser.find({}).skip(skip).limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
-    console.log("batch", batch);
 
     const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
     const tasks: IAssignPointsTask[] = [];
@@ -40,19 +39,15 @@ export const updatePythPoints = async () => {
       );
 
       if (pythData) {
-        console.log(pythData.stakedAmount / 1e6, user.points.PythStaker);
         const stakedAmountDiff = user.points.PythStaker
           ? pythData.stakedAmount / 1e6 - user.points.PythStaker
           : 0;
-        // console.log("stakedAmountDiff", stakedAmountDiff);
 
         if (stakedAmountDiff !== 0) {
           user.points.PythStaker = pythData.stakedAmount / 1e6;
-          // console.log("before", user.totalPointsV2);
           user.totalPointsV2 += stakedAmountDiff;
-          // console.log("after", user.totalPointsV2);
 
-          //task to update user and points
+          // task to update user and points
           tasks.push({
             userBulkWrites: [
               {
@@ -89,13 +84,14 @@ export const updatePythPoints = async () => {
         }
       }
     }
-    // console.log("tasks", tasks);
+
     await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
     await UserPointTransactions.bulkWrite(
       _.flatten(tasks.map((r) => r.pointsBulkWrites))
     );
+
     skip += batchSize;
-  } while (batch.length === batchSize);
+  } while (batch.length <= batchSize);
 };
 
 updatePythPoints();
