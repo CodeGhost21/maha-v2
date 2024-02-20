@@ -133,7 +133,13 @@ export const getPythData = async (req: Request, res: Response) => {
     );
 
     if (pythData) {
-      res.json({ success: true, pythData: pythData });
+      res.json({
+        success: true,
+        pythData: {
+          ...pythData,
+          stakedAmount: pythData.stakedAmount / 1e6,
+        },
+      });
     } else {
       res.json({ success: false, message: "no data found" });
     }
