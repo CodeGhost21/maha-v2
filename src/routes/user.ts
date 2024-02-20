@@ -11,12 +11,14 @@ import {
   getTotalUsers,
   getTotalReferralOfUsers,
   getPythData,
+  getMantaData,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
 router.post("/login", walletVerify);
 router.get("/lb", getLeaderBoard);
 router.get("/pyth", getPythData);
+router.get("/manta", getMantaData);
 router.get("/totalUsers", getTotalUsers);
 
 router.use(deserializeUser, ensureLoggedIn);

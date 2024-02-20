@@ -12,6 +12,7 @@ import nconf from "nconf";
 import NotFoundError from "../errors/NotFoundError";
 import pythAddresses from "../addresses/pyth.json";
 import { IPythStaker } from "./interface/IPythStaker";
+import { getMantaStakedData } from "./quests/stakeManta";
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
 const _generateReferralCode = () => {
@@ -142,6 +143,22 @@ export const getPythData = async (req: Request, res: Response) => {
       });
     } else {
       res.json({ success: false, message: "no data found" });
+    }
+  } else {
+    res.json({ success: false, message: "please provide wallet address" });
+  }
+};
+
+export const getMantaData = async (req: Request, res: Response) => {
+  const walletAddress: string = req.query.walletAddress as string;
+  if (walletAddress) {
+    const mantaData: any = await getMantaStakedData(walletAddress);
+    if (mantaData.success) {
+      res.json({
+        mantaData,
+      });
+    } else {
+      res.json({ success: mantaData.success, message: "no data found" });
     }
   } else {
     res.json({ success: false, message: "please provide wallet address" });
