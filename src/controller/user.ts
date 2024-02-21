@@ -158,7 +158,7 @@ export const getMantaData = async (req: Request, res: Response) => {
         mantaData,
       });
     } else {
-      res.json({ success: mantaData.success, message: "no data found" });
+      res.json({ success: mantaData.success, message: mantaData.message });
     }
   } else {
     res.json({ success: false, message: "please provide wallet address" });
