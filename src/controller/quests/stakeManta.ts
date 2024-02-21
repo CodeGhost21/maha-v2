@@ -1,7 +1,7 @@
 import axios from "axios";
 import "@polkadot/api-augment";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { mantaWhiteList, stakePtsPerManta } from "./constants";
+import { mantaWhiteList } from "./constants";
 // import { IMantaStaker } from "../interface/IMantaStaker";
 
 export const getMantaStakedData = async (walletAddress: string) => {
@@ -17,7 +17,7 @@ export const getMantaStakedData = async (walletAddress: string) => {
         success: true,
         data: {
           ...checkWhileListed,
-          stakedAmount: checkWhileListed.stakedAmount * stakePtsPerManta,
+          stakedAmount: checkWhileListed.stakedAmount,
         },
       };
     } else {
@@ -71,8 +71,7 @@ export const getMantaStakedData = async (walletAddress: string) => {
             let currentAccountStakingAmount =
               Number(delegationsRaw.amount) / 1e18;
             // Update staking amount of bind record
-            mantaData.stakedAmount =
-              currentAccountStakingAmount * stakePtsPerManta;
+            mantaData.stakedAmount = currentAccountStakingAmount;
           }
 
           console.log("Final mantaData:", mantaData);
