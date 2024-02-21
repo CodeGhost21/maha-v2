@@ -229,10 +229,16 @@ const referralCodesNew = [
   "tesla_crypto1",
   "waxscamru",
   "balakhonov_invest",
+  "Keyur",
+  "M6Labs",
+  "VirtualBacon",
+  "MadCripto",
 ];
 
+const deleteAddress = ["Keyur", "M6Labs", "VirtualBacon", "MadCripto"];
+
 const deletePythUsers = async () => {
-  referralCodesNew.map(async (item: string) => {
+  deleteAddress.map(async (item: string) => {
     if (await checkReferralCodeExists(item)) {
       const response = await WalletUser.deleteOne({
         referralCode: item,
@@ -250,11 +256,9 @@ const addPythUsers = async () => {
   referralCodesNew.map(async (item: string) => {
     if (!(await checkReferralCodeExists(item))) {
       console.log("does not exists");
-
-      const response = await WalletUser.create({
+      await WalletUser.create({
         referralCode: item,
       });
-      console.log(response);
     } else {
       console.log("already added");
     }
