@@ -2,7 +2,7 @@ import { open } from "./database";
 import cron from "node-cron";
 import { dailyLpPoints } from "./cron/dailyLpPoints";
 import { updateUsersRank } from "./cron/updateRank";
-
+import "./bots/gm";
 // connect to database
 open();
 

@@ -12,7 +12,7 @@ import routes from "./routes";
 import session from "express-session";
 
 import "./strategies";
-import "./bots/gm";
+// import "./bots/gm";
 
 const app = express();
 const server = new http.Server(app);
