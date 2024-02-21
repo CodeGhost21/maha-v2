@@ -9,6 +9,7 @@ import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
 import { IPythStaker } from "../interface/IPythStaker";
 import cache from "../../utils/cache";
+import { getMantaStakedData } from "./stakeManta";
 
 export const checkTask = async (
   req: Request,
@@ -56,6 +57,27 @@ export const checkTask = async (
             await task?.execute();
             success = true;
             user.checked.PythStaker = true;
+            cache.del(`userId:${user._id}`);
+          }
+        }
+      }
+    } else if (req.body.taskId === "MantaStaker") {
+      //checked if user is already a pyth staker
+      if (!user.checked.MantaStaker && !(user.points.MantaStaker > 0)) {
+        const mantaData: any = await getMantaStakedData(user.walletAddress);
+        if (mantaData.success) {
+          const stakedAmount = mantaData.data.stakedAmount;
+          if (stakedAmount > 0) {
+            const task = await assignPoints(
+              user.id,
+              stakedAmount,
+              "Manta Staker",
+              true,
+              "MantaStaker"
+            );
+            await task?.execute();
+            success = true;
+            user.checked.MantaStaker = true;
             cache.del(`userId:${user._id}`);
           }
         }

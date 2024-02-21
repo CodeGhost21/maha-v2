@@ -12,6 +12,7 @@ export interface IWalletUserChecked {
   twitterVerify: boolean;
   twitterFollow: boolean;
   PythStaker: boolean;
+  MantaStaker: boolean;
 }
 
 export interface IWalletUserPoints {
@@ -28,6 +29,7 @@ export interface IWalletUserPoints {
   supply: number;
   twitterFollow: number;
   PythStaker: number;
+  MantaStaker: number;
   // total: number;
 }
 
