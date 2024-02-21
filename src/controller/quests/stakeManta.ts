@@ -1,4 +1,5 @@
 import axios from "axios";
+import "@polkadot/api-augment";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { mantaWhiteList, stakePtsPerManta } from "./constants";
 // import { IMantaStaker } from "../interface/IMantaStaker";
