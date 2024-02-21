@@ -235,7 +235,10 @@ const referralCodesNew = [
   "MadCripto",
 ];
 
-const deleteAddress = ["Keyur", "M6Labs", "VirtualBacon", "MadCripto"];
+const deleteAddress = ["MrBlock"];
+
+const addAddress = ["MrBlockTW", "Bera"];
+const updateReferralCode = [{ old: "MrBlock", new: "MrBlockTW" }];
 
 const deletePythUsers = async () => {
   deleteAddress.map(async (item: string) => {
@@ -253,7 +256,7 @@ const deletePythUsers = async () => {
 // deletePythUsers();
 
 const addPythUsers = async () => {
-  referralCodesNew.map(async (item: string) => {
+  addAddress.map(async (item: string) => {
     if (!(await checkReferralCodeExists(item))) {
       console.log("does not exists");
       await WalletUser.create({
@@ -265,4 +268,18 @@ const addPythUsers = async () => {
   });
 };
 
-addPythUsers();
+// addPythUsers();
+
+const updateReferralCodes = async () => {
+  updateReferralCode.map(async (item: any) => {
+    if (await checkReferralCodeExists(item.old)) {
+      const response = await WalletUser.updateOne(
+        { referralCode: item.old },
+        { $set: { referralCode: item.new } }
+      );
+      console.log(response);
+    } else {
+      console.log("no referral code");
+    }
+  });
+};
