@@ -3,7 +3,7 @@ import {
   WalletUser,
 } from "../../database/models/walletUsers";
 import { checkGuildMember } from "../../output/discord";
-import { points } from "./constants";
+import { points, stakePtsPerManta } from "./constants";
 import { assignPoints } from "./assignPoints";
 import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
@@ -70,7 +70,7 @@ export const checkTask = async (
           if (stakedAmount > 0) {
             const task = await assignPoints(
               user.id,
-              stakedAmount,
+              stakedAmount * stakePtsPerManta,
               "Manta Staker",
               true,
               "MantaStaker"
