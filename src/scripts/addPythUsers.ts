@@ -238,7 +238,7 @@ const referralCodesNew = [
 const deleteAddress = ["MrBlock"];
 
 const addAddress = ["MrBlockTW", "Bera"];
-const updateReferralCode = [{ old: "MrBlock", new: "MrBlockTW" }];
+const updateReferralCode = [{ old: "AshWSBCrypto", new: "AshCrypto" }];
 
 const deletePythUsers = async () => {
   deleteAddress.map(async (item: string) => {
@@ -283,3 +283,5 @@ const updateReferralCodes = async () => {
     }
   });
 };
+
+// updateReferralCodes();
