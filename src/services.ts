@@ -2,6 +2,7 @@ import { open } from "./database";
 import cron from "node-cron";
 import { dailyLpPoints } from "./cron/dailyLpPoints";
 import { updateUsersRank } from "./cron/updateRank";
+import { totalPoints } from "./cron/totalPoints";
 import "./bots/gm";
 // connect to database
 open();
@@ -18,7 +19,7 @@ cron.schedule("*/5 * * * *", async () => {
 
 cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
-  await updateUsersRank();
+  await totalPoints();
 });
 // updateRank();
 // dailyLpPoints();
