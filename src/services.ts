@@ -15,5 +15,10 @@ cron.schedule("*/5 * * * *", async () => {
   console.log("updating rank every 5 minutes");
   await updateUsersRank();
 });
+
+cron.schedule("0 * * * *", async () => {
+  console.log("updating totalPoints every hour");
+  await updateUsersRank();
+});
 // updateRank();
 // dailyLpPoints();

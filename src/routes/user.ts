@@ -12,6 +12,7 @@ import {
   getTotalReferralOfUsers,
   getPythData,
   getMantaData,
+  getTotalPoints,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
@@ -20,6 +21,7 @@ router.get("/lb", getLeaderBoard);
 router.get("/pyth", getPythData);
 router.get("/manta", getMantaData);
 router.get("/totalUsers", getTotalUsers);
+router.get("/totalPoints", getTotalPoints); // {'totalPoints': '1000
 
 router.use(deserializeUser, ensureLoggedIn);
 router.get("/me", fetchMe);

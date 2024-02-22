@@ -5,7 +5,6 @@ import { NextFunction, Request, Response } from "express";
 import { SiweMessage } from "../siwe/lib/client";
 import { userLpData } from "./quests/onChainPoints";
 import * as jwt from "jsonwebtoken";
-import axios from "axios";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import nconf from "nconf";
@@ -163,4 +162,9 @@ export const getMantaData = async (req: Request, res: Response) => {
   } else {
     res.json({ success: false, message: "please provide wallet address" });
   }
+};
+
+export const getTotalPoints = async (req: Request, res: Response) => {
+  const cachedData: number | undefined = cache.get("tp:totalPoints");
+  res.json({ totalPoints: cachedData });
 };
