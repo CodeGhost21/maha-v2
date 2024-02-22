@@ -48,32 +48,49 @@ export const getMantaStakedData = async (walletAddress: string) => {
       { query: graphQuery },
       { headers }
     );
+    const mantaData: any = {};
     if (response.data.data) {
       if (response.data.data.bindPacificAddresses.length > 0) {
-        const mantaData = {
-          stakedAmount: 0,
-          atlanticAddress:
-            response.data.data.bindPacificAddresses[0].atlanticAddress,
-          pacificAddress:
-            response.data.data.bindPacificAddresses[0].pacificAddress,
-          blockNumber: response.data.data.bindPacificAddresses[0].blockNumber,
-        };
+        const records = response.data.data.bindPacificAddresses;
+        records.map((item: any) => {
+          // if (item.blockNumber <= snapshotBlockNumber) {
+          item.stakingAmount = 0;
+          mantaData[item.atlanticAddress] = item;
+          // }
+        });
 
-        // Fetch delegator state from Polkadot API
-        const delegatorState = await api.query.parachainStaking.delegatorState(
-          response.data.data.bindPacificAddresses[0].atlanticAddress
-        );
-        const currentDelegatorState: any = delegatorState.toJSON();
+        let atlanticAddressArray = Object.keys(mantaData);
 
-        if (currentDelegatorState !== null) {
-          const delegationsRaw = currentDelegatorState.delegations[0];
-          let currentAccountStakingAmount =
-            Number(delegationsRaw.amount) / 1e18;
-          // Update staking amount of bind record
-          mantaData.stakedAmount = currentAccountStakingAmount;
+        const delegatorState =
+          await api.query.parachainStaking.delegatorState.multi(
+            atlanticAddressArray
+          );
+
+        for (let i = 0; i < atlanticAddressArray.length; i++) {
+          const currentDelegatorState: any = delegatorState[i];
+
+          const delegationsRaw = currentDelegatorState.isSome
+            ? currentDelegatorState.value.delegations
+            : [];
+
+          let currentAccountStakingAmount = 0;
+          await delegationsRaw.map((delegationRaw: any) => {
+            currentAccountStakingAmount =
+              Number(currentAccountStakingAmount) +
+              Number(delegationRaw.amount / 1e18);
+          });
+
+          // update staking amount of bind record
+          mantaData[atlanticAddressArray[i]].stakingAmount =
+            currentAccountStakingAmount;
         }
 
-        console.log("Final mantaData:", mantaData);
+        //sum of staking amount
+        let totalStakingAmount = 0;
+        Object.keys(mantaData).map((key) => {
+          totalStakingAmount += mantaData[key].stakingAmount;
+        });
+        mantaData.totalStakingAmount = totalStakingAmount;
         return { success: true, data: mantaData };
       } else if (response.data.data.bindPacificAddresses.length === 0) {
         return { success: false, message: "no data found" };

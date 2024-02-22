@@ -66,7 +66,7 @@ export const checkTask = async (
       if (!user.checked.MantaStaker && !(user.points.MantaStaker > 0)) {
         const mantaData: any = await getMantaStakedData(user.walletAddress);
         if (mantaData.success) {
-          const stakedAmount = mantaData.data.stakedAmount;
+          const stakedAmount = mantaData.data.totalStakingAmount;
           if (stakedAmount > 0) {
             const task = await assignPoints(
               user.id,
