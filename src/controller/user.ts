@@ -168,3 +168,28 @@ export const getTotalPoints = async (req: Request, res: Response) => {
   const cachedData: number | undefined = cache.get("tp:totalPoints");
   res.json({ totalPoints: cachedData || 0 });
 };
+
+export const getUserReferralData = async (req: Request, res: Response) => {
+  const referralCode: string = req.query.referralCode as string;
+  if (!referralCode)
+    return res.json({
+      success: false,
+      message: "please provide referral code",
+    });
+  const walletUser: IWalletUserModel = (await WalletUser.findOne({
+    referralCode: referralCode,
+  })) as IWalletUserModel;
+  if (walletUser) {
+    const totalReferrals = await WalletUser.find({
+      referredBy: walletUser.id,
+    });
+
+    res.json({
+      success: true,
+      totalReferrals: totalReferrals.length || 0,
+      referralPoints: walletUser.points.referral || 0,
+    });
+  } else {
+    res.json({ success: false, message: "no data found" });
+  }
+};
