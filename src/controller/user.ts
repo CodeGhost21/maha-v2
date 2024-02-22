@@ -166,5 +166,5 @@ export const getMantaData = async (req: Request, res: Response) => {
 
 export const getTotalPoints = async (req: Request, res: Response) => {
   const cachedData: number | undefined = cache.get("tp:totalPoints");
-  res.json({ totalPoints: cachedData });
+  res.json({ totalPoints: cachedData || 0 });
 };
