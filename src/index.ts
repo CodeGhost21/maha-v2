@@ -10,6 +10,7 @@ import nconf from "nconf";
 import passport from "passport";
 import routes from "./routes";
 import session from "express-session";
+import { totalPoints } from "./cron/totalPoints";
 
 import "./strategies";
 // import "./bots/gm";
@@ -46,5 +47,10 @@ cron.schedule("*/10 * * * *", async () => {
   console.log("updating leaderboard cache 10 minutes");
   await updateLBCache();
   await totalUsers();
+});
+
+cron.schedule("0 * * * *", async () => {
+  console.log("updating totalPoints every hour");
+  await totalPoints();
 });
 updateLBCache();
