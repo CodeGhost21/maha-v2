@@ -165,8 +165,13 @@ export const getMantaData = async (req: Request, res: Response) => {
 };
 
 export const getTotalPoints = async (req: Request, res: Response) => {
-  const cachedData: number | undefined = cache.get("tp:totalPoints");
-  res.json({ totalPoints: cachedData });
+  try {
+    const cachedData: number | undefined = cache.get("tp:totalPoints");
+    res.json({ totalPoints: cachedData || 0 });
+  } catch (error) {
+    console.error("Error occurred while retrieving total points:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 export const getUserReferralData = async (req: Request, res: Response) => {

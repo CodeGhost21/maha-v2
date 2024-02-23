@@ -31,7 +31,7 @@ const referralCodesNew = [
   "IvanonTech",
   "top7",
   "Boxmining",
-  "LadyofCrypto",
+  "LoC",
   "SpiderCrypto",
   "0xJeff",
   "Stronghedge",
@@ -87,7 +87,7 @@ const referralCodesNew = [
   "UncleRick",
   "Kirby",
   "ABCryptoTalks",
-  "AshWSBCrypto",
+  "AshCrypto",
   "SamBitcoinDuniya",
   "Fomocatcher",
   "HiteshMalviya",
@@ -98,7 +98,7 @@ const referralCodesNew = [
   "SalsaTekila",
   "Phoenix_Ash3s",
   "TeddyCleps",
-  "Pastore1314",
+  "AlejandroXBT",
   "SilverBulletBTC",
   "TheCryptoMonk",
   "Damskotrades",
@@ -233,30 +233,30 @@ const referralCodesNew = [
   "M6Labs",
   "VirtualBacon",
   "MadCripto",
+  "HealthyPockets",
+  "Hasheur",
+  "CryptoZombie",
+  "ExpertKripto",
+  "Chef/Semih/Neo/Mag",
+  "WiseAdvice",
+  "CryptoMatrix",
+  "CoinMuhendisi",
+  "CryptoBoost",
+  "KianTheKollabKOLs",
+  "KianTheKollab",
+  "Prestito",
+  "Momentum6",
 ];
 
-const deleteAddress = ["MrBlock"];
-
-const addAddress = ["MrBlockTW", "Bera"];
-const updateReferralCode = [{ old: "AshWSBCrypto", new: "AshCrypto" }];
-
-const deletePythUsers = async () => {
-  deleteAddress.map(async (item: string) => {
-    if (await checkReferralCodeExists(item)) {
-      const response = await WalletUser.deleteOne({
-        referralCode: item,
-      });
-      console.log(response);
-    } else {
-      console.log("no referral code");
-    }
-  });
-};
-
-// deletePythUsers();
+const updateReferralCode = [
+  { old: "AshWSBCrypto", new: "AshCrypto" },
+  { old: "Pastore1314", new: "AlejandroXBT" },
+  { old: "LoC ", new: "LoC" },
+];
 
 const addPythUsers = async () => {
-  addAddress.map(async (item: string) => {
+  console.log("adding", referralCodesNew.length);
+  referralCodesNew.map(async (item: string) => {
     if (!(await checkReferralCodeExists(item))) {
       console.log("does not exists");
       await WalletUser.create({
@@ -285,3 +285,19 @@ const updateReferralCodes = async () => {
 };
 
 // updateReferralCodes();
+
+// const deleteReferral = ["AshWSBCrypto", "Pastore1314", "LadyofCrypto"];
+// const deletePythUsers = async () => {
+//   deleteReferral.map(async (item: string) => {
+//     if (await checkReferralCodeExists(item)) {
+//       const response = await WalletUser.deleteOne({
+//         referralCode: item,
+//       });
+//       console.log(response);
+//     } else {
+//       console.log("no referral code");
+//     }
+//   });
+// };
+
+// deletePythUsers();
