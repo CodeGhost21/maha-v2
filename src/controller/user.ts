@@ -198,3 +198,20 @@ export const getUserReferralData = async (req: Request, res: Response) => {
     res.json({ success: false, message: "no data found" });
   }
 };
+
+export const getReferralUsers = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as IWalletUserModel;
+    const referralUsers = await WalletUser.find({ referredBy: user.id })
+      // .sort({
+      //   createdAt: -1,
+      // })
+      .select("referralCode totalPointsV2 walletAddress rank");
+
+    console.log("referralUsers", referralUsers);
+
+    res.json({ success: true, referralUsers });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

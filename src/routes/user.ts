@@ -14,6 +14,7 @@ import {
   getMantaData,
   getTotalPoints,
   getUserReferralData,
+  getReferralUsers,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
@@ -28,6 +29,8 @@ router.get("/referral", getUserReferralData); // {'totalPoints': '1000
 router.use(deserializeUser, ensureLoggedIn);
 router.get("/me", fetchMe);
 router.post("/check", checkTask);
-router.post("/totalReferrals", getTotalReferralOfUsers);
+router.get("/totalReferrals", getTotalReferralOfUsers);
+router.get("/referralUsers", getReferralUsers);
+router;
 
 export default router;
