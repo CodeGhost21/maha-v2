@@ -15,6 +15,7 @@ import {
   getTotalPoints,
   getUserReferralData,
   getReferralUsers,
+  galxeLPCheck,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
@@ -25,6 +26,7 @@ router.get("/manta", getMantaData);
 router.get("/totalUsers", getTotalUsers);
 router.get("/totalPoints", getTotalPoints);
 router.get("/referral", getUserReferralData); // {'totalPoints': '1000
+router.get("/info", galxeLPCheck);
 
 router.use(deserializeUser, ensureLoggedIn);
 router.get("/me", fetchMe);

@@ -3,15 +3,21 @@ import { getEpoch } from "../utils/epoch";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { NextFunction, Request, Response } from "express";
 import { SiweMessage } from "../siwe/lib/client";
-import { userLpData } from "./quests/onChainPoints";
+import {
+  userLpData,
+  supplyBorrowPointsMantaMulticall,
+  supplyBorrowPointsZksyncMulticall,
+} from "./quests/onChainPoints";
 import * as jwt from "jsonwebtoken";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import nconf from "nconf";
+import axios from "axios";
 import NotFoundError from "../errors/NotFoundError";
 import pythAddresses from "../addresses/pyth.json";
 import { IPythStaker } from "./interface/IPythStaker";
 import { getMantaStakedData } from "./quests/stakeManta";
+
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
 const _generateReferralCode = () => {
@@ -214,4 +220,24 @@ export const getReferralUsers = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
+};
+
+export const galxeLPCheck = async (req: Request, res: Response) => {
+  const walletAddress: string = req.query.address as string;
+  // console.log(walletAddress);
+
+  const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
+  const zksyncData = await supplyBorrowPointsZksyncMulticall([walletAddress]);
+
+  // console.log(zksyncData, mantaData);
+
+  let success = false;
+
+  if (mantaData[0].supply.points > 100 || zksyncData[0].supply.points > 100) {
+    success = true;
+  }
+
+  res.json({
+    is_ok: success,
+  });
 };
