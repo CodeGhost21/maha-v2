@@ -251,7 +251,7 @@ const referralCodesNew = [
 const updateReferralCode = [
   { old: "AshWSBCrypto", new: "AshCrypto" },
   { old: "Pastore1314", new: "AlejandroXBT" },
-  { old: "LoC ", new: "LoC" },
+  { old: "Nekoz", new: "Tempo" },
 ];
 
 const addPythUsers = async () => {
@@ -284,7 +284,7 @@ const updateReferralCodes = async () => {
   });
 };
 
-// updateReferralCodes();
+updateReferralCodes();
 
 // const deleteReferral = ["AshWSBCrypto", "Pastore1314", "LadyofCrypto"];
 // const deletePythUsers = async () => {
