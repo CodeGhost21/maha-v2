@@ -224,20 +224,21 @@ export const getReferralUsers = async (req: Request, res: Response) => {
 
 export const galxeLPCheck = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.address as string;
-  // console.log(walletAddress);
-
-  const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
-  const zksyncData = await supplyBorrowPointsZksyncMulticall([walletAddress]);
-
-  // console.log(zksyncData, mantaData);
-
+  console.log(walletAddress);
   let success = false;
 
-  if (mantaData[0].supply.points > 100 || zksyncData[0].supply.points > 100) {
-    success = true;
+  try {
+    const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
+    const zksyncData = await supplyBorrowPointsZksyncMulticall([walletAddress]);
+    if (mantaData[0].supply.points > 100 || zksyncData[0].supply.points > 100) {
+      success = true;
+    }
+    res.json({
+      is_ok: success,
+    });
+  } catch (error) {
+    res.json({
+      is_ok: success,
+    });
   }
-
-  res.json({
-    is_ok: success,
-  });
 };
