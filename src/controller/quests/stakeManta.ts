@@ -2,12 +2,23 @@ import axios from "axios";
 import { ethers } from "ethers";
 import "@polkadot/api-augment";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-// import { mantaWhiteList } from "./constants";
-// import { IMantaStaker } from "../interface/IMantaStaker";
+
+const getBalance = async (
+  walletAddress: string,
+  rpc: string,
+  tokenAddress: string
+) => {
+  const provider = new ethers.JsonRpcProvider(rpc);
+  const contract = new ethers.Contract(
+    tokenAddress,
+    ["function balanceOf(address owner) view returns (uint256)"],
+    provider
+  );
+  const balance = await contract.balanceOf(walletAddress);
+  return balance;
+};
 
 export const getMantaStakedData = async (walletAddress: string) => {
-  console.log(walletAddress);
-
   try {
     const wsProvider = new WsProvider("wss://ws.manta.systems");
     const api = await ApiPromise.create({
@@ -93,29 +104,28 @@ export const getMantaStakedData = async (walletAddress: string) => {
 };
 
 export const getMantaStakedDataAccumulate = async (walletAddress: string) => {
-  const provider = new ethers.JsonRpcProvider(
-    "https://pacific-rpc.manta.network/http"
+  const balance = await getBalance(
+    walletAddress,
+    "https://pacific-rpc.manta.network/http",
+    "0x7AC168c81F4F3820Fa3F22603ce5864D6aB3C547"
   );
-  // Address of the ERC-20 token contract
-  const tokenAddress = "0x7AC168c81F4F3820Fa3F22603ce5864D6aB3C547";
+  return Number(balance) / 1e18;
+};
 
-  // ABI of the ERC-20 token contract
-  const tokenAbi = [
-    "function balanceOf(address account) view returns (uint256)",
-  ];
-  const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, provider);
-
-  const balance = await tokenContract.balanceOf(walletAddress);
-  console.log("Token Balance:", Number(balance) / 1e18);
+export const getMantaStakedDataBifrost = async (walletAddress: string) => {
+  const balance = await getBalance(
+    walletAddress,
+    "https://rpc.api.moonbeam.network",
+    "0xffffffffda2a05fb50e7ae99275f4341aed43379"
+  );
 
   return Number(balance) / 1e18;
 };
 
-// getMantaStakedDataBifrost("0x479C231019DD7BE36E198b91Cd2631e7768AeE50");
-
 export const getMantaStakersData = async (walletAddress: string) => {
   const manta: any = await getMantaStakedData(walletAddress);
   const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
+  const mantaBifrost = await getMantaStakedDataBifrost(walletAddress);
 
   let totalStakedManta = 0;
   if (manta.success) {
@@ -123,6 +133,9 @@ export const getMantaStakersData = async (walletAddress: string) => {
   }
   if (mantaAccumulate > 0) {
     totalStakedManta += mantaAccumulate;
+  }
+  if (mantaBifrost > 0) {
+    totalStakedManta += mantaBifrost;
   }
   return { totalStakedManta: totalStakedManta };
 };

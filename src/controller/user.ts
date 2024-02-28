@@ -16,7 +16,11 @@ import axios from "axios";
 import NotFoundError from "../errors/NotFoundError";
 import pythAddresses from "../addresses/pyth.json";
 import { IPythStaker } from "./interface/IPythStaker";
-import { getMantaStakedData } from "./quests/stakeManta";
+import {
+  getMantaStakedData,
+  getMantaStakedDataAccumulate,
+  getMantaStakedDataBifrost,
+} from "./quests/stakeManta";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -158,13 +162,24 @@ export const getMantaData = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
   if (walletAddress) {
     const mantaData: any = await getMantaStakedData(walletAddress);
-    if (mantaData.success) {
-      res.json({
-        mantaData,
-      });
-    } else {
-      res.json({ success: mantaData.success, message: mantaData.message });
-    }
+    const mantaBifrost = await getMantaStakedDataBifrost(walletAddress);
+    const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
+    console.log(mantaData, mantaBifrost, mantaAccumulate);
+
+    const totalStaked = mantaData.success
+      ? mantaData.data.totalStakingAmount
+      : 0 + mantaBifrost + mantaAccumulate;
+    // if (mantaData.success) {
+
+    res.json({
+      mantaData: mantaData.success ? mantaData.data.totalStakingAmount : 0,
+      mantaBifrost: mantaBifrost,
+      mantaAccumulate: mantaAccumulate,
+      totalStaked: totalStaked,
+    });
+    // } else {
+    //   res.json({ success: mantaData.success, message: mantaData.message });
+    // }
   } else {
     res.json({ success: false, message: "please provide wallet address" });
   }
