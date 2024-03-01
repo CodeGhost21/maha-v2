@@ -122,6 +122,7 @@ export const getMantaStakedDataBifrost = async (walletAddress: string) => {
   return Number(balance) / 1e18;
 };
 
+//manta stakers data
 export const getMantaStakersData = async (walletAddress: string) => {
   const manta: any = await getMantaStakedData(walletAddress);
   const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
