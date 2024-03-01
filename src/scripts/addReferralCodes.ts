@@ -246,6 +246,8 @@ const referralCodesNew = [
   "KianTheKollab",
   "Prestito",
   "Momentum6",
+  "ItsRagnar",
+  "Elena",
 ];
 
 const updateReferralCode = [
