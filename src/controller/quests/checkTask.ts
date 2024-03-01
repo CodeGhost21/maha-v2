@@ -10,6 +10,7 @@ import pythAddresses from "../../addresses/pyth.json";
 import { IPythStaker } from "../interface/IPythStaker";
 import cache from "../../utils/cache";
 import { getMantaStakedData, getMantaStakersData } from "./stakeManta";
+import { getUserHoldStationData } from "./stakeHoldStation";
 
 export const checkTask = async (
   req: Request,
@@ -80,6 +81,34 @@ export const checkTask = async (
           await task?.execute();
           success = true;
           user.checked.MantaStaker = true;
+          cache.del(`userId:${user._id}`);
+        }
+        // }
+      }
+    } else if (req.body.taskId === "HoldStationStaker") {
+      //checked if user is already a pyth staker
+      if (
+        !user.checked.HoldStationStaker &&
+        !(user.points.HoldStationStaker > 0)
+      ) {
+        const holdStationStakedAmount: any = await getUserHoldStationData(
+          user.walletAddress
+        );
+        console.log(holdStationStakedAmount);
+
+        // if (mantaData.success) {
+        const stakedAmount = holdStationStakedAmount;
+        if (stakedAmount > 0) {
+          const task = await assignPoints(
+            user.id,
+            stakedAmount,
+            "Hold Station Staker",
+            true,
+            "HoldStationStaker"
+          );
+          await task?.execute();
+          success = true;
+          user.checked.HoldStationStaker = true;
           cache.del(`userId:${user._id}`);
         }
         // }
