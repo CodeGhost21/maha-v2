@@ -6,6 +6,7 @@ import {
 import {
   supplyBorrowPointsMantaMulticall,
   supplyBorrowPointsZksyncMulticall,
+  supplyBorrowPointsBlastMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -19,6 +20,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     // get manta data
     const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
     const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
+    const blastData = await supplyBorrowPointsBlastMulticall(wallets);
 
     const tasks: IAssignPointsTask[] = [];
 
@@ -26,7 +28,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const user = userBatch[j];
       const zksync = zksyncData[j];
       const manta = mantaData[j];
-
+      const blast = blastData[j];
       // console.log(
       //   "  ",
       //   j,
@@ -98,6 +100,30 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
           `Daily Borrow on zksync chain for ${zksync.borrow.amount}`,
           true,
           "borrow",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (blast.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          blast.supply.points,
+          `Daily Supply on blast chain for ${blast.supply.amount}`,
+          true,
+          "supplyBlast",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (blast.borrow.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          blast.borrow.points,
+          `Daily Borrow on blast chain for ${blast.borrow.amount}`,
+          true,
+          "borrowBlast",
           epoch
         );
         if (t) tasks.push(t);

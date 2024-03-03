@@ -13,7 +13,7 @@ export interface IWalletUserChecked {
   twitterFollow: boolean;
   PythStaker: boolean;
   MantaStaker: boolean;
-  HoldStationStaker:boolean
+  HoldStationStaker: boolean;
 }
 
 export interface IWalletUserPoints {
@@ -28,10 +28,12 @@ export interface IWalletUserPoints {
   mintingONEZ: number;
   referral: number;
   supply: number;
+  supplyBlast: number;
+  borrowBlast: number;
   twitterFollow: number;
   PythStaker: number;
   MantaStaker: number;
-  HoldStationStaker:number
+  HoldStationStaker: number;
   // total: number;
 }
 

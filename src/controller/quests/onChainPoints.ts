@@ -1,6 +1,10 @@
 import { AbstractProvider } from "ethers";
 import { ethers, Provider } from "ethers";
-import { mantaProvider, zksyncProvider } from "../../utils/providers";
+import {
+  mantaProvider,
+  zksyncProvider,
+  blastProvider,
+} from "../../utils/providers";
 import { minSupplyAmount, borrowPtsPerUSD } from "./constants";
 import { MulticallWrapper } from "ethers-multicall-provider";
 import nconf from "nconf";
@@ -31,6 +35,14 @@ export const supplyBorrowPointsZksyncMulticall = async (
     addresses,
     nconf.get("ZKSYNC_POOL"),
     zksyncProvider
+  );
+};
+
+export const supplyBorrowPointsBlastMulticall = async (addresses: string[]) => {
+  return _supplyBorrowPointsMulticall(
+    addresses,
+    nconf.get("BLAST_POOL"),
+    blastProvider
   );
 };
 

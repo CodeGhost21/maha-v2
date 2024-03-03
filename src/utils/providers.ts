@@ -8,3 +8,7 @@ export const zksyncProvider = new ethers.JsonRpcProvider(
 export const mantaProvider = new ethers.JsonRpcProvider(
   nconf.get("MANTA_RPC_URL")
 );
+
+export const blastProvider = new ethers.JsonRpcProvider(
+  nconf.get("BLAST_RPC_URL")
+);
