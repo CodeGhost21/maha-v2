@@ -96,7 +96,7 @@ export const updatePythPoints = async () => {
   } while (batch.length === batchSize);
 };
 
-updatePythPoints();
+// updatePythPoints();
 
 export const updatePoints = async (
   userId: string,

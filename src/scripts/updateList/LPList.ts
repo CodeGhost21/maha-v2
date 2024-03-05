@@ -83,95 +83,174 @@ export const withoutDays = [
 ];
 
 export const withDays = [
+  // {
+  //   address: "0xc513F211f37A862Fb93737604161B3BccAEe3b76", //already added
+  //   manta: { supply: 1159.16, borrow: 0 },
+  //   zksync: { supply: 28.18, borrow: 0 },
+  //   days: 15,
+  // },
+  // {
+  //   address: "0x6179047b9fbbde94dCd8D322BaED45c91bf40aFf", //already added
+  //   manta: { supply: 6709.88, borrow: 4215.35 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 21,
+  // },
+  // {
+  //   address: "0xC0d7C128d9179dbdE12c99Cd335C23303e2772d2", //already added
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 225.38, borrow: 0 },
+  //   days: 10,
+  // },
+  // {
+  //   address: "0xAA560E418681a61171Ba5d7AE26Fd9E510834864", //already
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 1081.88, borrow: 0 },
+  //   days: 4,
+  // },
+  // {
+  //   address: "0xBB4a1bC4346204121DB5590bBa2a6a8fF1A04A7C", //
+  //   manta: { supply: 119.38, borrow: 0 },
+  //   zksync: { supply: 149.73, borrow: 0 },
+  //   days: 15,
+  // },
+  // {
+  //   address: "0x9255E104c4d64fEd983Eb10Ab6b7EB8D5AA1aC62", //
+  //   manta: { supply: 2451.09, borrow: 0 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 21,
+  // },
+  // {
+  //   address: "0xC5AAA5628eDE4b09945Ac71af0b51AAC4C24a01C", //
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 110.01, borrow: 62.12 },
+  //   days: 5,
+  // },
+  // {
+  //   address: "0x846514Fbac6d3B71cabebf19547886faE4B47BF3", //
+  //   manta: { supply: 299.7, borrow: 0 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 15,
+  // },
+  // {
+  //   address: "0xc5a752A4B8d751859d29af9069486B5b48Fa9499", //
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 1899.42, borrow: 1202.19 },
+  //   days: 4,
+  // },
+  // {
+  //   address: "0x90D107B34E84Ae88B57b54f095f090252280Dc2A", //
+  //   manta: { supply: 114.37, borrow: 30.26 },
+  //   zksync: { supply: 42.3, borrow: 0 },
+  //   days: 5,
+  // },
+  // {
+  //   address: "0xD95b0FAD00cf2979D79B6FA3CBbB757B46C61aA1", //
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 64816, borrow: 24599 },
+  //   days: 7,
+  // },
+  // {
+  //   address: "0x1CD6BEC46f14A44C4D0f74373e34BC06f6564a50", //
+  //   manta: { supply: 1264.9, borrow: 0 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 3,
+  // },
+  // {
+  //   address: "0xD7f87C209e3ef3282881C759993CBDDFCa181678", //
+  //   manta: { supply: 601.15, borrow: 105.05 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 20,
+  // },
+  // {
+  //   address: "0x6e5E3a5dfB5D218BD81D8083F11AEac7656ea668", //
+  //   manta: { supply: 11981.21, borrow: 3941.82 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 3,
+  // },
+  // {
+  //   address: "0xBeff6A861790fb10F573DEEc5327d9B528f926d2", //
+  //   manta: { supply: 102.99, borrow: 49.63 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 5,
+  // },
+  // {
+  //   address: "0x95752F215E4891abf3853Bed53148b604761eCE0", //
+  //   manta: { supply: 339, borrow: 0 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 3,
+  // },
+  // {
+  //   address: "0x9f2C7344BDC7422770Cc54540d06256C58665c55", //
+  //   manta: { supply: 329.48, borrow: 0 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 30,
+  // },
+  // {
+  //   address: "0x0f0036C2b15c487a64a39ec8AACF59250681D46C", //
+  //   manta: { supply: 2146, borrow: 0 },
+  //   zksync: { supply: 1000, borrow: 500 },
+  //   days: 14,
+  // },
+  // {
+  //   address: "0xB118356d05e0d3d641AA79306F9a58fd2901C77a", //
+  //   manta: { supply: 2146, borrow: 0 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 25,
+  // },
+  // {
+  //   address: "0x12cFA0fcBf3B2B12D90025D03EBC3241EbD63BFa", //
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 494, borrow: 305 },
+  //   days: 10,
+  // },
+  // {
+  //   address: "0xdE10cb1AC24EFAEdB579b480F4d182012C592ed4", //
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 2057.56, borrow: 914.49 },
+  //   days: 14,
+  // },
+  // {
+  //   address: "0x56D9b9f3612989f84c5baa0C5b32deC2c142B563", //
+  //   manta: { supply: 691.42, borrow: 0 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 30,
+  // },
+  // {
+  //   address: "0x54D355A1Cebcd44d066B125f50E9056a378065F8", //
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 3531, borrow: 1000 },
+  //   days: 11,
+  // },
+  // {
+  //   address: "0xd0319771F95375b161006fB2481fde74EB80cCf4", //
+  //   manta: { supply: 29469, borrow: 8775 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 14,
+  // },
+  // {
+  //   address: "0x25b0F3BE6346e87A2AB4d4A3FaC74490330CaFD5", //
+  //   manta: { supply: 251.65, borrow: 116.46 },
+  //   zksync: { supply: 0, borrow: 0 },
+  //   days: 31,
+  // },
+  // {
+  //   address: "0x58b17c261086d47CaC4eC904E4884E508fC40624", //
+  //   manta: { supply: 0, borrow: 0 },
+  //   zksync: { supply: 2501, borrow: 1750 },
+  //   days: 7,
+  // },
+
   {
-    address: "0xc513F211f37A862Fb93737604161B3BccAEe3b76", //already added
-    manta: { supply: 1159.16, borrow: 0 },
-    zksync: { supply: 28.18, borrow: 0 },
-    days: 15,
-  },
-  {
-    address: "0x6179047b9fbbde94dCd8D322BaED45c91bf40aFf", //already added
-    manta: { supply: 6709.88, borrow: 4215.35 },
-    zksync: { supply: 0, borrow: 0 },
-    days: 21,
-  },
-  {
-    address: "0xC0d7C128d9179dbdE12c99Cd335C23303e2772d2", //already added
+    address: "0xCf34403eCbA0299b8F6B86d34a3A008faB5A06cD", //
     manta: { supply: 0, borrow: 0 },
-    zksync: { supply: 225.38, borrow: 0 },
-    days: 10,
+    zksync: { supply: 291.44, borrow: 1750 },
+    days: 30,
   },
   {
-    address: "0xAA560E418681a61171Ba5d7AE26Fd9E510834864", //already
+    address: "0x6849CCAa07D4F7a558DAB6bD4813333DFa97C7A8", //
     manta: { supply: 0, borrow: 0 },
-    zksync: { supply: 1081.88, borrow: 0 },
-    days: 4,
-  },
-  {
-    address: "0xBB4a1bC4346204121DB5590bBa2a6a8fF1A04A7C", //
-    manta: { supply: 119.38, borrow: 0 },
-    zksync: { supply: 149.73, borrow: 0 },
-    days: 15,
-  },
-  {
-    address: "0x9255E104c4d64fEd983Eb10Ab6b7EB8D5AA1aC62", //
-    manta: { supply: 2451.09, borrow: 0 },
-    zksync: { supply: 0, borrow: 0 },
-    days: 21,
-  },
-  {
-    address: "0xC5AAA5628eDE4b09945Ac71af0b51AAC4C24a01C", //
-    manta: { supply: 0, borrow: 0 },
-    zksync: { supply: 110.01, borrow: 62.12 },
-    days: 5,
-  },
-  {
-    address: "0x846514Fbac6d3B71cabebf19547886faE4B47BF3", //
-    manta: { supply: 299.7, borrow: 0 },
-    zksync: { supply: 0, borrow: 0 },
-    days: 15,
-  },
-  {
-    address: "0xc5a752A4B8d751859d29af9069486B5b48Fa9499", //
-    manta: { supply: 0, borrow: 0 },
-    zksync: { supply: 1899.42, borrow: 1202.19 },
-    days: 4,
-  },
-  {
-    address: "0x90D107B34E84Ae88B57b54f095f090252280Dc2A", //
-    manta: { supply: 114.37, borrow: 30.26 },
-    zksync: { supply: 42.3, borrow: 0 },
-    days: 5,
-  },
-  {
-    address: "0xD95b0FAD00cf2979D79B6FA3CBbB757B46C61aA1", //
-    manta: { supply: 0, borrow: 0 },
-    zksync: { supply: 64816, borrow: 24599 },
-    days: 7,
-  },
-  {
-    address: "0x1CD6BEC46f14A44C4D0f74373e34BC06f6564a50", //
-    manta: { supply: 1264.9, borrow: 0 },
-    zksync: { supply: 0, borrow: 0 },
-    days: 3,
-  },
-  {
-    address: "0xD7f87C209e3ef3282881C759993CBDDFCa181678", //
-    manta: { supply: 601.15, borrow: 105.05 },
-    zksync: { supply: 0, borrow: 0 },
-    days: 20,
-  },
-  {
-    address: "0x6e5E3a5dfB5D218BD81D8083F11AEac7656ea668", //
-    manta: { supply: 11981.21, borrow: 3941.82 },
-    zksync: { supply: 0, borrow: 0 },
-    days: 3,
-  },
-  {
-    address: "0xE55370B8264e242BFf4e89FF24912468F7628068", //
-    manta: { supply: 13185, borrow: 3941.82 },
-    zksync: { supply: 0, borrow: 0 },
-    days: 25,
+    zksync: { supply: 134.37, borrow: 0 },
+    days: 32,
   },
   // {
   //   address: "0xe1245544B4d696ba5bD170eB0B65169D58221c9e", //already added
