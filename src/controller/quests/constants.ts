@@ -49,6 +49,8 @@ export const MAHAStakers: string[] = [
   "0x7d583D4d3404055a75640d94759A242255d9f5F8",
 ];
 
+export const whiteListTeam = ["0x961E45e3666029709C3ac50A26319029cde4e067"];
+
 export const mantaWhiteList = [
   {
     pacificAddress: "0xF152dA370FA509f08685Fa37a09BA997E41Fb65b",

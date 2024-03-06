@@ -1,18 +1,20 @@
 import _ from "underscore";
 import { getEpoch } from "../utils/epoch";
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { NextFunction, Request, Response } from "express";
+import nconf from "nconf";
+import axios from "axios";
+import * as jwt from "jsonwebtoken";
+
+import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { SiweMessage } from "../siwe/lib/client";
 import {
   userLpData,
   supplyBorrowPointsMantaMulticall,
   supplyBorrowPointsZksyncMulticall,
 } from "./quests/onChainPoints";
-import * as jwt from "jsonwebtoken";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
-import nconf from "nconf";
-import axios from "axios";
+
 import NotFoundError from "../errors/NotFoundError";
 import pythAddresses from "../addresses/pyth.json";
 import { IPythStaker } from "./interface/IPythStaker";
@@ -22,6 +24,7 @@ import {
   getMantaStakedDataBifrost,
 } from "./quests/stakeManta";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
+import { whiteListTeam } from "./quests/constants";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -267,6 +270,10 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
 
 export const getUserTransactions = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
+  const checkAdmin = whiteListTeam.includes(user.walletAddress);
+  if (!checkAdmin) {
+    return res.json({ success: false, message: "Unauthorized" });
+  }
   const transactions = await UserPointTransactions.find({
     userId: user.id,
   }).sort({
