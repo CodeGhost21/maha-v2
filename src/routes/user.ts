@@ -16,6 +16,7 @@ import {
   getUserReferralData,
   getReferralUsers,
   galxeLPCheck,
+  getUserTransactions,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
@@ -33,6 +34,6 @@ router.get("/me", fetchMe);
 router.post("/check", checkTask);
 router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
-router;
+router.get("/transactions", getUserTransactions);
 
 export default router;

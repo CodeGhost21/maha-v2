@@ -21,6 +21,7 @@ import {
   getMantaStakedDataAccumulate,
   getMantaStakedDataBifrost,
 } from "./quests/stakeManta";
+import { UserPointTransactions } from "../database/models/userPointTransactions";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -128,9 +129,14 @@ export const getTotalUsers = async (req: Request, res: Response) => {
 
 export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const totalReferrals = await WalletUser.find({ referredBy: user.id });
+  const totalReferrals = await WalletUser.find({ referredBy: user.id }).select(
+    "totalPointsV2 walletAddress "
+  );
 
-  res.json({ totalReferrals: totalReferrals.length });
+  res.json({
+    totalReferrals: totalReferrals.length,
+    referralUsers: totalReferrals,
+  });
 };
 
 export const getPythData = async (req: Request, res: Response) => {
@@ -257,4 +263,14 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
       is_ok: success,
     });
   }
+};
+
+export const getUserTransactions = async (req: Request, res: Response) => {
+  const user = req.user as IWalletUserModel;
+  const transactions = await UserPointTransactions.find({
+    userId: user.id,
+  }).sort({
+    createdAt: -1,
+  });
+  res.json({ success: true, transactions });
 };
