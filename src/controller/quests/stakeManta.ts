@@ -125,18 +125,18 @@ export const getMantaStakedDataBifrost = async (walletAddress: string) => {
 //manta stakers data
 export const getMantaStakersData = async (walletAddress: string) => {
   const manta: any = await getMantaStakedData(walletAddress);
-  // const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
-  // const mantaBifrost = await getMantaStakedDataBifrost(walletAddress);
+  const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
+  const mantaBifrost = await getMantaStakedDataBifrost(walletAddress);
 
   let totalStakedManta = 0;
   if (manta.success) {
     totalStakedManta += manta.data.totalStakingAmount;
   }
-  // if (mantaAccumulate > 0) {
-  //   totalStakedManta += mantaAccumulate;
-  // }
-  // if (mantaBifrost > 0) {
-  //   totalStakedManta += mantaBifrost;
-  // }
+  if (mantaAccumulate > 0) {
+    totalStakedManta += mantaAccumulate;
+  }
+  if (mantaBifrost > 0) {
+    totalStakedManta += mantaBifrost;
+  }
   return { totalStakedManta: totalStakedManta };
 };
