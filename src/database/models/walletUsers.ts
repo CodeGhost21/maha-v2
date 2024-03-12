@@ -14,6 +14,7 @@ export interface IWalletUserChecked {
   PythStaker: boolean;
   MantaStaker: boolean;
   HoldStationStaker: boolean;
+  CakeStaker: boolean;
 }
 
 export interface IWalletUserPoints {
@@ -34,6 +35,7 @@ export interface IWalletUserPoints {
   PythStaker: number;
   MantaStaker: number;
   HoldStationStaker: number;
+  CakeStaker: number;
   // total: number;
 }
 

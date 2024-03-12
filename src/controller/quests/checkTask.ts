@@ -3,7 +3,7 @@ import {
   WalletUser,
 } from "../../database/models/walletUsers";
 import { checkGuildMember } from "../../output/discord";
-import { points, stakePtsPerManta } from "./constants";
+import { points, stakePtsPerManta, stakePtsPerCake } from "./constants";
 import { assignPoints } from "./assignPoints";
 import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
@@ -11,6 +11,7 @@ import { IPythStaker } from "../interface/IPythStaker";
 import cache from "../../utils/cache";
 import { getMantaStakedData, getMantaStakersData } from "./stakeManta";
 import { getUserHoldStationData } from "./stakeHoldStation";
+import { getCakeStakeData } from "./stakeCake";
 
 export const checkTask = async (
   req: Request,
@@ -112,6 +113,31 @@ export const checkTask = async (
           cache.del(`userId:${user._id}`);
         }
         // }
+      }
+    } else if (req.body.taskId === "CakeStaker") {
+      // console.log(118, req.body.taskId);
+
+      //checked if user is already a pyth staker
+      if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
+        const cakeStakedAmount: any = await getCakeStakeData(
+          user.walletAddress
+        );
+        // console.log(cakeStakedAmount);
+
+        const stakedAmount = cakeStakedAmount;
+        if (stakedAmount > 0) {
+          const task = await assignPoints(
+            user.id,
+            stakedAmount * stakePtsPerCake,
+            "Cake Staker",
+            true,
+            "CakeStaker"
+          );
+          await task?.execute();
+          success = true;
+          user.checked.CakeStaker = true;
+          cache.del(`userId:${user._id}`);
+        }
       }
     }
     await user.save();

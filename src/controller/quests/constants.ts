@@ -15,6 +15,8 @@ export const borrowPtsPerUSD = 4;
 
 export const stakePtsPerManta = 5;
 
+export const stakePtsPerCake = 1;
+
 export const LQTYHolders: string[] = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",

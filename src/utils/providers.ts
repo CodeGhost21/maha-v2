@@ -12,3 +12,7 @@ export const mantaProvider = new ethers.JsonRpcProvider(
 export const blastProvider = new ethers.JsonRpcProvider(
   nconf.get("BLAST_RPC_URL")
 );
+
+export const cakeProvider = new ethers.JsonRpcProvider(
+  nconf.get("CAKE_RPC_URL")
+);
