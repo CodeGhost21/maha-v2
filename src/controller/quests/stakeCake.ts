@@ -20,8 +20,8 @@ export const getCakeStakeData = async (walletAddress: string) => {
 };
 
 //multi call function to fetch cake stake data
-export const updateCakeStake = async () => {
-  const addresses = ["0x5fA0D515c3E66e4F03E1642c8BF00e424119c769"];
+export const updateCakeStake = async (addresses: string[]) => {
+  // const addresses = ["0x5fA0D515c3E66e4F03E1642c8BF00e424119c769"];
   const provider = MulticallWrapper.wrap(cakeProvider);
   const pool = new ethers.Contract(
     nconf.get("CAKE_POOL"),
