@@ -11,9 +11,8 @@ import passport from "passport";
 import routes from "./routes";
 import session from "express-session";
 import { totalPoints } from "./cron/totalPoints";
-
+// import { getBlastPoints } from "./controller/quests/blastPoints";
 import "./strategies";
-// import "./bots/gm";
 
 const app = express();
 const server = new http.Server(app);
@@ -37,6 +36,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(routes);
+// getBlastPoints();
 app.set("port", nconf.get("PORT") || 5002);
 
 const port = app.get("port");
