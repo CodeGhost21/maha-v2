@@ -19,7 +19,6 @@ export interface IWalletUserChecked {
 
 export interface IWalletUserPoints {
   AAVEStaker: number;
-  borrow: number;
   discordFollow: number;
   gm: number;
   liquidityONEZ: number;
@@ -29,8 +28,13 @@ export interface IWalletUserPoints {
   mintingONEZ: number;
   referral: number;
   supply: number;
+  borrow: number;
   supplyBlast: number;
   borrowBlast: number;
+  supplyLinea: number;
+  borrowLinea: number;
+  supplyEthereumLrt: number;
+  borrowEthereumLrt: number;
   twitterFollow: number;
   PythStaker: number;
   MantaStaker: number;

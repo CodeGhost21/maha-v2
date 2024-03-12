@@ -4,6 +4,8 @@ import {
   mantaProvider,
   zksyncProvider,
   blastProvider,
+  lineaProvider,
+  ethLrtProvider,
 } from "../../utils/providers";
 import { minSupplyAmount, borrowPtsPerUSD } from "./constants";
 import { MulticallWrapper } from "ethers-multicall-provider";
@@ -20,6 +22,7 @@ const getContract = async (
   return new ethers.Contract(contractAddress, abi, provider);
 };
 
+//manta
 export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
   return _supplyBorrowPointsMulticall(
     addresses,
@@ -28,6 +31,7 @@ export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
   );
 };
 
+//zksync
 export const supplyBorrowPointsZksyncMulticall = async (
   addresses: string[]
 ) => {
@@ -38,11 +42,32 @@ export const supplyBorrowPointsZksyncMulticall = async (
   );
 };
 
+//blast
 export const supplyBorrowPointsBlastMulticall = async (addresses: string[]) => {
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("BLAST_POOL"),
     blastProvider
+  );
+};
+
+//linea
+export const supplyBorrowPointsLineaMulticall = async (addresses: string[]) => {
+  return _supplyBorrowPointsMulticall(
+    addresses,
+    nconf.get("LINEA_POOL"),
+    lineaProvider
+  );
+};
+
+//etherum Lrt
+export const supplyBorrowPointsEthereumLrtMulticall = async (
+  addresses: string[]
+) => {
+  return _supplyBorrowPointsMulticall(
+    addresses,
+    nconf.get("ETH_LRT_POOL"),
+    ethLrtProvider
   );
 };
 

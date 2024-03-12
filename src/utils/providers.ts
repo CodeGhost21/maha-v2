@@ -16,3 +16,11 @@ export const blastProvider = new ethers.JsonRpcProvider(
 export const cakeProvider = new ethers.JsonRpcProvider(
   nconf.get("CAKE_RPC_URL")
 );
+
+export const lineaProvider = new ethers.JsonRpcProvider(
+  nconf.get("LINEA_RPC_URL")
+);
+
+export const ethLrtProvider = new ethers.JsonRpcProvider(
+  nconf.get("ETH_LRT_RPC_URL")
+);

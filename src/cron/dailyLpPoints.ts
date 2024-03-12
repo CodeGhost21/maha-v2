@@ -7,6 +7,8 @@ import {
   supplyBorrowPointsMantaMulticall,
   supplyBorrowPointsZksyncMulticall,
   supplyBorrowPointsBlastMulticall,
+  supplyBorrowPointsLineaMulticall,
+  supplyBorrowPointsEthereumLrtMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -21,6 +23,8 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
     const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
     const blastData = await supplyBorrowPointsBlastMulticall(wallets);
+    const lineaData = await supplyBorrowPointsLineaMulticall(wallets);
+    const ethLrtData = await supplyBorrowPointsEthereumLrtMulticall(wallets);
 
     const tasks: IAssignPointsTask[] = [];
 
@@ -29,6 +33,8 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const zksync = zksyncData[j];
       const manta = mantaData[j];
       const blast = blastData[j];
+      const linea = lineaData[j];
+      const ethLrt = ethLrtData[j];
       // console.log(
       //   "  ",
       //   j,
@@ -40,7 +46,13 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       //   zksync.borrow.points
       // );
 
-      if (manta.supply.points === 0 && zksync.supply.points === 0) {
+      if (
+        manta.supply.points === 0 &&
+        zksync.supply.points === 0 &&
+        blast.supply.points === 0 &&
+        linea.supply.points === 0 &&
+        ethLrt.supply.points === 0
+      ) {
         tasks.push({
           userBulkWrites: [
             {
@@ -57,6 +69,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         });
       }
 
+      //manta
       if (manta.supply.points > 0) {
         const t = await assignPoints(
           user.id,
@@ -81,6 +94,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         if (t) tasks.push(t);
       }
 
+      //zksync
       if (zksync.supply.points > 0) {
         const t = await assignPoints(
           user.id,
@@ -105,6 +119,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         if (t) tasks.push(t);
       }
 
+      //blast
       if (blast.supply.points > 0) {
         const t = await assignPoints(
           user.id,
@@ -124,6 +139,56 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
           `Daily Borrow on blast chain for ${blast.borrow.amount}`,
           true,
           "borrowBlast",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      //linea
+      if (linea.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          linea.supply.points,
+          `Daily Supply on linea chain for ${linea.supply.amount}`,
+          true,
+          "supplyLinea",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (linea.borrow.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          linea.borrow.points,
+          `Daily Borrow on linea chain for ${linea.borrow.amount}`,
+          true,
+          "borrowLinea",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      //ethereum Lrt
+      if (ethLrt.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          ethLrt.supply.points,
+          `Daily Supply on ethLrt chain for ${ethLrt.supply.amount}`,
+          true,
+          "supplyEthereumLrt",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (ethLrt.borrow.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          ethLrt.borrow.points,
+          `Daily Borrow on ethLrt chain for ${ethLrt.borrow.amount}`,
+          true,
+          "borrowEthereumLrt",
           epoch
         );
         if (t) tasks.push(t);
