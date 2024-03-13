@@ -1,6 +1,4 @@
 import axios from "axios";
-import { Request, Response } from "express";
-import cache from "../utils/cache";
 
 const handleRequest = async (url: string) => {
   const response = await axios.get(url);
@@ -26,5 +24,5 @@ export const ELPoints = async () => {
     renzoPoints: renzoData.data.totals.renzoPoints,
     kelpMiles: Number(kelpDaoData.value.kelpMiles),
   };
-  cache.set("elp:ELPoints", result, 60 * 60 * 1000);
+  return result;
 };

@@ -1,8 +1,6 @@
 import axios from "axios";
-import { Request, Response } from "express";
 import { ethers } from "ethers";
 import nconf from "nconf";
-import cache from "../../utils/cache";
 
 const baseUrl = "https://waitlist-api.prod.blast.io";
 
@@ -80,6 +78,5 @@ export const BlastPoints = async () => {
   const totalPoints =
     Number(pointsUSDB.balancesByPointType.LIQUIDITY.available) +
     Number(pointsWETH.balancesByPointType.LIQUIDITY.available);
-
-  cache.set("bp:blastPoints", { totalPoints }, 60 * 60 * 1000);
+  return totalPoints;
 };
