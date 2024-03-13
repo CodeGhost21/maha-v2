@@ -11,8 +11,6 @@ import passport from "passport";
 import routes from "./routes";
 import session from "express-session";
 import { totalPoints } from "./cron/totalPoints";
-import { ELPoints } from "./controller/elPoints";
-import { BlastPoints } from "./controller/quests/blastPoints";
 import "./strategies";
 
 const app = express();
@@ -52,10 +50,6 @@ cron.schedule("*/10 * * * *", async () => {
 cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
   await totalPoints();
-  await ELPoints();
-  await BlastPoints();
 });
 
 updateLBCache();
-ELPoints();
-BlastPoints();
