@@ -11,6 +11,9 @@ import {
   userLpData,
   supplyBorrowPointsMantaMulticall,
   supplyBorrowPointsZksyncMulticall,
+  supplyBorrowPointsBlastMulticall,
+  supplyBorrowPointsLineaMulticall,
+  supplyBorrowPointsEthereumLrtMulticall,
 } from "./quests/onChainPoints";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
@@ -279,4 +282,29 @@ export const getUserTransactions = async (req: Request, res: Response) => {
     createdAt: -1,
   });
   res.json({ success: true, transactions });
+};
+
+export const getLPData = async (req: Request, res: Response) => {
+  const walletAddress: string = req.query.walletAddress as string;
+  console.log(walletAddress);
+
+  if (walletAddress) {
+    const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
+    const zksyncData = await supplyBorrowPointsZksyncMulticall([walletAddress]);
+    const blastData = await supplyBorrowPointsBlastMulticall([walletAddress]);
+    const lineaData = await supplyBorrowPointsLineaMulticall([walletAddress]);
+    const ethereumLrt = await supplyBorrowPointsEthereumLrtMulticall([
+      walletAddress,
+    ]);
+    res.json({
+      success: true,
+      mantaData: mantaData[0],
+      zksyncData: zksyncData[0],
+      blastData: blastData[0],
+      lineaData: lineaData[0],
+      ethereumLrt: ethereumLrt[0],
+    });
+  } else {
+    res.json({ success: false, message: "please provide wallet address" });
+  }
 };

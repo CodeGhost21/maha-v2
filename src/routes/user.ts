@@ -17,6 +17,7 @@ import {
   getReferralUsers,
   galxeLPCheck,
   getUserTransactions,
+  getLPData,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
@@ -28,6 +29,7 @@ router.get("/totalUsers", getTotalUsers);
 router.get("/totalPoints", getTotalPoints);
 router.get("/referral", getUserReferralData); // {'totalPoints': '1000
 router.get("/info", galxeLPCheck);
+router.get("/lpData", getLPData);
 
 router.use(deserializeUser, ensureLoggedIn);
 router.get("/me", fetchMe);
