@@ -11,7 +11,8 @@ import passport from "passport";
 import routes from "./routes";
 import session from "express-session";
 import { totalPoints } from "./cron/totalPoints";
-// import { getBlastPoints } from "./controller/quests/blastPoints";
+import { ELPoints } from "./controller/elPoints";
+import { BlastPoints } from "./controller/quests/blastPoints";
 import "./strategies";
 
 const app = express();
@@ -36,7 +37,6 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(routes);
-// getBlastPoints();
 app.set("port", nconf.get("PORT") || 5002);
 
 const port = app.get("port");
@@ -52,5 +52,10 @@ cron.schedule("*/10 * * * *", async () => {
 cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
   await totalPoints();
+  await ELPoints();
+  await BlastPoints();
 });
+
 updateLBCache();
+ELPoints();
+BlastPoints();

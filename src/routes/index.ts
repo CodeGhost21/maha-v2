@@ -3,6 +3,8 @@ import discord from "./discord";
 import user from "./user";
 import twitter from "./twitter";
 import HttpError from "src/errors/HttpError";
+import { getELPoints } from "../controller/elPoints";
+import { getBlastPoints } from "../controller/quests/blastPoints";
 
 export const router = Router();
 
@@ -17,6 +19,8 @@ router.get("/", (_req, res) => {
 router.use("/discord", discord);
 router.use("/twitter", twitter);
 router.use("/user", user);
+router.get("/ELPoints", getELPoints);
+router.get("/blastPoints", getBlastPoints);
 
 router.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

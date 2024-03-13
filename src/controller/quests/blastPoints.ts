@@ -1,6 +1,8 @@
 import axios from "axios";
+import { Request, Response } from "express";
 import { ethers } from "ethers";
 import nconf from "nconf";
+import cache from "../../utils/cache";
 
 const baseUrl = "https://waitlist-api.prod.blast.io";
 
@@ -60,18 +62,29 @@ const getPoints = async (token: string, contractAddress: string) => {
   return response.data;
 };
 
-export const getBlastPoints = async () => {
+export const BlastPoints = async () => {
   //USDB
   const contractAddressUSDB = "0x23A58cbe25E36e26639bdD969B0531d3aD5F9c34";
   const challengeUSDB = await getBlastChallenge(contractAddressUSDB);
   const tokenUSDB = await getBearerToken(challengeUSDB);
   const pointsUSDB = await getPoints(tokenUSDB, contractAddressUSDB);
-  console.log(pointsUSDB);
+  // console.log(pointsUSDB);
 
   //WETH
   const contractAddressWETH = "0x53a3Aa617afE3C12550a93BA6262430010037B04";
   const challengeWETH = await getBlastChallenge(contractAddressWETH);
   const tokenWETH = await getBearerToken(challengeWETH);
   const pointsWETH = await getPoints(tokenWETH, contractAddressWETH);
-  console.log(pointsWETH);
+  // console.log(pointsWETH);
+
+  const totalPoints =
+    Number(pointsUSDB.balancesByPointType.LIQUIDITY.available) +
+    Number(pointsWETH.balancesByPointType.LIQUIDITY.available);
+
+  cache.set("bp:blastPoints", { totalPoints }, 60 * 60 * 1000);
+};
+
+export const getBlastPoints = async (_req: Request, res: Response) => {
+  const blastPoints = cache.get("bp:blastPoints");
+  res.json(blastPoints);
 };
