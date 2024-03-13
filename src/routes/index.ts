@@ -2,9 +2,8 @@ import { NextFunction, Request, Response, Router } from "express";
 import discord from "./discord";
 import user from "./user";
 import twitter from "./twitter";
-import HttpError from "src/errors/HttpError";
-import { getELPoints } from "../controller/elPoints";
-import { getBlastPoints } from "../controller/quests/blastPoints";
+import HttpError from "../errors/HttpError";
+import { getProtocolPoints } from "../controller/protocol";
 
 export const router = Router();
 
@@ -19,8 +18,7 @@ router.get("/", (_req, res) => {
 router.use("/discord", discord);
 router.use("/twitter", twitter);
 router.use("/user", user);
-router.get("/ELPoints", getELPoints);
-router.get("/blastPoints", getBlastPoints);
+router.get("/protocol/points", getProtocolPoints);
 
 router.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

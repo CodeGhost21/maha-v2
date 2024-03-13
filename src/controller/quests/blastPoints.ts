@@ -83,8 +83,3 @@ export const BlastPoints = async () => {
 
   cache.set("bp:blastPoints", { totalPoints }, 60 * 60 * 1000);
 };
-
-export const getBlastPoints = async (_req: Request, res: Response) => {
-  const blastPoints = cache.get("bp:blastPoints");
-  res.json(blastPoints);
-};

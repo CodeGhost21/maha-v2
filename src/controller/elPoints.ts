@@ -28,9 +28,3 @@ export const ELPoints = async () => {
   };
   cache.set("elp:ELPoints", result, 60 * 60 * 1000);
 };
-
-export const getELPoints = async (req: Request, res: Response) => {
-  const elPoints = cache.get("elp:ELPoints");
-  res.json(elPoints);
-};
-// ELPoints();
