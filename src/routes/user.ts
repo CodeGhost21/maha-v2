@@ -18,6 +18,7 @@ import {
   galxeLPCheck,
   getUserTransactions,
   getLPData,
+  getUserTotalPoints,
 } from "../controller/user";
 import { checkTask } from "../controller/quests/checkTask";
 
@@ -37,5 +38,6 @@ router.post("/check", checkTask);
 router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
 router.get("/transactions", getUserTransactions);
+router.get("/userTotalPoints", getUserTotalPoints);
 
 export default router;

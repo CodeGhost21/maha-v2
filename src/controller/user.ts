@@ -207,6 +207,11 @@ export const getTotalPoints = async (req: Request, res: Response) => {
   }
 };
 
+export const getUserTotalPoints = async (req: Request, res: Response) => {
+  const user = req.user as IWalletUserModel;
+  res.json({ totalPoints: user.totalPointsV2 || 0 });
+};
+
 export const getUserReferralData = async (req: Request, res: Response) => {
   const referralCode: string = req.query.referralCode as string;
   if (!referralCode)
