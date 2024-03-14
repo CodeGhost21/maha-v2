@@ -210,7 +210,8 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
   const user: any = await WalletUser.findOne({ walletAddress: walletAddress });
-  res.json({ totalPoints: user.totalPointsV2 || 0 });
+  if (!user) return res.json({ success: false, message: "no data found" });
+  res.json({ success: true, totalPoints: user.totalPointsV2 || 0 });
 };
 
 export const getUserReferralData = async (req: Request, res: Response) => {
