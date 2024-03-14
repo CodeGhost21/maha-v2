@@ -208,7 +208,8 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 };
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
-  const user = req.user as IWalletUserModel;
+  const walletAddress: string = req.query.walletAddress as string;
+  const user: any = await WalletUser.findOne({ walletAddress: walletAddress });
   res.json({ totalPoints: user.totalPointsV2 || 0 });
 };
 
