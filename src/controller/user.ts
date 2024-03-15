@@ -209,7 +209,6 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   let walletAddress: string = req.query.walletAddress as string;
-  walletAddress = walletAddress.toLowerCase();
   const user: any = await WalletUser.findOne({
     walletAddress: { $regex: new RegExp("^" + walletAddress + "$", "i") },
   });
