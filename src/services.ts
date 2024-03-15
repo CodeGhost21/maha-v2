@@ -4,6 +4,8 @@ import { dailyLpPoints } from "./cron/dailyLpPoints";
 import { updateUsersRank } from "./cron/updateRank";
 import { updatePythPoints } from "./scripts/updatePythPoints";
 import { updateMantaPoints } from "./scripts/updateMantaPoints";
+import { addSupplyBorrowUsers } from "./scripts/newSupplyBorrowUsers";
+
 import "./bots/gm";
 // connect to database
 open();
@@ -26,6 +28,11 @@ cron.schedule("0 15 * * 5", async () => {
 cron.schedule("0 15 * * 6", async () => {
   console.log("updating manta points every saturday at 3 PM minutes");
   await updateMantaPoints();
+});
+
+cron.schedule("0 * * * *", async () => {
+  console.log("adding new wallet users every hour");
+  await addSupplyBorrowUsers();
 });
 // updateRank();
 // dailyLpPoints();

@@ -31,7 +31,7 @@ import { whiteListTeam } from "./quests/constants";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
-const _generateReferralCode = () => {
+export const _generateReferralCode = () => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let referralCode = "";
