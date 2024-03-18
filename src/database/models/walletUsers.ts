@@ -40,6 +40,8 @@ export interface IWalletUserPoints {
   MantaStaker: number;
   HoldStationStaker: number;
   CakeStaker: number;
+  supplyEthereumLrtEth: number;
+  borrowEthereumLrtEth: number;
   // total: number;
 }
 

@@ -9,6 +9,7 @@ import {
   supplyBorrowPointsBlastMulticall,
   supplyBorrowPointsLineaMulticall,
   supplyBorrowPointsEthereumLrtMulticall,
+  supplyBorrowPointsEthereumLrtETHMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -25,6 +26,10 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const blastData = await supplyBorrowPointsBlastMulticall(wallets);
     const lineaData = await supplyBorrowPointsLineaMulticall(wallets);
     const ethLrtData = await supplyBorrowPointsEthereumLrtMulticall(wallets);
+    const ethLrtEthData = await supplyBorrowPointsEthereumLrtETHMulticall(
+      wallets
+    );
+    console.log(ethLrtEthData);
 
     const tasks: IAssignPointsTask[] = [];
 
@@ -35,6 +40,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const blast = blastData[j];
       const linea = lineaData[j];
       const ethLrt = ethLrtData[j];
+      const ethLrtEth = ethLrtEthData[j];
       // console.log(
       //   "  ",
       //   j,
@@ -189,6 +195,31 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
           `Daily Borrow on ethLrt chain for ${ethLrt.borrow.amount}`,
           true,
           "borrowEthereumLrt",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      //ethereum Lrt ETH
+      if (ethLrtEth.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          ethLrtEth.supply.points,
+          `Daily Supply on ethLrtEth chain for ${ethLrtEth.supply.amount}`,
+          true,
+          "supplyEthereumLrtEth",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (ethLrtEth.borrow.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          ethLrtEth.borrow.points,
+          `Daily Borrow on ethLrtEth chain for ${ethLrtEth.borrow.amount}`,
+          true,
+          "borrowEthereumLrtEth",
           epoch
         );
         if (t) tasks.push(t);
