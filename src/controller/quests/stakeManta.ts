@@ -1,7 +1,12 @@
 import axios from "axios";
 import { ethers } from "ethers";
+import nconf from "nconf";
 import "@polkadot/api-augment";
 import { ApiPromise, WsProvider } from "@polkadot/api";
+import { MulticallWrapper } from "ethers-multicall-provider";
+import { mantaProvider } from "../../utils/providers";
+
+const MantaABI = ["function balanceOf(address owner) view returns (uint256)"];
 
 const getBalance = async (
   walletAddress: string,
@@ -18,6 +23,23 @@ const getBalance = async (
   return balance;
 };
 
+const mantaQueryData = async (graphQuery: string) => {
+  const queryURL =
+    "https://api.goldsky.com/api/public/project_clnv4qr7e30dv33vpgx7y0f1d/subgraphs/mainnet-staker/1.0.0/gn";
+
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  const response = await axios.post(
+    queryURL,
+    { query: graphQuery },
+    { headers }
+  );
+
+  return response;
+};
+
 export const getMantaStakedData = async (walletAddress: string) => {
   try {
     const wsProvider = new WsProvider("wss://ws.manta.systems");
@@ -25,10 +47,6 @@ export const getMantaStakedData = async (walletAddress: string) => {
       provider: wsProvider,
       noInitWarn: true,
     });
-
-    const queryURL =
-      "https://api.goldsky.com/api/public/project_clnv4qr7e30dv33vpgx7y0f1d/subgraphs/mainnet-staker/1.0.0/gn";
-
     const graphQuery = `query {
         bindPacificAddresses(where: { pacificAddress: "${walletAddress}" }) {
             id,
@@ -37,16 +55,7 @@ export const getMantaStakedData = async (walletAddress: string) => {
             blockNumber
         }
       }`;
-
-    const headers = {
-      "Content-Type": "application/json",
-    };
-
-    const response = await axios.post(
-      queryURL,
-      { query: graphQuery },
-      { headers }
-    );
+    const response = await mantaQueryData(graphQuery);
     const mantaData: any = {};
     if (response.data.data) {
       if (response.data.data.bindPacificAddresses.length > 0) {
@@ -139,4 +148,62 @@ export const getMantaStakersData = async (walletAddress: string) => {
     totalStakedManta += mantaBifrost;
   }
   return { totalStakedManta: totalStakedManta };
+};
+
+export const updateMantaStakersData = async (walletAddresses: any) => {
+  const graphQuery = `{
+    bindPacificAddresses(where: { pacificAddress_in: ${walletAddresses} }) {
+        id,
+        atlanticAddress,
+        pacificAddress,
+        blockNumber
+    }
+  }`;
+  console.log(graphQuery);
+
+  const response = await mantaQueryData(graphQuery);
+  console.log(response.data);
+  return response;
+};
+
+export const updateMantaStakersAccumulate = async (
+  walletAddresses: string[]
+) => {
+  const provider = MulticallWrapper.wrap(mantaProvider);
+  const pool = new ethers.Contract(
+    "0x7AC168c81F4F3820Fa3F22603ce5864D6aB3C547",
+    MantaABI,
+    provider
+  );
+
+  const results = await Promise.all(
+    walletAddresses.map((w) => pool.balanceOf(w))
+  );
+
+  return results.map((userBalance, index) => {
+    return {
+      address: walletAddresses[index],
+      balance: Number(userBalance) / 1e18,
+    };
+  });
+};
+
+export const updateMantaStakersBifrost = async (walletAddresses: string[]) => {
+  const provider = MulticallWrapper.wrap(mantaProvider);
+  const pool = new ethers.Contract(
+    "0xffffffffda2a05fb50e7ae99275f4341aed43379",
+    MantaABI,
+    provider
+  );
+
+  const results = await Promise.all(
+    walletAddresses.map((w) => pool.balanceOf(w))
+  );
+
+  return results.map((userBalance, index) => {
+    return {
+      address: walletAddresses[index],
+      balance: Number(userBalance) / 1e18,
+    };
+  });
 };

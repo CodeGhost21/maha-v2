@@ -182,16 +182,16 @@ export const getMantaData = async (req: Request, res: Response) => {
       ? mantaData.data.totalStakingAmount
       : 0;
     +mantaBifrost + mantaAccumulate;
-    if (mantaData.success) {
-      res.json({
-        mantaData: mantaData.success ? mantaData.data.totalStakingAmount : 0,
-        mantaBifrost: mantaBifrost,
-        mantaAccumulate: mantaAccumulate,
-        totalStaked: totalStaked,
-      });
-    } else {
-      res.json({ success: mantaData.success, message: mantaData.message });
-    }
+    // if (mantaData.success) {
+    res.json({
+      mantaData: mantaData.success ? mantaData.data.totalStakingAmount : 0,
+      mantaBifrost: mantaBifrost,
+      mantaAccumulate: mantaAccumulate,
+      totalStaked: totalStaked,
+    });
+    // } else {
+    //   res.json({ success: mantaData.success, message: mantaData.message });
+    // }
   } else {
     res.json({ success: false, message: "please provide wallet address" });
   }
