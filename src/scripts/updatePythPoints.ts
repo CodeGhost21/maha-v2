@@ -31,18 +31,20 @@ export const updatePythPoints = async () => {
   let skip = 0;
   let batch;
 
+  const tasks: IAssignPointsTask[] = [];
   do {
     batch = await WalletUser.find({}).skip(skip).limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
     // console.log("batch", batch);
 
     const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
-    const tasks: IAssignPointsTask[] = [];
     for (const user of batch) {
-      const pythData = typedAddresses.find(
-        (item) =>
-          item.evm.toLowerCase().trim() ===
-          user.walletAddress.toLowerCase().trim()
-      );
+      const pythData = user.walletAddress
+        ? typedAddresses.find(
+            (item) =>
+              item.evm.toLowerCase().trim() ===
+              user.walletAddress.toLowerCase().trim()
+          )
+        : undefined;
       if (pythData) {
         const latestPoints = pythData.stakedAmount / 1e6;
         const oldPythPoints = Number(user.points.PythStaker) || 0;
@@ -94,6 +96,10 @@ export const updatePythPoints = async () => {
     );
     skip += batchSize;
   } while (batch.length === batchSize);
+  await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
+  await UserPointTransactions.bulkWrite(
+    _.flatten(tasks.map((r) => r.pointsBulkWrites))
+  );
 };
 
 // updatePythPoints();
@@ -185,6 +191,7 @@ export const updatePoints = async (
         $set: {
           epoch: epoch || user.epoch,
           [`checked.${taskId}`]: true,
+          [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
         },
       },
     },
