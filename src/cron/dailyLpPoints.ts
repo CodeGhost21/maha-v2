@@ -213,17 +213,17 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         if (t) tasks.push(t);
       }
 
-      if (ethLrtEth.borrow.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          ethLrtEth.borrow.points,
-          `Daily Borrow on ethLrtEth chain for ${ethLrtEth.borrow.amount}`,
-          true,
-          "borrowEthereumLrtEth",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
+      // if (ethLrtEth.borrow.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     ethLrtEth.borrow.points,
+      //     `Daily Borrow on ethLrtEth chain for ${ethLrtEth.borrow.amount}`,
+      //     true,
+      //     "borrowEthereumLrtEth",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
     }
 
     // once all the db operators are accumulated; write into the DB
