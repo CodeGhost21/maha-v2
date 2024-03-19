@@ -61,18 +61,6 @@ export const updatePythPoints = async () => {
           const pointsMessage = `${pointsAction} ${Math.abs(
             stakedAmountDiff
           )} PythStaker points from user ${user.walletAddress}`;
-          // console.log(
-          //   136,
-          //   user.id,
-          //   previousPoints,
-          //   latestPoints,
-          //   previousReferralPoints,
-          //   stakedAmountDiff,
-          //   pointsMessage,
-          //   pointsAction === "added" ? true : false,
-          //   "PythStaker"
-          // );
-          // console.log("message", pointsMessage);
           //assign points logic
           const t = await updatePoints(
             user._id,
@@ -90,10 +78,6 @@ export const updatePythPoints = async () => {
       }
     }
     // console.log("tasks", tasks);
-    await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
-    await UserPointTransactions.bulkWrite(
-      _.flatten(tasks.map((r) => r.pointsBulkWrites))
-    );
     skip += batchSize;
   } while (batch.length === batchSize);
   await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
