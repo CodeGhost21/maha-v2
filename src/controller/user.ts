@@ -74,7 +74,7 @@ export const walletVerify = async (
     //assign role
     const role = await userLpData(result.data.address);
     const user = await WalletUser.findOne({
-      walletAddress: result.data.address,
+      walletAddress: result.data.address.toLowerCase().trim(),
     });
 
     if (user) {
@@ -88,7 +88,7 @@ export const walletVerify = async (
     const referralCode = _generateReferralCode();
 
     const newUser = await WalletUser.create({
-      walletAddress: req.body.message.address,
+      walletAddress: req.body.message.toLowerCase().trim(),
       rank: usersCount + 1,
       epoch: getEpoch(),
       referralCode: referralCode ? referralCode : null,
@@ -210,7 +210,7 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   let walletAddress: string = req.query.walletAddress as string;
   const user: any = await WalletUser.findOne({
-    walletAddress: { $regex: new RegExp("^" + walletAddress + "$", "i") },
+    walletAddress: walletAddress.toLowerCase().trim(), //{ $regex: new RegExp("^" + walletAddress + "$", "i") },
   });
   if (!user) return res.json({ success: false, message: "no data found" });
   res.json({ success: true, totalPoints: user.totalPointsV2 || 0 });
@@ -260,7 +260,6 @@ export const getReferralUsers = async (req: Request, res: Response) => {
 
 export const galxeLPCheck = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.address as string;
-  console.log(walletAddress);
   let success = false;
 
   try {
@@ -281,7 +280,9 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
 
 export const getUserTransactions = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const checkAdmin = whiteListTeam.includes(user.walletAddress);
+  const checkAdmin = whiteListTeam.includes(
+    user.walletAddress.toLowerCase().trim()
+  );
   if (!checkAdmin) {
     return res.json({ success: false, message: "Unauthorized" });
   }
