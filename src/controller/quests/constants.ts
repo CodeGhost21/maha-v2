@@ -21,6 +21,8 @@ export const supplyEthEthereumLrt = 2;
 
 export const borrowEthEthereumLrt = 8;
 
+export const blastStartDate = new Date("29 Feb 2024").getTime();
+
 export const LQTYHolders: string[] = [
   "0x961E45e3666029709C3ac50A26319029cde4e067",
   "0x98a7Fa97B90f1eC0E54cAB708247936a5fa33492",
