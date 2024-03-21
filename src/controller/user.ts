@@ -52,8 +52,10 @@ export const walletVerify = async (
     const siweMessage = new SiweMessage(message);
     const result = await siweMessage.verify({ signature });
 
+    const address = result.data.address.toLowerCase().trim();
+
     // todo: verify other data
-    if (result.data.address !== req.body.message.address) {
+    if (address !== req.body.message.address.toLowerCase()) {
       throw new BadRequestError(
         "Signature verification failed. Invalid signature."
       );
@@ -72,9 +74,9 @@ export const walletVerify = async (
     // }
 
     //assign role
-    const role = await userLpData(result.data.address);
+    const role = await userLpData(address);
     const user = await WalletUser.findOne({
-      walletAddress: result.data.address.toLowerCase().trim(),
+      walletAddress: address,
     });
 
     if (user) {
@@ -208,7 +210,7 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 };
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
-  let walletAddress: string = req.query.walletAddress as string;
+  const walletAddress: string = req.query.walletAddress as string;
   const user: any = await WalletUser.findOne({
     walletAddress: walletAddress.toLowerCase().trim(), //{ $regex: new RegExp("^" + walletAddress + "$", "i") },
   });
