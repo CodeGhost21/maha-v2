@@ -7,6 +7,7 @@ import { blastStartDate } from "./constants";
 import { blastProvider } from "../../utils/providers";
 import BlastPointABI from "../../abis/BlastPoints.json";
 import { BlastUser } from "../../database/models/blastUsers";
+import { BlastBatches } from "../../database/models/blastBatches";
 
 const baseUrl = "https://waitlist-api.prod.blast.io";
 
@@ -94,14 +95,14 @@ export const BlastPoints = async () => {
   const challengeUSDB = await getBlastChallenge(contractAddressUSDB);
   const tokenUSDB = await getBearerToken(challengeUSDB);
   const pointsUSDB = await getPoints(tokenUSDB, contractAddressUSDB);
-  // console.log(pointsUSDB);
+  console.log(pointsUSDB);
 
   //WETH
   const contractAddressWETH = "0x53a3Aa617afE3C12550a93BA6262430010037B04";
   const challengeWETH = await getBlastChallenge(contractAddressWETH);
   const tokenWETH = await getBearerToken(challengeWETH);
   const pointsWETH = await getPoints(tokenWETH, contractAddressWETH);
-  // console.log(pointsWETH);
+  console.log(pointsWETH);
 
   const totalPoints =
     Number(pointsUSDB.balancesByPointType.LIQUIDITY.available) +
@@ -143,13 +144,14 @@ export const calculateBlastUserShare = async (addresses: string[]) => {
       address: addresses[index],
       shares: share,
       sharePercentage: sharePercentage * 100,
-      points:
+      pointUSDB: Number(sharePercentage * blastPoints.blastUSDB).toFixed(2),
+      pointWETH: Number(sharePercentage * blastPoints.blastWETH).toFixed(2),
+      points: Number(
         sharePercentage * blastPoints.blastUSDB +
-        sharePercentage * blastPoints.blastWETH,
+          sharePercentage * blastPoints.blastWETH
+      ).toFixed(2),
     };
   });
-  console.log(finalResults);
-
   return finalResults;
 };
 
@@ -176,42 +178,44 @@ export const saveBlastUsers = async () => {
     };
     batch = await axios.post(queryURL, { query: graphQuery }, { headers });
     const addresses = batch.data.data.users.map((user: any) => user.id);
-    const userShares = await calculateBlastUserShare([
-      "0x0F6e98A756A40dD050dC78959f45559F98d3289d",
-      "0x961E45e3666029709C3ac50A26319029cde4e067",
-    ]);
+    const userShares = await calculateBlastUserShare(addresses);
 
     for (const userShare of userShares) {
       const walletAddress: any = userShare.address.toLowerCase().trim();
-
-      if (allBlastUsersAddress.includes(walletAddress)) {
-        bulkOperations.push({
-          updateOne: {
-            filter: { walletAddress },
-            update: {
-              $set: {
-                "blastPoints.pointsPending": userShare.points,
-                "blastPoints.shares": userShare.shares,
-                "blastPoints.sharePercent": userShare.sharePercentage,
-                "blastPoints.timestamp": Date.now(),
+      if (Number(userShare.points) > 0) {
+        if (allBlastUsersAddress.includes(walletAddress)) {
+          bulkOperations.push({
+            updateOne: {
+              filter: { walletAddress },
+              update: {
+                $set: {
+                  "blastPoints.pointsPending": Number(userShare.points),
+                  "blastPoints.pointsPendingUSDB": Number(userShare.pointUSDB),
+                  "blastPoints.pointsPendingWETH": Number(userShare.pointWETH),
+                  "blastPoints.shares": userShare.shares,
+                  "blastPoints.sharePercent": userShare.sharePercentage,
+                  "blastPoints.timestamp": Date.now(),
+                },
               },
             },
-          },
-        });
-      } else {
-        bulkOperations.push({
-          insertOne: {
-            document: {
-              walletAddress,
-              blastPoints: {
-                pointsPending: userShare.points,
-                shares: userShare.shares,
-                sharePercent: userShare.sharePercentage,
-                timestamp: Date.now(),
+          });
+        } else {
+          bulkOperations.push({
+            insertOne: {
+              document: {
+                walletAddress,
+                blastPoints: {
+                  pointsPending: Number(userShare.points),
+                  pointsPendingUSDB: Number(userShare.pointUSDB),
+                  pointsPendingWETH: Number(userShare.pointWETH),
+                  shares: userShare.shares,
+                  sharePercent: userShare.sharePercentage,
+                  timestamp: Date.now(),
+                },
               },
             },
-          },
-        });
+          });
+        }
       }
     }
 
@@ -230,36 +234,100 @@ export const assignBlastPoints = async () => {
   const batchSize = 2000;
   let skip = 0;
   let batch;
-  const bulkOperations = [];
-  const addressUSDB = "0x23A58cbe25E36e26639bdD969B0531d3aD5F9c34";
+  const addressUSDB = "0x53a3Aa617afE3C12550a93BA6262430010037B04";
   const challengeUSDB = await getBlastChallenge(addressUSDB);
   const tokenUSDB = await getBearerToken(challengeUSDB);
-  const batchId = Math.floor(Date.now() / 86400 / 7 / 1000) + 1;
+  const tokenName = "WETH";
+  let batchId = 2837; //Math.floor(Date.now() / 86400 / 7 / 1000);
   do {
-    batch = await BlastUser.find({}).skip(skip).limit(batchSize);
+    //USDB
+    console.log("batchId", batchId);
+    batch = await BlastUser.find({
+      [`blastPoints.pointsPending${tokenName}`]: { $gt: 0 },
+    })
+      .skip(skip)
+      .limit(batchSize);
     const transferBatch = [];
-    for (const user of batch) {
-      const transfer: Transfer = {
-        toAddress: user.walletAddress,
-        points: String(user.blastPoints.pointsPending),
-      };
-      transferBatch.push(transfer);
-    }
-    console.log(transferBatch);
+    if (batch.length > 0) {
+      for (const user of batch) {
+        if (user.blastPoints[`pointsPending${tokenName}`] > 0) {
+          const transfer: Transfer = {
+            toAddress: user.walletAddress,
+            points: String(user.blastPoints[`pointsPending${tokenName}`]),
+          };
+          transferBatch.push(transfer);
+        }
+      }
+      console.log(transferBatch.length);
 
-    const request: Request = {
-      pointType: "LIQUIDITY",
-      transfers: transferBatch,
-    };
-    const url = `${baseUrl}/v1/contracts/${addressUSDB}/batches/${batchId}`;
-    const headers = {
-      Authorization: `Bearer ${tokenUSDB}`,
-    };
-    try {
-      const response = await axios.put(url, request, { headers });
-      console.log(response.data);
-    } catch (e: any) {
-      console.log(e.response.data);
+      const request: Request = {
+        pointType: "LIQUIDITY",
+        transfers: transferBatch,
+      };
+      const url = `${baseUrl}/v1/contracts/${addressUSDB}/batches/${batchId}`;
+      const headers = {
+        Authorization: `Bearer ${tokenUSDB}`,
+      };
+      try {
+        const response = await axios.put(url, request, { headers });
+        console.log(response.data);
+        if (response.data.success) {
+          //saving batch
+          await BlastBatches.create({
+            batchId,
+            batch: transferBatch,
+          });
+        }
+      } catch (e: any) {
+        console.log(e.response.data);
+      }
+
+      skip += batchSize;
+      batchId += 1;
     }
   } while (batch.length === batchSize);
+};
+
+export const updateBlastPoints = async () => {
+  const tokenName = "WETH";
+  const blastBatches = await BlastBatches.find({ batchId: { $gte: 2836 } });
+
+  blastBatches.forEach(async (batch: any) => {
+    const bulkOperations: any = [];
+    for (const item of batch.batch) {
+      bulkOperations.push({
+        updateOne: {
+          filter: { walletAddress: item.toAddress },
+          update: {
+            $inc: {
+              "blastPoints.pointsGiven": Number(item.points),
+              "blastPoints.pointsPending": -Number(item.points),
+            },
+            $set: {
+              [`blastPoints.pointsPending${tokenName}`]: 0,
+              "blastPoints.timestamp": Date.now(),
+            },
+          },
+        },
+      });
+    }
+    if (bulkOperations.length > 0) {
+      await BlastUser.bulkWrite(bulkOperations);
+      console.log(
+        `Updated ${bulkOperations.length} documents in BlastUser collection.`
+      );
+    }
+  });
+};
+
+export const getTotalBlastPointGiven = async () => {
+  const result = await BlastUser.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalPointsGiven: { $sum: "$blastPoints.pointsGiven" },
+      },
+    },
+  ]);
+  console.log(result);
 };
