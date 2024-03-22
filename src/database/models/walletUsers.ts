@@ -42,6 +42,9 @@ export interface IWalletUserPoints {
   CakeStaker: number;
   supplyEthereumLrtEth: number;
   borrowEthereumLrtEth: number;
+  supplyLineaEzEth: number;
+  supplyBlastEzEth: number;
+  supplyEthereumLrtEzEth: number;
   // total: number;
 }
 

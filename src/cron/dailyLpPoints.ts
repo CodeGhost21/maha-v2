@@ -10,6 +10,9 @@ import {
   supplyBorrowPointsLineaMulticall,
   supplyBorrowPointsEthereumLrtMulticall,
   supplyBorrowPointsEthereumLrtETHMulticall,
+  supplyPointsBlastEzETHMulticall,
+  supplyPointsEthereumLrtEzETHMulticall,
+  supplyPointsLineaEzETHMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -29,6 +32,11 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const ethLrtEthData = await supplyBorrowPointsEthereumLrtETHMulticall(
       wallets
     );
+    const lineaEzEthData = await supplyPointsLineaEzETHMulticall(wallets);
+    const blastEzEthData = await supplyPointsBlastEzETHMulticall(wallets);
+    const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(
+      wallets
+    );
     console.log(ethLrtEthData);
 
     const tasks: IAssignPointsTask[] = [];
@@ -41,6 +49,10 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const linea = lineaData[j];
       const ethLrt = ethLrtData[j];
       const ethLrtEth = ethLrtEthData[j];
+      const lineaEzEth = lineaEzEthData[j];
+      const blastEzEth = blastEzEthData[j];
+      const ethLrtEzEth = ethLrtEzEthData[j];
+
       // console.log(
       //   "  ",
       //   j,
@@ -205,11 +217,51 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPoints(
           user.id,
           ethLrtEth.supply.points,
-          `Daily Supply on ethLrtEth chain for ${ethLrtEth.supply.amount}`,
+          `Daily Supply on ethLrt chain for ${ethLrtEth.supply.amount}`,
           true,
           "supplyEthereumLrtEth",
           epoch
         );
+        if (t) tasks.push(t);
+      }
+
+      //linea ezEth
+      if (lineaEzEth.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          lineaEzEth.supply.points,
+          `Daily Supply on linea chain for ${lineaEzEth.supply.amount}`,
+          true,
+          "supplyLineaEzEth",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      //blast ezEth
+      if (blastEzEth.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          blastEzEth.supply.points,
+          `Daily Supply on blast chain for ${blastEzEth.supply.amount}`,
+          true,
+          "supplyBlastEzEth",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      //eth LrtEth
+      if (ethLrtEth.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          ethLrtEth.supply.points,
+          `Daily Supply on ethLrt chain for ${ethLrtEth.supply.amount}`,
+          true,
+          "supplyEthereumLrtEth",
+          epoch
+        );
+
         if (t) tasks.push(t);
       }
 

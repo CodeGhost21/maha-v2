@@ -1,5 +1,6 @@
 import { AbstractProvider } from "ethers";
 import { ethers, Provider } from "ethers";
+import CoinGecko from "coingecko-api";
 import axios from "axios";
 import {
   mantaProvider,
@@ -20,15 +21,25 @@ import poolABI from "../../abis/Pool.json";
 import stabilityPool from "../../abis/StabilityPool.json";
 import troveManagerABI from "../../abis/TroveManager.json";
 import cache from "../../utils/cache";
+const CoinGeckoClient = new CoinGecko();
 
-async function getEthUsdPrice() {
-  const response = await axios.get(
-    "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-  );
-  const ethUsdPrice = response.data.ethereum.usd;
-  cache.set("coingecko:ethUsdPrice", ethUsdPrice, 60 * 60);
-  return ethUsdPrice;
-}
+export const getPriceCoinGecko = async () => {
+  try {
+    const data = await CoinGeckoClient.simple.price({
+      ids: ["ethereum", "renzo-restaked-eth"],
+      vs_currencies: ["usd"],
+    });
+    const priceList = {
+      ETH: data.data.ethereum.usd,
+      ezETH: data.data["renzo-restaked-eth"].usd,
+    };
+    cache.set("coingecko:PriceList", priceList, 60 * 60);
+    return priceList;
+  } catch (error) {
+    console.error("Error fetching Ethereum price:", error);
+    throw error;
+  }
+};
 
 const getContract = async (
   contractAddress: string,
@@ -90,9 +101,9 @@ export const supplyBorrowPointsEthereumLrtMulticall = async (
 export const supplyBorrowPointsEthereumLrtETHMulticall = async (
   walletAddresses: string[]
 ) => {
-  let ethUsdPrice: any = await cache.get("coingecko:ethUsdPrice");
-  if (!ethUsdPrice) {
-    ethUsdPrice = await getEthUsdPrice();
+  let marketPrice: any = await cache.get("coingecko:PriceList");
+  if (!marketPrice) {
+    marketPrice = await getPriceCoinGecko();
   }
   const provider = MulticallWrapper.wrap(ethLrtProvider);
   const abi = ["function balanceOf(address owner) view returns (uint256)"];
@@ -102,8 +113,84 @@ export const supplyBorrowPointsEthereumLrtETHMulticall = async (
     provider
   );
 
-  const contractBorrow = new ethers.Contract(
-    nconf.get("ETH_LRT_ETH_BORROW"),
+  const results = await Promise.all(
+    walletAddresses.map(async (w) => {
+      const balanceSupply = await contractDeposit.balanceOf(w);
+      const supply = (Number(balanceSupply) / 1e18) * marketPrice.ETH;
+      return {
+        who: w,
+        supply: { points: supply * supplyEthEthereumLrt, amount: supply },
+      };
+    })
+  );
+  return results;
+};
+
+export const supplyPointsLineaEzETHMulticall = async (
+  walletAddresses: string[]
+) => {
+  let marketPrice: any = await cache.get("coingecko:PriceList");
+  if (!marketPrice) {
+    marketPrice = await getPriceCoinGecko();
+  }
+  const provider = MulticallWrapper.wrap(lineaProvider);
+  const abi = ["function balanceOf(address owner) view returns (uint256)"];
+  const contractDeposit = new ethers.Contract(
+    nconf.get("LINEA_EZ_ETH_SUPPLY"),
+    abi,
+    provider
+  );
+  const results = await Promise.all(
+    walletAddresses.map(async (w) => {
+      const balanceSupply = await contractDeposit.balanceOf(w);
+      const supply = (Number(balanceSupply) / 1e18) * marketPrice.ezETH;
+      return {
+        who: w,
+        supply: { points: supply, amount: supply },
+      };
+    })
+  );
+  return results;
+};
+
+export const supplyPointsEthereumLrtEzETHMulticall = async (
+  walletAddresses: string[]
+) => {
+  let marketPrice: any = await cache.get("coingecko:PriceList");
+  if (!marketPrice) {
+    marketPrice = await getPriceCoinGecko();
+  }
+  const provider = MulticallWrapper.wrap(ethLrtProvider);
+  const abi = ["function balanceOf(address owner) view returns (uint256)"];
+  const contractDeposit = new ethers.Contract(
+    nconf.get("ETH_EZ_ETH_SUPPLY"),
+    abi,
+    provider
+  );
+  const results = await Promise.all(
+    walletAddresses.map(async (w) => {
+      const balanceSupply = await contractDeposit.balanceOf(w);
+      const supply = (Number(balanceSupply) / 1e18) * marketPrice.ezETH;
+      return {
+        who: w,
+        supply: { points: supply, amount: supply },
+      };
+    })
+  );
+  return results;
+};
+
+export const supplyPointsBlastEzETHMulticall = async (
+  walletAddresses: string[]
+) => {
+  let marketPrice: any = await cache.get("coingecko:PriceList");
+  if (!marketPrice) {
+    marketPrice = await getPriceCoinGecko();
+  }
+  const provider = MulticallWrapper.wrap(blastProvider);
+  const abi = ["function balanceOf(address owner) view returns (uint256)"];
+  const contractDeposit = new ethers.Contract(
+    nconf.get("BLAST_EZ_ETH_SUPPLY"),
     abi,
     provider
   );
@@ -111,14 +198,10 @@ export const supplyBorrowPointsEthereumLrtETHMulticall = async (
   const results = await Promise.all(
     walletAddresses.map(async (w) => {
       const balanceSupply = await contractDeposit.balanceOf(w);
-      const balanceBorrow = await contractBorrow.balanceOf(w);
-
-      const supply = (Number(balanceSupply) / 1e18) * ethUsdPrice;
-      const borrow = (Number(balanceBorrow) / 1e18) * ethUsdPrice;
+      const supply = (Number(balanceSupply) / 1e18) * marketPrice.ezETH;
       return {
         who: w,
-        supply: { points: supply * supplyEthEthereumLrt, amount: supply },
-        borrow: { points: borrow * borrowEthEthereumLrt, amount: borrow },
+        supply: { points: supply, amount: supply },
       };
     })
   );
