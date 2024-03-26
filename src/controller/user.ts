@@ -90,7 +90,7 @@ export const walletVerify = async (
     const referralCode = _generateReferralCode();
 
     const newUser = await WalletUser.create({
-      walletAddress: req.body.message.toLowerCase().trim(),
+      walletAddress: address,
       rank: usersCount + 1,
       epoch: getEpoch(),
       referralCode: referralCode ? referralCode : null,
