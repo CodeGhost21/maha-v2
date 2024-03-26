@@ -8,7 +8,6 @@ import {
   addSupplyBorrowUsers,
   addSupplyBorrowUsersManta,
 } from "./scripts/newSupplyBorrowUsers";
-import { updateWalletAddresses } from "./scripts/updateWalletAddresses";
 import "./bots/gm";
 // connect to database
 open();
