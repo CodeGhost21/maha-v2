@@ -67,8 +67,6 @@ export const checkTask = async (
       //checked if user is already a pyth staker
       if (!user.checked.MantaStaker && !(user.points.MantaStaker > 0)) {
         const mantaData: any = await getMantaStakersData(user.walletAddress);
-        console.log(mantaData);
-
         // if (mantaData.success) {
         const stakedAmount = mantaData.totalStakedManta;
         if (stakedAmount > 0) {
@@ -95,8 +93,6 @@ export const checkTask = async (
         const holdStationStakedAmount: any = await getUserHoldStationData(
           user.walletAddress
         );
-        console.log(holdStationStakedAmount);
-
         // if (mantaData.success) {
         const stakedAmount = holdStationStakedAmount;
         if (stakedAmount > 0) {
@@ -122,7 +118,7 @@ export const checkTask = async (
         const cakeStakedAmount: any = await getCakeStakeData(
           user.walletAddress
         );
-        // console.log(cakeStakedAmount);
+        console.log("cakeStakedAmount",cakeStakedAmount);
 
         const stakedAmount = cakeStakedAmount;
         if (stakedAmount > 0) {
