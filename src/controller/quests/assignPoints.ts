@@ -34,9 +34,6 @@ export const assignPoints = async (
   const previousPoints = Number(user.totalPointsV2) || 0;
   let latestPoints = Number(points) || 0;
   let newMessage = message;
-  console.log(points < 0.01,isNaN(points));
-  
-console.log(points < 0.01 || isNaN(points));
 
   if (points < 0.01 || isNaN(points)) return;
 
@@ -108,7 +105,7 @@ console.log(points < 0.01 || isNaN(points));
       },
     },
   });
-console.log(userBulkWrites);
+console.log(userBulkWrites[0]);
 
   return {
     userBulkWrites,
