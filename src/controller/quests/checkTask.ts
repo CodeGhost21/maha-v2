@@ -131,7 +131,7 @@ export const checkTask = async (
           );
           await task?.execute();
           success = true;
-          // user.checked.CakeStaker = true;
+          user.checked.CakeStaker = true;
           cache.del(`userId:${user._id}`);
         }
       }
