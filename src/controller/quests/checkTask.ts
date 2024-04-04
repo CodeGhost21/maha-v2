@@ -9,7 +9,7 @@ import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
 import { IPythStaker } from "../interface/IPythStaker";
 import cache from "../../utils/cache";
-import { getMantaStakedData, getMantaStakersData } from "./stakeManta";
+import { getMantaStakersData } from "./stakeManta";
 import { getUserHoldStationData } from "./stakeHoldStation";
 import { getCakeStakeData } from "./stakeCake";
 
@@ -116,7 +116,7 @@ export const checkTask = async (
       }
     } else if (req.body.taskId === "CakeStaker") {
       // console.log(118, req.body.taskId);
-
+      
       //checked if user is already a pyth staker
       if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
         const cakeStakedAmount: any = await getCakeStakeData(

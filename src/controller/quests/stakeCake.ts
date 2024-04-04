@@ -14,9 +14,9 @@ export const getCakeStakeData = async (walletAddress: string) => {
     CakePoolABI,
     provider
   );
-
-  const userInfo = await contract.userInfo(walletAddress);
-  return Number(userInfo[8]) / 1e18;
+  
+  const userInfo = await contract.balanceOf(walletAddress);
+  return Number(userInfo) / 1e18;
 };
 
 //multi call function to fetch cake stake data
