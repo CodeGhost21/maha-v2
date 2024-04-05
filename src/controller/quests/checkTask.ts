@@ -48,7 +48,6 @@ export const checkTask = async (
         );
         if (pythData) {
           const stakedAmount = pythData.stakedAmount / 1e6;
-          if (stakedAmount < 0.01 || isNaN(stakedAmount)) return;
           if (stakedAmount > 0) {
             const task = await assignPoints(
               user.id,
@@ -70,7 +69,6 @@ export const checkTask = async (
         const mantaData: any = await getMantaStakersData(user.walletAddress);
         // if (mantaData.success) {
           const stakedAmount = mantaData.totalStakedManta;
-        if (stakedAmount < 0.01 || isNaN(stakedAmount)) return;
         if (stakedAmount > 0) {
           const task = await assignPoints(
             user.id,
@@ -97,7 +95,6 @@ export const checkTask = async (
         );
         // if (mantaData.success) {
         const stakedAmount = holdStationStakedAmount;
-        if (stakedAmount < 0.01 || isNaN(stakedAmount)) return;
         if (stakedAmount > 0) {
           const task = await assignPoints(
             user.id,
@@ -115,7 +112,6 @@ export const checkTask = async (
       }
     } else if (req.body.taskId === "CakeStaker") {
       console.log(118, req.body.taskId);
-      
       //checked if user is already a pyth staker
       if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
         const cakeStakedAmount: any = await getCakeStakeData(
@@ -123,9 +119,7 @@ export const checkTask = async (
         );
 
         const stakedAmount = cakeStakedAmount;
-        console.log(126,stakedAmount,stakedAmount < 0.01,isNaN(stakedAmount),stakedAmount < 0.01 || isNaN(stakedAmount));
-        
-        if (stakedAmount < 0.01 || isNaN(stakedAmount)) return;
+        console.log(126,stakedAmount);
         if (stakedAmount > 0) {
           const task = await assignPoints(
             user.id,
