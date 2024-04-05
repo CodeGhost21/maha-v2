@@ -105,8 +105,6 @@ export const assignPoints = async (
       },
     },
   });
-console.log(userBulkWrites[0]);
-
   return {
     userBulkWrites,
     pointsBulkWrites,

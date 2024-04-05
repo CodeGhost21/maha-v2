@@ -58,7 +58,7 @@ export const checkTask = async (
             );
             await task?.execute();
             success = true;
-            user.checked.PythStaker = true;
+            // user.checked.PythStaker = true;
             cache.del(`userId:${user._id}`);
           }
         }
@@ -66,7 +66,7 @@ export const checkTask = async (
     } else if (req.body.taskId === "MantaStaker") {
       //checked if user is already a pyth staker
       if (!user.checked.MantaStaker && !(user.points.MantaStaker > 0)) {
-        const mantaData: any = await getMantaStakersData(user.walletAddress);
+        const mantaData = await getMantaStakersData(user.walletAddress);
         // if (mantaData.success) {
           const stakedAmount = mantaData.totalStakedManta;
         if (stakedAmount > 0) {
@@ -79,7 +79,7 @@ export const checkTask = async (
           );
           await task?.execute();
           success = true;
-          user.checked.MantaStaker = true;
+          // user.checked.MantaStaker = true;
           cache.del(`userId:${user._id}`);
         }
         // }
@@ -90,7 +90,7 @@ export const checkTask = async (
         !user.checked.HoldStationStaker &&
         !(user.points.HoldStationStaker > 0)
       ) {
-        const holdStationStakedAmount: any = await getUserHoldStationData(
+        const holdStationStakedAmount = await getUserHoldStationData(
           user.walletAddress
         );
         // if (mantaData.success) {
@@ -105,7 +105,7 @@ export const checkTask = async (
           );
           await task?.execute();
           success = true;
-          user.checked.HoldStationStaker = true;
+          // user.checked.HoldStationStaker = true;
           cache.del(`userId:${user._id}`);
         }
         // }
@@ -114,7 +114,7 @@ export const checkTask = async (
       console.log(118, req.body.taskId);
       //checked if user is already a pyth staker
       if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
-        const cakeStakedAmount: any = await getCakeStakeData(
+        const cakeStakedAmount = await getCakeStakeData(
           user.walletAddress
         );
 
@@ -130,12 +130,12 @@ export const checkTask = async (
           );
           await task?.execute();
           success = true;
-          user.checked.CakeStaker = true;
+          // user.checked.CakeStaker = true;
           cache.del(`userId:${user._id}`);
         }
       }
     }
-    await user.save();
+    // await user.save();
 
     // } else if (req.body.taskId === "twitterFollow" && !user.checked.twitterFollow) {
     //   await assignPoints(
