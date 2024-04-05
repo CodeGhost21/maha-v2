@@ -114,7 +114,7 @@ export const checkTask = async (
         // }
       }
     } else if (req.body.taskId === "CakeStaker") {
-      // console.log(118, req.body.taskId);
+      console.log(118, req.body.taskId);
       
       //checked if user is already a pyth staker
       if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
