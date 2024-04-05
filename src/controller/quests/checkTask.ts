@@ -48,6 +48,7 @@ export const checkTask = async (
         );
         if (pythData) {
           const stakedAmount = pythData.stakedAmount / 1e6;
+          if (stakedAmount < 0.01 || isNaN(stakedAmount)) return;
           if (stakedAmount > 0) {
             const task = await assignPoints(
               user.id,
@@ -95,6 +96,7 @@ export const checkTask = async (
         );
         // if (mantaData.success) {
         const stakedAmount = holdStationStakedAmount;
+        if (stakedAmount < 0.01 || isNaN(stakedAmount)) return;
         if (stakedAmount > 0) {
           const task = await assignPoints(
             user.id,
@@ -119,7 +121,6 @@ export const checkTask = async (
         );
 
         const stakedAmount = cakeStakedAmount;
-        console.log(126,stakedAmount);
         if (stakedAmount > 0) {
           const task = await assignPoints(
             user.id,
