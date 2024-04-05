@@ -35,7 +35,7 @@ export const assignPoints = async (
   let latestPoints = Number(points) || 0;
   let newMessage = message;
 
-  if (points < 0.01 || isNaN(points)) return;
+  // if (points < 0.01 || isNaN(points)) return;
 
   if (user.referredBy) {
     const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
