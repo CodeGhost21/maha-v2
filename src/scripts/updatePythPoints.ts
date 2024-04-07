@@ -26,67 +26,6 @@ import { open } from "../database";
 
 open();
 
-export const updatePythPoints = async () => {
-  const batchSize = 1000;
-  let skip = 0;
-  let batch;
-
-  const tasks: IAssignPointsTask[] = [];
-  do {
-    batch = await WalletUser.find({}).skip(skip).limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
-    // console.log("batch", batch);
-
-    const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
-    for (const user of batch) {
-      const pythData = user.walletAddress
-        ? typedAddresses.find(
-            (item) =>
-              item.evm.toLowerCase().trim() ===
-              user.walletAddress.toLowerCase().trim()
-          )
-        : undefined;
-      if (pythData) {
-        const latestPoints = pythData.stakedAmount / 1e6;
-        const oldPythPoints = Number(user.points.PythStaker) || 0;
-        let previousPoints = oldPythPoints;
-        let previousReferralPoints = 0;
-        let stakedAmountDiff = oldPythPoints - latestPoints;
-        if (user.referredBy) {
-          previousPoints = oldPythPoints / 1.2;
-          previousReferralPoints = previousPoints - oldPythPoints / 1.2;
-          stakedAmountDiff = latestPoints - previousPoints;
-        }
-        if (stakedAmountDiff !== 0) {
-          const pointsAction = stakedAmountDiff > 0 ? "added" : "subtracted";
-          const pointsMessage = `${pointsAction} ${Math.abs(
-            stakedAmountDiff
-          )} PythStaker points from user ${user.walletAddress}`;
-          //assign points logic
-          const t = await updatePoints(
-            user._id,
-            previousPoints,
-            latestPoints,
-            previousReferralPoints,
-            pointsMessage,
-            pointsAction === "added" ? true : false,
-            "PythStaker"
-          );
-          if (t) tasks.push(t);
-        } else {
-          console.log("no difference");
-        }
-      }
-    }
-    // console.log("tasks", tasks);
-    skip += batchSize;
-  } while (batch.length === batchSize);
-  await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
-  await UserPointTransactions.bulkWrite(
-    _.flatten(tasks.map((r) => r.pointsBulkWrites))
-  );
-};
-
-// updatePythPoints();
 
 export const updatePoints = async (
   userId: string,
@@ -104,8 +43,6 @@ export const updatePoints = async (
   const user = await WalletUser.findById(userId);
   if (!user) return;
   const userTotalPoints = Number(user.totalPointsV2) || 0;
-  console.log(userTotalPoints);
-
   let newMessage = message;
   let points = latestPoints;
   if (user.referredBy) {
@@ -190,3 +127,128 @@ export const updatePoints = async (
     },
   };
 };
+
+export const updatePythPoints=async()=>{
+  const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
+  const addresses: string[] = typedAddresses
+  .map((u) => u.evm) // Map all wallet addresses
+  .filter((address) => address !== '') // Filter out null and undefined values
+  .map((address) => address as string); 
+
+  const existingUsers = await WalletUser.find({
+    walletAddress: {
+      $in: addresses.map(
+        (address: string) => address.toLowerCase().trim()
+      ),
+    },
+  });
+  const tasks: IAssignPointsTask[] = [];
+  let count =1
+  for(const user of existingUsers){
+    const pythData = typedAddresses.find(
+            (item) =>
+              item.evm.toLowerCase().trim() ===
+              user.walletAddress.toLowerCase().trim()
+          )
+    ;
+      if (pythData) {
+        const latestPoints = pythData.stakedAmount / 1e6;
+        const oldPythPoints = Number(user.points.PythStaker) || 0;
+        let previousPoints = oldPythPoints;
+        let previousReferralPoints = 0;
+        let stakedAmountDiff = oldPythPoints - latestPoints;
+        if (user.referredBy) {
+          previousPoints = oldPythPoints / 1.2;
+          previousReferralPoints = previousPoints - oldPythPoints / 1.2;
+          stakedAmountDiff = latestPoints - previousPoints;
+        }
+        if (stakedAmountDiff !== 0) {
+          const pointsAction = stakedAmountDiff > 0 ? "added" : "subtracted";
+          const pointsMessage = `${pointsAction} ${Math.abs(
+            stakedAmountDiff
+          )} PythStaker points from user ${user.walletAddress}`;
+          //assign points logic
+          const t = await updatePoints(
+            user._id,
+            previousPoints,
+            latestPoints,
+            previousReferralPoints,
+            pointsMessage,
+            pointsAction === "added" ? true : false,
+            "PythStaker"
+          );
+          if (t) tasks.push(t);
+        } else {
+          console.log("no difference");
+        }
+      }
+      count+=1
+  }
+  await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
+  await UserPointTransactions.bulkWrite(
+    _.flatten(tasks.map((r) => r.pointsBulkWrites))
+  );
+}
+
+
+// export const updatePythPointsOld = async () => {
+//   const batchSize = 1000;
+//   let skip = 0;
+//   let batch;
+
+//   const tasks: IAssignPointsTask[] = [];
+//   do {
+//     batch = await WalletUser.find({}).skip(skip).limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
+//     // console.log("batch", batch);
+
+//     const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
+//     for (const user of batch) {
+//       const pythData = user.walletAddress
+//         ? typedAddresses.find(
+//             (item) =>
+//               item.evm.toLowerCase().trim() ===
+//               user.walletAddress.toLowerCase().trim()
+//           )
+//         : undefined;
+//       if (pythData) {
+//         const latestPoints = pythData.stakedAmount / 1e6;
+//         const oldPythPoints = Number(user.points.PythStaker) || 0;
+//         let previousPoints = oldPythPoints;
+//         let previousReferralPoints = 0;
+//         let stakedAmountDiff = oldPythPoints - latestPoints;
+//         if (user.referredBy) {
+//           previousPoints = oldPythPoints / 1.2;
+//           previousReferralPoints = previousPoints - oldPythPoints / 1.2;
+//           stakedAmountDiff = latestPoints - previousPoints;
+//         }
+//         if (stakedAmountDiff !== 0) {
+//           const pointsAction = stakedAmountDiff > 0 ? "added" : "subtracted";
+//           const pointsMessage = `${pointsAction} ${Math.abs(
+//             stakedAmountDiff
+//           )} PythStaker points from user ${user.walletAddress}`;
+//           //assign points logic
+//           const t = await updatePoints(
+//             user._id,
+//             previousPoints,
+//             latestPoints,
+//             previousReferralPoints,
+//             pointsMessage,
+//             pointsAction === "added" ? true : false,
+//             "PythStaker"
+//           );
+//           if (t) tasks.push(t);
+//         } else {
+//           console.log("no difference");
+//         }
+//       }
+//     }
+//     // console.log("tasks", tasks);
+//     skip += batchSize;
+//   } while (batch.length === batchSize);
+//   await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
+//   await UserPointTransactions.bulkWrite(
+//     _.flatten(tasks.map((r) => r.pointsBulkWrites))
+//   );
+// };
+
+// updatePythPoints();
