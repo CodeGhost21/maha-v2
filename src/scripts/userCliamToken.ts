@@ -68,4 +68,4 @@ const assignClaimPoints =async()=>{
     
 }
 
-assignClaimPoints()
+// assignClaimPoints()
