@@ -4,7 +4,7 @@ import nconf from "nconf";
 import "@polkadot/api-augment";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { MulticallWrapper } from "ethers-multicall-provider";
-import { mantaProvider } from "../../utils/providers";
+import { mantaProvider ,moonbeamProvider} from "../../utils/providers";
 
 const MantaABI = ["function balanceOf(address owner) view returns (uint256)"];
 
@@ -67,7 +67,7 @@ export const getMantaStakedData = async (walletAddress: string) => {
           // }
         });
 
-        let atlanticAddressArray = Object.keys(mantaData);
+        const atlanticAddressArray = Object.keys(mantaData);
 
         const delegatorState =
           await api.query.parachainStaking.delegatorState.multi(
@@ -150,26 +150,70 @@ export const getMantaStakersData = async (walletAddress: string) => {
   return { totalStakedManta: totalStakedManta };
 };
 
-export const updateMantaStakersData = async (walletAddresses: any) => {
+export const updateMantaStakersData = async (walletAddresses: string[]) => {
+  const addressesString = JSON.stringify(walletAddresses);
+  const wsProvider = new WsProvider("wss://ws.manta.systems");
+    const api = await ApiPromise.create({
+      provider: wsProvider,
+      noInitWarn: true,
+    });
   const graphQuery = `{
-    bindPacificAddresses(where: { pacificAddress_in: ${walletAddresses} }) {
+    bindPacificAddresses(where: { pacificAddress_in: ${addressesString} }) {
         id,
         atlanticAddress,
         pacificAddress,
         blockNumber
     }
   }`;
-  console.log(graphQuery);
-
   const response = await mantaQueryData(graphQuery);
-  console.log(response.data);
-  return response;
+  const mantaData: any = {};
+  const allMantaData=[]
+  if (response.data.data) {
+    if (response.data.data.bindPacificAddresses.length > 0) {
+      const records = response.data.data.bindPacificAddresses;
+
+      //
+      records.map((item: any) => {
+        item.stakingAmount = 0;
+        mantaData[item.atlanticAddress] = item;
+      });
+
+      const atlanticAddressArray = Object.keys(mantaData);
+
+      const delegatorState =
+        await api.query.parachainStaking.delegatorState.multi(
+          atlanticAddressArray
+        );
+
+      for (let i = 0; i < atlanticAddressArray.length; i++) {
+        const currentDelegatorState: any = delegatorState[i];
+
+        const delegationsRaw = currentDelegatorState.isSome
+          ? currentDelegatorState.value.delegations
+          : [];
+
+        let currentAccountStakingAmount = 0;
+        await delegationsRaw.map((delegationRaw: any) => {
+          currentAccountStakingAmount =
+            Number(currentAccountStakingAmount) +
+            Number(delegationRaw.amount / 1e18);
+        });
+
+        // update staking amount of bind record
+        mantaData[atlanticAddressArray[i]].stakingAmount =
+          currentAccountStakingAmount;
+        allMantaData.push(mantaData[atlanticAddressArray[i]])
+      }
+      return { allMantaData };
+    } 
+  }
+  return response.data.data.bindPacificAddresses;
 };
 
 export const updateMantaStakersAccumulate = async (
   walletAddresses: string[]
 ) => {
-  const provider = MulticallWrapper.wrap(mantaProvider);
+  const provider =await  MulticallWrapper.wrap(mantaProvider);
   const pool = new ethers.Contract(
     "0x7AC168c81F4F3820Fa3F22603ce5864D6aB3C547",
     MantaABI,
@@ -189,17 +233,16 @@ export const updateMantaStakersAccumulate = async (
 };
 
 export const updateMantaStakersBifrost = async (walletAddresses: string[]) => {
-  const provider = MulticallWrapper.wrap(mantaProvider);
+  const provider =await  MulticallWrapper.wrap(moonbeamProvider);
   const pool = new ethers.Contract(
-    "0xffffffffda2a05fb50e7ae99275f4341aed43379",
+    "0xFFfFFfFfdA2a05FB50e7ae99275F4341AEd43379",
     MantaABI,
     provider
   );
-
+  // console.log(198,pool)
   const results = await Promise.all(
     walletAddresses.map((w) => pool.balanceOf(w))
   );
-
   return results.map((userBalance, index) => {
     return {
       address: walletAddresses[index],

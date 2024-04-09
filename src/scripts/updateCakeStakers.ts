@@ -31,7 +31,7 @@ export const updateCakeStakers = async () => {
 
       if (user.referredBy) {
         previousPoints = oldPythPoints / 1.2;
-        previousReferralPoints = previousPoints - oldPythPoints / 1.2;
+        previousReferralPoints = oldPythPoints - previousPoints;
         stakedAmountDiff = latestPoints - previousPoints;
       }
       if (stakedAmountDiff !== 0) {
@@ -46,7 +46,6 @@ export const updateCakeStakers = async () => {
           latestPoints,
           previousReferralPoints,
           pointsMessage,
-          stakedAmountDiff,
           pointsAction === "added" ? true : false,
           "CakeStaker"
         );

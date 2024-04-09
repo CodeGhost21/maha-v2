@@ -29,3 +29,7 @@ export const ethLrtProvider = new ethers.JsonRpcProvider(
 export const sepoliaProvider= new ethers.JsonRpcProvider(
   nconf.get("SEPOLIA_RPC_URL")
 )
+
+export const moonbeamProvider= new ethers.JsonRpcProvider(
+  nconf.get("MOONBEAM_RPC_URL")
+)
