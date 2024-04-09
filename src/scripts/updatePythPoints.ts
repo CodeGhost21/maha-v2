@@ -41,7 +41,7 @@ export const updatePythPoints=async()=>{
         if (user.referredBy) {
           previousPoints = oldPythPoints / 1.2;
           previousReferralPoints =oldPythPoints - previousPoints;
-          stakedAmountDiff = latestPoints - previousPoints;
+          stakedAmountDiff = (latestPoints * 1e18 - previousPoints * 1e18)/1e18;
         }
         if (stakedAmountDiff !== 0) {
           const pointsAction = stakedAmountDiff > 0 ? "added" : "subtracted";
