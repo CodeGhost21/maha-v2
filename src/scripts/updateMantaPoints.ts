@@ -11,7 +11,7 @@ import { stakePtsPerManta } from "../controller/quests/constants";
 
 export const updateMantaPoints= async()=>{
   const batchSize = 1000;
-  let skip = 0;
+  let skip = 395000;
   let batch;
   do {
     batch = await WalletUser.find({ walletAddress: { $exists: true, $ne: null ,$not: { $eq: "" } } }).skip(skip).limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents

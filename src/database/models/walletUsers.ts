@@ -29,6 +29,8 @@ export interface IWalletUserPoints {
   referral: number;
   supply: number;
   borrow: number;
+  supplyManta: number;
+  borrowManta: number;
   supplyBlast: number;
   borrowBlast: number;
   supplyLinea: number;
@@ -41,7 +43,6 @@ export interface IWalletUserPoints {
   HoldStationStaker: number;
   CakeStaker: number;
   supplyEthereumLrtEth: number;
-  borrowEthereumLrtEth: number;
   supplyLineaEzEth: number;
   supplyBlastEzEth: number;
   supplyEthereumLrtEzEth: number;
@@ -67,6 +68,8 @@ export interface IWalletUser {
   checked: IWalletUserChecked;
   points: IWalletUserPoints;
   pointsUpdateTimestamp: IWalletUserPoints;
+  pointsPerSecond:IWalletUserPoints,
+  pointsPerSecondUpdateTimestamp:IWalletUserPoints
 }
 
 const UserSchema = new mongoose.Schema(
@@ -89,6 +92,8 @@ const UserSchema = new mongoose.Schema(
     points: { type: Object, default: {} },
     checked: { type: Object, default: {} },
     pointsUpdateTimestamp: { type: Object, default: {} },
+    pointsPerSecond:{ type: Object, default: {} },
+    pointsPerSecondUpdateTimestamp:{ type: Object, default: {} }
   },
   { timestamps: true }
 );
