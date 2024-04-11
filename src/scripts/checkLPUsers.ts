@@ -22,7 +22,10 @@ import { withoutDays, withDays } from "./updateList/LPList";
 
 const updateLpPoints = async () => {
   const addresses: any = withoutDays.map((i) => i.address);
-  const result = await WalletUser.find({ walletAddress: { $in: addresses } });
+  const result = await WalletUser.find({
+    walletAddress: { $in: addresses },
+    isDeleted: false,
+  });
   const epoch = getEpoch();
   const wallets = result.map((u) => u.walletAddress);
   const tasks: IAssignPointsTask[] = [];
@@ -115,7 +118,10 @@ const updateLpPoints = async () => {
 
 const temp = async () => {
   const addresses: any = withDays.map((i) => i.address);
-  const result = await WalletUser.find({ walletAddress: { $in: addresses } });
+  const result = await WalletUser.find({
+    walletAddress: { $in: addresses },
+    isDeleted: false,
+  });
   const epoch = getEpoch();
   const wallets = result.map((u) => u.walletAddress);
   const tasks: IAssignPointsTask[] = [];

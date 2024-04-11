@@ -23,7 +23,9 @@ const updateDiscordPoints = async () => {
   const skip = 0;
   let batch;
   do {
-    batch = await WalletUser.find({}).skip(skip).limit(batchSize);
+    batch = await WalletUser.find({ isDeleted: false })
+      .skip(skip)
+      .limit(batchSize);
     for (const user of batch) {
       const previousDiscordFollowPoints =
         Number(user.points.discordFollow) || 0;

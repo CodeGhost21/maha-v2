@@ -44,7 +44,10 @@ export const requestToken = async (req: Request, res: Response) => {
 router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   const reqUser = req.user as any;
   const user = await WalletUser.findById(req.query.state);
-  const discordUser = await WalletUser.findOne({ discordId: req.query.state });
+  const discordUser = await WalletUser.findOne({
+    discordId: req.query.state,
+    isDeleted: false,
+  });
 
   if (!user) return;
   let url = `/#/tasks?status=discord_error`;
@@ -116,7 +119,10 @@ export const registerUser = async (
       throw new BadRequestError("Invalid Discord token. Try logging again");
 
     // check if there is an existing user
-    const existingUser = await WalletUser.findOne({ discordId: data.id });
+    const existingUser = await WalletUser.findOne({
+      discordId: data.id,
+      isDeleted: false,
+    });
     if (existingUser)
       throw new BadRequestError(
         "Discord account already assigned to another wallet"

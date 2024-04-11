@@ -11,7 +11,9 @@ export const updateCakeStakers = async () => {
   let batch;
 
   do {
-    batch = await WalletUser.find({}).skip(skip).limit(batchSize);
+    batch = await WalletUser.find({ isDeleted: false })
+      .skip(skip)
+      .limit(batchSize);
     const addresses: string[] = batch.map((u) => u.walletAddress) as string[];
     const result = await updateCakeStake(addresses);
     const tasks: IAssignPointsTask[] = [];
@@ -32,7 +34,7 @@ export const updateCakeStakers = async () => {
       if (user.referredBy) {
         previousPoints = oldPythPoints / 1.2;
         previousReferralPoints = oldPythPoints - previousPoints;
-        stakedAmountDiff = (latestPoints * 1e18 - previousPoints * 1e18)/1e18;
+        stakedAmountDiff = (latestPoints * 1e18 - previousPoints * 1e18) / 1e18;
       }
       if (stakedAmountDiff !== 0) {
         const pointsAction = stakedAmountDiff > 0 ? "added" : "subtracted";

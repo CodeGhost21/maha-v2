@@ -48,7 +48,7 @@ export const walletVerify = async (
   next: NextFunction
 ) => {
   try {
-    const { message, signature, captcha } = req.body;
+    const { message, signature } = req.body;
     const siweMessage = new SiweMessage(message);
     const result = await siweMessage.verify({ signature });
 
@@ -61,22 +61,11 @@ export const walletVerify = async (
       );
     }
 
-    // //recaptcha verify
-    // const recaptchaSecretKey = nconf.get("RECAPTCHA_SECRET_KEY");
-    // const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${captcha}`;
-    // const response = await axios.post(verificationURL);
-    // const { success } = response.data;
-    // console.log("recaptcha response", response.data);
-    // // const success = true;
-    // if (!success) {
-    //   console.log("recaptcha failed");
-    //   throw new BadRequestError("invalid captcha");
-    // }
-
     //assign role
     const role = await userLpData(address);
     const user = await WalletUser.findOne({
       walletAddress: address,
+      isDeleted: false,
     });
 
     if (user) {
@@ -101,6 +90,7 @@ export const walletVerify = async (
     if (req.body.referredByCode !== "") {
       const referrer = await WalletUser.findOne({
         referralCode: req.body.referredByCode,
+        isDeleted: false,
       });
       if (referrer) newUser.referredBy = referrer.id;
     }
@@ -137,9 +127,10 @@ export const getTotalUsers = async (req: Request, res: Response) => {
 
 export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const totalReferrals = await WalletUser.find({ referredBy: user.id }).select(
-    "totalPointsV2 walletAddress "
-  );
+  const totalReferrals = await WalletUser.find({
+    referredBy: user.id,
+    isDeleted: false,
+  }).select("totalPointsV2 walletAddress ");
 
   res.json({
     totalReferrals: totalReferrals.length,
@@ -212,7 +203,8 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
   const user: any = await WalletUser.findOne({
-    walletAddress: walletAddress.toLowerCase().trim(), //{ $regex: new RegExp("^" + walletAddress + "$", "i") },
+    walletAddress: walletAddress.toLowerCase().trim(),
+    isDeleted: false,
   });
   if (!user) return res.json({ success: false, message: "no data found" });
   res.json({ success: true, totalPoints: user.totalPointsV2 || 0 });
@@ -227,10 +219,12 @@ export const getUserReferralData = async (req: Request, res: Response) => {
     });
   const walletUser: IWalletUserModel = (await WalletUser.findOne({
     referralCode: referralCode,
+    isDeleted: false,
   })) as IWalletUserModel;
   if (walletUser) {
     const totalReferrals = await WalletUser.find({
       referredBy: walletUser.id,
+      isDeleted: false,
     });
 
     res.json({
@@ -246,7 +240,10 @@ export const getUserReferralData = async (req: Request, res: Response) => {
 export const getReferralUsers = async (req: Request, res: Response) => {
   try {
     const user = req.user as IWalletUserModel;
-    const referralUsers = await WalletUser.find({ referredBy: user.id })
+    const referralUsers = await WalletUser.find({
+      referredBy: user.id,
+      isDeleted: false,
+    })
       // .sort({
       //   createdAt: -1,
       // })

@@ -78,7 +78,7 @@ client.on("messageCreate", async (message: any) => {
 });
 
 const gmPoints = async (discordId: string) => {
-  const walletUser = await WalletUser.findOne({ discordId });
+  const walletUser = await WalletUser.findOne({ discordId, isDeleted: false });
   if (!walletUser) return;
   console.log(83, walletUser.id, points.gm, "Good Morning Points", true, "gm");
 
