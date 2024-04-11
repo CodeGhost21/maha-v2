@@ -31,7 +31,6 @@ export const assignPoints = async (
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
-  console.log(29, taskId, points);
 
   const user = await WalletUser.findById(userId);
   if (!user) return;
@@ -143,45 +142,7 @@ export const assignPointsLP = async (
   const user = await WalletUser.findById(userId);
   if (!user) return;
 
-  let latestPoints = Number(points) || 0;
-
-  if (user.referredBy) {
-    const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
-    if (referredByUser) {
-      const referralPoints = Number(points * referralPercent) || 0;
-      latestPoints = latestPoints + referralPoints;
-      const refPoints = (referredByUser.points || {}).referral || 0;
-
-      // assign referral points to referred by user
-      pointsBulkWrites.push({
-        insertOne: {
-          document: {
-            userId: referredByUser.id,
-            previousPoints: refPoints,
-            currentPoints: refPoints + referralPoints,
-            subPoints: isAdd ? 0 : referralPoints,
-            addPoints: !isAdd ? 0 : referralPoints,
-            message: "referral points",
-          },
-        },
-      });
-
-      userBulkWrites.push({
-        updateOne: {
-          filter: { _id: referredByUser.id },
-          update: {
-            $inc: {
-              ["points.referral"]: referralPoints,
-              totalPointsV2: referralPoints,
-            },
-            $set: {
-              ["pointsUpdateTimestamp.referral"]: Date.now(),
-            },
-          },
-        },
-      });
-    }
-  }
+  const latestPoints = Number(points) || 0;
 
   userBulkWrites.push({
     updateOne: {

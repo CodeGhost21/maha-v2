@@ -16,6 +16,7 @@ import {
   type IWalletUserPoints,
 } from "../database/models/walletUsers";
 import { AnyBulkWriteOperation } from "mongodb";
+import { referralPercent } from "../controller/quests/constants";
 
 open();
 
@@ -45,12 +46,44 @@ export const updateHourlyLPPoints = async () => {
       ];
 
       for (const lpTask of lpTasks) {
-        const timestamp = user.pointsPerSecondUpdateTimestamp[lpTask];
-        const amount = user.pointsPerSecond[lpTask];
+        const timestamp = Number(
+          user.pointsPerSecondUpdateTimestamp[lpTask] || 0
+        );
+        const pointsPerSecond = Number(user.pointsPerSecond[lpTask] || 0);
 
-        const timeElapsed = (Date.now() - (timestamp || 0)) / 1000;
-        const newPoints = Number(amount || 0) * timeElapsed;
+        const timeElapsed = (Date.now() - timestamp) / 1000;
+        const newPoints = pointsPerSecond * timeElapsed;
+
         if (typeof newPoints === "number" && newPoints !== 0) {
+          // check and giver referral points with newPoints
+          if (user.referredBy) {
+            const referredByUser = await WalletUser.findOne({
+              _id: user.referredBy,
+            });
+            let latestPoints = Number(newPoints) || 0;
+            if (referredByUser) {
+              const referralPoints = Number(newPoints * referralPercent) || 0;
+              latestPoints = latestPoints + referralPoints;
+              // newMessage = message + " plus referral points";
+              // const refPoints = (referredByUser.points || {}).referral || 0;
+
+              userBulkWrites.push({
+                updateOne: {
+                  filter: { _id: referredByUser.id },
+                  update: {
+                    $inc: {
+                      ["points.referral"]: referralPoints,
+                      totalPointsV2: referralPoints,
+                    },
+                    $set: {
+                      ["pointsUpdateTimestamp.referral"]: Date.now(),
+                    },
+                  },
+                },
+              });
+            }
+          }
+
           userBulkWrites.push({
             updateOne: {
               filter: { _id: user.id },
@@ -68,131 +101,9 @@ export const updateHourlyLPPoints = async () => {
         }
       }
     }
+
     await WalletUser.bulkWrite(userBulkWrites);
     skip += batchSize;
   } while (batch.length === batchSize);
 };
 updateHourlyLPPoints();
-
-// const updatePoints=async(userId:any,timestamp:number,amount:number,lpTask:string)=>{
-//     const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-//     const timeElapsed = (Date.now() - Number(timestamp || 0)) / 1000
-//     const newPoints=Number(amount||0)* timeElapsed
-
-//     await userBulkWrites.push({
-//                 updateOne: {
-//                   filter: { _id: userId },
-//                   update: {
-//                     $inc: {
-//                       [`points.${lpTask}`]: newPoints,
-//                       totalPointsV2: newPoints,
-//                     },
-//                     $set: {
-//                         [`pointsPerSecondUpdateTimestamp.${lpTask}`]: Date.now(),
-//                     }
-//                   },
-//                 },
-//               });
-
-//     return {
-//         userBulkWrites,
-//         execute: async () => {
-//           await WalletUser.bulkWrite(userBulkWrites);
-//         },
-//       };
-// }
-
-// export const updateHourlyLPPointsNew=async()=>{
-//   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-
-//     const tasks: IAssignPointsTaskLP[] = [];
-//     const batchSize = 1000;
-//     let skip = 0;
-//     let batch;
-//     do{
-//         batch=await WalletUser.find().skip(skip).limit(batchSize);
-//         for (const user of batch) {
-
-//           const lpTasks: Array<keyof IWalletUserPoints> = ["supply", "borrow"]
-
-//           for (const lpTask of lpTasks) {
-//             const timestamp = user.pointsPerSecondUpdateTimestamp[lpTask];
-//             const amount = user.pointsPerSecond[lpTask];
-//             console.log(timestamp);
-//             console.log(amount);
-
-//                 const timeElapsed = (Date.now() - (timestamp || 0)) / 1000;
-//                 const newPoints = Number(amount || 0) * timeElapsed;
-
-//                 userBulkWrites.push({
-//                   updateOne: {
-//                       filter: { _id: user.id },
-//                       update: {
-//                           $inc: {
-//                               [`points.${lpTask}`]: newPoints,
-//                               totalPointsV2: newPoints,
-//                           },
-//                           $set: {
-//                               [`pointsPerSecondUpdateTimestamp.${lpTask}`]: Date.now(),
-//                           }
-//                       },
-//                   },
-//               });
-//           }
-//             //zksync
-//             const supplyZksync = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supply,user.pointsPerSecond.supply,'supply');
-//             if (supplyZksync) tasks.push(supplyZksync);
-
-//             const borrowZksync = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.borrow,user.pointsPerSecond.borrow,'borrow');
-//             if (borrowZksync) tasks.push(borrowZksync);
-
-//             //manta
-//             const supplyManta = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyManta,user.pointsPerSecond.supplyManta,'supplyManta');
-//             if (supplyManta) tasks.push(supplyManta);
-
-//             const borrowManta = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.borrowManta,user.pointsPerSecond.borrowManta,'borrowManta');
-//             if (borrowManta) tasks.push(borrowManta);
-
-//             //linea
-//             const supplyLinea = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyLinea,user.pointsPerSecond.supplyLinea,'supplyLinea');
-//             if (supplyLinea) tasks.push(supplyLinea);
-
-//             const borrowLinea = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.borrowLinea,user.pointsPerSecond.borrowLinea,'borrowLinea');
-//             if (borrowLinea) tasks.push(borrowLinea);
-
-//             //blast
-//             const supplyBlast = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyBlast,user.pointsPerSecond.supplyBlast,'supplyBlast');
-//             if (supplyBlast) tasks.push(supplyBlast);
-
-//             const borrowBlast = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.borrowBlast,user.pointsPerSecond.borrowBlast,'borrowBlast');
-//             if (borrowBlast) tasks.push(borrowBlast);
-
-//             //ethereum Lrt
-//             const supplyEthereumLrt = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyEthereumLrt,user.pointsPerSecond.supplyEthereumLrt,'supplyEthereumLrt');
-//             if (supplyEthereumLrt) tasks.push(supplyEthereumLrt);
-
-//             const borrowEthereumLrt = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.borrowEthereumLrt,user.pointsPerSecond.borrowEthereumLrt,'borrowEthereumLrt');
-//             if (borrowEthereumLrt) tasks.push(borrowEthereumLrt);
-
-//             //ethereum Lrt Eth
-//             const supplyEthereumLrtEth = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyEthereumLrtEth,user.pointsPerSecond.supplyEthereumLrtEth,'supplyEthereumLrtEth');
-//             if (supplyEthereumLrtEth) tasks.push(supplyEthereumLrtEth);
-
-//             //Linea EzEth
-//             const supplyLineaEzEth = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyLineaEzEth,user.pointsPerSecond.supplyLineaEzEth,'supplyLineaEzEth');
-//             if (supplyLineaEzEth) tasks.push(supplyLineaEzEth);
-
-//             //Blast EzEth
-//             const supplyBlastEzEth = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyBlastEzEth,user.pointsPerSecond.supplyBlastEzEth,'supplyBlastEzEth');
-//             if (supplyBlastEzEth) tasks.push(supplyBlastEzEth);
-
-//             //EthereumLrt EzEth
-//             const supplyEthereumLrtEzEth = await updatePoints(user.id,user.pointsPerSecondUpdateTimestamp.supplyEthereumLrtEzEth,user.pointsPerSecond.supplyEthereumLrtEzEth,'supplyEthereumLrtEzEth');
-//             if (supplyEthereumLrtEzEth) tasks.push(supplyEthereumLrtEzEth);
-
-//         }
-//         await WalletUser.bulkWrite(userBulkWrites);
-//         skip += batchSize
-//     } while (batch.length === batchSize)
-// }
-// updateHourlyLPPointsNew()

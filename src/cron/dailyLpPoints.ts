@@ -2,7 +2,7 @@ import { UserPointTransactions } from "../database/models/userPointTransactions"
 import {
   IAssignPointsTask,
   assignPoints,
-  assignPointsLP
+  assignPointsLP,
 } from "../controller/quests/assignPoints";
 import {
   supplyBorrowPointsMantaMulticall,
@@ -14,7 +14,7 @@ import {
   supplyPointsBlastEzETHMulticall,
   supplyPointsEthereumLrtEzETHMulticall,
   supplyPointsLineaEzETHMulticall,
-  supplyPointsZksyncLidoMulticall
+  supplyPointsZksyncLidoMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -40,7 +40,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(
       wallets
     );
-    const zkSyncLidoData= await supplyPointsZksyncLidoMulticall(wallets)
+    const zkSyncLidoData = await supplyPointsZksyncLidoMulticall(wallets);
     const tasks: IAssignPointsTask[] = [];
 
     for (let j = 0; j < wallets.length; j++) {
@@ -54,7 +54,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const lineaEzEth = lineaEzEthData[j];
       const blastEzEth = blastEzEthData[j];
       const ethLrtEzEth = ethLrtEzEthData[j];
-      const zksyncLido=zkSyncLidoData[j]
+      const zksyncLido = zkSyncLidoData[j];
 
       if (
         manta.supply.points === 0 &&
@@ -289,7 +289,7 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
   const query = migrate
     ? { $or: [{ epoch: 0 }, { epoch: undefined }] }
     : { epoch: { $ne: epoch } };
-console.log(query);
+  console.log(query);
 
   // const query = { walletAddress: "0x13FeFdD563A930F07B1aC8A2227Acc27c3C12946" };
   const users = await WalletUser.find(query)
