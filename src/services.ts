@@ -1,6 +1,6 @@
 import { open } from "./database";
 import cron from "node-cron";
-import { dailyLpPoints } from "./cron/dailyLpPoints";
+import { updateLPRate } from "./cron/updateLPRate";
 import { updateUsersRank } from "./cron/updateRank";
 import { updatePythPoints } from "./scripts/updatePythPoints";
 import { updateMantaPoints } from "./scripts/updateMantaPoints";
@@ -9,12 +9,18 @@ import {
   addSupplyBorrowUsersManta,
 } from "./scripts/newSupplyBorrowUsers";
 import "./bots/gm";
+import { updateLPPointsHourly } from "./cron/updateLPPointsHourly";
 // connect to database
 open();
 
 cron.schedule("*/20 * * * *", async () => {
   console.log("running lp points every 20 minutes");
-  await dailyLpPoints();
+  await updateLPRate();
+});
+
+cron.schedule("0 0 * * *", async () => {
+  console.log("running lp points every 20 minutes");
+  await updateLPPointsHourly();
 });
 
 cron.schedule("*/5 * * * *", async () => {

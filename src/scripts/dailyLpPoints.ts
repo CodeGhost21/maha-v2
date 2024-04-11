@@ -9,7 +9,7 @@ nconf
   .file({ file: path.resolve("./config.json") });
 
 import { open } from "../database";
-import { dailyLpPoints } from "../cron/dailyLpPoints";
+import { updateLPRate } from "../cron/updateLPRate";
 
 open();
-dailyLpPoints();
+updateLPRate();

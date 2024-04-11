@@ -23,27 +23,23 @@ import { getEpoch } from "../utils/epoch";
 const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
   try {
     // get wallets
-    const wallets = userBatch.map((u) => u.walletAddress);
-    console.log(wallets);
+    const w = userBatch.map((u) => u.walletAddress);
+    console.log(w);
 
     // get manta data
-    const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
-    const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
-    const blastData = await supplyBorrowPointsBlastMulticall(wallets);
-    const lineaData = await supplyBorrowPointsLineaMulticall(wallets);
-    const ethLrtData = await supplyBorrowPointsEthereumLrtMulticall(wallets);
-    const ethLrtEthData = await supplyBorrowPointsEthereumLrtETHMulticall(
-      wallets
-    );
-    const lineaEzEthData = await supplyPointsLineaEzETHMulticall(wallets);
-    const blastEzEthData = await supplyPointsBlastEzETHMulticall(wallets);
-    const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(
-      wallets
-    );
-    const zkSyncLidoData = await supplyPointsZksyncLidoMulticall(wallets);
+    const mantaData = await supplyBorrowPointsMantaMulticall(w);
+    const zksyncData = await supplyBorrowPointsZksyncMulticall(w);
+    const blastData = await supplyBorrowPointsBlastMulticall(w);
+    const lineaData = await supplyBorrowPointsLineaMulticall(w);
+    const ethLrtData = await supplyBorrowPointsEthereumLrtMulticall(w);
+    const ethLrtEthData = await supplyBorrowPointsEthereumLrtETHMulticall(w);
+    const lineaEzEthData = await supplyPointsLineaEzETHMulticall(w);
+    const blastEzEthData = await supplyPointsBlastEzETHMulticall(w);
+    const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(w);
+    const zkSyncLidoData = await supplyPointsZksyncLidoMulticall(w);
     const tasks: IAssignPointsTask[] = [];
 
-    for (let j = 0; j < wallets.length; j++) {
+    for (let j = 0; j < w.length; j++) {
       const user = userBatch[j];
       const zksync = zksyncData[j];
       const manta = mantaData[j];
@@ -84,7 +80,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           manta.supply.points,
-          // `Daily Supply on manta chain for ${manta.supply.amount}`,
           true,
           "supplyManta",
           epoch
@@ -96,7 +91,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           manta.borrow.points,
-          // `Daily Borrow on manta chain for ${manta.borrow.amount}`,
           true,
           "borrowManta",
           epoch
@@ -109,7 +103,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           zksync.supply.points,
-          // `Daily Supply on zksync chain for ${zksync.supply.amount}`,
           true,
           "supply",
           epoch
@@ -134,7 +127,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           blast.supply.points,
-          // `Daily Supply on blast chain for ${blast.supply.amount}`,
           true,
           "supplyBlast",
           epoch
@@ -159,7 +151,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           linea.supply.points,
-          // `Daily Supply on linea chain for ${linea.supply.amount}`,
           true,
           "supplyLinea",
           epoch
@@ -184,7 +175,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           ethLrt.supply.points,
-          // `Daily Supply on ethLrt chain for ${ethLrt.supply.amount}`,
           true,
           "supplyEthereumLrt",
           epoch
@@ -209,7 +199,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           ethLrtEth.supply.points,
-          // `Daily Supply on ethLrt chain for ETH${ethLrtEth.supply.amount}`,
           true,
           "supplyEthereumLrtEth",
           epoch
@@ -222,7 +211,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           lineaEzEth.supply.points,
-          // `Daily Supply on linea chain for ezETH${lineaEzEth.supply.amount}`,
           true,
           "supplyLineaEzEth",
           epoch
@@ -235,7 +223,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           blastEzEth.supply.points,
-          // `Daily Supply on blast chain for ezETH ${blastEzEth.supply.amount}`,
           true,
           "supplyBlastEzEth",
           epoch
@@ -248,7 +235,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPointsLP(
           user.id,
           ethLrtEzEth.supply.points,
-          // `Daily Supply on ethLrt chain for ezETH ${ethLrtEzEth.supply.amount}`,
           true,
           "supplyEthereumLrtEzEth",
           epoch
@@ -256,20 +242,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
 
         if (t) tasks.push(t);
       }
-
-      //lido zksync (for now it is n frozen state)
-      // if (zksyncLido.supply.points > 0) {
-      //   const t = await assignPointsLP(
-      //     user.id,
-      //     zksyncLido.supply.points,
-      //     // `Daily Supply on zksync chain for Lido ${zksyncLido.supply.amount}`,
-      //     true,
-      //     "supplyZkSyncLido",
-      //     epoch
-      //   );
-
-      //   if (t) tasks.push(t);
-      // }
     }
 
     // once all the db operators are accumulated; write into the DB
@@ -282,16 +254,14 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
   }
 };
 
-const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
+const _updateLPRate = async (from: number, count: number, migrate = false) => {
   const epoch = getEpoch();
   console.log("working with epoch", epoch);
 
   const query = migrate
     ? { $or: [{ epoch: 0 }, { epoch: undefined }] }
     : { epoch: { $ne: epoch } };
-  console.log(query);
 
-  // const query = { walletAddress: "0x13FeFdD563A930F07B1aC8A2227Acc27c3C12946" };
   const users = await WalletUser.find(query)
     .limit(count)
     .skip(from)
@@ -317,13 +287,13 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
 };
 
 let lock = false;
-export const dailyLpPoints = async (migrate = false) => {
+export const updateLPRate = async (migrate = false) => {
   if (lock) return;
   lock = true;
 
   try {
     const count = await WalletUser.count({});
-    await _dailyLpPoints(0, count, migrate);
+    await _updateLPRate(0, count, migrate);
   } catch (error) {
     console.log("cron failed beacuse of", error);
   }
