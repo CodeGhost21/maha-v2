@@ -6,8 +6,8 @@ import { ethers } from "ethers";
 const snapshotBlockNumber = 1412658;
 
 let skip = 0;
-let first = 500;
-let bindRecords: any = {};
+const first = 500;
+const bindRecords: any = {};
 const fileName = `./snapshot-block-${snapshotBlockNumber}.csv`;
 interface BindRecord {
   pacificAddress: string;
@@ -77,7 +77,7 @@ const queryStakedRecord = async (api: any, writeStream: any) => {
       }
     });
 
-    let atlanticAddressArray = Object.keys(bindRecords);
+    const atlanticAddressArray = Object.keys(bindRecords);
     const delegatorState =
       await api.query.parachainStaking.delegatorState.multi(
         atlanticAddressArray

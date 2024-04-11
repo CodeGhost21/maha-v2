@@ -25,7 +25,7 @@ const updateDiscordPoints = async () => {
   const referralPoints = 20;
 
   const batchSize = 100;
-  let skip = 0;
+  const skip = 0;
   let batch;
   do {
     batch = await WalletUser.find({}).skip(skip).limit(batchSize);
