@@ -259,8 +259,16 @@ const _updateLPRate = async (from: number, count: number, migrate = false) => {
   console.log("working with epoch", epoch);
 
   const query = migrate
-    ? { isDeleted: false, $or: [{ epoch: 0 }, { epoch: undefined }] }
-    : { isDeleted: false, epoch: { $ne: epoch } };
+    ? {
+        walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+        isDeleted: false,
+        $or: [{ epoch: 0 }, { epoch: undefined }],
+      }
+    : {
+        walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+        isDeleted: false,
+        epoch: { $ne: epoch },
+      };
   console.log(query);
 
   const users = await WalletUser.find(query)
