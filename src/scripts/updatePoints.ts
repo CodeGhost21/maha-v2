@@ -18,7 +18,6 @@ export const updatePoints = async (
   latestPoints: number,
   previousReferralPoints: number,
   message: string,
-  stakedAmountDiff: number,
   isAdd: boolean,
   taskId: keyof IWalletUserPoints,
   epoch?: number
@@ -29,8 +28,6 @@ export const updatePoints = async (
   const user = await WalletUser.findById(userId);
   if (!user) return;
   const userTotalPoints = Number(user.totalPointsV2) || 0;
-  console.log(userTotalPoints);
-
   let newMessage = message;
   let points = latestPoints;
   if (user.referredBy) {
@@ -40,8 +37,6 @@ export const updatePoints = async (
       points = points + newReferralPoints;
       newMessage = message + " plus referral points";
       const refPoints = (referredByUser.points || {}).referral || 0;
-      console.log(141, newReferralPoints - previousReferralPoints);
-
       pointsBulkWrites.push({
         insertOne: {
           document: {
@@ -49,8 +44,12 @@ export const updatePoints = async (
             previousPoints: refPoints,
             currentPoints:
               refPoints + (newReferralPoints - previousReferralPoints),
-            addPoints: isAdd ? 0 : Math.abs(stakedAmountDiff),
-            subPoints: !isAdd ? 0 : Math.abs(stakedAmountDiff),
+            addPoints: isAdd
+              ? 0
+              : Math.abs(newReferralPoints - previousReferralPoints),
+            subPoints: !isAdd
+              ? 0
+              : Math.abs(newReferralPoints - previousReferralPoints),
             message: `${isAdd ? "add" : "subtract"} referral points`,
           },
         },
@@ -61,8 +60,8 @@ export const updatePoints = async (
           filter: { _id: referredByUser.id },
           update: {
             $inc: {
-              ["points.referral"]: stakedAmountDiff,
-              totalPointsV2: stakedAmountDiff,
+              ["points.referral"]: newReferralPoints - previousReferralPoints,
+              totalPointsV2: newReferralPoints - previousReferralPoints,
             },
           },
         },
@@ -100,6 +99,7 @@ export const updatePoints = async (
         $set: {
           epoch: epoch || user.epoch,
           [`checked.${taskId}`]: true,
+          [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
         },
       },
     },

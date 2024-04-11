@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import nconf from "nconf";
 import path from "path";
 
-import { AnyBulkWriteOperation } from "mongodb";
 dotenv.config();
 nconf
   .argv()
@@ -14,18 +13,14 @@ import { open } from "../database";
 
 open();
 
-import {
-  IWalletUser,
-  IWalletUserPoints,
-  WalletUser,
-} from "../database/models/walletUsers";
+import { WalletUser } from "../database/models/walletUsers";
 
 const updateDiscordPoints = async () => {
   const discordPoints = 100;
   const referralPoints = 20;
 
   const batchSize = 100;
-  let skip = 0;
+  const skip = 0;
   let batch;
   do {
     batch = await WalletUser.find({}).skip(skip).limit(batchSize);

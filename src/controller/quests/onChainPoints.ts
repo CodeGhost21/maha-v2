@@ -13,7 +13,7 @@ import {
   minSupplyAmount,
   borrowPtsPerUSD,
   supplyEthEthereumLrt,
-  borrowEthEthereumLrt,
+  supplyZksyncLido,
 } from "./constants";
 import { MulticallWrapper } from "ethers-multicall-provider";
 import nconf from "nconf";
@@ -26,12 +26,13 @@ const CoinGeckoClient = new CoinGecko();
 export const getPriceCoinGecko = async () => {
   try {
     const data = await CoinGeckoClient.simple.price({
-      ids: ["ethereum", "renzo-restaked-eth"],
+      ids: ["ethereum", "renzo-restaked-eth", "lido-dao"],
       vs_currencies: ["usd"],
     });
     const priceList = {
       ETH: data.data.ethereum.usd,
       ezETH: data.data["renzo-restaked-eth"].usd,
+      lido: data.data["lido-dao"].usd,
     };
     cache.set("coingecko:PriceList", priceList, 60 * 60);
     return priceList;
@@ -174,6 +175,33 @@ export const supplyPointsEthereumLrtEzETHMulticall = async (
       return {
         who: w,
         supply: { points: supply, amount: supply },
+      };
+    })
+  );
+  return results;
+};
+
+export const supplyPointsZksyncLidoMulticall = async (
+  walletAddresses: string[]
+) => {
+  let marketPrice: any = await cache.get("coingecko:PriceList");
+  if (!marketPrice) {
+    marketPrice = await getPriceCoinGecko();
+  }
+  const provider = MulticallWrapper.wrap(zksyncProvider);
+  const abi = ["function balanceOf(address owner) view returns (uint256)"];
+  const contractDeposit = new ethers.Contract(
+    nconf.get("LIDO_SUPPLY"),
+    abi,
+    provider
+  );
+  const results = await Promise.all(
+    walletAddresses.map(async (w) => {
+      const balanceSupply = await contractDeposit.balanceOf(w);
+      const supply = (Number(balanceSupply) / 1e18) * marketPrice.lido;
+      return {
+        who: w,
+        supply: { points: supply * supplyZksyncLido, amount: supply },
       };
     })
   );
