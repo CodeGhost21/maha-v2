@@ -11,7 +11,7 @@ export const getUserHoldStationData = async (walletAddress: string) => {
   const holdStationData = await getHoldStationData();
   let foundData = null;
 
-  for (let data of holdStationData) {
+  for (const data of holdStationData) {
     if (data[1] === walletAddress) {
       foundData = data;
       break;

@@ -44,8 +44,12 @@ export const updatePoints = async (
             previousPoints: refPoints,
             currentPoints:
               refPoints + (newReferralPoints - previousReferralPoints),
-            addPoints: isAdd ? 0 : Math.abs(newReferralPoints - previousReferralPoints),
-            subPoints: !isAdd ? 0 : Math.abs(newReferralPoints - previousReferralPoints),
+            addPoints: isAdd
+              ? 0
+              : Math.abs(newReferralPoints - previousReferralPoints),
+            subPoints: !isAdd
+              ? 0
+              : Math.abs(newReferralPoints - previousReferralPoints),
             message: `${isAdd ? "add" : "subtract"} referral points`,
           },
         },

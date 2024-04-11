@@ -9,48 +9,48 @@ nconf
   .file({ file: path.resolve("./config.json") });
 
 import { open } from "../database";
-import {supplyBorrowPointsZksyncMulticall} from '../controller/quests/onChainPoints'
-import {
-  WalletUser,
-} from "../database/models/walletUsers";
-open()
-export const test= async()=>{
-  try{
-  const batchSize = 1000;
-  let skip = 0;
-  let batch;
-  let moreThan10=0
-  let moreThan50=0
-  let moreThan100=0
-  do {
-    batch = await WalletUser.find({ walletAddress: { $exists: true, $ne: null ,$not: { $eq: "" } } }).skip(skip).limit(batchSize);
-    const addresses: string[] = batch
-    .map((u) => u.walletAddress) // Map all wallet addresses
-    const zksyncData :any= await supplyBorrowPointsZksyncMulticall(addresses);
-    for (let j = 0; j < zksyncData.length; j++) {
+import { supplyBorrowPointsZksyncMulticall } from "../controller/quests/onChainPoints";
+import { WalletUser } from "../database/models/walletUsers";
+open();
+export const test = async () => {
+  try {
+    const batchSize = 1000;
+    let skip = 0;
+    let batch;
+    let moreThan10 = 0;
+    let moreThan50 = 0;
+    let moreThan100 = 0;
+    do {
+      batch = await WalletUser.find({
+        walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+      })
+        .skip(skip)
+        .limit(batchSize);
+      const addresses: string[] = batch.map((u) => u.walletAddress); // Map all wallet addresses
+      const zksyncData: any = await supplyBorrowPointsZksyncMulticall(
+        addresses
+      );
+      for (let j = 0; j < zksyncData.length; j++) {
+        if (zksyncData[j].supply.amount > 10) moreThan10 += 1;
+        if (zksyncData[j].supply.amount > 50) moreThan50 += 1;
+        if (zksyncData[j].supply.amount > 100) moreThan100 += 1;
+      }
+      skip += batchSize;
+      console.log("moreThan10", moreThan10);
+      console.log("moreThan50", moreThan50);
+      console.log("moreThan100", moreThan100);
+    } while (batch.length === batchSize);
 
-      if(zksyncData[j].supply.amount>10) moreThan10+=1
-      if(zksyncData[j].supply.amount>50) moreThan50+=1
-      if(zksyncData[j].supply.amount>100) moreThan100+=1
-    }
-    skip += batchSize;
-    console.log("moreThan10",moreThan10)
-    console.log("moreThan50",moreThan50)
-    console.log("moreThan100",moreThan100)
-  } while (batch.length === batchSize);
-
-  console.log('final')
-console.log("moreThan10",moreThan10)
-console.log("moreThan50",moreThan50)
-console.log("moreThan100",moreThan100)  
+    console.log("final");
+    console.log("moreThan10", moreThan10);
+    console.log("moreThan50", moreThan50);
+    console.log("moreThan100", moreThan100);
+  } catch (e) {
+    console.log(e);
   }
-catch(e){
-  console.log(e); 
-}
-}
+};
 
-test()
-
+test();
 
 export const findDuplicateWalletAddresses = async () => {
   try {
@@ -72,12 +72,9 @@ export const findDuplicateWalletAddresses = async () => {
     ]);
     console.log("Duplicate wallet addresses:", duplicates);
 
-
     // duplicates.map(async(item)=>{
     //   await WalletUser.deleteOne({$and:[{walletAddress:item._id},{createdAt:item.createdAt}]})
     // })
-
-
 
     // const addresses: string[] = duplicates.map((dup) => dup._id);
     // const filter = {
@@ -87,11 +84,8 @@ export const findDuplicateWalletAddresses = async () => {
     //   }, // Example wallet addresses
     // };
     // console.log(filter);
- 
-
- 
   } catch (error) {
     console.error("Error:", error);
   }
- };
+};
 //  findDuplicateWalletAddresses()

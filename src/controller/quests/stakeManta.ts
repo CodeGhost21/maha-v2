@@ -4,7 +4,7 @@ import nconf from "nconf";
 import "@polkadot/api-augment";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { MulticallWrapper } from "ethers-multicall-provider";
-import { mantaProvider ,moonbeamProvider} from "../../utils/providers";
+import { mantaProvider, moonbeamProvider } from "../../utils/providers";
 
 const MantaABI = ["function balanceOf(address owner) view returns (uint256)"];
 
@@ -153,10 +153,10 @@ export const getMantaStakersData = async (walletAddress: string) => {
 export const updateMantaStakersData = async (walletAddresses: string[]) => {
   const addressesString = JSON.stringify(walletAddresses);
   const wsProvider = new WsProvider("wss://ws.manta.systems");
-    const api = await ApiPromise.create({
-      provider: wsProvider,
-      noInitWarn: true,
-    });
+  const api = await ApiPromise.create({
+    provider: wsProvider,
+    noInitWarn: true,
+  });
   const graphQuery = `{
     bindPacificAddresses(where: { pacificAddress_in: ${addressesString} }) {
         id,
@@ -167,7 +167,7 @@ export const updateMantaStakersData = async (walletAddresses: string[]) => {
   }`;
   const response = await mantaQueryData(graphQuery);
   const mantaData: any = {};
-  const allMantaData=[]
+  const allMantaData = [];
   if (response.data.data) {
     if (response.data.data.bindPacificAddresses.length > 0) {
       const records = response.data.data.bindPacificAddresses;
@@ -202,10 +202,10 @@ export const updateMantaStakersData = async (walletAddresses: string[]) => {
         // update staking amount of bind record
         mantaData[atlanticAddressArray[i]].stakingAmount =
           currentAccountStakingAmount;
-        allMantaData.push(mantaData[atlanticAddressArray[i]])
+        allMantaData.push(mantaData[atlanticAddressArray[i]]);
       }
       return { allMantaData };
-    } 
+    }
   }
   return response.data.data.bindPacificAddresses;
 };
@@ -213,7 +213,7 @@ export const updateMantaStakersData = async (walletAddresses: string[]) => {
 export const updateMantaStakersAccumulate = async (
   walletAddresses: string[]
 ) => {
-  const provider =await  MulticallWrapper.wrap(mantaProvider);
+  const provider = await MulticallWrapper.wrap(mantaProvider);
   const pool = new ethers.Contract(
     "0x7AC168c81F4F3820Fa3F22603ce5864D6aB3C547",
     MantaABI,
@@ -233,7 +233,7 @@ export const updateMantaStakersAccumulate = async (
 };
 
 export const updateMantaStakersBifrost = async (walletAddresses: string[]) => {
-  const provider =await  MulticallWrapper.wrap(moonbeamProvider);
+  const provider = await MulticallWrapper.wrap(moonbeamProvider);
   const pool = new ethers.Contract(
     "0xFFfFFfFfdA2a05FB50e7ae99275F4341AEd43379",
     MantaABI,

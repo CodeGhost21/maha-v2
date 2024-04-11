@@ -10,64 +10,74 @@ nconf
   .file({ file: path.resolve("./config.json") });
 
 import { open } from "../database";
-import {IWalletUser, WalletUser, type IWalletUserPoints } from "../database/models/walletUsers";
+import {
+  IWalletUser,
+  WalletUser,
+  type IWalletUserPoints,
+} from "../database/models/walletUsers";
 import { AnyBulkWriteOperation } from "mongodb";
 
 open();
 
-export const updateHourlyLPPoints=async()=>{
+export const updateHourlyLPPoints = async () => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-    const batchSize = 1000;
-    let skip = 0;
-    let batch;
-    do{
-        batch=await WalletUser.find().skip(skip).limit(batchSize);
-        for (const user of batch) {
+  const batchSize = 1000;
+  let skip = 0;
+  let batch;
+  do {
+    batch = await WalletUser.find().skip(skip).limit(batchSize);
+    for (const user of batch) {
+      const lpTasks: Array<keyof IWalletUserPoints> = [
+        "supply",
+        "borrow",
+        "supplyManta",
+        "borrowManta",
+        "supplyLinea",
+        "borrowLinea",
+        "supplyBlast",
+        "borrowBlast",
+        "supplyEthereumLrt",
+        "borrowEthereumLrt",
+        "supplyEthereumLrtEth",
+        "supplyLineaEzEth",
+        "supplyBlastEzEth",
+        "supplyEthereumLrtEzEth",
+      ];
 
-          const lpTasks: Array<keyof IWalletUserPoints> = ["supply", "borrow","supplyManta","borrowManta","supplyLinea","borrowLinea","supplyBlast","borrowBlast","supplyEthereumLrt","borrowEthereumLrt","supplyEthereumLrtEth","supplyLineaEzEth","supplyBlastEzEth","supplyEthereumLrtEzEth"]
+      for (const lpTask of lpTasks) {
+        const timestamp = user.pointsPerSecondUpdateTimestamp[lpTask];
+        const amount = user.pointsPerSecond[lpTask];
 
-          for (const lpTask of lpTasks) {
-            const timestamp = user.pointsPerSecondUpdateTimestamp[lpTask];
-            const amount = user.pointsPerSecond[lpTask];
-          
-                const timeElapsed = (Date.now() - (timestamp || 0)) / 1000;
-                const newPoints = Number(amount || 0) * timeElapsed;
-                if(typeof newPoints === 'number' && newPoints !== 0){
-                userBulkWrites.push({
-                  updateOne: {
-                      filter: { _id: user.id },
-                      update: {
-                          $inc: {
-                              [`points.${lpTask}`]: newPoints,
-                              totalPointsV2: newPoints,
-                          },
-                          $set: {
-                              [`pointsPerSecondUpdateTimestamp.${lpTask}`]: Date.now(),
-                          }
-                      },
-                  },
-              });
-            }
-          }
-        
-
+        const timeElapsed = (Date.now() - (timestamp || 0)) / 1000;
+        const newPoints = Number(amount || 0) * timeElapsed;
+        if (typeof newPoints === "number" && newPoints !== 0) {
+          userBulkWrites.push({
+            updateOne: {
+              filter: { _id: user.id },
+              update: {
+                $inc: {
+                  [`points.${lpTask}`]: newPoints,
+                  totalPointsV2: newPoints,
+                },
+                $set: {
+                  [`pointsPerSecondUpdateTimestamp.${lpTask}`]: Date.now(),
+                },
+              },
+            },
+          });
         }
-        await WalletUser.bulkWrite(userBulkWrites);
-        skip += batchSize
-    } while (batch.length === batchSize)
-}
-updateHourlyLPPoints()
-
-
-
-
-
+      }
+    }
+    await WalletUser.bulkWrite(userBulkWrites);
+    skip += batchSize;
+  } while (batch.length === batchSize);
+};
+updateHourlyLPPoints();
 
 // const updatePoints=async(userId:any,timestamp:number,amount:number,lpTask:string)=>{
 //     const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
 //     const timeElapsed = (Date.now() - Number(timestamp || 0)) / 1000
 //     const newPoints=Number(amount||0)* timeElapsed
-
 
 //     await userBulkWrites.push({
 //                 updateOne: {
@@ -110,7 +120,6 @@ updateHourlyLPPoints()
 //             const amount = user.pointsPerSecond[lpTask];
 //             console.log(timestamp);
 //             console.log(amount);
-            
 
 //                 const timeElapsed = (Date.now() - (timestamp || 0)) / 1000;
 //                 const newPoints = Number(amount || 0) * timeElapsed;

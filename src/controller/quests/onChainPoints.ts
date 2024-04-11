@@ -13,7 +13,7 @@ import {
   minSupplyAmount,
   borrowPtsPerUSD,
   supplyEthEthereumLrt,
-  supplyZksyncLido
+  supplyZksyncLido,
 } from "./constants";
 import { MulticallWrapper } from "ethers-multicall-provider";
 import nconf from "nconf";
@@ -26,13 +26,13 @@ const CoinGeckoClient = new CoinGecko();
 export const getPriceCoinGecko = async () => {
   try {
     const data = await CoinGeckoClient.simple.price({
-      ids: ["ethereum", "renzo-restaked-eth","lido-dao"],
+      ids: ["ethereum", "renzo-restaked-eth", "lido-dao"],
       vs_currencies: ["usd"],
     });
     const priceList = {
       ETH: data.data.ethereum.usd,
       ezETH: data.data["renzo-restaked-eth"].usd,
-      lido:data.data["lido-dao"].usd
+      lido: data.data["lido-dao"].usd,
     };
     cache.set("coingecko:PriceList", priceList, 60 * 60);
     return priceList;
@@ -201,7 +201,7 @@ export const supplyPointsZksyncLidoMulticall = async (
       const supply = (Number(balanceSupply) / 1e18) * marketPrice.lido;
       return {
         who: w,
-        supply: { points: supply*supplyZksyncLido, amount: supply },
+        supply: { points: supply * supplyZksyncLido, amount: supply },
       };
     })
   );
