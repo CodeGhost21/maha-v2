@@ -7,6 +7,8 @@ import { AnyBulkWriteOperation } from "mongodb";
 import { referralPercent } from "../controller/quests/constants";
 
 export const updateLPPointsHourly = async () => {
+  console.log("updateLPPointsHourly");
+
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const batchSize = 1000;
 
@@ -14,7 +16,10 @@ export const updateLPPointsHourly = async () => {
   let batch;
 
   do {
-    batch = await WalletUser.find().skip(skip).limit(batchSize);
+    batch = await WalletUser.find({ isDeleted: false })
+      .skip(skip)
+      .limit(batchSize);
+
     for (const user of batch) {
       const lpTasks: Array<keyof IWalletUserPoints> = [
         "borrow",
@@ -35,56 +40,60 @@ export const updateLPPointsHourly = async () => {
       ];
 
       for (const lpTask of lpTasks) {
-        const timestamp = Number(
-          user.pointsPerSecondUpdateTimestamp[lpTask] || 0
-        );
-        const pointsPerSecond = Number(user.pointsPerSecond[lpTask] || 0);
+        if (user.pointsPerSecond[lpTask]) {
+          const timestamp = Number(
+            user.pointsPerSecondUpdateTimestamp[lpTask] || 0
+          );
 
-        const timeElapsed = (Date.now() - timestamp) / 1000;
-        const newPoints = Number(pointsPerSecond * timeElapsed || 0);
+          const pointsPerSecond = Number(user.pointsPerSecond[lpTask] || 0);
+          const timeElapsed = (Date.now() - timestamp) / 1000;
 
-        if (newPoints <= 0) return;
+          const newPoints = Number(pointsPerSecond * timeElapsed);
 
-        // check and giver referral points with newPoints
-        if (user.referredBy) {
-          const referredByUser = await WalletUser.findOne({
-            _id: user.referredBy,
-          });
+          if (newPoints <= 0) return;
 
-          if (referredByUser) {
-            const referralPoints = Number(newPoints * referralPercent) || 0;
+          let referralPoints = 0;
+          // check and giver referral points with newPoints
+          if (user.referredBy) {
+            const referredByUser = await WalletUser.findOne({
+              _id: user.referredBy,
+            });
+            if (referredByUser) {
+              referralPoints = Number(newPoints * referralPercent) || 0;
 
-            userBulkWrites.push({
-              updateOne: {
-                filter: { _id: referredByUser.id },
-                update: {
-                  $inc: {
-                    ["points.referral"]: referralPoints,
-                    totalPointsV2: referralPoints,
-                  },
-                  $set: {
-                    ["pointsUpdateTimestamp.referral"]: Date.now(),
+              userBulkWrites.push({
+                updateOne: {
+                  filter: { _id: referredByUser.id },
+                  update: {
+                    $inc: {
+                      ["points.referral"]: timestamp > 0 ? referralPoints : 0,
+                      totalPointsV2: timestamp > 0 ? referralPoints : 0,
+                    },
+                    $set: {
+                      ["pointsUpdateTimestamp.referral"]: Date.now(),
+                    },
                   },
                 },
-              },
-            });
+              });
+            }
           }
-        }
 
-        userBulkWrites.push({
-          updateOne: {
-            filter: { _id: user.id },
-            update: {
-              $inc: {
-                [`points.${lpTask}`]: newPoints,
-                totalPointsV2: newPoints,
-              },
-              $set: {
-                [`pointsPerSecondUpdateTimestamp.${lpTask}`]: Date.now(),
+          userBulkWrites.push({
+            updateOne: {
+              filter: { _id: user.id },
+              update: {
+                $inc: {
+                  [`points.${lpTask}`]:
+                    timestamp > 0 ? newPoints + referralPoints : 0,
+                  totalPointsV2: timestamp > 0 ? newPoints + referralPoints : 0,
+                },
+                $set: {
+                  [`pointsPerSecondUpdateTimestamp.${lpTask}`]: Date.now(),
+                },
               },
             },
-          },
-        });
+          });
+        }
       }
     }
 
