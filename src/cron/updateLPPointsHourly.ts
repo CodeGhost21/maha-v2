@@ -31,6 +31,7 @@ export const updateLPPointsHourly = async () => {
         "supplyLinea",
         "supplyLineaEzEth",
         "supplyManta",
+        "supplyEthereumLrtRsEth",
       ];
 
       for (const lpTask of lpTasks) {

@@ -15,12 +15,12 @@ open();
 
 cron.schedule("*/20 * * * *", async () => {
   console.log("running lp points every 20 minutes");
-  await updateLPRate();
+  await updateLPPointsHourly();
 });
 
 cron.schedule("0 0 * * *", async () => {
-  console.log("running lp points every 20 minutes");
-  await updateLPPointsHourly();
+  console.log("running lp points rate every day");
+  await updateLPRate();
 });
 
 cron.schedule("*/5 * * * *", async () => {
