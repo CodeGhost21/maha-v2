@@ -17,6 +17,7 @@ export const updatePythPoints = async () => {
     walletAddress: {
       $in: addresses.map((address: string) => address.toLowerCase().trim()),
     },
+    isDeleted: false,
   });
   const tasks: IAssignPointsTask[] = [];
   for (const user of existingUsers) {

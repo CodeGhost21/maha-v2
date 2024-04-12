@@ -23,6 +23,7 @@ export const test = async () => {
     do {
       batch = await WalletUser.find({
         walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+        isDeleted: false,
       })
         .skip(skip)
         .limit(batchSize);
@@ -50,11 +51,11 @@ export const test = async () => {
   }
 };
 
-test();
+// test();
 
 export const findDuplicateWalletAddresses = async () => {
   try {
-    const timestampThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000 * 22);
+    const timestampThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000 * 25);
     const duplicates = await WalletUser.aggregate([
       {
         $group: {
@@ -72,9 +73,17 @@ export const findDuplicateWalletAddresses = async () => {
     ]);
     console.log("Duplicate wallet addresses:", duplicates);
 
-    // duplicates.map(async(item)=>{
-    //   await WalletUser.deleteOne({$and:[{walletAddress:item._id},{createdAt:item.createdAt}]})
-    // })
+    await Promise.all(
+      duplicates.map(async (item: any) => {
+        await WalletUser.updateOne(
+          {
+            walletAddress: item._id,
+            createdAt: item.createdAt,
+          },
+          { $set: { isDeleted: true } }
+        );
+      })
+    );
 
     // const addresses: string[] = duplicates.map((dup) => dup._id);
     // const filter = {
@@ -88,4 +97,4 @@ export const findDuplicateWalletAddresses = async () => {
     console.error("Error:", error);
   }
 };
-//  findDuplicateWalletAddresses()
+findDuplicateWalletAddresses();

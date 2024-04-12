@@ -13,7 +13,9 @@ import { open } from "../database";
 open();
 
 const _recalculatePoints = async (from: number, count: number) => {
-  const users = await WalletUser.find({}).limit(count).skip(from);
+  const users = await WalletUser.find({ isDeleted: false })
+    .limit(count)
+    .skip(from);
 
   const tx = await WalletUser.bulkWrite(
     users.map((user) => {

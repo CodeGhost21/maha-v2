@@ -46,7 +46,7 @@ export interface IWalletUserPoints {
   supplyLineaEzEth: number;
   supplyBlastEzEth: number;
   supplyEthereumLrtEzEth: number;
-  supplyZkSyncLido:number
+  supplyZkSyncLido: number;
   // total: number;
 }
 
@@ -57,7 +57,7 @@ export interface IWalletUser {
   referralCode: string;
   referredBy: string;
   totalPointsV2: number;
-  claimedTotalPointsV2:number;
+  claimedTotalPointsV2: number;
   twitterId: string;
   twitterOauthToken: string;
   twitterOauthTokenSecret: string;
@@ -68,8 +68,10 @@ export interface IWalletUser {
   checked: IWalletUserChecked;
   points: IWalletUserPoints;
   pointsUpdateTimestamp: IWalletUserPoints;
-  pointsPerSecond:IWalletUserPoints,
-  pointsPerSecondUpdateTimestamp:IWalletUserPoints
+  pointsPerSecond: IWalletUserPoints;
+  pointsPerSecondUpdateTimestamp: IWalletUserPoints;
+
+  isDeleted: boolean;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -80,7 +82,7 @@ const UserSchema = new mongoose.Schema(
     referralCode: { type: String, index: true },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
     totalPointsV2: { type: Number, default: 0, index: true },
-    claimedTotalPointsV2:{ type: Number, default: 0, index: true },
+    claimedTotalPointsV2: { type: Number, default: 0, index: true },
     totalPoints: { type: Number, default: 0 },
     twitterId: String,
     twitterOauthToken: String,
@@ -92,8 +94,10 @@ const UserSchema = new mongoose.Schema(
     points: { type: Object, default: {} },
     checked: { type: Object, default: {} },
     pointsUpdateTimestamp: { type: Object, default: {} },
-    pointsPerSecond:{ type: Object, default: {} },
-    pointsPerSecondUpdateTimestamp:{ type: Object, default: {} }
+    pointsPerSecond: { type: Object, default: {} },
+    pointsPerSecondUpdateTimestamp: { type: Object, default: {} },
+
+    isDeleted: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 );

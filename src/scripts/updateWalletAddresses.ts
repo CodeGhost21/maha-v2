@@ -6,7 +6,9 @@ export const updateWalletAddresses = async () => {
   let batch;
   const bulkOperations = [];
   do {
-    batch = await WalletUser.find({}).skip(skip).limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
+    batch = await WalletUser.find({ isDeleted: false })
+      .skip(skip)
+      .limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
     for (const user of batch) {
       console.log("walletAddress", user.walletAddress);
 

@@ -1,7 +1,6 @@
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import {
   IAssignPointsTask,
-  assignPoints,
   assignPointsLP,
 } from "../controller/quests/assignPoints";
 import {
@@ -259,8 +258,16 @@ const _updateLPRate = async (from: number, count: number, migrate = false) => {
   console.log("working with epoch", epoch);
 
   const query = migrate
-    ? { $or: [{ epoch: 0 }, { epoch: undefined }] }
-    : { epoch: { $ne: epoch } };
+    ? {
+        walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+        isDeleted: false,
+        $or: [{ epoch: 0 }, { epoch: undefined }],
+      }
+    : {
+        walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+        isDeleted: false,
+        epoch: { $ne: epoch },
+      };
 
   const users = await WalletUser.find(query)
     .limit(count)

@@ -19,6 +19,7 @@ export const updateMantaPoints = async () => {
   do {
     batch = await WalletUser.find({
       walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+      isDeleted: false,
     })
       .skip(skip)
       .limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
