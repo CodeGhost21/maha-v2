@@ -1,7 +1,6 @@
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import {
   IAssignPointsTask,
-  assignPoints,
   assignPointsLP,
 } from "../controller/quests/assignPoints";
 import {
@@ -269,7 +268,6 @@ const _updateLPRate = async (from: number, count: number, migrate = false) => {
         isDeleted: false,
         epoch: { $ne: epoch },
       };
-  console.log(query);
 
   const users = await WalletUser.find(query)
     .limit(count)
