@@ -46,6 +46,7 @@ export interface IWalletUserPoints {
   supplyLineaEzEth: number;
   supplyBlastEzEth: number;
   supplyEthereumLrtEzEth: number;
+  supplyEthereumLrtRsEth: number;
   supplyZkSyncLido: number;
   // total: number;
 }

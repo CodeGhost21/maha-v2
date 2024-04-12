@@ -14,6 +14,7 @@ import {
   supplyPointsEthereumLrtEzETHMulticall,
   supplyPointsLineaEzETHMulticall,
   supplyPointsZksyncLidoMulticall,
+  supplyPointsEthereumLrtRsETHMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -35,6 +36,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const lineaEzEthData = await supplyPointsLineaEzETHMulticall(w);
     const blastEzEthData = await supplyPointsBlastEzETHMulticall(w);
     const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(w);
+    const ethLrtRsEthData = await supplyPointsEthereumLrtRsETHMulticall(w);
     const zkSyncLidoData = await supplyPointsZksyncLidoMulticall(w);
     const tasks: IAssignPointsTask[] = [];
 
@@ -49,6 +51,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const lineaEzEth = lineaEzEthData[j];
       const blastEzEth = blastEzEthData[j];
       const ethLrtEzEth = ethLrtEzEthData[j];
+      const ethLrtRsEth = ethLrtRsEthData[j];
       const zksyncLido = zkSyncLidoData[j];
 
       if (
@@ -236,6 +239,19 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
           ethLrtEzEth.supply.points,
           true,
           "supplyEthereumLrtEzEth",
+          epoch
+        );
+
+        if (t) tasks.push(t);
+      }
+
+      //ethereumLrt rsEth
+      if (ethLrtRsEth.supply.points > 0) {
+        const t = await assignPointsLP(
+          user.id,
+          ethLrtRsEth.supply.points,
+          true,
+          "supplyEthereumLrtRsEth",
           epoch
         );
 
