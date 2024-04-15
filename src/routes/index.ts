@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import discord from "./discord";
 import user from "./user";
 import twitter from "./twitter";
+import blast from "./blast";
 import HttpError from "../errors/HttpError";
 
 export const router = Router();
@@ -17,6 +18,7 @@ router.get("/", (_req, res) => {
 router.use("/discord", discord);
 router.use("/twitter", twitter);
 router.use("/user", user);
+router.use("/blast", blast);
 
 router.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
