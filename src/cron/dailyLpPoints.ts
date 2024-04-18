@@ -13,6 +13,7 @@ import {
   supplyPointsBlastEzETHMulticall,
   supplyPointsEthereumLrtEzETHMulticall,
   supplyPointsLineaEzETHMulticall,
+  supplyPointsEthereumLrtRsETHMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -37,7 +38,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(
       wallets
     );
-    console.log(ethLrtEthData);
+    const ethLrtRsETH = await supplyPointsEthereumLrtRsETHMulticall(wallets);
 
     const tasks: IAssignPointsTask[] = [];
 
@@ -52,6 +53,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const lineaEzEth = lineaEzEthData[j];
       const blastEzEth = blastEzEthData[j];
       const ethLrtEzEth = ethLrtEzEthData[j];
+      const ethLrtRsEth = ethLrtRsETH[j];
 
       // console.log(
       //   "  ",
@@ -217,7 +219,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPoints(
           user.id,
           ethLrtEth.supply.points,
-          `Daily Supply on ethLrt chain for ${ethLrtEth.supply.amount}`,
+          `Daily Supply on ethLrt chain for ETH ${ethLrtEth.supply.amount}`,
           true,
           "supplyEthereumLrtEth",
           epoch
@@ -230,7 +232,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPoints(
           user.id,
           lineaEzEth.supply.points,
-          `Daily Supply on linea chain for ${lineaEzEth.supply.amount}`,
+          `Daily Supply on linea chain for ezETH ${lineaEzEth.supply.amount}`,
           true,
           "supplyLineaEzEth",
           epoch
@@ -243,7 +245,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         const t = await assignPoints(
           user.id,
           blastEzEth.supply.points,
-          `Daily Supply on blast chain for ${blastEzEth.supply.amount}`,
+          `Daily Supply on blast chain for ezETH ${blastEzEth.supply.amount}`,
           true,
           "supplyBlastEzEth",
           epoch
@@ -251,14 +253,28 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         if (t) tasks.push(t);
       }
 
-      //eth LrtEth
+      //eth Lrt EzEth
       if (ethLrtEth.supply.points > 0) {
         const t = await assignPoints(
           user.id,
-          ethLrtEth.supply.points,
-          `Daily Supply on ethLrt chain for ${ethLrtEth.supply.amount}`,
+          ethLrtEzEth.supply.points,
+          `Daily Supply on ethLrt chain for ezETH ${ethLrtEzEth.supply.amount}`,
           true,
-          "supplyEthereumLrtEth",
+          "supplyEthereumLrtEzEth",
+          epoch
+        );
+
+        if (t) tasks.push(t);
+      }
+
+      //ethLrtRsEth
+      if (ethLrtEth.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          ethLrtEzEth.supply.points,
+          `Daily Supply on ethLrt chain for rsETH ${ethLrtEzEth.supply.amount}`,
+          true,
+          "supplyEthereumLrtRsEth",
           epoch
         );
 
