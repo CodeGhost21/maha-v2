@@ -110,7 +110,7 @@ export const assignPoints = async (
           totalPointsV2: pointsAccumulated,
         },
         $set: {
-          [`pointsPerSecond.${taskId}`]: latestPoints / 86400,
+          // [`pointsPerSecond.${taskId}`]: latestPoints / 86400,
           // [`pointsPerSecondUpdateTimestamp.${taskId}`]:Date.now(),
           epoch: epoch || user.epoch,
           [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
