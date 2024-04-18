@@ -63,6 +63,7 @@ export const addSupplyBorrowUsersManta = async () => {
           (address: string) => address.toLowerCase().trim() //new RegExp("^" + address + "$", "i")
         ),
       },
+      isDeleted: false,
     });
     const existingAddresses = existingUsers.map((user) => user.walletAddress);
     const newAddresses = addresses.filter(
@@ -101,6 +102,7 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
           (address: string) => address.toLowerCase().trim() //new RegExp("^" + address + "$", "i")
         ),
       },
+      isDeleted: false,
     });
     const existingAddresses = existingUsers.map((user) => user.walletAddress);
     const newAddresses = addresses.filter(

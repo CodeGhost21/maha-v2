@@ -309,8 +309,13 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
   console.log("working with epoch", epoch);
 
   const query = migrate
-    ? { $or: [{ epoch: 0 }, { epoch: undefined }] }
-    : { epoch: { $ne: epoch } };
+    ? {
+        $or: [
+          { epoch: 0, isDeleted: false },
+          { epoch: undefined, isDeleted: false },
+        ],
+      }
+    : { epoch: { $ne: epoch }, isDeleted: false };
 
   // const query = { walletAddress: "0x13FeFdD563A930F07B1aC8A2227Acc27c3C12946" };
   const users = await WalletUser.find(query)

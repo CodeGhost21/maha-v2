@@ -38,7 +38,10 @@ export const assignPoints = async (
   // if (points < 0.01 || isNaN(points)) return;
 
   if (user.referredBy) {
-    const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
+    const referredByUser = await WalletUser.findOne({
+      _id: user.referredBy,
+      isDeleted: false,
+    });
     if (referredByUser) {
       const referralPoints = Number(points * referralPercent) || 0;
       latestPoints = latestPoints + referralPoints;

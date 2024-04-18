@@ -31,7 +31,10 @@ export const updatePoints = async (
   let newMessage = message;
   let points = latestPoints;
   if (user.referredBy) {
-    const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
+    const referredByUser = await WalletUser.findOne({
+      _id: user.referredBy,
+      isDeleted: false,
+    });
     if (referredByUser) {
       const newReferralPoints = Number(latestPoints * referralPercent) || 0;
       points = points + newReferralPoints;
@@ -44,8 +47,12 @@ export const updatePoints = async (
             previousPoints: refPoints,
             currentPoints:
               refPoints + (newReferralPoints - previousReferralPoints),
-            addPoints: isAdd ? 0 : Math.abs(newReferralPoints - previousReferralPoints),
-            subPoints: !isAdd ? 0 : Math.abs(newReferralPoints - previousReferralPoints),
+            addPoints: isAdd
+              ? 0
+              : Math.abs(newReferralPoints - previousReferralPoints),
+            subPoints: !isAdd
+              ? 0
+              : Math.abs(newReferralPoints - previousReferralPoints),
             message: `${isAdd ? "add" : "subtract"} referral points`,
           },
         },

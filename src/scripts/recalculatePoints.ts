@@ -13,7 +13,7 @@ import { open } from "../database";
 open();
 
 const _recalculatePoints = async (from: number, count: number) => {
-  const users = await WalletUser.find({})
+  const users = await WalletUser.find({ isDeleted: false })
     .select(["totalPoints", "totalPointsV2", "points"])
     .limit(count)
     .skip(from);

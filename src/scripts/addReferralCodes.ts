@@ -18,6 +18,7 @@ const checkReferralCodeExists = async (referralCode: string) => {
 
   const existingReferral = await WalletUser.findOne({
     referralCode: { $regex: new RegExp("^" + referralCode + "$", "i") },
+    isDeleted: false,
   });
   console.log(existingReferral);
 
