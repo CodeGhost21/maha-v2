@@ -25,11 +25,10 @@ export const ethLrtProvider = new ethers.JsonRpcProvider(
   nconf.get("ETH_LRT_RPC_URL")
 );
 
-
-export const sepoliaProvider= new ethers.JsonRpcProvider(
+export const sepoliaProvider = new ethers.JsonRpcProvider(
   nconf.get("SEPOLIA_RPC_URL")
-)
+);
 
-export const moonbeamProvider= new ethers.JsonRpcProvider(
+export const moonbeamProvider = new ethers.JsonRpcProvider(
   nconf.get("MOONBEAM_RPC_URL")
-)
+);
