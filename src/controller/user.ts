@@ -2,7 +2,8 @@ import _ from "underscore";
 import { getEpoch } from "../utils/epoch";
 import { NextFunction, Request, Response } from "express";
 import nconf from "nconf";
-import axios from "axios";
+import { ethers } from "ethers";
+
 import * as jwt from "jsonwebtoken";
 
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -140,7 +141,7 @@ export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
 
 export const getPythData = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
-  if (walletAddress) {
+  if (walletAddress && ethers.isAddress(walletAddress)) {
     const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
     const pythData = typedAddresses.find(
       (item) =>
@@ -159,13 +160,16 @@ export const getPythData = async (req: Request, res: Response) => {
       res.json({ success: false, message: "no data found" });
     }
   } else {
-    res.json({ success: false, message: "please provide wallet address" });
+    res.json({
+      success: false,
+      message: "Wallet address not provided or is incorrect",
+    });
   }
 };
 
 export const getMantaData = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
-  if (walletAddress) {
+  if (walletAddress && ethers.isAddress(walletAddress)) {
     const mantaData: any = await getMantaStakedData(walletAddress);
     const mantaBifrost = await getMantaStakedDataBifrost(walletAddress);
     const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
@@ -186,7 +190,10 @@ export const getMantaData = async (req: Request, res: Response) => {
     //   res.json({ success: mantaData.success, message: mantaData.message });
     // }
   } else {
-    res.json({ success: false, message: "please provide wallet address" });
+    res.json({
+      success: false,
+      message: "Wallet address not provided or is incorrect",
+    });
   }
 };
 
@@ -294,26 +301,32 @@ export const getUserTransactions = async (req: Request, res: Response) => {
 };
 
 export const getLPData = async (req: Request, res: Response) => {
-  const walletAddress: string = req.query.walletAddress as string;
-  console.log(walletAddress);
+  try {
+    const walletAddress: string = req.query.walletAddress as string;
+    console.log(walletAddress);
 
-  if (walletAddress) {
-    const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
-    const zksyncData = await supplyBorrowPointsZksyncMulticall([walletAddress]);
-    const blastData = await supplyBorrowPointsBlastMulticall([walletAddress]);
-    const lineaData = await supplyBorrowPointsLineaMulticall([walletAddress]);
-    const ethereumLrt = await supplyBorrowPointsEthereumLrtMulticall([
-      walletAddress,
-    ]);
-    res.json({
-      success: true,
-      mantaData: mantaData[0],
-      zksyncData: zksyncData[0],
-      blastData: blastData[0],
-      lineaData: lineaData[0],
-      ethereumLrt: ethereumLrt[0],
-    });
-  } else {
-    res.json({ success: false, message: "please provide wallet address" });
+    if (walletAddress && ethers.isAddress(walletAddress)) {
+      const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
+      const zksyncData = await supplyBorrowPointsZksyncMulticall([
+        walletAddress,
+      ]);
+      const blastData = await supplyBorrowPointsBlastMulticall([walletAddress]);
+      const lineaData = await supplyBorrowPointsLineaMulticall([walletAddress]);
+      const ethereumLrt = await supplyBorrowPointsEthereumLrtMulticall([
+        walletAddress,
+      ]);
+      res.json({
+        success: true,
+        mantaData: mantaData[0],
+        zksyncData: zksyncData[0],
+        blastData: blastData[0],
+        lineaData: lineaData[0],
+        ethereumLrt: ethereumLrt[0],
+      });
+    } else {
+      res.json({ success: false, message: "please provide wallet address" });
+    }
+  } catch (e) {
+    console.log(e);
   }
 };
