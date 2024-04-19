@@ -207,9 +207,9 @@ export const assignBlastGold = async () => {
   } while (batch.length === batchSize);
 };
 
-export const updateBlastPoints = async () => {
+export const updateBlastGold = async () => {
   const tokenName = "WETH";
-  const blastBatches = await BlastBatches.find({ batchId: { $gte: 2836 } });
+  const blastBatches = await BlastBatches.find({ batchId: { $gte: 2845 } });
 
   blastBatches.forEach(async (batch: any) => {
     const bulkOperations: any = [];
@@ -219,12 +219,12 @@ export const updateBlastPoints = async () => {
           filter: { walletAddress: item.toAddress },
           update: {
             $inc: {
-              "blastPoints.pointsGiven": Number(item.points),
-              "blastPoints.pointsPending": -Number(item.points),
+              "blastGold.pointsGiven": Number(item.points),
+              "blastGold.pointsPending": -Number(item.points),
             },
             $set: {
-              [`blastPoints.pointsPending${tokenName}`]: 0,
-              "blastPoints.timestamp": Date.now(),
+              [`blastGold.pointsPending${tokenName}`]: 0,
+              "blastGold.timestamp": Date.now(),
             },
           },
         },
@@ -239,12 +239,12 @@ export const updateBlastPoints = async () => {
   });
 };
 
-export const getTotalBlastPointGiven = async () => {
+export const getTotalBlastGoldGiven = async () => {
   const result = await BlastUser.aggregate([
     {
       $group: {
         _id: null,
-        totalPointsGiven: { $sum: "$blastPoints.pointsGiven" },
+        totalPointsGiven: { $sum: "$blastGold.pointsGiven" },
       },
     },
   ]);
