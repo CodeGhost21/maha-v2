@@ -286,12 +286,12 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
 
 export const getUserTransactions = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const checkAdmin = whiteListTeam.includes(
-    user.walletAddress.toLowerCase().trim()
-  );
-  if (!checkAdmin) {
-    return res.json({ success: false, message: "Unauthorized" });
-  }
+  // const checkAdmin = whiteListTeam.includes(
+  //   user.walletAddress.toLowerCase().trim()
+  // );
+  // if (!checkAdmin) {
+  //   return res.json({ success: false, message: "Unauthorized" });
+  // }
   const transactions = await UserPointTransactions.find({
     userId: user.id,
   }).sort({
