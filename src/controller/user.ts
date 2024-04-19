@@ -324,7 +324,10 @@ export const getLPData = async (req: Request, res: Response) => {
         ethereumLrt: ethereumLrt[0],
       });
     } else {
-      res.json({ success: false, message: "please provide wallet address" });
+      res.json({
+        success: false,
+        message: "Wallet address not provided or is incorrect",
+      });
     }
   } catch (e) {
     console.log(e);
