@@ -79,24 +79,30 @@ export const BlastData = async () => {
   const challengeUSDB = await getBlastChallenge(contractAddressUSDB);
   const tokenUSDB = await getBearerToken(challengeUSDB);
   const pointsUSDB = await getPoints(tokenUSDB, contractAddressUSDB);
-  console.log(pointsUSDB);
+  // console.log(pointsUSDB);
 
   //WETH
   const contractAddressWETH = "0x53a3Aa617afE3C12550a93BA6262430010037B04";
   const challengeWETH = await getBlastChallenge(contractAddressWETH);
   const tokenWETH = await getBearerToken(challengeWETH);
   const pointsWETH = await getPoints(tokenWETH, contractAddressWETH);
-  console.log(pointsWETH);
+  // console.log(pointsWETH);
 
   const totalPoints =
-    Number(pointsUSDB.balancesByPointType.LIQUIDITY.available) +
-    Number(pointsWETH.balancesByPointType.LIQUIDITY.available);
-  console.log(totalPoints);
+    Number(pointsUSDB.balancesByPointType.LIQUIDITY.earnedCumulative) +
+    Number(pointsWETH.balancesByPointType.LIQUIDITY.earnedCumulative);
+  // console.log(totalPoints);
 
   return {
-    blastUSDB: Number(pointsUSDB.balancesByPointType.LIQUIDITY.available),
-    blastWETH: Number(pointsWETH.balancesByPointType.LIQUIDITY.available),
-    blastGoldWETH: Number(pointsWETH.balancesByPointType.DEVELOPER.available),
+    blastUSDB: Number(
+      pointsUSDB.balancesByPointType.LIQUIDITY.earnedCumulative
+    ),
+    blastWETH: Number(
+      pointsWETH.balancesByPointType.LIQUIDITY.earnedCumulative
+    ),
+    blastGoldWETH: Number(
+      pointsWETH.balancesByPointType.DEVELOPER.earnedCumulative
+    ),
     totalPoints: totalPoints,
   };
 };
