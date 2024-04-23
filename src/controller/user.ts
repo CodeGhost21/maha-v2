@@ -85,6 +85,7 @@ export const walletVerify = async (
       epoch: getEpoch(),
       referralCode: referralCode ? referralCode : null,
       role: role,
+      isDeleted: false,
     });
 
     // referred by user added to user model

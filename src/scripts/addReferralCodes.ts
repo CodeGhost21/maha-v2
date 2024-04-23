@@ -310,6 +310,7 @@ const addPythUsers = async () => {
       console.log("does not exists");
       await WalletUser.create({
         referralCode: item,
+        isDeleted: false,
       });
     } else {
       console.log("already added");

@@ -17,6 +17,7 @@ export const executeAddSupplyBorrowUsers = async (
       walletAddress: address.toLowerCase().trim(),
       referralCode,
       rank: rank,
+      isDeleted: false,
     });
     userBulkWrites.push({
       insertOne: {
