@@ -3,7 +3,12 @@ import {
   WalletUser,
 } from "../../database/models/walletUsers";
 import { checkGuildMember } from "../../output/discord";
-import { points, stakePtsPerManta, stakePtsPerCake } from "./constants";
+import {
+  points,
+  stakePtsPerManta,
+  stakePtsPerCake,
+  stakePtsPerMAHA,
+} from "./constants";
 import { assignPoints } from "./assignPoints";
 import { Request, Response, NextFunction } from "express";
 import pythAddresses from "../../addresses/pyth.json";
@@ -12,6 +17,7 @@ import cache from "../../utils/cache";
 import { getMantaStakersData } from "./stakeManta";
 import { getUserHoldStationData } from "./stakeHoldStation";
 import { getCakeStakeData } from "./stakeCake";
+import { getMAHAStakeData } from "./stakeMAHA";
 
 export const checkTask = async (
   req: Request,
@@ -68,7 +74,7 @@ export const checkTask = async (
       if (!user.checked.MantaStaker && !(user.points.MantaStaker > 0)) {
         const mantaData = await getMantaStakersData(user.walletAddress);
         // if (mantaData.success) {
-          const stakedAmount = mantaData.totalStakedManta;
+        const stakedAmount = mantaData.totalStakedManta;
         if (stakedAmount > 0) {
           const task = await assignPoints(
             user.id,
@@ -111,12 +117,9 @@ export const checkTask = async (
         // }
       }
     } else if (req.body.taskId === "CakeStaker") {
-      console.log(118, req.body.taskId);
       //checked if user is already a pyth staker
       if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
-        const cakeStakedAmount = await getCakeStakeData(
-          user.walletAddress
-        );
+        const cakeStakedAmount = await getCakeStakeData(user.walletAddress);
 
         const stakedAmount = cakeStakedAmount;
         if (stakedAmount > 0) {
@@ -126,6 +129,26 @@ export const checkTask = async (
             "Cake Staker",
             true,
             "CakeStaker"
+          );
+          await task?.execute();
+          success = true;
+          // user.checked.CakeStaker = true;
+          cache.del(`userId:${user._id}`);
+        }
+      }
+    } else if (req.body.taskId === "MahaXStaker") {
+      //checked if user is already a pyth staker
+      if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
+        const cakeStakedAmount = await getMAHAStakeData(user.walletAddress);
+
+        const stakedAmount = cakeStakedAmount;
+        if (stakedAmount > 0) {
+          const task = await assignPoints(
+            user.id,
+            stakedAmount * stakePtsPerMAHA,
+            "MAHAX Staker",
+            true,
+            "MahaXStaker"
           );
           await task?.execute();
           success = true;

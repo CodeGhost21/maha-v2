@@ -15,6 +15,7 @@ export interface IWalletUserChecked {
   MantaStaker: boolean;
   HoldStationStaker: boolean;
   CakeStaker: boolean;
+  MahaXStaker: boolean;
 }
 
 export interface IWalletUserPoints {
@@ -40,6 +41,7 @@ export interface IWalletUserPoints {
   MantaStaker: number;
   HoldStationStaker: number;
   CakeStaker: number;
+  MahaXStaker: number;
   supplyEthereumLrtEth: number;
   borrowEthereumLrtEth: number;
   supplyLineaEzEth: number;
