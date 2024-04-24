@@ -29,6 +29,7 @@ import {
 } from "./quests/stakeManta";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { whiteListTeam } from "./quests/constants";
+import { getMAHAStakeData } from "./quests/stakeMAHA";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -160,6 +161,20 @@ export const getPythData = async (req: Request, res: Response) => {
     } else {
       res.json({ success: false, message: "no data found" });
     }
+  } else {
+    res.json({
+      success: false,
+      message: "Wallet address not provided or is incorrect",
+    });
+  }
+};
+
+export const getMahaXData = async (req: Request, res: Response) => {
+  const walletAddress: string = req.query.walletAddress as string;
+  if (walletAddress && ethers.isAddress(walletAddress)) {
+    const mahaXData = await getMAHAStakeData(walletAddress);
+
+    res.json({ success: true, MAHAX: mahaXData });
   } else {
     res.json({
       success: false,
