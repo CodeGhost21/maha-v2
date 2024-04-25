@@ -13,7 +13,11 @@ export const updateLPPointsHourly = async () => {
   const batchSize = 1000;
 
   let skip = 0;
+  let t1 = Date.now()
   let batch;
+
+  console.log("----- user skip ----", skip)
+  console.log("----- start time for user skip ----", t1 )
 
   do {
     batch = await WalletUser.find({ isDeleted: false })
@@ -46,7 +50,7 @@ export const updateLPPointsHourly = async () => {
           );
 
           const pointsPerSecond = Number(user.pointsPerSecond[lpTask] || 0);
-          const timeElapsed = (Date.now() - timestamp) / 1000;
+          const timeElapsed = timestamp <=0 ? 0 : (Date.now() - timestamp) / 1000;
 
           const newPoints = Number(pointsPerSecond * timeElapsed);
 
@@ -100,4 +104,8 @@ export const updateLPPointsHourly = async () => {
     await WalletUser.bulkWrite(userBulkWrites);
     skip += batchSize;
   } while (batch.length === batchSize);
+
+  console.log("----- user skip ----", skip)
+  console.log("----- End time for user skip ----", Date.now())
+  console.log("----- final time to complete-----", Date.now() - t1 )
 };
