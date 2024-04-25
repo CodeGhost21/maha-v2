@@ -138,7 +138,7 @@ export const checkTask = async (
       }
     } else if (req.body.taskId === "MahaXStaker") {
       //checked if user is already a pyth staker
-      if (!user.checked.CakeStaker && !(user.points.CakeStaker > 0)) {
+      if (!user.checked.MahaXStaker && !(user.points.MahaXStaker > 0)) {
         const cakeStakedAmount = await getMAHAStakeData(user.walletAddress);
 
         const stakedAmount = cakeStakedAmount;
