@@ -224,7 +224,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
           xLayer.supply.points,
           `Daily Supply on X Layer chain for ${xLayer.supply.amount}`,
           true,
-          "supplyEthereumLrt",
+          "supplyXLayer",
           epoch
         );
         if (t) tasks.push(t);
@@ -236,7 +236,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
           xLayer.borrow.points,
           `Daily Borrow on X Layer chain for ${xLayer.borrow.amount}`,
           true,
-          "borrowEthereumLrt",
+          "borrowXLayer",
           epoch
         );
         if (t) tasks.push(t);

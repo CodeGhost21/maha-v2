@@ -36,6 +36,8 @@ export interface IWalletUserPoints {
   borrowLinea: number;
   supplyEthereumLrt: number;
   borrowEthereumLrt: number;
+  supplyXLayer: number;
+  borrowXLayer: number;
   twitterFollow: number;
   PythStaker: number;
   MantaStaker: number;
