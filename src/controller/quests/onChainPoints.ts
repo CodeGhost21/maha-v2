@@ -8,6 +8,7 @@ import {
   blastProvider,
   lineaProvider,
   ethLrtProvider,
+  xLayerProvider,
 } from "../../utils/providers";
 import {
   minSupplyAmount,
@@ -62,7 +63,8 @@ export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("MANTA_POOL"),
-    mantaProvider
+    mantaProvider,
+    1
   );
 };
 
@@ -73,7 +75,8 @@ export const supplyBorrowPointsZksyncMulticall = async (
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("ZKSYNC_POOL"),
-    zksyncProvider
+    zksyncProvider,
+    1
   );
 };
 
@@ -82,7 +85,8 @@ export const supplyBorrowPointsBlastMulticall = async (addresses: string[]) => {
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("BLAST_POOL"),
-    blastProvider
+    blastProvider,
+    1
   );
 };
 
@@ -91,7 +95,8 @@ export const supplyBorrowPointsLineaMulticall = async (addresses: string[]) => {
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("LINEA_POOL"),
-    lineaProvider
+    lineaProvider,
+    1
   );
 };
 
@@ -102,14 +107,28 @@ export const supplyBorrowPointsEthereumLrtMulticall = async (
   return _supplyBorrowPointsMulticall(
     addresses,
     nconf.get("ETH_LRT_POOL"),
-    ethLrtProvider
+    ethLrtProvider,
+    1
+  );
+};
+
+//xlayer
+export const supplyBorrowPointsXLayerMulticall = async (
+  addresses: string[]
+) => {
+  return _supplyBorrowPointsMulticall(
+    addresses,
+    nconf.get("OKX_POOL"),
+    xLayerProvider,
+    2
   );
 };
 
 const _supplyBorrowPointsMulticall = async (
   addresses: string[],
   poolAddr: string,
-  p: AbstractProvider
+  p: AbstractProvider,
+  supplyMultiplier: number
 ) => {
   const provider = MulticallWrapper.wrap(p);
   const pool = await getContract(poolAddr, poolABI, provider);
@@ -136,7 +155,10 @@ const _supplyBorrowPointsMulticall = async (
 
     return {
       who: addresses[index],
-      supply: { points: supply * multiplier, amount: supply },
+      supply: {
+        points: supply * multiplier * supplyMultiplier,
+        amount: supply,
+      },
       borrow: { points: borrow * multiplier * borrowPtsPerUSD, amount: borrow },
     };
   });
