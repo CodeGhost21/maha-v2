@@ -17,7 +17,7 @@ export const stakePtsPerManta = 5;
 
 export const stakePtsPerCake = 0.25;
 
-export const stakePtsPerMAHA = 10;
+export const stakePtsPerMAHA = 1000;
 
 export const supplyEthEthereumLrt = 2;
 

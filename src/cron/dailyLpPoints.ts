@@ -14,6 +14,7 @@ import {
   supplyPointsEthereumLrtEzETHMulticall,
   supplyPointsLineaEzETHMulticall,
   supplyPointsEthereumLrtRsETHMulticall,
+  supplyBorrowPointsXLayerMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
@@ -30,6 +31,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const blastData = await supplyBorrowPointsBlastMulticall(wallets);
     const lineaData = await supplyBorrowPointsLineaMulticall(wallets);
     const ethLrtData = await supplyBorrowPointsEthereumLrtMulticall(wallets);
+    const xLayerData = await supplyBorrowPointsXLayerMulticall(wallets);
     const ethLrtEthData = await supplyBorrowPointsEthereumLrtETHMulticall(
       wallets
     );
@@ -49,6 +51,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const blast = blastData[j];
       const linea = lineaData[j];
       const ethLrt = ethLrtData[j];
+      const xLayer = xLayerData[j];
       const ethLrtEth = ethLrtEthData[j];
       const lineaEzEth = lineaEzEthData[j];
       const blastEzEth = blastEzEthData[j];
@@ -214,6 +217,31 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         if (t) tasks.push(t);
       }
 
+      //x Layer
+      if (xLayer.supply.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          xLayer.supply.points,
+          `Daily Supply on X Layer chain for ${xLayer.supply.amount}`,
+          true,
+          "supplyEthereumLrt",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
+      if (xLayer.borrow.points > 0) {
+        const t = await assignPoints(
+          user.id,
+          xLayer.borrow.points,
+          `Daily Borrow on X Layer chain for ${xLayer.borrow.amount}`,
+          true,
+          "borrowEthereumLrt",
+          epoch
+        );
+        if (t) tasks.push(t);
+      }
+
       //ethereum Lrt ETH
       if (ethLrtEth.supply.points > 0) {
         const t = await assignPoints(
@@ -268,7 +296,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       }
 
       //ethLrtRsEth
-      if (ethLrtEth.supply.points > 0) {
+      if (ethLrtRsEth.supply.points > 0) {
         const t = await assignPoints(
           user.id,
           ethLrtEzEth.supply.points,
@@ -323,7 +351,7 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
     .skip(from)
     .select(["walletAddress"]);
 
-  const chunk = 100;
+  const chunk = 1000;
 
   const loops = Math.floor(users.length / chunk) + 1;
   console.log(loops, users.length, from, count);
@@ -344,6 +372,8 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
 
 let lock = false;
 export const dailyLpPoints = async (migrate = false) => {
+  console.log("daily lp points");
+
   if (lock) return;
   lock = true;
 
