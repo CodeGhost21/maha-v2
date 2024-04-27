@@ -54,8 +54,6 @@ export const updateLPPointsHourly = async () => {
 
           const newPoints = Number(pointsPerSecond * timeElapsed);
 
-          if (newPoints <= 0) return;
-
           let referralPoints = 0;
           // check and giver referral points with newPoints
           if (user.referredBy) {
