@@ -13,12 +13,12 @@ import { updateLPPointsHourly } from "./cron/updateLPPointsHourly";
 // connect to database
 open();
 
-cron.schedule("*/60 * * * *", async () => {
+cron.schedule("*/10 * * * *", async () => {
   console.log("running lp points every 1 hour");
   await updateLPPointsHourly();
 });
 
-cron.schedule("0 0 * * *", async () => {
+cron.schedule("*/30 * * * *", async () => {
   console.log("running lp points rate every day");
   await updateLPRate();
 });
