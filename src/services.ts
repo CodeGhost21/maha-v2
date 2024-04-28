@@ -13,12 +13,12 @@ import { updateLPPointsHourly } from "./cron/updateLPPointsHourly";
 // connect to database
 open();
 
-cron.schedule("*/10 * * * *", async () => {
+cron.schedule("*/30 * * * *", async () => {
   console.log("running lp points every 1 hour");
   await updateLPPointsHourly();
 });
 
-cron.schedule("*/30 * * * *", async () => {
+cron.schedule("*/60 * * * *", async () => {
   console.log("running lp points rate every day");
   await updateLPRate();
 });
@@ -38,25 +38,25 @@ cron.schedule("0 15 * * 6", async () => {
   await updateMantaPoints();
 });
 
-cron.schedule("0 1 * * *", async () => {
-  console.log("adding new wallet users every day at 1 am");
+// cron.schedule("0 1 * * *", async () => {
+//   console.log("adding new wallet users every day at 1 am");
 
-  //manta
-  await addSupplyBorrowUsersManta();
+//   //manta
+//   await addSupplyBorrowUsersManta();
 
-  //zksync
-  await addSupplyBorrowUsers(
-    "https://api.studio.thegraph.com/query/49970/zerolend/version/latest"
-  );
-  //ethereum
-  await addSupplyBorrowUsers(
-    "https://api.studio.thegraph.com/query/65585/zerolend-ethereum-lrt-market/version/latest"
-  );
-  //linea
-  await addSupplyBorrowUsers(
-    "https://api.studio.thegraph.com/query/65585/zerolend-linea-market/version/latest"
-  );
-});
+//   //zksync
+//   await addSupplyBorrowUsers(
+//     "https://api.studio.thegraph.com/query/49970/zerolend/version/latest"
+//   );
+//   //ethereum
+//   await addSupplyBorrowUsers(
+//     "https://api.studio.thegraph.com/query/65585/zerolend-ethereum-lrt-market/version/latest"
+//   );
+//   //linea
+//   await addSupplyBorrowUsers(
+//     "https://api.studio.thegraph.com/query/65585/zerolend-linea-market/version/latest"
+//   );
+// });
 // updateRank();
 // dailyLpPoints();
 // updatePythPoints();
