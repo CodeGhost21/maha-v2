@@ -19,10 +19,12 @@ export const getUsersSupply = async (req: Request, res: Response) => {
       const supplyData = await supplyPointsEthereumLrtRsETHMulticall(batch);
 
       for (const data of supplyData) {
-        usersWithSupplyData.push({
-          walletAddress: data.who,
-          supply: data.supply.points
-        });
+        if (data.supply.points) {
+          usersWithSupplyData.push({
+            walletAddress: data.who,
+            supply: data.supply.points
+          });
+        }
       }
     }
 
