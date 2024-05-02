@@ -54,6 +54,15 @@ export interface IWalletUserPoints {
   // total: number;
 }
 
+export interface ITaskName {
+  linea: number;
+  ["eth-lrt"]: number;
+  manta: number;
+  zksync: number;
+  blast: number;
+  xlayer: number;
+}
+
 export interface IWalletUser {
   discordId: string;
   jwt: string;
@@ -72,6 +81,7 @@ export interface IWalletUser {
   checked: IWalletUserChecked;
   points: IWalletUserPoints;
   pointsUpdateTimestamp: IWalletUserPoints;
+  epochs: ITaskName;
 
   isDeleted: boolean;
 }
@@ -95,6 +105,7 @@ const UserSchema = new mongoose.Schema(
     epoch: { type: Number, default: 0 },
     points: { type: Object, default: {} },
     checked: { type: Object, default: {} },
+    epochs: { type: Object, default: {} },
     pointsUpdateTimestamp: { type: Object, default: {} },
     isDeleted: { type: Boolean, default: false, index: true },
   },

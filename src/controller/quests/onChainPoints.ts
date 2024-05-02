@@ -60,7 +60,7 @@ const getContract = async (
 
 //manta
 export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
-  return _supplyBorrowPointsMulticall(
+  return supplyBorrowPointsMulticall(
     addresses,
     nconf.get("MANTA_POOL"),
     mantaProvider,
@@ -72,7 +72,7 @@ export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
 export const supplyBorrowPointsZksyncMulticall = async (
   addresses: string[]
 ) => {
-  return _supplyBorrowPointsMulticall(
+  return supplyBorrowPointsMulticall(
     addresses,
     nconf.get("ZKSYNC_POOL"),
     zksyncProvider,
@@ -82,7 +82,7 @@ export const supplyBorrowPointsZksyncMulticall = async (
 
 //blast
 export const supplyBorrowPointsBlastMulticall = async (addresses: string[]) => {
-  return _supplyBorrowPointsMulticall(
+  return supplyBorrowPointsMulticall(
     addresses,
     nconf.get("BLAST_POOL"),
     blastProvider,
@@ -92,7 +92,7 @@ export const supplyBorrowPointsBlastMulticall = async (addresses: string[]) => {
 
 //linea
 export const supplyBorrowPointsLineaMulticall = async (addresses: string[]) => {
-  return _supplyBorrowPointsMulticall(
+  return supplyBorrowPointsMulticall(
     addresses,
     nconf.get("LINEA_POOL"),
     lineaProvider,
@@ -104,7 +104,7 @@ export const supplyBorrowPointsLineaMulticall = async (addresses: string[]) => {
 export const supplyBorrowPointsEthereumLrtMulticall = async (
   addresses: string[]
 ) => {
-  return _supplyBorrowPointsMulticall(
+  return supplyBorrowPointsMulticall(
     addresses,
     nconf.get("ETH_LRT_POOL"),
     ethLrtProvider,
@@ -116,7 +116,7 @@ export const supplyBorrowPointsEthereumLrtMulticall = async (
 export const supplyBorrowPointsXLayerMulticall = async (
   addresses: string[]
 ) => {
-  return _supplyBorrowPointsMulticall(
+  return supplyBorrowPointsMulticall(
     addresses,
     nconf.get("OKX_POOL"),
     xLayerProvider,
@@ -124,7 +124,7 @@ export const supplyBorrowPointsXLayerMulticall = async (
   );
 };
 
-const _supplyBorrowPointsMulticall = async (
+export const supplyBorrowPointsMulticall = async (
   addresses: string[],
   poolAddr: string,
   p: AbstractProvider,
