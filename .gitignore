@@ -21,3 +21,4 @@ config.backup.json
 dump
 dump-v2
 config.prod.json
+config.staging.json

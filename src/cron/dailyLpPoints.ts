@@ -58,17 +58,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
       const ethLrtEzEth = ethLrtEzEthData[j];
       const ethLrtRsEth = ethLrtRsETH[j];
 
-      // console.log(
-      //   "  ",
-      //   j,
-      //   "manta",
-      //   manta.supply.points,
-      //   manta.borrow.points,
-      //   "zks",
-      //   zksync.supply.points,
-      //   zksync.borrow.points
-      // );
-
       if (
         manta.supply.points === 0 &&
         zksync.supply.points === 0 &&
@@ -308,18 +297,6 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
 
         if (t) tasks.push(t);
       }
-
-      // if (ethLrtEth.borrow.points > 0) {
-      //   const t = await assignPoints(
-      //     user.id,
-      //     ethLrtEth.borrow.points,
-      //     `Daily Borrow on ethLrtEth chain for ${ethLrtEth.borrow.amount}`,
-      //     true,
-      //     "borrowEthereumLrtEth",
-      //     epoch
-      //   );
-      //   if (t) tasks.push(t);
-      // }
     }
 
     // once all the db operators are accumulated; write into the DB
