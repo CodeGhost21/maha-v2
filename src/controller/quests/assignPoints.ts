@@ -26,7 +26,7 @@ export const assignPoints = async (
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
-  console.log(taskId, points);
+  // console.log(taskId, points);
 
   const user = await WalletUser.findById(userId);
   if (!user) return;

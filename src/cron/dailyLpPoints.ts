@@ -26,85 +26,70 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     const wallets = userBatch.map((u) => u.walletAddress);
 
     // get manta data
-    const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
+    // const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
+    console.log("got manta");
     const zksyncData = await supplyBorrowPointsZksyncMulticall(wallets);
+    console.log("got zksync");
     const blastData = await supplyBorrowPointsBlastMulticall(wallets);
+    console.log("got blast");
     const lineaData = await supplyBorrowPointsLineaMulticall(wallets);
+    console.log("got linea");
     const ethLrtData = await supplyBorrowPointsEthereumLrtMulticall(wallets);
-    const xLayerData = await supplyBorrowPointsXLayerMulticall(wallets);
+    console.log("got lrt");
+    // const xLayerData = await supplyBorrowPointsXLayerMulticall(wallets);
     const ethLrtEthData = await supplyBorrowPointsEthereumLrtETHMulticall(
       wallets
     );
-    const lineaEzEthData = await supplyPointsLineaEzETHMulticall(wallets);
-    const blastEzEthData = await supplyPointsBlastEzETHMulticall(wallets);
-    const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(
-      wallets
-    );
-    const ethLrtRsETH = await supplyPointsEthereumLrtRsETHMulticall(wallets);
+    console.log("got lrt etg");
+    // const lineaEzEthData = await supplyPointsLineaEzETHMulticall(wallets);
+    // const blastEzEthData = await supplyPointsBlastEzETHMulticall(wallets);
+    // const ethLrtEzEthData = await supplyPointsEthereumLrtEzETHMulticall(
+    //   wallets
+    // );
+    // const ethLrtRsETH = await supplyPointsEthereumLrtRsETHMulticall(wallets);
+
+    // conso
 
     const tasks: IAssignPointsTask[] = [];
 
     for (let j = 0; j < wallets.length; j++) {
       const user = userBatch[j];
       const zksync = zksyncData[j];
-      const manta = mantaData[j];
+      // const manta = mantaData[j];
       const blast = blastData[j];
       const linea = lineaData[j];
       const ethLrt = ethLrtData[j];
-      const xLayer = xLayerData[j];
-      const ethLrtEth = ethLrtEthData[j];
-      const lineaEzEth = lineaEzEthData[j];
-      const blastEzEth = blastEzEthData[j];
-      const ethLrtEzEth = ethLrtEzEthData[j];
-      const ethLrtRsEth = ethLrtRsETH[j];
+      // const xLayer = xLayerData[j];
+      // const ethLrtEth = ethLrtEthData[j];
+      // const lineaEzEth = lineaEzEthData[j];
+      // const blastEzEth = blastEzEthData[j];
+      // const ethLrtEzEth = ethLrtEzEthData[j];
+      // const ethLrtRsEth = ethLrtRsETH[j];
 
-      if (
-        manta.supply.points === 0 &&
-        zksync.supply.points === 0 &&
-        blast.supply.points === 0 &&
-        linea.supply.points === 0 &&
-        ethLrt.supply.points === 0
-      ) {
-        tasks.push({
-          userBulkWrites: [
-            {
-              updateOne: {
-                filter: { _id: user.id },
-                update: { $set: { epoch } },
-              },
-            },
-          ],
-          pointsBulkWrites: [],
-          execute: async () => {
-            return;
-          },
-        });
-      }
+      // //manta
+      // if (manta.supply.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     manta.supply.points,
+      //     `Daily Supply on manta chain for ${manta.supply.amount}`,
+      //     true,
+      //     "supply",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
 
-      //manta
-      if (manta.supply.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          manta.supply.points,
-          `Daily Supply on manta chain for ${manta.supply.amount}`,
-          true,
-          "supply",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
-
-      if (manta.borrow.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          manta.borrow.points,
-          `Daily Borrow on manta chain for ${manta.borrow.amount}`,
-          true,
-          "borrow",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
+      // if (manta.borrow.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     manta.borrow.points,
+      //     `Daily Borrow on manta chain for ${manta.borrow.amount}`,
+      //     true,
+      //     "borrow",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
 
       //zksync
       if (zksync.supply.points > 0) {
@@ -206,97 +191,96 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
         if (t) tasks.push(t);
       }
 
-      //x Layer
-      if (xLayer.supply.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          xLayer.supply.points,
-          `Daily Supply on X Layer chain for ${xLayer.supply.amount}`,
-          true,
-          "supplyXLayer",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
+      // //x Layer
+      // if (xLayer.supply.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     xLayer.supply.points,
+      //     `Daily Supply on X Layer chain for ${xLayer.supply.amount}`,
+      //     true,
+      //     "supplyXLayer",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
 
-      if (xLayer.borrow.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          xLayer.borrow.points,
-          `Daily Borrow on X Layer chain for ${xLayer.borrow.amount}`,
-          true,
-          "borrowXLayer",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
+      // if (xLayer.borrow.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     xLayer.borrow.points,
+      //     `Daily Borrow on X Layer chain for ${xLayer.borrow.amount}`,
+      //     true,
+      //     "borrowXLayer",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
 
-      //ethereum Lrt ETH
-      if (ethLrtEth.supply.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          ethLrtEth.supply.points,
-          `Daily Supply on ethLrt chain for ETH ${ethLrtEth.supply.amount}`,
-          true,
-          "supplyEthereumLrtEth",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
+      // //ethereum Lrt ETH
+      // if (ethLrtEth.supply.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     ethLrtEth.supply.points,
+      //     `Daily Supply on ethLrt chain for ETH ${ethLrtEth.supply.amount}`,
+      //     true,
+      //     "supplyEthereumLrtEth",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
 
-      //linea ezEth
-      if (lineaEzEth.supply.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          lineaEzEth.supply.points,
-          `Daily Supply on linea chain for ezETH ${lineaEzEth.supply.amount}`,
-          true,
-          "supplyLineaEzEth",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
+      // //linea ezEth
+      // if (lineaEzEth.supply.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     lineaEzEth.supply.points,
+      //     `Daily Supply on linea chain for ezETH ${lineaEzEth.supply.amount}`,
+      //     true,
+      //     "supplyLineaEzEth",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
 
-      //blast ezEth
-      if (blastEzEth.supply.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          blastEzEth.supply.points,
-          `Daily Supply on blast chain for ezETH ${blastEzEth.supply.amount}`,
-          true,
-          "supplyBlastEzEth",
-          epoch
-        );
-        if (t) tasks.push(t);
-      }
+      // //blast ezEth
+      // if (blastEzEth.supply.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     blastEzEth.supply.points,
+      //     `Daily Supply on blast chain for ezETH ${blastEzEth.supply.amount}`,
+      //     true,
+      //     "supplyBlastEzEth",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
 
-      //eth Lrt EzEth
-      if (ethLrtEth.supply.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          ethLrtEzEth.supply.points,
-          `Daily Supply on ethLrt chain for ezETH ${ethLrtEzEth.supply.amount}`,
-          true,
-          "supplyEthereumLrtEzEth",
-          epoch
-        );
+      // //eth Lrt EzEth
+      // if (ethLrtEth.supply.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     ethLrtEzEth.supply.points,
+      //     `Daily Supply on ethLrt chain for ezETH ${ethLrtEzEth.supply.amount}`,
+      //     true,
+      //     "supplyEthereumLrtEzEth",
+      //     epoch
+      //   );
 
-        if (t) tasks.push(t);
-      }
+      //   if (t) tasks.push(t);
+      // }
 
-      //ethLrtRsEth
-      if (ethLrtRsEth.supply.points > 0) {
-        const t = await assignPoints(
-          user.id,
-          ethLrtEzEth.supply.points,
-          `Daily Supply on ethLrt chain for rsETH ${ethLrtEzEth.supply.amount}`,
-          true,
-          "supplyEthereumLrtRsEth",
-          epoch
-        );
-
-        if (t) tasks.push(t);
-      }
+      // //ethLrtRsEth
+      // if (ethLrtRsEth.supply.points > 0) {
+      //   const t = await assignPoints(
+      //     user.id,
+      //     ethLrtEzEth.supply.points,
+      //     `Daily Supply on ethLrt chain for rsETH ${ethLrtEzEth.supply.amount}`,
+      //     true,
+      //     "supplyEthereumLrtRsEth",
+      //     epoch
+      //   );
+      //   if (t) tasks.push(t);
+      // }
     }
 
     // once all the db operators are accumulated; write into the DB
@@ -322,22 +306,18 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
       }
     : { epoch: { $ne: epoch }, isDeleted: false };
 
-  // const query = { walletAddress: "0x13FeFdD563A930F07B1aC8A2227Acc27c3C12946" };
-  const users = await WalletUser.find(query)
-    .limit(count)
-    .skip(from)
-    .select(["walletAddress"]);
-
   const chunk = 1000;
-
-  const loops = Math.floor(users.length / chunk) + 1;
-  console.log(loops, users.length, from, count);
+  const loops = Math.floor(count / chunk) + 1;
 
   for (let i = 0; i < loops; i++) {
     try {
+      const users = await WalletUser.find(query)
+        .limit(chunk)
+        .skip(i * chunk)
+        .select(["walletAddress"]);
+
       console.log("working on batch", i);
-      const userBatch = users.slice(i * chunk, (i + 1) * chunk);
-      await _processBatch(userBatch, epoch);
+      await _processBatch(users, epoch);
     } catch (error) {
       console.log("error", error);
       console.log("failure working with batch", i);
