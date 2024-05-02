@@ -300,8 +300,16 @@ const _dailyLpPoints = async (from: number, count: number, migrate = false) => {
   const query = migrate
     ? {
         $or: [
-          { epoch: 0, isDeleted: false },
-          { epoch: undefined, isDeleted: false },
+          {
+            epoch: 0,
+            isDeleted: false,
+            walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+          },
+          {
+            epoch: undefined,
+            isDeleted: false,
+            walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+          },
         ],
       }
     : { epoch: { $ne: epoch }, isDeleted: false };
