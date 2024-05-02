@@ -1,5 +1,4 @@
 import {
-  ITaskName,
   IWalletUser,
   IWalletUserModel,
   IWalletUserPoints,
@@ -125,8 +124,7 @@ export const assignPointsV2 = async (
   points: number,
   message: string,
   isAdd: boolean,
-  taskId: keyof ITaskName,
-  key: string,
+  key: keyof IWalletUserPoints,
   epoch?: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
@@ -205,9 +203,9 @@ export const assignPointsV2 = async (
         },
         $set: {
           epoch: epoch || user.epoch,
-          [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
-          [`checked.${taskId}`]: true,
-          [`epochs.${taskId}`]: epoch || epochs[taskId] || 0,
+          [`pointsUpdateTimestamp.${key}`]: Date.now(),
+          [`checked.${key}`]: true,
+          [`epochs.${key}`]: epoch || epochs[key] || 0,
         },
       },
     },

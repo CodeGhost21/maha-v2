@@ -30,6 +30,8 @@ export interface IWalletUserPoints {
   referral: number;
   supply: number;
   borrow: number;
+  supplyManta: number;
+  borrowManta: number;
   supplyBlast: number;
   borrowBlast: number;
   supplyLinea: number;
@@ -54,14 +56,14 @@ export interface IWalletUserPoints {
   // total: number;
 }
 
-export interface ITaskName {
-  linea: number;
-  ["eth-lrt"]: number;
-  manta: number;
-  zksync: number;
-  blast: number;
-  xlayer: number;
-}
+// export interface ITaskName {
+//   Linea: number;
+//   EthereumLrt: number;
+//   Manta: number;
+//   Zksync: number;
+//   Blast: number;
+//   Xlayer: number;
+// }
 
 export interface IWalletUser {
   discordId: string;
@@ -81,7 +83,7 @@ export interface IWalletUser {
   checked: IWalletUserChecked;
   points: IWalletUserPoints;
   pointsUpdateTimestamp: IWalletUserPoints;
-  epochs: ITaskName;
+  epochs: IWalletUserPoints;
 
   isDeleted: boolean;
 }

@@ -7,8 +7,8 @@ import nconf from "nconf";
 import _ from "underscore";
 import { supplyBorrowPointsMulticall } from "../controller/quests/onChainPoints";
 import {
-  ITaskName,
   IWalletUserModel,
+  IWalletUserPoints,
   WalletUser,
 } from "../database/models/walletUsers";
 import { getEpoch } from "../utils/epoch";
@@ -26,7 +26,8 @@ import {
 const _processBatch = async (
   userBatch: IWalletUserModel[],
   epoch: number,
-  task: keyof ITaskName,
+  supplyTask: keyof IWalletUserPoints,
+  borrowTask: keyof IWalletUserPoints,
   poolAddr: string,
   p: AbstractProvider,
   supplyMultiplier: number
@@ -37,7 +38,7 @@ const _processBatch = async (
 
     // get manta data
     // const mantaData = await supplyBorrowPointsMantaMulticall(wallets);
-    console.log("got", task, "for epoch", epoch);
+    // console.log("got", task, "for epoch", epoch);
     const data = await supplyBorrowPointsMulticall(
       wallets,
       poolAddr,
@@ -57,10 +58,9 @@ const _processBatch = async (
         const t = await assignPointsV2(
           user,
           d.supply.points,
-          `Daily Supply on ${task} chain for ${d.supply.amount}`,
+          `Daily Supply on ${supplyTask} chain for ${d.supply.amount}`,
           true,
-          task,
-          `${task == "zksync" ? "" : task}Supply`,
+          supplyTask,
           epoch
         );
         if (t) tasks.push(t);
@@ -70,10 +70,9 @@ const _processBatch = async (
         const t = await assignPointsV2(
           user,
           d.borrow.points,
-          `Daily Borrow on ${task} chain for ${d.borrow.amount}`,
+          `Daily Borrow on ${borrowTask} chain for ${d.borrow.amount}`,
           true,
-          task,
-          `${task == "zksync" ? "" : task}Borrow`,
+          borrowTask,
           epoch
         );
         if (t) tasks.push(t);
@@ -94,18 +93,19 @@ const _processBatch = async (
 
 const _dailyLpPoints = async (
   count: number,
-  task: keyof ITaskName,
+  supplyTask: keyof IWalletUserPoints,
+  borrowTask: keyof IWalletUserPoints,
   poolAddr: string,
   p: AbstractProvider,
   supplyMultiplier: number
 ) => {
-  const epoch = getEpoch();
+  const epoch = getEpoch() - 2;
   console.log("working with epoch", epoch);
 
   const query = {
     $or: [
-      { [`epochs.${task}`]: 0, isDeleted: false },
-      { [`epochs.${task}`]: undefined, isDeleted: false },
+      { [`epochs.${supplyTask}`]: 0, isDeleted: false },
+      { [`epochs.${supplyTask}`]: undefined, isDeleted: false },
     ],
   };
 
@@ -120,7 +120,15 @@ const _dailyLpPoints = async (
         .select(["walletAddress", "totalPointsV2", "referredBy"]);
 
       console.log("working on batch", i);
-      await _processBatch(users, epoch, task, poolAddr, p, supplyMultiplier);
+      await _processBatch(
+        users,
+        epoch,
+        supplyTask,
+        borrowTask,
+        poolAddr,
+        p,
+        supplyMultiplier
+      );
     } catch (error) {
       console.log("error", error);
       console.log("failure working with batch", i);
@@ -132,28 +140,37 @@ const _dailyLpPoints = async (
 
 const lock: { [chain: string]: boolean } = {};
 const _dailyLpPointsChain = async (
-  task: keyof ITaskName,
+  supplyTask: keyof IWalletUserPoints,
+  borrowTask: keyof IWalletUserPoints,
   poolAddr: string,
   p: AbstractProvider,
   supplyMultiplier: number
 ) => {
-  console.log(task, "daily lp points");
+  console.log(supplyTask, "daily lp points");
 
-  if (lock[task]) return;
-  lock[task] = true;
+  if (lock[supplyTask]) return;
+  lock[supplyTask] = true;
   try {
     const count = await WalletUser.count({});
-    await _dailyLpPoints(count, task, poolAddr, p, supplyMultiplier);
+    await _dailyLpPoints(
+      count,
+      supplyTask,
+      borrowTask,
+      poolAddr,
+      p,
+      supplyMultiplier
+    );
   } catch (error) {
-    console.log(task, "cron failed beacuse of", error);
+    console.log(supplyTask, "cron failed beacuse of", error);
   }
-  lock[task] = false;
+  lock[supplyTask] = false;
 };
 
 // manta
 export const mantaCron = async () => {
   return _dailyLpPointsChain(
-    "manta",
+    "supplyManta",
+    "borrowManta",
     nconf.get("MANTA_POOL"),
     mantaProvider,
     1
@@ -163,7 +180,8 @@ export const mantaCron = async () => {
 // zksync
 export const zksyncCron = async () => {
   return _dailyLpPointsChain(
-    "zksync",
+    "supply",
+    "borrow",
     nconf.get("ZKSYNC_POOL"),
     zksyncProvider,
     1
@@ -173,7 +191,8 @@ export const zksyncCron = async () => {
 // blast
 export const blastCron = async () => {
   return _dailyLpPointsChain(
-    "blast",
+    "supplyBlast",
+    "borrowBlast",
     nconf.get("BLAST_POOL"),
     blastProvider,
     1
@@ -183,7 +202,8 @@ export const blastCron = async () => {
 // linea
 export const lineaCron = async () => {
   return _dailyLpPointsChain(
-    "linea",
+    "supplyLinea",
+    "borrowLinea",
     nconf.get("LINEA_POOL"),
     lineaProvider,
     1
@@ -193,7 +213,8 @@ export const lineaCron = async () => {
 // etherum Lrt
 export const ethereumLrtCron = async () => {
   return _dailyLpPointsChain(
-    "eth-lrt",
+    "supplyEthereumLrt",
+    "borrowEthereumLrt",
     nconf.get("ETH_LRT_POOL"),
     ethLrtProvider,
     1
@@ -203,7 +224,8 @@ export const ethereumLrtCron = async () => {
 // xlayer
 export const xLayerCron = async () => {
   return _dailyLpPointsChain(
-    "xlayer",
+    "supplyXLayer",
+    "borrowXLayer",
     nconf.get("OKX_POOL"),
     xLayerProvider,
     2
