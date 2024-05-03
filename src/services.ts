@@ -4,10 +4,6 @@ import { dailyLpPoints } from "./cron/dailyLpPoints";
 import { updateUsersRank } from "./cron/updateRank";
 import { updatePythPoints } from "./scripts/updatePythPoints";
 import { updateMantaPoints } from "./scripts/updateMantaPoints";
-import {
-  addSupplyBorrowUsers,
-  addSupplyBorrowUsersManta,
-} from "./scripts/newSupplyBorrowUsers";
 import "./bots/gm";
 import {
   mantaCron,
@@ -17,6 +13,7 @@ import {
   blastCron,
   xLayerCron,
 } from "./cron/dailyLpPointsChain.v2";
+import { addUsers } from "./scripts/newSupplyBorrowUsers";
 // connect to database
 open();
 
@@ -66,8 +63,13 @@ cron.schedule("0 5 * * * *", async () => {
 });
 
 cron.schedule("0 6 * * * *", async () => {
-  console.log("running linea lp points every day at 5 am");
+  console.log("running xLayer lp points every day at 6 am");
   await xLayerCron();
+});
+
+cron.schedule("0 1 * * *", async () => {
+  console.log("adding new wallet users every day at 9 am");
+  await addUsers();
 });
 
 // cron.schedule("0 6 * * * *", async () => {
@@ -98,9 +100,9 @@ cron.schedule("0 6 * * * *", async () => {
 // updatePythPoints();
 // updateWalletAddresses();
 
-setTimeout(() => zksyncCron(), 0);
-setTimeout(() => lineaCron(), 0);
-setTimeout(() => mantaCron(), 0);
-setTimeout(() => xLayerCron(), 0);
-setTimeout(() => blastCron(), 0);
-setTimeout(() => ethereumLrtCron(), 0);
+// setTimeout(() => zksyncCron(), 0);
+// setTimeout(() => lineaCron(), 0);
+// setTimeout(() => mantaCron(), 0);
+// setTimeout(() => xLayerCron(), 0);
+// setTimeout(() => blastCron(), 0);
+// setTimeout(() => ethereumLrtCron(), 0);
