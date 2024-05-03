@@ -27,8 +27,8 @@ cron.schedule("0 8 * * *", async () => {
   await updateUsersRank();
 });
 
-cron.schedule("0 15 * * 4", async () => {
-  console.log("updating pyth points every Thursday at 3 PM minutes");
+cron.schedule("0 15 * * 5", async () => {
+  console.log("updating pyth points every Friday at 3 PM minutes");
   await updatePythPoints();
 });
 
