@@ -8,7 +8,7 @@ export const addUsers = async () => {
   console.log("Starting add new users process...");
   const baseUrl =
     "https://api.goldsky.com/api/public/project_clsk1wzatdsls01wchl2e4n0y/subgraphs/";
-  const apiManta = baseUrl + "zerolend-manta/1.0.0/gn";
+  const apiManta = baseUrl + "zerolend-m/1.0.0/gn";
   const apiZKSync = baseUrl + "zerolend-zksync/1.0.0/gn";
   const apiEth = baseUrl + "zerolend-mainnet-lrt/1.0.0/gn";
   const apiLinea = baseUrl + "zerolend-linea/1.0.0/gn";
@@ -121,12 +121,8 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
   const addressesToInsert = [];
   do {
     const graphQuery = `query {
-      users(
-        where: {lastUpdateTimestamp_gte: 1710282994, id_gt: "0x0000000000000000000000000000000000000000"},
-        skip: ${skip}
-      ) {
+      users(first: ${first}, skip: ${skip}) {
         id
-        lastUpdateTimestamp
       }
     }`;
     const headers = {
