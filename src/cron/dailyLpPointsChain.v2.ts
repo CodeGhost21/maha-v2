@@ -99,7 +99,7 @@ const _dailyLpPoints = async (
   p: AbstractProvider,
   supplyMultiplier: number
 ) => {
-  const epoch = getEpoch() - 2;
+  const epoch = getEpoch();
   console.log("working with epoch", epoch);
 
   const query = {
