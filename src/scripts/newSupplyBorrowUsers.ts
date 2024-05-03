@@ -55,7 +55,7 @@ export const addUsers = async () => {
     console.log("adding Blast users failed with error:", e);
   }
 
-  // X layer
+  // // X layer
   try {
     console.log("adding x layer wallet users");
     await addSupplyBorrowUsers(apiXLayer);
@@ -74,7 +74,7 @@ export const executeAddSupplyBorrowUsers = async (
   console.log("addresses to insert", addressesToInsert.length);
   let rank = await WalletUser.count();
   for (let i = 0; i < addressesToInsert.length; i = i + batchSize) {
-  const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+    const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
     console.log("initial user bulk write", userBulkWrites.length);
     const batchAddresses = addressesToInsert.slice(i, i + batchSize);
     batchAddresses.forEach((address) => {
@@ -180,6 +180,7 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
       console.log("No users to add");
       return;
     }
+
     const addresses = batch.data.data.users.map((user: any) => user.id);
     const existingAddresses = (
       await WalletUser.find(

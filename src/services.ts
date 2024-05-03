@@ -63,12 +63,12 @@ cron.schedule("0 5 * * * *", async () => {
 });
 
 cron.schedule("0 6 * * * *", async () => {
-  console.log("running linea lp points every day at 5 am");
+  console.log("running xLayer lp points every day at 6 am");
   await xLayerCron();
 });
 
 cron.schedule("0 1 * * *", async () => {
-  console.log("adding new wallet users every day at 1 am");
+  console.log("adding new wallet users every day at 9 am");
   await addUsers();
 });
 
@@ -100,9 +100,9 @@ cron.schedule("0 1 * * *", async () => {
 // updatePythPoints();
 // updateWalletAddresses();
 
-setTimeout(() => zksyncCron(), 0);
-setTimeout(() => lineaCron(), 0);
-setTimeout(() => mantaCron(), 0);
-setTimeout(() => xLayerCron(), 0);
-setTimeout(() => blastCron(), 0);
-setTimeout(() => ethereumLrtCron(), 0);
+// setTimeout(() => zksyncCron(), 0);
+// setTimeout(() => lineaCron(), 0);
+// setTimeout(() => mantaCron(), 0);
+// setTimeout(() => xLayerCron(), 0);
+// setTimeout(() => blastCron(), 0);
+// setTimeout(() => ethereumLrtCron(), 0);
