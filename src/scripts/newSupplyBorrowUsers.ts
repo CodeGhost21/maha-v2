@@ -69,36 +69,49 @@ export const addUsers = async () => {
 export const executeAddSupplyBorrowUsers = async (
   addressesToInsert: string[]
 ) => {
-  const usersCount = await WalletUser.count();
-  let rank = usersCount;
+  // let rank = usersCount;
+  const batchSize = 100000;
+  console.log("addresses to insert", addressesToInsert.length);
+  let rank = await WalletUser.count();
+  for (let i = 0; i < addressesToInsert.length; i = i + batchSize) {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-  addressesToInsert.forEach((address) => {
-    rank = rank + 1;
-    const referralCode = _generateReferralCode();
-    const user = new WalletUser({
-      walletAddress: address.toLowerCase().trim(),
-      referralCode,
-      rank: rank,
-      isDeleted: false,
+    console.log("initial user bulk write", userBulkWrites.length);
+    const batchAddresses = addressesToInsert.slice(i, i + batchSize);
+    batchAddresses.forEach((address) => {
+      rank = rank + 1;
+      // console.log(rank)
+      const referralCode = _generateReferralCode();
+      const user = new WalletUser({
+        walletAddress: address.toLowerCase().trim(),
+        referralCode,
+        rank: rank,
+        isDeleted: false,
+      });
+      userBulkWrites.push({
+        insertOne: {
+          document: user,
+        },
+      });
     });
-    userBulkWrites.push({
-      insertOne: {
-        document: user,
-      },
-    });
-  });
 
-  if (userBulkWrites.length > 0) {
-    try {
-      // Execute bulk write operations
-      await WalletUser.bulkWrite(userBulkWrites);
-      console.log("Bulk write operations executed successfully.");
-    } catch (error) {
-      console.error("Error executing bulk write operations:", error);
+    if (userBulkWrites.length > 0) {
+      try {
+        // Execute bulk write operations
+        console.log("writing ", userBulkWrites.length, "entries to db");
+        await WalletUser.bulkWrite(userBulkWrites);
+        const remaining = addressesToInsert.length - (i + batchSize);
+        console.log(
+          "Bulk write operations executed successfully.Remaining addresses to write",
+          remaining > 0 ? remaining : 0
+        );
+      } catch (error) {
+        console.error("Error executing bulk write operations:", error);
+      }
+    } else {
+      console.log("No new users to insert.");
     }
-  } else {
-    console.log("No new users to insert.");
   }
+  console.log("Bulk write operations executed successfully.");
 };
 
 export const addSupplyBorrowUsersManta = async (queryURL: string) => {
