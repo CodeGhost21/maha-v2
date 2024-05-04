@@ -7,7 +7,10 @@ export const main = async () => {
   let skip = 0;
   let batch;
   do {
-    batch = await WalletUser.find({ isDeleted: false })
+    batch = await WalletUser.find({
+      isDeleted: false,
+      totalPointsV2: { $ne: 0, $gt: 0 },
+    })
       .select("walletAddress points totalPointsV2")
       .skip(skip)
       .limit(batchSize);
