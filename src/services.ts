@@ -28,7 +28,7 @@ cron.schedule("0 8 * * *", async () => {
 });
 
 cron.schedule("0 15 * * 5", async () => {
-  console.log("updating pyth points every Thursday at 3 PM minutes");
+  console.log("updating pyth points every Friday at 3 PM minutes");
   await updatePythPoints();
 });
 
@@ -67,7 +67,7 @@ cron.schedule("0 6 * * * *", async () => {
   await xLayerCron();
 });
 
-cron.schedule("0 1 * * *", async () => {
+cron.schedule("0 9 * * *", async () => {
   console.log("adding new wallet users every day at 9 am");
   await addUsers();
 });
