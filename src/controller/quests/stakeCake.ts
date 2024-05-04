@@ -14,7 +14,6 @@ export const getCakeStakeData = async (walletAddress: string) => {
     CakePoolABI,
     provider
   );
-  
   const userInfo = await contract.balanceOf(walletAddress);
   return Number(userInfo) / 1e18;
 };
@@ -29,12 +28,12 @@ export const updateCakeStake = async (addresses: string[]) => {
     provider
   );
 
-  const results = await Promise.all(addresses.map((w) => pool.userInfo(w)));
+  const results = await Promise.all(addresses.map((w) => pool.balanceOf(w)));
 
   return results.map((userInfoData: bigint[], index) => {
     return {
       address: addresses[index],
-      stakedAmount: Number(userInfoData[8]) / 1e18,
+      stakedAmount: Number(userInfoData) / 1e18,
     };
   });
 };

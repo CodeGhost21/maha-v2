@@ -31,7 +31,7 @@ export const updateMAHAStake = async (addresses: string[]) => {
   return results.map((userInfoData: bigint[], index) => {
     return {
       address: addresses[index],
-      stakedAmount: Number(userInfoData[8]) / 1e18,
+      stakedAmount: Number(userInfoData) / 1e18,
     };
   });
 };

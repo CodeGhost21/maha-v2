@@ -1,50 +1,51 @@
 import _ from "underscore";
-import { updateCakeStake } from "../controller/quests/stakeCake";
 import { IAssignPointsTask } from "../controller/quests/assignPoints";
 import { WalletUser } from "../database/models/walletUsers";
 import { updatePoints } from "./updatePoints";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
-import { stakePtsPerCake } from "../controller/quests/constants";
+import { updateMAHAStake } from "../controller/quests/stakeMAHA";
+import { stakePtsPerMAHA } from "../controller/quests/constants";
 
-export const updateCakeStakers = async () => {
+export const updateMahaXPoints = async () => {
   const batchSize = 1000;
   let skip = 0;
   let batch;
-
   do {
     batch = await WalletUser.find({
       walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
       isDeleted: false,
     })
       .skip(skip)
-      .limit(batchSize);
-    const addresses: string[] = batch.map((u) => u.walletAddress) as string[];
-    const result = await updateCakeStake(addresses);
+      .limit(batchSize); // Use lean() to get plain JavaScript objects instead of Mongoose documents
+    // console.log("batch", batch);
     const tasks: IAssignPointsTask[] = [];
+    const addresses: string[] = batch.map((u) => u.walletAddress);
+    const result = await updateMAHAStake(addresses);
     for (const user of batch) {
-      const cakeData: any = result.find(
+      const mahaXData: any = result.find(
         (item) =>
           item.address.toLowerCase().trim() ===
           user.walletAddress.toLowerCase().trim()
       );
-      if (!cakeData) continue;
 
-      const latestPoints = cakeData.stakedAmount * stakePtsPerCake;
-      const oldPythPoints = Number(user.points.CakeStaker) || 0;
-      let previousPoints = oldPythPoints;
+      if (!mahaXData) continue;
+
+      const latestPoints = mahaXData.stakedAmount * stakePtsPerMAHA;
+      const oldMahaXPoints = Number(user.points.MahaXStaker) || 0;
+      let previousPoints = oldMahaXPoints;
       let previousReferralPoints = 0;
-      let stakedAmountDiff = latestPoints - oldPythPoints;
+      let stakedAmountDiff = latestPoints - oldMahaXPoints;
 
       if (user.referredBy) {
-        previousPoints = oldPythPoints / 1.2;
-        previousReferralPoints = oldPythPoints - previousPoints;
+        previousPoints = oldMahaXPoints / 1.2;
+        previousReferralPoints = oldMahaXPoints - previousPoints;
         stakedAmountDiff = (latestPoints * 1e18 - previousPoints * 1e18) / 1e18;
       }
       if (stakedAmountDiff !== 0) {
         const pointsAction = stakedAmountDiff > 0 ? "added" : "subtracted";
         const pointsMessage = `${pointsAction} ${Math.abs(
           stakedAmountDiff
-        )} CakeStakers points from user ${user.walletAddress}`;
+        )} MahaXStakers points from user ${user.walletAddress}`;
         //assign points logic
         const t = await updatePoints(
           user._id,
@@ -53,7 +54,7 @@ export const updateCakeStakers = async () => {
           previousReferralPoints,
           pointsMessage,
           pointsAction === "added" ? true : false,
-          "CakeStaker"
+          "MahaXStaker"
         );
         if (t) tasks.push(t);
       } else {
