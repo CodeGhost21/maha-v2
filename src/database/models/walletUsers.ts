@@ -53,6 +53,7 @@ export interface IWalletUserPoints {
   supplyEthereumLrtEzEth: number;
   supplyEthereumLrtRsEth: number;
   supplyZkSyncLido: number;
+  miscellaneousPoints: number;
   // total: number;
 }
 
