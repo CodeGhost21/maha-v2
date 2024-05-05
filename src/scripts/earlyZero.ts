@@ -182,7 +182,7 @@ const getEarlyZeroBalance = async (
   earlyZeroContractAddress: string,
   incentiveControllerAddress: string,
   aTokens: string[],
-  variableDebtToken: string[],
+  variableDebtTokens: string[],
   walletAddresses: string[],
   chain: string,
   p: AbstractProvider
@@ -203,15 +203,13 @@ const getEarlyZeroBalance = async (
     walletAddresses.map(async (w) => {
       const earlyZeroBalanceSupply = await earlyZeroContract.balanceOf(w);
       const earlyZeroBalance = Number(earlyZeroBalanceSupply) / 1e18;
-      let claimableAmount = BigInt(0);
-      const claimableAmounts =
-        await incentiveControllerContract.getAllUserRewards(
-          [...aTokens, ...variableDebtToken],
-          w
-        );
-      claimableAmounts.unclaimedAmounts.forEach((element: any) => {
-        claimableAmount += BigInt(element);
-      });
+
+      const claimableAmount = await incentiveControllerContract.getUserRewards(
+        [...aTokens, ...variableDebtTokens],
+        w,
+        earlyZeroContractAddress
+      );
+
       return {
         who: w,
         claimedRewards: earlyZeroBalance,
