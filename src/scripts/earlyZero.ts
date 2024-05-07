@@ -187,15 +187,18 @@ const getEarlyZeroBalance = async (
   chain: string,
   p: AbstractProvider
 ) => {
+  //@ts-ignore
   const provider = MulticallWrapper.wrap(p);
   const earlyZeroContract = new ethers.Contract(
     earlyZeroContractAddress,
     EarlyZeroABI,
+    //@ts-ignore
     provider
   );
   const incentiveControllerContract = new ethers.Contract(
     incentiveControllerAddress,
     IncentiveControllerABI,
+    //@ts-ignore
     provider
   );
 
@@ -249,7 +252,7 @@ export const main = async () => {
       skip += batchSize;
     } while (walletUsersBatch.length === batchSize);
   }
-  console.log("completed.")
+  console.log("completed.");
 };
 
 //write csv file

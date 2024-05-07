@@ -33,6 +33,7 @@ export const getPriceCoinGecko = async () => {
         "renzo-restaked-eth",
         "lido-dao",
         "kelp-dao-restaked-eth",
+        "zerolend",
       ],
       vs_currencies: ["usd"],
     });
@@ -41,6 +42,7 @@ export const getPriceCoinGecko = async () => {
       ezETH: data.data["renzo-restaked-eth"].usd,
       lido: data.data["lido-dao"].usd,
       rsEth: data.data["kelp-dao-restaked-eth"].usd,
+      zerolend: data.data.zerolend.usd,
     };
     cache.set("coingecko:PriceList", priceList, 60 * 60);
     return priceList;
