@@ -1,5 +1,5 @@
 export interface IAsset {
-  eth: number;
+  eth?: number;
   usdc?: number;
   usdt?: number;
   manta?: number;
