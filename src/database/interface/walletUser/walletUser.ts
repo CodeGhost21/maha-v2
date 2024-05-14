@@ -3,7 +3,7 @@ import { IWalletUserPoints } from "./walletUserPoints";
 export interface IWalletUser {
   discordId: string;
   jwt: string;
-  rank: number; 
+  rank: number;
   referralCode: string[];
   referredBy: string;
   totalPoints: number;
@@ -12,5 +12,7 @@ export interface IWalletUser {
   epoch: number;
   points: IWalletUserPoints;
   pointsUpdateTimestamp: IWalletUserPoints;
+  pointsPerSecond: IWalletUserPoints;
+  pointsPerSecondUpdateTimestamp: IWalletUserPoints;
   epochs: IWalletUserPoints;
 }

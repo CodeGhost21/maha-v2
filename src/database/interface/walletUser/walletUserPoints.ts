@@ -1,9 +1,9 @@
 import { IAsset } from "./assets";
 
 export interface IWalletUserPoints {
-  discordFollow: number;
-  gm: number;
-  referral: number;
+  discordFollow?: number;
+  gm?: number;
+  referral?: number;
   supplyZkSync?: IAsset;
   borrowZkSync?: IAsset;
   supplyManta?: IAsset;
@@ -14,6 +14,6 @@ export interface IWalletUserPoints {
   borrowLinea?: IAsset;
   supplyXLayer?: IAsset;
   borrowXLayer?: IAsset;
-  supplyEthereumLrt?: number;
-  borrowEthereumLrt?: number;
+  supplyEthereumLrt?: IAsset;
+  borrowEthereumLrt?: IAsset;
 }
