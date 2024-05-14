@@ -1,19 +1,17 @@
 import {
-  IWalletUser,
   IWalletUserModel,
-  IWalletUserPoints,
   WalletUser,
 } from "../../database/models/walletUsers";
-import {
-  IUserPointTransactions,
-  UserPointTransactions,
-} from "../../database/models/userPointTransactions";
+import { UserPointTransactions } from "../../database/models/userPointTransactions";
 import { referralPercent } from "./constants";
 import { AnyBulkWriteOperation } from "mongodb";
+import { IWalletUser } from "src/database/interface/walletUser/walletUser";
+import { IUserPointTransactions } from "src/database/interface/userPoints/userPointsTransactions";
+import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
 
 export interface IAssignPointsTask {
   userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];
-  pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[];
+  // pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[];
   execute: () => Promise<void>;
 }
 
@@ -32,7 +30,7 @@ export const assignPoints = async (
   const user = await WalletUser.findById(userId);
   if (!user) return;
 
-  const previousPoints = Number(user.totalPointsV2) || 0;
+  const previousPoints = Number(user.totalPoints) || 0;
   let latestPoints = Number(points) || 0;
   let newMessage = message;
 
@@ -41,7 +39,6 @@ export const assignPoints = async (
   if (user.referredBy) {
     const referredByUser = await WalletUser.findOne({
       _id: user.referredBy,
-      isDeleted: false,
     });
     if (referredByUser) {
       const referralPoints = Number(points * referralPercent) || 0;
@@ -69,7 +66,7 @@ export const assignPoints = async (
           update: {
             $inc: {
               ["points.referral"]: referralPoints,
-              totalPointsV2: referralPoints,
+              totalPoints: referralPoints,
             },
             $set: {
               ["pointsUpdateTimestamp.referral"]: Date.now(),
@@ -99,12 +96,12 @@ export const assignPoints = async (
       update: {
         $inc: {
           [`points.${taskId}`]: latestPoints,
-          totalPointsV2: latestPoints,
+          totalPoints: latestPoints,
         },
         $set: {
           epoch: epoch || user.epoch,
           [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
-          [`checked.${taskId}`]: true,
+          // [`checked.${taskId}`]: true,
         },
       },
     },
@@ -132,14 +129,13 @@ export const assignPointsV2 = async (
 
   if (!user || !user.id) return;
 
-  const previousPoints = Number(user.totalPointsV2) || 0;
+  const previousPoints = Number(user.totalPoints) || 0;
   let latestPoints = Number(points) || 0;
   let newMessage = message;
 
   if (user.referredBy) {
     const referredByUser = await WalletUser.findOne({
       _id: user.referredBy,
-      isDeleted: false,
     }).select(["points", "_id", "id"]);
 
     if (referredByUser) {
@@ -168,7 +164,7 @@ export const assignPointsV2 = async (
           update: {
             $inc: {
               ["points.referral"]: referralPoints,
-              totalPointsV2: referralPoints,
+              totalPoints: referralPoints,
             },
             $set: {
               ["pointsUpdateTimestamp.referral"]: Date.now(),
@@ -198,13 +194,13 @@ export const assignPointsV2 = async (
       filter: { _id: user.id },
       update: {
         $inc: {
-          [`points.${key}`]: latestPoints,
-          totalPointsV2: latestPoints,
+          [`points.${key}`]: latestPoints, // points.chain.asset
+          totalPoints: latestPoints,
         },
         $set: {
           epoch: epoch || user.epoch,
           [`pointsUpdateTimestamp.${key}`]: Date.now(),
-          [`checked.${key}`]: true,
+          // [`checked.${key}`]: true,
           [`epochs.${key}`]: epoch || epochs[key] || 0,
         },
       },
@@ -220,3 +216,85 @@ export const assignPointsV2 = async (
     },
   };
 };
+
+export const assignPointsToBatch = async (
+  users: IWalletUserModel[],
+  pointsData: Map<any, any>,
+  task: string,
+  message: string,
+  isAdd: boolean,
+  epoch?: number
+): Promise<IAssignPointsTask | undefined> => {
+  const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+
+  if (!users || !users.length) return;
+
+  users.map((user) => {
+    const latestPoints = pointsData.get(user.walletAddress);
+    const Keys = Object.keys(latestPoints);
+    const pointsPerSecond: { [key: string]: number } = {};
+
+    if (Keys.length) {
+      Keys.forEach((key) => {
+        pointsPerSecond[`pointsPerSecond.${task}.${key}`] =
+          latestPoints[key] / 86400;
+      });
+    }
+
+    userBulkWrites.push({
+      updateOne: {
+        filter: { _id: user.id },
+        update: {
+          $set: {
+            ...pointsPerSecond,
+            epoch: epoch || user.epoch,
+          },
+        },
+      },
+    });
+  });
+
+  return {
+    userBulkWrites,
+    execute: async () => {
+      await WalletUser.bulkWrite(userBulkWrites);
+    },
+  };
+};
+
+// TODO remove below
+// export const assignPointsLP = async (
+//   userId: string,
+//   points: number,
+//   isAdd: boolean,
+//   taskId: keyof IWalletUserPoints,
+//   epoch?: number
+// ): Promise<IAssignPointsTask | undefined> => {
+//   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+//   const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
+
+//   const user = await WalletUser.findById(userId);
+//   if (!user) return;
+
+//   const latestPoints = Number(points) || 0;
+
+//   userBulkWrites.push({
+//     updateOne: {
+//       filter: { _id: user.id },
+//       update: {
+//         $set: {
+//           [`pointsPerSecond.${taskId}`]: latestPoints / 86400,
+//           epoch: epoch || user.epoch,
+//         },
+//       },
+//     },
+//   });
+//   return {
+//     userBulkWrites,
+//     pointsBulkWrites,
+//     execute: async () => {
+//       await WalletUser.bulkWrite(userBulkWrites);
+//       await UserPointTransactions.bulkWrite(pointsBulkWrites);
+//     },
+//   };
+// };

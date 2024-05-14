@@ -2,18 +2,12 @@ import axios from "axios";
 import { AnyBulkWriteOperation } from "mongodb";
 
 import { _generateReferralCode } from "../controller/user";
-import { WalletUser, IWalletUser } from "../database/models/walletUsers";
+import { WalletUser } from "../database/models/walletUsers";
+import { IWalletUser } from "src/database/interface/walletUser/walletUser";
+import { apiBlast, apiEth, apiLinea, apiManta, apiXLayer, apiZKSync } from "src/controller/quests/constants";
 
 export const addUsers = async () => {
   console.log("Starting add new users process...");
-  const baseUrl =
-    "https://api.goldsky.com/api/public/project_clsk1wzatdsls01wchl2e4n0y/subgraphs/";
-  const apiManta = baseUrl + "zerolend-m/1.0.0/gn";
-  const apiZKSync = baseUrl + "zerolend-zksync/1.0.0/gn";
-  const apiEth = baseUrl + "zerolend-mainnet-lrt/1.0.0/gn";
-  const apiLinea = baseUrl + "zerolend-linea/1.0.0/gn";
-  const apiBlast = baseUrl + "zerolend-blast/1.0.0/gn";
-  const apiXLayer = baseUrl + "zerolend-xlayer/1.0.0/gn";
 
   //manta
   try {
@@ -85,7 +79,6 @@ export const executeAddSupplyBorrowUsers = async (
         walletAddress: address.toLowerCase().trim(),
         referralCode,
         rank: rank,
-        isDeleted: false,
       });
       userBulkWrites.push({
         insertOne: {
@@ -136,7 +129,6 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
           (address: string) => address.toLowerCase().trim() //new RegExp("^" + address + "$", "i")
         ),
       },
-      isDeleted: false,
     });
     const existingAddresses = existingUsers.map((user) => user.walletAddress);
     const newAddresses = addresses.filter(
@@ -186,7 +178,6 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
               address.toLowerCase().trim()
             ),
           },
-          isDeleted: false,
         },
         { walletAddress: 1 }
       )

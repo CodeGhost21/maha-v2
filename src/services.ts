@@ -20,21 +20,18 @@ open();
 //   await dailyLpPoints();
 // });
 
+
 cron.schedule("0 8 * * *", async () => {
   console.log("updating rank every day at 8am");
   await updateUsersRank();
 });
 
-// cron.schedule("0 15 * * 5", async () => {
-//   console.log("updating pyth points every Friday at 3 PM minutes");
-//   await updatePythPoints();
-// });
+cron.schedule("0 9 * * *", async () => {
+  console.log("adding new wallet users every day at 9 am");
+  await addUsers();
+});
 
-// cron.schedule("0 15 * * 6", async () => {
-//   console.log("updating manta points every saturday at 3 PM minutes");
-//   await updateMantaPoints();
-// });
-
+// updateLPRate
 cron.schedule("0 1 * * * *", async () => {
   console.log("running zksyn lp points every day at 1 am");
   await zksyncCron();
@@ -65,42 +62,3 @@ cron.schedule("0 6 * * * *", async () => {
   await xLayerCron();
 });
 
-cron.schedule("0 9 * * *", async () => {
-  console.log("adding new wallet users every day at 9 am");
-  await addUsers();
-});
-
-// cron.schedule("0 6 * * * *", async () => {
-//   console.log("running xLayer lp points every day at 6 am");
-//   await xLayerCron();
-// });
-// cron.schedule("0 1 * * *", async () => {
-//   console.log("adding new wallet users every day at 1 am");
-
-//   //manta
-//   await addSupplyBorrowUsersManta();
-
-//   //zksync
-//   await addSupplyBorrowUsers(
-//     "https://api.studio.thegraph.com/query/49970/zerolend/version/latest"
-//   );
-//   //ethereum
-//   await addSupplyBorrowUsers(
-//     "https://api.studio.thegraph.com/query/65585/zerolend-ethereum-lrt-market/version/latest"
-//   );
-//   //linea
-//   await addSupplyBorrowUsers(
-//     "https://api.studio.thegraph.com/query/65585/zerolend-linea-market/version/latest"
-//   );
-// });
-// updateRank();
-// dailyLpPoints();
-// updatePythPoints();
-// updateWalletAddresses();
-
-// setTimeout(() => zksyncCron(), 0);
-// setTimeout(() => lineaCron(), 0);
-// setTimeout(() => mantaCron(), 0);
-// setTimeout(() => xLayerCron(), 0);
-// setTimeout(() => blastCron(), 0);
-// setTimeout(() => ethereumLrtCron(), 0);

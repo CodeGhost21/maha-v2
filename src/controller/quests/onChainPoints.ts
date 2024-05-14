@@ -23,6 +23,7 @@ import poolABI from "../../abis/Pool.json";
 import stabilityPool from "../../abis/StabilityPool.json";
 import troveManagerABI from "../../abis/TroveManager.json";
 import cache from "../../utils/cache";
+import { IWalletUserModel } from "src/database/models/walletUsers";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -61,9 +62,11 @@ const getContract = async (
 };
 
 //manta
-export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
+export const supplyBorrowPointsMantaMulticall = async (
+  userBatch: IWalletUserModel[]
+) => {
   return supplyBorrowPointsMulticall(
-    addresses,
+    userBatch,
     nconf.get("MANTA_POOL"),
     mantaProvider,
     1
@@ -72,10 +75,10 @@ export const supplyBorrowPointsMantaMulticall = async (addresses: string[]) => {
 
 //zksync
 export const supplyBorrowPointsZksyncMulticall = async (
-  addresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   return supplyBorrowPointsMulticall(
-    addresses,
+    userBatch,
     nconf.get("ZKSYNC_POOL"),
     zksyncProvider,
     1
@@ -83,9 +86,11 @@ export const supplyBorrowPointsZksyncMulticall = async (
 };
 
 //blast
-export const supplyBorrowPointsBlastMulticall = async (addresses: string[]) => {
+export const supplyBorrowPointsBlastMulticall = async (
+  userBatch: IWalletUserModel[]
+) => {
   return supplyBorrowPointsMulticall(
-    addresses,
+    userBatch,
     nconf.get("BLAST_POOL"),
     blastProvider,
     1
@@ -93,9 +98,11 @@ export const supplyBorrowPointsBlastMulticall = async (addresses: string[]) => {
 };
 
 //linea
-export const supplyBorrowPointsLineaMulticall = async (addresses: string[]) => {
+export const supplyBorrowPointsLineaMulticall = async (
+  userBatch: IWalletUserModel[]
+) => {
   return supplyBorrowPointsMulticall(
-    addresses,
+    userBatch,
     nconf.get("LINEA_POOL"),
     lineaProvider,
     1
@@ -104,10 +111,10 @@ export const supplyBorrowPointsLineaMulticall = async (addresses: string[]) => {
 
 //etherum Lrt
 export const supplyBorrowPointsEthereumLrtMulticall = async (
-  addresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   return supplyBorrowPointsMulticall(
-    addresses,
+    userBatch,
     nconf.get("ETH_LRT_POOL"),
     ethLrtProvider,
     1
@@ -116,10 +123,10 @@ export const supplyBorrowPointsEthereumLrtMulticall = async (
 
 //xlayer
 export const supplyBorrowPointsXLayerMulticall = async (
-  addresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   return supplyBorrowPointsMulticall(
-    addresses,
+    userBatch,
     nconf.get("OKX_POOL"),
     xLayerProvider,
     2
@@ -127,47 +134,106 @@ export const supplyBorrowPointsXLayerMulticall = async (
 };
 
 export const supplyBorrowPointsMulticall = async (
-  addresses: string[],
-  poolAddr: string,
+  api: string,
+  userBatch: IWalletUserModel[],
   p: AbstractProvider,
-  supplyMultiplier: number
+  supplyMultiplier: number,
 ) => {
-  const provider = MulticallWrapper.wrap(p);
-  const pool = await getContract(poolAddr, poolABI, provider);
-
-  const results = await Promise.all(
-    addresses.map((w) => pool.getUserAccountData(w))
-  );
-
-  return results.map((userAccoutnData: bigint[], index) => {
-    const supply = Number(userAccoutnData[0]) / 1e8;
-    const borrow = Number(userAccoutnData[1]) / 1e8;
-
-    if (supply < minSupplyAmount) {
-      return {
-        who: addresses[index],
-        supply: { points: 0, amount: supply },
-        borrow: { points: 0, amount: borrow },
-      };
+  try {
+    let marketPrice: any = await cache.get("coingecko:PriceList");
+    if (!marketPrice) {
+      marketPrice = await getPriceCoinGecko();
     }
-
-    // const multiplier = 5; // 5 days
-    // const multiplier = 0.25; // 6 hours
-    const multiplier = 1; // 1 day
-
-    return {
-      who: addresses[index],
-      supply: {
-        points: supply * multiplier * supplyMultiplier,
-        amount: supply,
-      },
-      borrow: { points: borrow * multiplier * borrowPtsPerUSD, amount: borrow },
+    const currentBlock = p.getBlockNumber(); // TODO: try eliminating this
+    const graphQuery = `query {
+      userReserves(
+        block: {number: ${currentBlock}}
+        where: {
+          and: [
+            {
+              or: [
+                { currentTotalDebt_gt: 0 },
+                { currentATokenBalance_gt: 0 }
+              ]
+            },
+            {user_in: ${userBatch.map((u) => u.walletAddress)}},
+          ]
+        }
+      ) {
+        user {
+          id
+        }
+        currentTotalDebt
+        currentATokenBalance
+        reserve {
+          underlyingAsset
+          symbol
+          name
+        }
+      }
+    }`;
+    const headers = {
+      "Content-Type": "application/json",
     };
-  });
+    const data = await axios.post(api, { query: graphQuery }, { headers });
+    const result = data.data.userReserves;
+
+    const supply = new Map();
+    const borrow = new Map();
+
+    // TODO: confirm if balance*coinGecko price is required for both borrow and supply
+    result.map((userReserve: any) => {
+      const supplyData = supply.get(userReserve.user.id) || {};
+      supplyData[userReserve.reserve.symbol.toLowerCase()] =
+        userReserve.currentATokenBalance *
+        marketPrice[`${userReserve.reserve.symbol}`] *
+        supplyMultiplier; // TODO: confirm supplyMultiplier
+      supply.set(userReserve.user.id, supplyData);
+
+      const borrowData = borrow.get(userReserve.user.id) || {};
+      borrowData[userReserve.reserve.symbol.toLowerCase()] =
+        userReserve.currentTotalDebt *
+        marketPrice[`${userReserve.reserve.symbol}`];
+      borrow.set(userReserve.user.id, borrowData);
+    });
+
+    /*
+    return
+    {
+      supply: {
+        "address1": {
+          "asset1": value1,
+          "asset2": value2,
+        }
+        "address2": {
+          "asset1": value1,
+          "asset3": value3,
+        }
+      },
+      borrow: {
+        "address1": {
+          "asset1": value1,
+          "asset2": value2,
+        }
+        "address2": {
+          "asset1": value1,
+          "asset3": value3,
+        }
+      }
+    }
+    */
+    return {
+      supply,
+      borrow,
+    };
+  } catch (error) {
+    console.log("error while fetching points");
+    throw error;
+  }
 };
 
 export const supplyBorrowPointsEthereumLrtETHMulticall = async (
-  walletAddresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   let marketPrice: any = await cache.get("coingecko:PriceList");
   if (!marketPrice) {
@@ -182,11 +248,11 @@ export const supplyBorrowPointsEthereumLrtETHMulticall = async (
   );
 
   const results = await Promise.all(
-    walletAddresses.map(async (w) => {
-      const balanceSupply = await contractDeposit.balanceOf(w);
+    userBatch.map(async (u) => {
+      const balanceSupply = await contractDeposit.balanceOf(u.walletAddress);
       const supply = (Number(balanceSupply) / 1e18) * marketPrice.ETH;
       return {
-        who: w,
+        who: u.walletAddress,
         supply: { points: supply * supplyEthEthereumLrt, amount: supply },
       };
     })
@@ -195,7 +261,7 @@ export const supplyBorrowPointsEthereumLrtETHMulticall = async (
 };
 
 export const supplyPointsLineaEzETHMulticall = async (
-  walletAddresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   let marketPrice: any = await cache.get("coingecko:PriceList");
   if (!marketPrice) {
@@ -209,11 +275,11 @@ export const supplyPointsLineaEzETHMulticall = async (
     provider
   );
   const results = await Promise.all(
-    walletAddresses.map(async (w) => {
-      const balanceSupply = await contractDeposit.balanceOf(w);
+    userBatch.map(async (u) => {
+      const balanceSupply = await contractDeposit.balanceOf(u.walletAddress);
       const supply = (Number(balanceSupply) / 1e18) * marketPrice.ezETH;
       return {
-        who: w,
+        who: u.walletAddress,
         supply: { points: supply, amount: supply },
       };
     })
@@ -222,7 +288,7 @@ export const supplyPointsLineaEzETHMulticall = async (
 };
 
 export const supplyPointsEthereumLrtEzETHMulticall = async (
-  walletAddresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   let marketPrice: any = await cache.get("coingecko:PriceList");
   if (!marketPrice) {
@@ -236,11 +302,11 @@ export const supplyPointsEthereumLrtEzETHMulticall = async (
     provider
   );
   const results = await Promise.all(
-    walletAddresses.map(async (w) => {
-      const balanceSupply = await contractDeposit.balanceOf(w);
+    userBatch.map(async (u) => {
+      const balanceSupply = await contractDeposit.balanceOf(u.walletAddress);
       const supply = (Number(balanceSupply) / 1e18) * marketPrice.ezETH;
       return {
-        who: w,
+        who: u.walletAddress,
         supply: { points: supply, amount: supply },
       };
     })
@@ -249,7 +315,7 @@ export const supplyPointsEthereumLrtEzETHMulticall = async (
 };
 
 export const supplyPointsBlastEzETHMulticall = async (
-  walletAddresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   let marketPrice: any = await cache.get("coingecko:PriceList");
   if (!marketPrice) {
@@ -264,11 +330,11 @@ export const supplyPointsBlastEzETHMulticall = async (
   );
 
   const results = await Promise.all(
-    walletAddresses.map(async (w) => {
-      const balanceSupply = await contractDeposit.balanceOf(w);
+    userBatch.map(async (u) => {
+      const balanceSupply = await contractDeposit.balanceOf(u.walletAddress);
       const supply = (Number(balanceSupply) / 1e18) * marketPrice.ezETH;
       return {
-        who: w,
+        who: u.walletAddress,
         supply: { points: supply, amount: supply },
       };
     })
@@ -277,7 +343,7 @@ export const supplyPointsBlastEzETHMulticall = async (
 };
 
 export const supplyPointsEthereumLrtRsETHMulticall = async (
-  walletAddresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   let marketPrice: any = await cache.get("coingecko:PriceList");
   if (!marketPrice) {
@@ -292,11 +358,11 @@ export const supplyPointsEthereumLrtRsETHMulticall = async (
   );
 
   const results = await Promise.all(
-    walletAddresses.map(async (w) => {
-      const balanceSupply = await contractDeposit.balanceOf(w);
+    userBatch.map(async (u) => {
+      const balanceSupply = await contractDeposit.balanceOf(u.walletAddress);
       const supply = (Number(balanceSupply) / 1e18) * marketPrice.rsEth;
       return {
-        who: w,
+        who: u.walletAddress,
         supply: { points: supply * supplyEthereumLrtEsEth, amount: supply },
       };
     })
@@ -305,7 +371,7 @@ export const supplyPointsEthereumLrtRsETHMulticall = async (
 };
 
 export const supplyPointsZksyncLidoMulticall = async (
-  walletAddresses: string[]
+  userBatch: IWalletUserModel[]
 ) => {
   let marketPrice: any = await cache.get("coingecko:PriceList");
   if (!marketPrice) {
@@ -319,11 +385,11 @@ export const supplyPointsZksyncLidoMulticall = async (
     provider
   );
   const results = await Promise.all(
-    walletAddresses.map(async (w) => {
-      const balanceSupply = await contractDeposit.balanceOf(w);
+    userBatch.map(async (u) => {
+      const balanceSupply = await contractDeposit.balanceOf(u.walletAddress);
       const supply = (Number(balanceSupply) / 1e18) * marketPrice.lido;
       return {
-        who: w,
+        who: u.walletAddress,
         supply: { points: supply * supplyZksyncLido, amount: supply },
       };
     })
