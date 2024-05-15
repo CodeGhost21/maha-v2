@@ -112,6 +112,7 @@ export const assignPoints = async (
   };
 };
 
+//need to fix this to assign points per second
 export const assignPointsPerSecondToBatch = async (
   users: IWalletUserModel[],
   pointsData: Map<any, any>,
@@ -119,13 +120,19 @@ export const assignPointsPerSecondToBatch = async (
   epoch?: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+  console.log(users, pointsData);
 
   if (!users || !users.length) return;
 
   users.map((user) => {
     const latestPoints = pointsData.get(user.walletAddress);
+    console.log(128, latestPoints);
+
     const Keys = Object.keys(latestPoints);
+    console.log(131, Keys);
+
     const pointsPerSecond: { [key: string]: number } = {};
+    console.log(135, pointsPerSecond);
 
     if (Keys.length) {
       Keys.forEach((key) => {

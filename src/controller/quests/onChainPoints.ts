@@ -97,10 +97,12 @@ export const supplyBorrowPointsGQL = async (
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }
-    const currentBlock = p.getBlockNumber();
+    const currentBlock = await p.getBlockNumber();
+    console.log(currentBlock - 10); // cannot fetch data for latest block no
+
     const graphQuery = `query {
       userReserves(
-        block: {number: ${currentBlock}}
+        block: {number: ${currentBlock - 10}}
         where: {
           and: [
             {
@@ -109,7 +111,7 @@ export const supplyBorrowPointsGQL = async (
                 { currentATokenBalance_gt: 0 }
               ]
             },
-            {user_in: ${userBatch.map((u) => u.walletAddress)}},
+            {user_in: ["0x961e45e3666029709c3ac50a26319029cde4e067","0xf152da370fa509f08685fa37a09ba997e41fb65b","0x4724682104fdcbe5f8cdec1da2b9aa8a023c935b"]},
           ]
         }
       ) {
@@ -125,11 +127,12 @@ export const supplyBorrowPointsGQL = async (
         }
       }
     }`;
+
     const headers = {
       "Content-Type": "application/json",
     };
     const data = await axios.post(api, { query: graphQuery }, { headers });
-    const result = data.data.userReserves;
+    const result = data.data.data.userReserves;
 
     const supply = new Map();
     const borrow = new Map();

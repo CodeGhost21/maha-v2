@@ -1,4 +1,3 @@
-import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { supplyBorrowPointsGQL } from "../controller/quests/onChainPoints";
 import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
 import { getEpoch } from "../utils/epoch";
@@ -45,12 +44,7 @@ const _processBatch = async (
   multiplier: Multiplier
 ) => {
   try {
-    const data = await supplyBorrowPointsGQL(
-      api,
-      userBatch,
-      p,
-      multiplier
-    );
+    const data = await supplyBorrowPointsGQL(api, userBatch, p, multiplier);
 
     const tasks: IAssignPointsTask[] = [];
 
@@ -143,14 +137,7 @@ const _dailyLpPointsChain = async (
   lock[supplyTask] = true;
   try {
     const count = await WalletUserV2.count({});
-    await _dailyLpPoints(
-      api,
-      count,
-      supplyTask,
-      borrowTask,
-      p,
-      multiplier
-    );
+    await _dailyLpPoints(api, count, supplyTask, borrowTask, p, multiplier);
   } catch (error) {
     console.log(supplyTask, "cron failed beacuse of", error);
   }
