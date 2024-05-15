@@ -31,8 +31,13 @@ export const migrateUsers = async () => {
 
       console.log(user.walletAddress, user.id);
     });
-    await WalletUserV2.insertMany(batch);
-    skip += batchSize;
+    try {
+      await WalletUserV2.ensureIndexes();
+      await WalletUserV2.insertMany(batch);
+      skip += batchSize;
+    } catch (e) {
+      console.log(e);
+    }
   } while (batch.length === batchSize);
 };
 migrateUsers();
