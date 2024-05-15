@@ -1,14 +1,13 @@
 import {
   IWalletUserModel,
-  WalletUser,
-} from "../../database/models/walletUsers";
+  WalletUserV2,
+} from "../../database/models/walletUsersV2";
 import { UserPointTransactions } from "../../database/models/userPointTransactions";
 import { referralPercent } from "./constants";
 import { AnyBulkWriteOperation } from "mongodb";
 import { IWalletUser } from "src/database/interface/walletUser/walletUser";
 import { IUserPointTransactions } from "src/database/interface/userPoints/userPointsTransactions";
 import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
-import { error } from "console";
 
 export interface IAssignPointsTask {
   userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];
@@ -17,7 +16,7 @@ export interface IAssignPointsTask {
 }
 
 export const assignPoints = async (
-  userId: string,
+  user: IWalletUserModel,
   points: number,
   message: string,
   isAdd: boolean,
@@ -30,17 +29,14 @@ export const assignPoints = async (
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
 
-  const user = await WalletUser.findById(userId);
-  if (!user) return;
-
   const previousPoints = Number(user.totalPoints) || 0;
   let latestPoints = Number(points) || 0;
   let newMessage = message;
 
   if (user.referredBy) {
-    const referredByUser = await WalletUser.findOne({
+    const referredByUser = await WalletUserV2.findOne({
       _id: user.referredBy,
-    });
+    }).select("points id");
     if (referredByUser) {
       const referralPoints = Number(points * referralPercent) || 0;
       latestPoints = latestPoints + referralPoints;
@@ -110,7 +106,7 @@ export const assignPoints = async (
     userBulkWrites,
     pointsBulkWrites,
     execute: async () => {
-      await WalletUser.bulkWrite(userBulkWrites);
+      await WalletUserV2.bulkWrite(userBulkWrites);
       await UserPointTransactions.bulkWrite(pointsBulkWrites);
     },
   };
@@ -156,7 +152,7 @@ export const assignPointsPerSecondToBatch = async (
   return {
     userBulkWrites,
     execute: async () => {
-      await WalletUser.bulkWrite(userBulkWrites);
+      await WalletUserV2.bulkWrite(userBulkWrites);
     },
   };
 };

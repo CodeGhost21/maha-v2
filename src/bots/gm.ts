@@ -3,7 +3,7 @@ import nconf from "nconf";
 import { client } from "../output/discord";
 import { User } from "../database/models/user";
 import { Message } from "../database/models/message";
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 import { points } from "../controller/quests/constants";
 import { assignPoints } from "../controller/quests/assignPoints";
 
@@ -78,12 +78,13 @@ client.on("messageCreate", async (message: any) => {
 });
 
 const gmPoints = async (discordId: string) => {
-  const walletUser = await WalletUser.findOne({ discordId }).select("points id");
+  const walletUser = await WalletUserV2.findOne({ discordId }).select(
+    "points id totalPoints referredBy epoch"
+  );
   if (!walletUser) return;
-  console.log(83, walletUser.id, points.gm, "Good Morning Points", true, "gm");
 
   const tx = await assignPoints(
-    walletUser.id,
+    walletUser,
     points.gm,
     "Good Morning Points",
     true,

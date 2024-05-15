@@ -17,7 +17,7 @@ import {
   supplyPointsEthereumLrtRsETHMulticall,
 } from "../controller/quests/onChainPoints";
 import _ from "underscore";
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
+import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
 import { getEpoch } from "../utils/epoch";
 
 const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
@@ -257,7 +257,7 @@ const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
     }
 
     // once all the db operators are accumulated; write into the DB
-    await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
+    await WalletUserV2.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
     await UserPointTransactions.bulkWrite(
       _.flatten(tasks.map((r) => r.pointsBulkWrites))
     );
@@ -282,7 +282,7 @@ const _updateLPRate = async (from: number, count: number, migrate = false) => {
         epoch: { $ne: epoch },
       };
 
-  const users = await WalletUser.find(query)
+  const users = await WalletUserV2.find(query)
     .limit(count)
     .skip(from)
     .select(["walletAddress"]);
@@ -312,7 +312,7 @@ export const updateLPRate = async (migrate = false) => {
   lock = true;
 
   try {
-    const count = await WalletUser.count({});
+    const count = await WalletUserV2.count({});
     await _updateLPRate(0, count, migrate);
   } catch (error) {
     console.log("cron failed beacuse of", error);

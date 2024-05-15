@@ -1,4 +1,4 @@
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 import { AnyBulkWriteOperation } from "mongodb";
 import { referralPercent } from "../controller/quests/constants";
 import { IWalletUser } from "src/database/interface/walletUser/walletUser";
@@ -19,12 +19,12 @@ export const updateLPPointsHourly = async () => {
   console.log("----- start time for user skip ----", t1);
 
   do {
-    batch = await WalletUser.find().skip(skip).limit(batchSize);
+    batch = await WalletUserV2.find().skip(skip).limit(batchSize);
 
     for (const user of batch) {
       let referredByUser = null;
       if (user.referredBy) {
-        referredByUser = await WalletUser.findOne({
+        referredByUser = await WalletUserV2.findOne({
           _id: user.referredBy,
         }).select("id");
       }
@@ -113,7 +113,7 @@ export const updateLPPointsHourly = async () => {
       );
     }
 
-    await WalletUser.bulkWrite(userBulkWrites);
+    await WalletUserV2.bulkWrite(userBulkWrites);
     skip += batchSize;
   } while (batch.length === batchSize);
 

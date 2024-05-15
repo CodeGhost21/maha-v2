@@ -9,7 +9,7 @@ import {
   IAssignPointsTask,
   assignPointsPerSecondToBatch,
 } from "../controller/quests/assignPoints";
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
+import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
 import {
   mantaProvider,
   zksyncProvider,
@@ -97,7 +97,7 @@ const _dailyLpPoints = async (
 
   for (let i = 0; i < loops; i++) {
     try {
-      const users = await WalletUser.find(query)
+      const users = await WalletUserV2.find(query)
         .limit(chunk)
         .skip(i * chunk)
         .select(["walletAddress", "totalPoints", "referredBy"]);
@@ -134,7 +134,7 @@ const _dailyLpPointsChain = async (
   if (lock[supplyTask]) return;
   lock[supplyTask] = true;
   try {
-    const count = await WalletUser.count({});
+    const count = await WalletUserV2.count({});
     await _dailyLpPoints(
       api,
       count,

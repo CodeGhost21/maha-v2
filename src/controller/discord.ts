@@ -4,7 +4,7 @@ import passport from "passport";
 
 import axios from "axios";
 import urlJoin from "../utils/url-join";
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
+import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
 import { checkGuildMember } from "../output/discord";
 import { points } from "./quests/constants";
 import { assignPoints } from "./quests/assignPoints";
@@ -43,8 +43,10 @@ export const requestToken = async (req: Request, res: Response) => {
 
 router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   const reqUser = req.user as any;
-  const user = await WalletUser.findById(req.query.state);
-  const discordUser = await WalletUser.findOne({
+  const user = await WalletUserV2.findById(req.query.state).select(
+    "points id totalPoints referredBy epoch"
+  );
+  const discordUser = await WalletUserV2.findOne({
     discordId: req.query.state,
   }).select("id");
 
@@ -55,7 +57,7 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
     const isFollow = await checkGuildMember(reqUser.id);
     if (isFollow) {
       await assignPoints(
-        user.id,
+        user,
         points.discordFollow,
         "Discord Follower",
         true,
@@ -115,7 +117,7 @@ export const registerUser = async (
       throw new BadRequestError("Invalid Discord token. Try logging again");
 
     // check if there is an existing user
-    const existingUser = await WalletUser.findOne({
+    const existingUser = await WalletUserV2.findOne({
       discordId: data.id,
     });
     if (existingUser)
@@ -131,7 +133,7 @@ export const registerUser = async (
 
     if (isGuildMember) {
       const tx = await assignPoints(
-        user.id,
+        user,
         points.discordFollow,
         "Discord Follower",
         true,

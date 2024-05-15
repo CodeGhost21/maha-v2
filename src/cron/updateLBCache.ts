@@ -1,8 +1,8 @@
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 import cache from "../utils/cache";
 
 export const updateLBCache = async () => {
-  const allUsers = await WalletUser.find()
+  const allUsers = await WalletUserV2.find()
     .sort({ rank: 1 })
     .select(
       "referralPoints totalPointsV2 totalPoints rank walletAddress points"

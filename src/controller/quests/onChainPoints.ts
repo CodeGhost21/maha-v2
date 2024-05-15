@@ -23,7 +23,7 @@ import poolABI from "../../abis/Pool.json";
 import stabilityPool from "../../abis/StabilityPool.json";
 import troveManagerABI from "../../abis/TroveManager.json";
 import cache from "../../utils/cache";
-import { IWalletUserModel } from "src/database/models/walletUsers";
+import { IWalletUserModel } from "src/database/models/walletUsersV2";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {

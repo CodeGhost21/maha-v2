@@ -17,8 +17,8 @@ open();
 import {
   IWalletUser,
   IWalletUserPoints,
-  WalletUser,
-} from "../database/models/walletUsers";
+  WalletUserV2,
+} from "../database/models/walletUsersV2";
 
 const updateDiscordPoints = async () => {
   const discordPoints = 100;
@@ -28,7 +28,7 @@ const updateDiscordPoints = async () => {
   const skip = 0;
   let batch;
   do {
-    batch = await WalletUser.find({ isDeleted: false })
+    batch = await WalletUserV2.find({ isDeleted: false })
       .skip(skip)
       .limit(batchSize);
     for (const user of batch) {

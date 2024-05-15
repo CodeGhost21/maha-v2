@@ -4,6 +4,7 @@ export interface IWalletUserPoints {
   discordFollow?: number;
   gm?: number;
   referral?: number;
+  mahaXStaker?:number;
   supplyZkSync?: IAsset;
   borrowZkSync?: IAsset;
   supplyManta?: IAsset;

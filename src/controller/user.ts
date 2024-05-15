@@ -4,22 +4,16 @@ import { NextFunction, Request, Response } from "express";
 import nconf from "nconf";
 import { ethers } from "ethers";
 import * as jwt from "jsonwebtoken";
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
+import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
 import { SiweMessage } from "../siwe/lib/client";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import NotFoundError from "../errors/NotFoundError";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
-import { getMAHAStakeData } from "./quests/stakeMAHA";
 import {
   userLpData,
   supplyBorrowPointsGQL,
 } from "./quests/onChainPoints";
-import {
-  getMantaStakedData,
-  getMantaStakedDataAccumulate,
-  getMantaStakedDataBifrost,
-} from "./quests/stakeManta";
 import {
   apiBlast,
   apiEth,
@@ -72,7 +66,7 @@ export const walletVerify = async (
 
     //assign role
     const role = await userLpData(address);
-    const user = await WalletUser.findOne(
+    const user = await WalletUserV2.findOne(
       {
         walletAddress: address,
       },
@@ -86,10 +80,10 @@ export const walletVerify = async (
       return res.json({ success: true, user });
     }
 
-    const usersCount = await WalletUser.count();
+    const usersCount = await WalletUserV2.count();
     const referralCode = _generateReferralCode();
 
-    const newUser = await WalletUser.create({
+    const newUser = await WalletUserV2.create({
       walletAddress: address,
       rank: usersCount + 1,
       epoch: getEpoch(),
@@ -99,7 +93,7 @@ export const walletVerify = async (
 
     // referred by user added to user model
     if (req.body.referredByCode !== "") {
-      const referrer = await WalletUser.findOne(
+      const referrer = await WalletUserV2.findOne(
         {
           referralCode: req.body.referredByCode,
         },
@@ -140,7 +134,7 @@ export const getTotalUsers = async (req: Request, res: Response) => {
 
 export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const totalReferrals = await WalletUser.find({
+  const totalReferrals = await WalletUserV2.find({
     referredBy: user.id,
   }).select("totalPointsV2 walletAddress ");
 
@@ -148,50 +142,6 @@ export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
     totalReferrals: totalReferrals.length,
     referralUsers: totalReferrals,
   });
-};
-
-export const getMahaXData = async (req: Request, res: Response) => {
-  const walletAddress: string = req.query.walletAddress as string;
-  if (walletAddress && ethers.isAddress(walletAddress)) {
-    const mahaXData = await getMAHAStakeData(walletAddress);
-
-    res.json({ success: true, MAHAX: mahaXData });
-  } else {
-    res.json({
-      success: false,
-      message: "Wallet address not provided or is incorrect",
-    });
-  }
-};
-
-export const getMantaData = async (req: Request, res: Response) => {
-  const walletAddress: string = req.query.walletAddress as string;
-  if (walletAddress && ethers.isAddress(walletAddress)) {
-    const mantaData: any = await getMantaStakedData(walletAddress);
-    const mantaBifrost = await getMantaStakedDataBifrost(walletAddress);
-    const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
-    console.log(mantaData, mantaBifrost, mantaAccumulate);
-
-    const totalStaked = mantaData.success
-      ? mantaData.data.totalStakingAmount
-      : 0;
-    +mantaBifrost + mantaAccumulate;
-    // if (mantaData.success) {
-    res.json({
-      mantaData: mantaData.success ? mantaData.data.totalStakingAmount : 0,
-      mantaBifrost: mantaBifrost,
-      mantaAccumulate: mantaAccumulate,
-      totalStaked: totalStaked,
-    });
-    // } else {
-    //   res.json({ success: mantaData.success, message: mantaData.message });
-    // }
-  } else {
-    res.json({
-      success: false,
-      message: "Wallet address not provided or is incorrect",
-    });
-  }
 };
 
 export const getTotalPoints = async (req: Request, res: Response) => {
@@ -206,7 +156,7 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
-  const user: any = await WalletUser.findOne({
+  const user: any = await WalletUserV2.findOne({
     walletAddress: walletAddress.toLowerCase().trim(),
   }).select("totalPoints");
   if (!user) return res.json({ success: false, message: "no data found" });
@@ -220,11 +170,11 @@ export const getUserReferralData = async (req: Request, res: Response) => {
       success: false,
       message: "please provide referral code",
     });
-  const walletUser: IWalletUserModel = (await WalletUser.findOne({
+  const walletUser: IWalletUserModel = (await WalletUserV2.findOne({
     referralCode: referralCode,
   })) as IWalletUserModel;
   if (walletUser) {
-    const totalReferrals = await WalletUser.find({
+    const totalReferrals = await WalletUserV2.find({
       referredBy: walletUser.id,
     });
 
@@ -241,7 +191,7 @@ export const getUserReferralData = async (req: Request, res: Response) => {
 export const getReferralUsers = async (req: Request, res: Response) => {
   try {
     const user = req.user as IWalletUserModel;
-    const referralUsers = await WalletUser.find({
+    const referralUsers = await WalletUserV2.find({
       referredBy: user.id,
     })
       // .sort({
@@ -368,6 +318,7 @@ export const getLPData = async (req: Request, res: Response) => {
         blastData: blastData,
         lineaData: lineaData,
         ethereumLrt: ethereumLrt,
+        xlayerData: xlayerData,
       });
     } else {
       res.json({

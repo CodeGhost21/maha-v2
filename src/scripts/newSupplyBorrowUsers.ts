@@ -2,7 +2,7 @@ import axios from "axios";
 import { AnyBulkWriteOperation } from "mongodb";
 
 import { _generateReferralCode } from "../controller/user";
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 import { IWalletUser } from "src/database/interface/walletUser/walletUser";
 import { apiBlast, apiEth, apiLinea, apiManta, apiXLayer, apiZKSync } from "src/controller/quests/constants";
 
@@ -63,19 +63,17 @@ export const addUsers = async () => {
 export const executeAddSupplyBorrowUsers = async (
   addressesToInsert: string[]
 ) => {
-  // let rank = usersCount;
   const batchSize = 100000;
   console.log("addresses to insert", addressesToInsert.length);
-  let rank = await WalletUser.count();
+  let rank = await WalletUserV2.count();
   for (let i = 0; i < addressesToInsert.length; i = i + batchSize) {
     const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
     console.log("initial user bulk write", userBulkWrites.length);
     const batchAddresses = addressesToInsert.slice(i, i + batchSize);
     batchAddresses.forEach((address) => {
       rank = rank + 1;
-      // console.log(rank)
       const referralCode = _generateReferralCode();
-      const user = new WalletUser({
+      const user = new WalletUserV2({
         walletAddress: address.toLowerCase().trim(),
         referralCode,
         rank: rank,
@@ -91,7 +89,7 @@ export const executeAddSupplyBorrowUsers = async (
       try {
         // Execute bulk write operations
         console.log("writing ", userBulkWrites.length, "entries to db");
-        await WalletUser.bulkWrite(userBulkWrites);
+        await WalletUserV2.bulkWrite(userBulkWrites);
         const remaining = addressesToInsert.length - (i + batchSize);
         console.log(
           "Bulk write operations executed successfully.Remaining addresses to write",
@@ -123,13 +121,13 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
     };
     batch = await axios.post(queryURL, { query: graphQuery }, { headers });
     const addresses = batch.data.data.users.map((user: any) => user.id);
-    const existingUsers = await WalletUser.find({
+    const existingUsers = await WalletUserV2.find({
       walletAddress: {
         $in: addresses.map(
-          (address: string) => address.toLowerCase().trim() //new RegExp("^" + address + "$", "i")
+          (address: string) => address.toLowerCase().trim()
         ),
       },
-    });
+    }).select("walletAddress");
     const existingAddresses = existingUsers.map((user) => user.walletAddress);
     const newAddresses = addresses.filter(
       (address: string) => !existingAddresses.includes(address)
@@ -171,7 +169,7 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
 
     const addresses = batch.data.data.users.map((user: any) => user.id);
     const existingAddresses = (
-      await WalletUser.find(
+      await WalletUserV2.find(
         {
           walletAddress: {
             $in: addresses.map((address: string) =>

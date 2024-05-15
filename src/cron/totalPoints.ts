@@ -1,9 +1,9 @@
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 import cache from "../utils/cache";
 
 export const totalPoints = async () => {
   try {
-    const totalPoints = await WalletUser.aggregate([
+    const totalPoints = await WalletUserV2.aggregate([
       {
         $group: {
           _id: null,

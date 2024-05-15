@@ -10,7 +10,6 @@ import {
   fetchMe,
   getTotalUsers,
   getTotalReferralOfUsers,
-  getMantaData,
   getTotalPoints,
   getUserReferralData,
   getReferralUsers,
@@ -18,25 +17,20 @@ import {
   getUserTransactions,
   getLPData,
   getUserTotalPoints,
-  getMahaXData,
 } from "../controller/user";
-import { checkTask } from "../controller/quests/checkTask";
 
 router.post("/login", walletVerify);
 // router.get("/lb", getLeaderBoard);
-// router.get("/pyth", getPythData);
-// router.get("/manta", getMantaData);
+
 router.get("/totalUsers", getTotalUsers);
 // router.get("/totalPoints", getTotalPoints);
 router.get("/referral", getUserReferralData); // {'totalPoints': '1000
 // router.get("/info", galxeLPCheck);
 // router.get("/lpData", getLPData);
 // router.get("/userTotalPoints", getUserTotalPoints);
-// router.get("/mahax", getMahaXData);
 
 router.use(deserializeUser, ensureLoggedIn);
 router.get("/me", fetchMe);
-router.post("/check", checkTask);
 router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
 router.get("/transactions", getUserTransactions);

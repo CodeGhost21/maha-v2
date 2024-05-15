@@ -1,5 +1,5 @@
 import fs from "fs";
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 const fileName = `./userPoints.csv`;
 
 export const main = async () => {
@@ -7,7 +7,7 @@ export const main = async () => {
   let skip = 0;
   let batch;
   do {
-    batch = await WalletUser.find({
+    batch = await WalletUserV2.find({
       isDeleted: false,
       totalPointsV2: { $ne: 0, $gt: 0 },
     })

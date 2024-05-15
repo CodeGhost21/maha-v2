@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import nconf, { use } from "nconf";
+import nconf from "nconf";
 import path from "path";
 
 dotenv.config();
@@ -33,7 +33,7 @@ export const migrateUsers = async () => {
     });
     try {
       await WalletUserV2.ensureIndexes();
-      await WalletUserV2.insertMany(batch);
+      await WalletUserV2.insertMany(batch,{ordered: false});
       skip += batchSize;
     } catch (e) {
       console.log(e);
