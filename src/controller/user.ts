@@ -73,12 +73,9 @@ export const walletVerify = async (
 
     //assign role
     const role = await userLpData(address);
-    const user = await WalletUserV2.findOne(
-      {
-        walletAddress: address,
-      },
-      { jwt: 1, role: 1 }
-    );
+    const user = await WalletUserV2.findOne({
+      walletAddress: address,
+    }).select("id");
 
     if (user) {
       user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
@@ -240,11 +237,11 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
     const zksyncSupply = zksyncData.supply.get(walletAddress);
 
     for (const [_, value] of Object.entries(mantaSupply)) {
-      mantaPoints += Number(value);
+      mantaPoints += Number(value) / 1e18;
     }
 
     for (const [_, value] of Object.entries(zksyncSupply)) {
-      zksyncPoints += Number(value);
+      zksyncPoints += Number(value) / 1e18;
     }
 
     if (mantaPoints > minSupplyAmount || zksyncPoints > minSupplyAmount) {

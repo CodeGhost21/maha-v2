@@ -1,13 +1,17 @@
 import { AbstractProvider } from "ethers";
-import { ethers, Provider } from "ethers";
 import CoinGecko from "coingecko-api";
 import axios from "axios";
 import { mantaProvider, zksyncProvider } from "../../utils/providers";
-import nconf from "nconf";
-import poolABI from "../../abis/Pool.json";
 import cache from "../../utils/cache";
 import { IWalletUserModel } from "../../database/models/walletUsersV2";
-import { Multiplier } from "./constants";
+import {
+  apiManta,
+  apiZKSync,
+  mantaMultiplier,
+  minSupplyAmount,
+  Multiplier,
+  zksyncMultiplier,
+} from "./constants";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -36,14 +40,6 @@ export const getPriceCoinGecko = async () => {
     console.error("Error fetching Ethereum price:", error);
     throw error;
   }
-};
-
-const getContract = async (
-  contractAddress: string,
-  abi: any,
-  provider: Provider
-) => {
-  return new ethers.Contract(contractAddress, abi, provider);
 };
 
 export const supplyBorrowPointsGQL = async (
@@ -99,16 +95,20 @@ export const supplyBorrowPointsGQL = async (
       const supplyData = supply.get(userReserve.user.id) || {};
       const supplyMultiplier = multiplier[`${asset}Supply` as keyof Multiplier];
       supplyData[asset] =
-        userReserve.currentATokenBalance *
-        marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()] *
+        (Number(userReserve.currentATokenBalance) / 1e18) *
+        Number(
+          marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()]
+        ) *
         (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
       supply.set(userReserve.user.id, supplyData);
 
       const borrowData = borrow.get(userReserve.user.id) || {};
       const borrowMultiplier = multiplier[`${asset}Borrow` as keyof Multiplier];
       borrowData[asset] =
-        userReserve.currentTotalDebt *
-        marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()] *
+        (Number(userReserve.currentTotalDebt) / 1e18) *
+        Number(
+          marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()]
+        ) *
         (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
       borrow.set(userReserve.user.id, borrowData);
     });
@@ -149,32 +149,48 @@ export const supplyBorrowPointsGQL = async (
 };
 
 export const userLpData = async (walletAddress: string) => {
-  const poolManta = await getContract(
-    nconf.get("MANTA_POOL"),
-    poolABI,
-    mantaProvider
+  const mantaData = await supplyBorrowPointsGQL(
+    apiManta,
+    [{ walletAddress } as IWalletUserModel],
+    mantaProvider,
+    mantaMultiplier
   );
 
-  const poolZksync = await getContract(
-    nconf.get("ZKSYNC_POOL"),
-    poolABI,
-    zksyncProvider
+  const zksyncData = await supplyBorrowPointsGQL(
+    apiZKSync,
+    [{ walletAddress } as IWalletUserModel],
+    zksyncProvider,
+    zksyncMultiplier
   );
 
-  const poolMantaResult = await poolManta.getUserAccountData(walletAddress);
-  const poolZksyncResult = await poolZksync.getUserAccountData(walletAddress);
+  let supplyManta = 0;
+  let supplyZksync = 0;
 
-  const supplyManta = Number(poolMantaResult[0]) / 1e8;
-  const supplyZksync = Number(poolZksyncResult[0]) / 1e8;
+  const mantaSupply = mantaData.supply.get(walletAddress);
+  const zksyncSupply = zksyncData.supply.get(walletAddress);
+
+  for (const [_, value] of Object.entries(mantaSupply)) {
+    supplyManta += Number(value) / 1e18;
+  }
+
+  for (const [_, value] of Object.entries(zksyncSupply)) {
+    supplyZksync += Number(value) / 1e18;
+  }
 
   const totalSupply = supplyManta + supplyZksync;
-  if (totalSupply > 100 && totalSupply <= 1000) {
+  if (totalSupply > minSupplyAmount && totalSupply <= minSupplyAmount * 10) {
     return "shrimp";
-  } else if (totalSupply > 1000 && totalSupply <= 10000) {
+  } else if (
+    totalSupply > minSupplyAmount * 10 &&
+    totalSupply <= minSupplyAmount * 100
+  ) {
     return "shark";
-  } else if (totalSupply > 10000 && totalSupply <= 100000) {
+  } else if (
+    totalSupply > minSupplyAmount * 100 &&
+    totalSupply <= minSupplyAmount * 1000
+  ) {
     return "whale";
-  } else if (totalSupply > 100000) {
+  } else if (totalSupply > minSupplyAmount * 1000) {
     return "gigaWhale";
   } else {
     return "no role";
