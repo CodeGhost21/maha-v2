@@ -122,8 +122,37 @@ export const fetchMe = async (
 ) => {
   const user = req.user as IWalletUserModel;
   if (!user) return next(new NotFoundError());
-  const totalSupplyPoints = 0;
-  const totalBorrowPoints = 0;
+
+  // get supply points for all chains and their assets
+  const mantaSupply = user.points.supplyManta;
+  const zksyncSupply = user.points.supplyZkSync;
+  const xlayerSupply = user.points.supplyXLayer;
+  const ethereumLrtSupply = user.points.supplyEthereumLrt;
+  const blastSupply = user.points.supplyBlast;
+  const lineaSupply = user.points.supplyLinea;
+
+  // get borrow points for all chains and their assets
+  const mantaBorrow = user.points.borrowManta;
+  const zksyncBorrow = user.points.borrowZkSync;
+  const xlayerBorrow = user.points.borrowXLayer;
+  const ethereumLrtBorrow = user.points.borrowEthereumLrt;
+  const blastBorrow = user.points.borrowBlast;
+  const lineaBorrow = user.points.borrowLinea;
+
+  const totalSupplyPoints =
+    getTotalPoints(mantaSupply) +
+    getTotalPoints(zksyncSupply) +
+    getTotalPoints(xlayerSupply) +
+    getTotalPoints(ethereumLrtSupply) +
+    getTotalPoints(blastSupply) +
+    getTotalPoints(lineaSupply);
+  const totalBorrowPoints =
+    getTotalPoints(mantaBorrow) +
+    getTotalPoints(zksyncBorrow) +
+    getTotalPoints(xlayerBorrow) +
+    getTotalPoints(ethereumLrtBorrow) +
+    getTotalPoints(blastBorrow) +
+    getTotalPoints(lineaBorrow);
 
   const userData = {
     ...user,
@@ -242,19 +271,11 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
       zksyncMultiplier
     );
 
-    let mantaPoints = 0;
-    let zksyncPoints = 0;
-
     const mantaSupply = mantaData.supply.get(walletAddress);
     const zksyncSupply = zksyncData.supply.get(walletAddress);
 
-    for (const [_, value] of Object.entries(mantaSupply)) {
-      mantaPoints += Number(value) / 1e18;
-    }
-
-    for (const [_, value] of Object.entries(zksyncSupply)) {
-      zksyncPoints += Number(value) / 1e18;
-    }
+    const mantaPoints = getTotalPoints(mantaSupply);
+    const zksyncPoints = getTotalPoints(zksyncSupply);
 
     if (mantaPoints > minSupplyAmount || zksyncPoints > minSupplyAmount) {
       success = true;
@@ -291,50 +312,10 @@ export const getLPData = async (req: Request, res: Response) => {
     console.log(walletAddress);
 
     if (walletAddress && ethers.isAddress(walletAddress)) {
-      const mantaData = await supplyBorrowPointsGQL(
-        apiManta,
-        [{ walletAddress } as IWalletUserModel],
-        mantaProvider,
-        mantaMultiplier
-      );
-      const zksyncData = await supplyBorrowPointsGQL(
-        apiZKSync,
-        [{ walletAddress } as IWalletUserModel],
-        zksyncProvider,
-        zksyncMultiplier
-      );
-      const blastData = await supplyBorrowPointsGQL(
-        apiBlast,
-        [{ walletAddress } as IWalletUserModel],
-        blastProvider,
-        blastMultiplier
-      );
-      const lineaData = await supplyBorrowPointsGQL(
-        apiLinea,
-        [{ walletAddress } as IWalletUserModel],
-        lineaProvider,
-        lineaMultiplier
-      );
-      const ethereumLrt = await supplyBorrowPointsGQL(
-        apiEth,
-        [{ walletAddress } as IWalletUserModel],
-        ethLrtProvider,
-        ethLrtMultiplier
-      );
-      const xlayerData = await supplyBorrowPointsGQL(
-        apiXLayer,
-        [{ walletAddress } as IWalletUserModel],
-        xLayerProvider,
-        xlayerMultiplier
-      );
+      const lpData = await getLpDataForAddress(walletAddress);
       res.json({
         success: true,
-        mantaData: mantaData,
-        zksyncData: zksyncData,
-        blastData: blastData,
-        lineaData: lineaData,
-        ethereumLrt: ethereumLrt,
-        xlayerData: xlayerData,
+        ...lpData,
       });
     } else {
       res.json({
@@ -345,4 +326,60 @@ export const getLPData = async (req: Request, res: Response) => {
   } catch (e) {
     console.log(e);
   }
+};
+
+const getLpDataForAddress = async (walletAddress: string) => {
+  const mantaData = await supplyBorrowPointsGQL(
+    apiManta,
+    [{ walletAddress } as IWalletUserModel],
+    mantaProvider,
+    mantaMultiplier
+  );
+  const zksyncData = await supplyBorrowPointsGQL(
+    apiZKSync,
+    [{ walletAddress } as IWalletUserModel],
+    zksyncProvider,
+    zksyncMultiplier
+  );
+  const blastData = await supplyBorrowPointsGQL(
+    apiBlast,
+    [{ walletAddress } as IWalletUserModel],
+    blastProvider,
+    blastMultiplier
+  );
+  const lineaData = await supplyBorrowPointsGQL(
+    apiLinea,
+    [{ walletAddress } as IWalletUserModel],
+    lineaProvider,
+    lineaMultiplier
+  );
+  const ethereumLrtData = await supplyBorrowPointsGQL(
+    apiEth,
+    [{ walletAddress } as IWalletUserModel],
+    ethLrtProvider,
+    ethLrtMultiplier
+  );
+  const xlayerData = await supplyBorrowPointsGQL(
+    apiXLayer,
+    [{ walletAddress } as IWalletUserModel],
+    xLayerProvider,
+    xlayerMultiplier
+  );
+
+  return {
+    zksyncData,
+    mantaData,
+    xlayerData,
+    ethereumLrtData,
+    blastData,
+    lineaData,
+  };
+};
+
+const getTotalPoints = (supplyOrBorrowObject: any) => {
+  let totalPoints = 0;
+  for (const [_, value] of Object.entries(supplyOrBorrowObject)) {
+    totalPoints += Number(value) / 1e18;
+  }
+  return totalPoints;
 };
