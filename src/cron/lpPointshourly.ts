@@ -1,9 +1,9 @@
-import { WalletUserV2 } from "../database/models/walletUsersV2";
+import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
 import { AnyBulkWriteOperation } from "mongodb";
 import { referralPercent } from "../controller/quests/constants";
-import { IWalletUser } from "src/database/interface/walletUser/walletUser";
-import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
-import { IAsset } from "src/database/interface/walletUser/assets";
+import { IWalletUser } from "../database/interface/walletUser/walletUser";
+import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
+import { IAsset } from "../database/interface/walletUser/assets";
 
 export const updateLPPointsHourly = async () => {
   console.log("updateLPPointsHourly");
@@ -22,7 +22,7 @@ export const updateLPPointsHourly = async () => {
     batch = await WalletUserV2.find().skip(skip).limit(batchSize);
 
     for (const user of batch) {
-      let referredByUser = null;
+      let referredByUser = {} as IWalletUserModel;
       if (user.referredBy) {
         referredByUser = await WalletUserV2.findOne({
           _id: user.referredBy,
@@ -62,7 +62,7 @@ export const updateLPPointsHourly = async () => {
               if (newPoints > 0) {
                 const refPointForAsset =
                   timestamp > 0 ? Number(newPoints * referralPercent) : 0;
-                if (referredByUser) {
+                if ((Object.keys(referredByUser)).length) {
                   referralPoints += refPointForAsset;
                 }
 
@@ -77,14 +77,14 @@ export const updateLPPointsHourly = async () => {
               }
             });
 
-            if (referredByUser) {
+            if (Object.keys(referredByUser).length) {
               userBulkWrites.push({
                 updateOne: {
                   filter: { _id: referredByUser.id },
                   update: {
                     $inc: {
                       ["points.referral"]: referralPoints,
-                      totalPoints: referralPoints
+                      totalPoints: referralPoints,
                     },
                     $set: {
                       ["pointsUpdateTimestamp.referral"]: Date.now(),
