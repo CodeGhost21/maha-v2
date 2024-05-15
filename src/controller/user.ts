@@ -118,7 +118,15 @@ export const fetchMe = async (
 ) => {
   const user = req.user as IWalletUserModel;
   if (!user) return next(new NotFoundError());
-  res.json({ success: true, user });
+  const totalSupplyPoints = 0;
+  const totalBorrowPoints = 0;
+
+  const userData = {
+    ...user,
+    totalSupplyPoints: totalSupplyPoints,
+    totalBorrowPoints: totalBorrowPoints,
+  };
+  res.json({ success: true, userData });
 };
 
 export const getLeaderBoard = async (req: Request, res: Response) => {
@@ -144,10 +152,14 @@ export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   });
 };
 
-export const getTotalPoints = async (req: Request, res: Response) => {
+export const getUsersData = async (req: Request, res: Response) => {
   try {
-    const cachedData: number | undefined = cache.get("tp:totalPoints");
-    res.json({ totalPoints: cachedData || 0 });
+    const cachedAllUSers: string | undefined = cache.get("tu:allUsers");
+    const cachedTotalPoints: number | undefined = cache.get("tp:totalPoints");
+    res.json({
+      totalPoints: cachedTotalPoints || 0,
+      totalUsers: cachedAllUSers || 0,
+    });
   } catch (error) {
     console.error("Error occurred while retrieving total points:", error);
     res.status(500).json({ error: "Internal server error" });
