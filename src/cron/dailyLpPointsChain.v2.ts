@@ -1,5 +1,5 @@
 import { UserPointTransactions } from "../database/models/userPointTransactions";
-import { supplyBorrowPointsMulticall } from "../controller/quests/onChainPoints";
+import { supplyBorrowPointsGQL } from "../controller/quests/onChainPoints";
 import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
 import { getEpoch } from "../utils/epoch";
 import { AbstractProvider } from "ethers";
@@ -7,7 +7,7 @@ import nconf from "nconf";
 import _ from "underscore";
 import {
   IAssignPointsTask,
-  assignPointsToBatch,
+  assignPointsPerSecondToBatch,
 } from "../controller/quests/assignPoints";
 import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import {
@@ -38,23 +38,23 @@ const _processBatch = async (
 ) => {
 
   try {
-    const data = await supplyBorrowPointsMulticall(api, userBatch, p, supplyMultiplier);
+    const data = await supplyBorrowPointsGQL(api, userBatch, p, supplyMultiplier);
 
     const tasks: IAssignPointsTask[] = [];
 
     // update supply points
-    const supplyExecutable = await assignPointsToBatch(
+    const supplyExecutable = await assignPointsPerSecondToBatch(
       userBatch,
       data.supply,
       supplyTask,
-      `Daily Supply on ${supplyTask.substring(6)} chain`, //TODO: add pps and timestamp
+      `Daily Supply on ${supplyTask.substring(6)} chain`,
       true,
       epoch
     );
     await supplyExecutable?.execute();
 
     // update borrow points
-    const borrowExecutable = await assignPointsToBatch(
+    const borrowExecutable = await assignPointsPerSecondToBatch(
       userBatch,
       data.borrow,
       borrowTask,
@@ -68,7 +68,7 @@ const _processBatch = async (
     console.log("done with batch", tasks.length);
   } catch (error) {
     console.log(
-      `processBatch error for ${supplyTask.substring(6)} chain`, //TODO: add pps and timestamp
+      `processBatch error for ${supplyTask.substring(6)} chain`,
       error
     );
   }

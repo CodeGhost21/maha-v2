@@ -8,8 +8,8 @@ export const updateUsersRank = async () => {
 
   do {
     // Retrieve users in batches
-    const users = await WalletUser.find({ isDeleted: false })
-      .sort({ totalPointsV2: -1 })
+    const users = await WalletUser.find({}, { _id: 1, totalPointsV2: 1 })
+      .sort({ totalPoints: -1 })
       .skip(skip)
       .limit(batchSize)
       .exec();

@@ -1,6 +1,5 @@
 import { open } from "./database";
 import cron from "node-cron";
-import { dailyLpPoints } from "./cron/dailyLpPoints";
 import { updateUsersRank } from "./cron/updateRank";
 import "./bots/gm";
 import {
@@ -15,11 +14,9 @@ import { addUsers } from "./scripts/newSupplyBorrowUsers";
 // connect to database
 open();
 
-// cron.schedule("*/60 * * * *", async () => {
-//   console.log("running lp points every hour");
-//   await dailyLpPoints();
-// });
 
+// totalPoints;
+// lpPointsHourly
 
 cron.schedule("0 8 * * *", async () => {
   console.log("updating rank every day at 8am");

@@ -46,8 +46,7 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   const user = await WalletUser.findById(req.query.state);
   const discordUser = await WalletUser.findOne({
     discordId: req.query.state,
-    isDeleted: false,
-  });
+  }).select("id");
 
   if (!user) return;
   let url = `/#/tasks?status=discord_error`;
@@ -55,7 +54,6 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   if (!discordUser) {
     const isFollow = await checkGuildMember(reqUser.id);
     if (isFollow) {
-      user.checked.discordFollow = true;
       await assignPoints(
         user.id,
         points.discordFollow,
@@ -65,8 +63,6 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
       );
     }
     user.discordId = reqUser.id;
-    user.checked.discordVerify = true;
-    user.checked.discordFollow = isFollow;
     await user.save();
     cache.del(`userId:${user._id}`);
     url = `/#/tasks?status=discord_success`;
@@ -121,7 +117,6 @@ export const registerUser = async (
     // check if there is an existing user
     const existingUser = await WalletUser.findOne({
       discordId: data.id,
-      isDeleted: false,
     });
     if (existingUser)
       throw new BadRequestError(
@@ -131,11 +126,6 @@ export const registerUser = async (
     const isGuildMember = await checkGuildMember(data.id);
 
     user.discordId = data.id;
-    user.checked = {
-      ...user.checked,
-      discordVerify: true,
-      discordFollow: isGuildMember,
-    };
 
     await user.save();
 

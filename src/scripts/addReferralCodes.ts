@@ -18,7 +18,6 @@ const checkReferralCodeExists = async (referralCode: string) => {
 
   const existingReferral = await WalletUser.findOne({
     referralCode: { $regex: new RegExp("^" + referralCode + "$", "i") },
-    isDeleted: false,
   });
   console.log(existingReferral);
 
@@ -310,7 +309,6 @@ const addPythUsers = async () => {
       console.log("does not exists");
       await WalletUser.create({
         referralCode: item,
-        isDeleted: false,
       });
     } else {
       console.log("already added");

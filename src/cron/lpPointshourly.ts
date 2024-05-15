@@ -26,7 +26,7 @@ export const updateLPPointsHourly = async () => {
       if (user.referredBy) {
         referredByUser = await WalletUser.findOne({
           _id: user.referredBy,
-        });
+        }).select("id");
       }
       const userLpTasksKeys = Object.keys(user.pointsPerSecond) as Array<
         keyof IWalletUserPoints

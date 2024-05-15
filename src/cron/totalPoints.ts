@@ -7,7 +7,7 @@ export const totalPoints = async () => {
       {
         $group: {
           _id: null,
-          totalPoints: { $sum: "$totalPointsV2" },
+          totalPoints: { $sum: "$totalPoints" },
         },
       },
     ]);
