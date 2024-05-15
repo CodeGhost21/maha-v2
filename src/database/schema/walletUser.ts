@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-export const UserSchema = new Schema(
+export const WalletUserSchema = new Schema(
   {
     discordId: { type: String, index: true },
     jwt: String,
@@ -8,7 +8,7 @@ export const UserSchema = new Schema(
     referralCode: { type: Array, index: true },
     referredBy: { type: Schema.Types.ObjectId, ref: "Users" },
     totalPoints: { type: Number, default: 0, index: true },
-    walletAddress: { type: String, index: true, unique: true },
+    walletAddress: { type: String, unique: true, index: true },
     role: { type: String },
     epoch: { type: Number, default: 0 },
     points: { type: Object, default: {} },
