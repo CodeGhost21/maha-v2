@@ -4,16 +4,16 @@ import { NextFunction, Request, Response } from "express";
 import nconf from "nconf";
 import { ethers } from "ethers";
 import * as jwt from "jsonwebtoken";
-import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
+import {
+  IWalletUserModel,
+  WalletUserV2,
+} from "../database/models/walletUsersV2";
 import { SiweMessage } from "../siwe/lib/client";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import NotFoundError from "../errors/NotFoundError";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
-import {
-  userLpData,
-  supplyBorrowPointsGQL,
-} from "./quests/onChainPoints";
+import { userLpData, supplyBorrowPointsGQL } from "./quests/onChainPoints";
 import {
   apiBlast,
   apiEth,
@@ -30,7 +30,7 @@ import {
   mantaProvider,
   xLayerProvider,
   zksyncProvider,
-} from "src/utils/providers";
+} from "../utils/providers";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
