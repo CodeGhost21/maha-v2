@@ -21,7 +21,14 @@ import {
   apiManta,
   apiXLayer,
   apiZKSync,
+  blastMultiplier,
+  ethLrtMultiplier,
+  lineaMultiplier,
+  mantaMultiplier,
+  minSupplyAmount,
   whiteListTeam,
+  xlayerMultiplier,
+  zksyncMultiplier,
 } from "./quests/constants";
 import {
   blastProvider,
@@ -216,14 +223,14 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
       apiManta,
       [{ walletAddress } as IWalletUserModel],
       mantaProvider,
-      1
+      mantaMultiplier
     );
 
     const zksyncData = await supplyBorrowPointsGQL(
       apiZKSync,
       [{ walletAddress } as IWalletUserModel],
       zksyncProvider,
-      1
+      zksyncMultiplier
     );
 
     let mantaPoints = 0;
@@ -240,7 +247,7 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
       zksyncPoints += Number(value);
     }
 
-    if (mantaPoints > 100 || zksyncPoints > 100) {
+    if (mantaPoints > minSupplyAmount || zksyncPoints > minSupplyAmount) {
       success = true;
     }
     res.json({
@@ -279,37 +286,37 @@ export const getLPData = async (req: Request, res: Response) => {
         apiManta,
         [{ walletAddress } as IWalletUserModel],
         mantaProvider,
-        1
+        mantaMultiplier
       );
       const zksyncData = await supplyBorrowPointsGQL(
         apiZKSync,
         [{ walletAddress } as IWalletUserModel],
         zksyncProvider,
-        1
+        zksyncMultiplier
       );
       const blastData = await supplyBorrowPointsGQL(
         apiBlast,
         [{ walletAddress } as IWalletUserModel],
         blastProvider,
-        1
+        blastMultiplier
       );
       const lineaData = await supplyBorrowPointsGQL(
         apiLinea,
         [{ walletAddress } as IWalletUserModel],
         lineaProvider,
-        1
+        lineaMultiplier
       );
       const ethereumLrt = await supplyBorrowPointsGQL(
         apiEth,
         [{ walletAddress } as IWalletUserModel],
         ethLrtProvider,
-        1
+        ethLrtMultiplier
       );
       const xlayerData = await supplyBorrowPointsGQL(
         apiXLayer,
         [{ walletAddress } as IWalletUserModel],
         xLayerProvider,
-        2
+        xlayerMultiplier
       );
       res.json({
         success: true,

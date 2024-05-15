@@ -20,12 +20,19 @@ import {
   xLayerProvider,
 } from "../utils/providers";
 import {
+  Multiplier,
   apiBlast,
   apiEth,
   apiLinea,
   apiManta,
   apiXLayer,
   apiZKSync,
+  blastMultiplier,
+  ethLrtMultiplier,
+  lineaMultiplier,
+  mantaMultiplier,
+  xlayerMultiplier,
+  zksyncMultiplier,
 } from "../controller/quests/constants";
 
 const _processBatch = async (
@@ -35,14 +42,14 @@ const _processBatch = async (
   supplyTask: keyof IWalletUserPoints,
   borrowTask: keyof IWalletUserPoints,
   p: AbstractProvider,
-  supplyMultiplier: number
+  multiplier: Multiplier
 ) => {
   try {
     const data = await supplyBorrowPointsGQL(
       api,
       userBatch,
       p,
-      supplyMultiplier
+      multiplier
     );
 
     const tasks: IAssignPointsTask[] = [];
@@ -81,7 +88,7 @@ const _dailyLpPoints = async (
   supplyTask: keyof IWalletUserPoints,
   borrowTask: keyof IWalletUserPoints,
   p: AbstractProvider,
-  supplyMultiplier: number
+  multiplier: Multiplier
 ) => {
   const epoch = getEpoch();
   console.log("working with epoch", epoch);
@@ -111,7 +118,7 @@ const _dailyLpPoints = async (
         supplyTask,
         borrowTask,
         p,
-        supplyMultiplier
+        multiplier
       );
     } catch (error) {
       console.log("error", error);
@@ -128,7 +135,7 @@ const _dailyLpPointsChain = async (
   supplyTask: keyof IWalletUserPoints,
   borrowTask: keyof IWalletUserPoints,
   p: AbstractProvider,
-  supplyMultiplier: number
+  multiplier: Multiplier
 ) => {
   console.log(supplyTask, "daily lp points");
 
@@ -142,7 +149,7 @@ const _dailyLpPointsChain = async (
       supplyTask,
       borrowTask,
       p,
-      supplyMultiplier
+      multiplier
     );
   } catch (error) {
     console.log(supplyTask, "cron failed beacuse of", error);
@@ -157,7 +164,7 @@ export const mantaCron = async () => {
     "supplyManta",
     "borrowManta",
     mantaProvider,
-    1
+    mantaMultiplier
   );
 };
 
@@ -168,7 +175,7 @@ export const zksyncCron = async () => {
     "supplyZkSync",
     "borrowZkSync",
     zksyncProvider,
-    1
+    zksyncMultiplier
   );
 };
 
@@ -179,7 +186,7 @@ export const blastCron = async () => {
     "supplyBlast",
     "borrowBlast",
     blastProvider,
-    1
+    blastMultiplier
   );
 };
 
@@ -190,7 +197,7 @@ export const lineaCron = async () => {
     "supplyLinea",
     "borrowLinea",
     lineaProvider,
-    1
+    lineaMultiplier
   );
 };
 
@@ -201,7 +208,7 @@ export const ethereumLrtCron = async () => {
     "supplyEthereumLrt",
     "borrowEthereumLrt",
     ethLrtProvider,
-    1
+    ethLrtMultiplier
   );
 };
 
@@ -212,6 +219,6 @@ export const xLayerCron = async () => {
     "supplyXLayer",
     "borrowXLayer",
     xLayerProvider,
-    2
+    xlayerMultiplier
   );
 };

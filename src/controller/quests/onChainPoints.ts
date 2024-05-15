@@ -2,14 +2,12 @@ import { AbstractProvider } from "ethers";
 import { ethers, Provider } from "ethers";
 import CoinGecko from "coingecko-api";
 import axios from "axios";
-import {
-  mantaProvider,
-  zksyncProvider
-} from "../../utils/providers";
+import { mantaProvider, zksyncProvider } from "../../utils/providers";
 import nconf from "nconf";
 import poolABI from "../../abis/Pool.json";
 import cache from "../../utils/cache";
 import { IWalletUserModel } from "../../database/models/walletUsersV2";
+import { Multiplier } from "./constants";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -51,7 +49,7 @@ export const supplyBorrowPointsGQL = async (
   api: string,
   userBatch: IWalletUserModel[],
   p: AbstractProvider,
-  supplyMultiplier: number,
+  multiplier: Multiplier
 ) => {
   try {
     let marketPrice: any = await cache.get("coingecko:PriceList");
@@ -96,17 +94,21 @@ export const supplyBorrowPointsGQL = async (
     const borrow = new Map();
 
     result.map((userReserve: any) => {
+      const asset = userReserve.reserve.symbol.toLowerCase();
       const supplyData = supply.get(userReserve.user.id) || {};
-      supplyData[userReserve.reserve.symbol.toLowerCase()] =
+      const supplyMultiplier = multiplier[`${asset}Supply` as keyof Multiplier];
+      supplyData[asset] =
         userReserve.currentATokenBalance *
         marketPrice[`${userReserve.reserve.symbol}`] *
-        supplyMultiplier;
+        (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
       supply.set(userReserve.user.id, supplyData);
 
       const borrowData = borrow.get(userReserve.user.id) || {};
-      borrowData[userReserve.reserve.symbol.toLowerCase()] =
+      const borrowMultiplier = multiplier[`${asset}Borrow` as keyof Multiplier];
+      borrowData[asset] =
         userReserve.currentTotalDebt *
-        marketPrice[`${userReserve.reserve.symbol}`];
+        marketPrice[`${userReserve.reserve.symbol}`] *
+        (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
       borrow.set(userReserve.user.id, borrowData);
     });
 

@@ -11,21 +11,54 @@ export const referralPercent = 0.2;
 
 export const minSupplyAmount = 100;
 
-export const borrowPtsPerUSD = 4;
-
 export const stakePtsPerManta = 5;
 
 export const stakePtsPerCake = 0.25;
 
 export const stakePtsPerMAHA = 1000;
 
-export const supplyEthEthereumLrt = 2;
+export interface Multiplier {
+  defaultSupply: number;
+  defaultBorrow: number;
+  ethSupply?: number;
+  ethBorrow?: number;
+  esethSupply?: number;
+  lidoSupply?: number;
+}
 
-export const borrowEthEthereumLrt = 8;
+export const ethLrtMultiplier: Multiplier = {
+  defaultSupply: 1,
+  defaultBorrow: 4,
+  ethSupply: 2,
+  ethBorrow: 8,
+  esethSupply: 1,
+};
 
-export const supplyZksyncLido = 2;
+export const zksyncMultiplier: Multiplier = {
+  defaultSupply: 1,
+  defaultBorrow: 4,
+  lidoSupply: 2,
+};
 
-export const supplyEthereumLrtEsEth = 1;
+export const blastMultiplier: Multiplier = {
+  defaultSupply: 1,
+  defaultBorrow: 4,
+};
+
+export const lineaMultiplier: Multiplier = {
+  defaultSupply: 1,
+  defaultBorrow: 4,
+};
+
+export const mantaMultiplier: Multiplier = {
+  defaultSupply: 1,
+  defaultBorrow: 4,
+};
+
+export const xlayerMultiplier: Multiplier = {
+  defaultSupply: 1,
+  defaultBorrow: 4,
+};
 
 export const blastStartDate = new Date("29 Feb 2024").getTime();
 
@@ -86,11 +119,11 @@ export const mantaWhiteList = [
   },
 ];
 
-  export const baseUrl =
-    "https://api.goldsky.com/api/public/project_clsk1wzatdsls01wchl2e4n0y/subgraphs/";
-  export const apiManta = baseUrl + "zerolend-m/1.0.0/gn";
-  export const apiZKSync = baseUrl + "zerolend-zksync/1.0.0/gn";
-  export const apiEth = baseUrl + "zerolend-mainnet-lrt/1.0.0/gn";
-  export const apiLinea = baseUrl + "zerolend-linea/1.0.0/gn";
-  export const apiBlast = baseUrl + "zerolend-blast/1.0.0/gn";
-  export const apiXLayer = baseUrl + "zerolend-xlayer/1.0.0/gn";
+export const baseUrl =
+  "https://api.goldsky.com/api/public/project_clsk1wzatdsls01wchl2e4n0y/subgraphs/";
+export const apiManta = baseUrl + "zerolend-m/1.0.0/gn";
+export const apiZKSync = baseUrl + "zerolend-zksync/1.0.0/gn";
+export const apiEth = baseUrl + "zerolend-mainnet-lrt/1.0.0/gn";
+export const apiLinea = baseUrl + "zerolend-linea/1.0.0/gn";
+export const apiBlast = baseUrl + "zerolend-blast/1.0.0/gn";
+export const apiXLayer = baseUrl + "zerolend-xlayer/1.0.0/gn";
