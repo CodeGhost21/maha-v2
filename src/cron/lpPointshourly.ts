@@ -1,14 +1,19 @@
-import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
+import {
+  IWalletUserModel,
+  WalletUserV2,
+} from "../database/models/walletUsersV2";
 import { AnyBulkWriteOperation } from "mongodb";
 import { referralPercent } from "../controller/quests/constants";
 import { IWalletUser } from "../database/interface/walletUser/walletUser";
 import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
 import { IAsset } from "../database/interface/walletUser/assets";
+import { IUserPointTransactions } from "src/database/interface/userPoints/userPointsTransactions";
 
 export const updateLPPointsHourly = async () => {
   console.log("updateLPPointsHourly");
 
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+  const pointsBulkWrite: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
   const batchSize = 1000;
   const t1 = Date.now();
 
@@ -26,7 +31,7 @@ export const updateLPPointsHourly = async () => {
       if (user.referredBy) {
         referredByUser = await WalletUserV2.findOne({
           _id: user.referredBy,
-        }).select("id");
+        }).select("id totalPoints points");
       }
       const userLpTasksKeys = Object.keys(user.pointsPerSecond) as Array<
         keyof IWalletUserPoints
@@ -62,7 +67,7 @@ export const updateLPPointsHourly = async () => {
               if (newPoints > 0) {
                 const refPointForAsset =
                   timestamp > 0 ? Number(newPoints * referralPercent) : 0;
-                if ((Object.keys(referredByUser)).length) {
+                if (Object.keys(referredByUser).length) {
                   referralPoints += refPointForAsset;
                 }
 
@@ -92,6 +97,19 @@ export const updateLPPointsHourly = async () => {
                   },
                 },
               });
+
+              pointsBulkWrite.push({
+                insertOne: {
+                  document: {
+                    userId: referredByUser.id,
+                    previousPoints: referredByUser.totalPoints,
+                    currentPoints: referredByUser.totalPoints + referralPoints,
+                    subPoints: 0,
+                    addPoints: referralPoints,
+                    message: "Referral Points",
+                  },
+                },
+              });
             }
 
             userBulkWrites.push({
@@ -102,9 +120,20 @@ export const updateLPPointsHourly = async () => {
                     ..._points,
                     totalPoints: _totalPoints,
                   },
-                  $set: {
-                    [`pointsPerSecondUpdateTimestamp.${lpTask}`]: Date.now(),
-                  },
+                  $set: _pointsPerSecondUpdateTimestamp,
+                },
+              },
+            });
+
+            pointsBulkWrite.push({
+              insertOne: {
+                document: {
+                  userId: user.id,
+                  previousPoints: user.totalPoints,
+                  currentPoints: user.totalPoints + _totalPoints,
+                  subPoints: 0,
+                  addPoints: _totalPoints,
+                  message: `${lpTask} points`,
                 },
               },
             });

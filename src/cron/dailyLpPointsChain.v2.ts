@@ -7,7 +7,10 @@ import {
   IAssignPointsTask,
   assignPointsPerSecondToBatch,
 } from "../controller/quests/assignPoints";
-import { IWalletUserModel, WalletUserV2 } from "../database/models/walletUsersV2";
+import {
+  IWalletUserModel,
+  WalletUserV2,
+} from "../database/models/walletUsersV2";
 import {
   mantaProvider,
   zksyncProvider,
@@ -34,9 +37,13 @@ const _processBatch = async (
   p: AbstractProvider,
   supplyMultiplier: number
 ) => {
-
   try {
-    const data = await supplyBorrowPointsGQL(api, userBatch, p, supplyMultiplier);
+    const data = await supplyBorrowPointsGQL(
+      api,
+      userBatch,
+      p,
+      supplyMultiplier
+    );
 
     const tasks: IAssignPointsTask[] = [];
 
@@ -45,8 +52,6 @@ const _processBatch = async (
       userBatch,
       data.supply,
       supplyTask,
-      `Daily Supply on ${supplyTask.substring(6)} chain`,
-      true,
       epoch
     );
     await supplyExecutable?.execute();
@@ -56,8 +61,6 @@ const _processBatch = async (
       userBatch,
       data.borrow,
       borrowTask,
-      `Daily Borrow on ${borrowTask.substring(6)} chain`,
-      true,
       epoch
     );
 

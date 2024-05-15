@@ -116,8 +116,6 @@ export const assignPointsPerSecondToBatch = async (
   users: IWalletUserModel[],
   pointsData: Map<any, any>,
   task: string,
-  message: string,
-  isAdd: boolean,
   epoch?: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
