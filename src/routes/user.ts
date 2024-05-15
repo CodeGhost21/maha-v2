@@ -10,7 +10,7 @@ import {
   fetchMe,
   getTotalUsers,
   getTotalReferralOfUsers,
-  getTotalPoints,
+  getUsersData,
   getUserReferralData,
   getReferralUsers,
   galxeLPCheck,
@@ -19,11 +19,9 @@ import {
   getUserTotalPoints,
 } from "../controller/user";
 
+router.get("/", getUsersData);
 router.post("/login", walletVerify);
 // router.get("/lb", getLeaderBoard);
-
-router.get("/totalUsers", getTotalUsers);
-// router.get("/totalPoints", getTotalPoints);
 router.get("/referral", getUserReferralData); // {'totalPoints': '1000
 // router.get("/info", galxeLPCheck);
 // router.get("/lpData", getLPData);
@@ -33,6 +31,8 @@ router.use(deserializeUser, ensureLoggedIn);
 router.get("/me", fetchMe);
 router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
-router.get("/transactions", getUserTransactions);
+// router.get("/transactions", getUserTransactions);
+
+//
 
 export default router;
