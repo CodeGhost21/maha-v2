@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-export const WalletUserSchema = new Schema(
+export const WalletUserSchemaV2 = new Schema(
   {
     discordId: { type: String, index: true },
     jwt: String,
