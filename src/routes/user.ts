@@ -10,7 +10,6 @@ import {
   fetchMe,
   getTotalUsers,
   getTotalReferralOfUsers,
-  getPythData,
   getMantaData,
   getTotalPoints,
   getUserReferralData,
