@@ -23,6 +23,7 @@ export const getPriceCoinGecko = async () => {
       vs_currencies: ["usd"],
     });
     const priceList = {
+      // TODO: return keys in lowercase
       ETH: data.data.ethereum.usd,
       ezETH: data.data["renzo-restaked-eth"].usd,
       lido: data.data["lido-dao"].usd,
@@ -99,7 +100,7 @@ export const supplyBorrowPointsGQL = async (
       const supplyMultiplier = multiplier[`${asset}Supply` as keyof Multiplier];
       supplyData[asset] =
         userReserve.currentATokenBalance *
-        marketPrice[`${userReserve.reserve.symbol}`] *
+        marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()] *
         (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
       supply.set(userReserve.user.id, supplyData);
 
@@ -107,7 +108,7 @@ export const supplyBorrowPointsGQL = async (
       const borrowMultiplier = multiplier[`${asset}Borrow` as keyof Multiplier];
       borrowData[asset] =
         userReserve.currentTotalDebt *
-        marketPrice[`${userReserve.reserve.symbol}`] *
+        marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()] *
         (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
       borrow.set(userReserve.user.id, borrowData);
     });

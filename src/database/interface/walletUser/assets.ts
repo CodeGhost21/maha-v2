@@ -1,18 +1,21 @@
 export interface IAsset {
   eth?: number;
+  mai?: number;
   usdc?: number;
   usdt?: number;
-  manta?: number;
-  stone?: number;
-  tia?: number;
-  wbtc?: number;
-  wsEth?: number;
-  wusdm?: number;
   ezeth?: number;
+  pufeth?: number;
+  rseth?: number;
   grai?: number;
-  mai?: number;
-  okb?: number;
+  wbtc?: number;
+  sweth?: number;
+  weeth?:number;
+  wrseth?:number;
+  unieth?:number;
   dai?: number;
+  weth:number;
+  okb?: number;
+  usdb?:number;
   lusd?: number;
   usdce?: number;
   busd?: number;
@@ -21,9 +24,9 @@ export interface IAsset {
   sword?: number;
   vc?: number;
   wsteth?: number;
-  pufeth?: number;
-  rseth?: number;
-  wefeth?: number;
-  sweth?: number;
-  lido?: number;
+  manta?: number;
+  stone?: number;
+  tia?: number;
+  wstEth?: number;
+  wusdm?: number;
 }
