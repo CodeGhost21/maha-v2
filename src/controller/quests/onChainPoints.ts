@@ -20,18 +20,52 @@ export const getPriceCoinGecko = async () => {
       ids: [
         "ethereum",
         "renzo-restaked-eth",
-        "lido-dao",
         "kelp-dao-restaked-eth",
         "zerolend",
+        "pufeth",
+        "grai",
+        "wrapped-bitcoin",
+        "wrapped-eeth",
+        "sweth",
+        "mai",
+        "weth",
+        "okb",
+        "pancakeswap",
+        "mute",
+        "sword",
+        "velocore",
+        "wrapped-steth",
+        "universal-eth",
+        "manta-network",
+        "stakestone-ether",
+        "celestia",
+        "wrapped-usdm",
       ],
       vs_currencies: ["usd"],
     });
     const priceList = {
       // TODO: return keys in lowercase
-      ETH: data.data.ethereum.usd,
-      ezETH: data.data["renzo-restaked-eth"].usd,
-      lido: data.data["lido-dao"].usd,
-      rsEth: data.data["kelp-dao-restaked-eth"].usd,
+      eth: data.data.ethereum.usd,
+      ezeth: data.data["renzo-restaked-eth"].usd,
+      rseth: data.data["kelp-dao-restaked-eth"].usd,
+      pufeth: data.data,
+      grai: data.data,
+      wbtc: data.data,
+      weeth: data.data,
+      sweth: data.data,
+      mai: data.data,
+      weth: data.data,
+      okb: data.data,
+      cake: data.data,
+      mute: data.data,
+      sword: data.data,
+      vc: data.data,
+      wsteth: data.data,
+      unieth: data.data,
+      manta: data.data,
+      stone: data.data,
+      tia: data.data,
+      wusdm: data.data,
       zerolend: data.data.zerolend.usd,
     };
     cache.set("coingecko:PriceList", priceList, 60 * 60);
@@ -96,9 +130,7 @@ export const supplyBorrowPointsGQL = async (
       const supplyMultiplier = multiplier[`${asset}Supply` as keyof Multiplier];
       supplyData[asset] =
         (Number(userReserve.currentATokenBalance) / 1e18) *
-        Number(
-          marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()]
-        ) *
+        Number(marketPrice[`${asset}`]) *
         (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
       supply.set(userReserve.user.id, supplyData);
 
@@ -106,9 +138,7 @@ export const supplyBorrowPointsGQL = async (
       const borrowMultiplier = multiplier[`${asset}Borrow` as keyof Multiplier];
       borrowData[asset] =
         (Number(userReserve.currentTotalDebt) / 1e18) *
-        Number(
-          marketPrice[`${userReserve.reserve.symbol}`.toLocaleLowerCase()]
-        ) *
+        Number(marketPrice[`${asset}`]) *
         (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
       borrow.set(userReserve.user.id, borrowData);
     });
