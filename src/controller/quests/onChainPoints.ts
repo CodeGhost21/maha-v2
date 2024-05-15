@@ -27,10 +27,9 @@ export const getPriceCoinGecko = async () => {
         "wrapped-bitcoin",
         "wrapped-eeth",
         "sweth",
-        "mai",
         "weth",
         "okb",
-        "pancakeswap",
+        // "pancakeswap",
         "mute",
         "sword",
         "velocore",
@@ -43,32 +42,43 @@ export const getPriceCoinGecko = async () => {
       ],
       vs_currencies: ["usd"],
     });
+
     const priceList = {
-      // TODO: return keys in lowercase
+      //stable coins
+      usdc: 1,
+      usdt: 1,
+      usdb: 1,
+      lusd: 1,
+      busd: 1,
+      mai: 1,
+      dai: 1,
+
       eth: data.data.ethereum.usd,
       ezeth: data.data["renzo-restaked-eth"].usd,
       rseth: data.data["kelp-dao-restaked-eth"].usd,
-      pufeth: data.data,
-      grai: data.data,
-      wbtc: data.data,
-      weeth: data.data,
-      sweth: data.data,
-      mai: data.data,
-      weth: data.data,
-      okb: data.data,
-      cake: data.data,
-      mute: data.data,
-      sword: data.data,
-      vc: data.data,
-      wsteth: data.data,
-      unieth: data.data,
-      manta: data.data,
-      stone: data.data,
-      tia: data.data,
-      wusdm: data.data,
+      wrseth: data.data["kelp-dao-restaked-eth"].usd,
+      pufeth: data.data.pufeth.usd,
+      grai: data.data.grai.usd,
+      wbtc: data.data["wrapped-bitcoin"].usd,
+      weeth: data.data["wrapped-eeth"],
+      sweth: data.data.sweth.usd,
+      weth: data.data.weth.usd,
+      okb: data.data.okb.usd,
+      cake: 2.6, //could not fetch from coingecko
+      mute: data.data.mute.usd,
+      sword: data.data.sword.usd,
+      vc: data.data.velocore.usd,
+      wsteth: data.data["wrapped-steth"].usd,
+      unieth: data.data["universal-eth"].usd,
+      manta: data.data["manta-network"].usd,
+      stone: data.data["stakestone-ether"].usd,
+      tia: data.data.celestia.usd,
+      wusdm: data.data["wrapped-usdm"].usd, //price not listed on coingecko
+
       zerolend: data.data.zerolend.usd,
     };
     cache.set("coingecko:PriceList", priceList, 60 * 60);
+
     return priceList;
   } catch (error) {
     console.error("Error fetching Ethereum price:", error);

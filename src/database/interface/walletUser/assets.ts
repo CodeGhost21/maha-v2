@@ -5,16 +5,17 @@ export interface IAsset {
   lusd?: number; //stable
   busd?: number; //stable
   dai?: number; //stable
+  mai?: number; //stable
 
   eth?: number; //done
   ezeth?: number; //done
   rseth?: number; //done
+  wrseth?: number; //done
   pufeth?: number; //done
   grai?: number;
   wbtc?: number; //done
   weeth?: number; //done
   sweth?: number; //done
-  mai?: number; //done
   weth?: number; //done
   okb?: number; //done
   cake?: number; //done
