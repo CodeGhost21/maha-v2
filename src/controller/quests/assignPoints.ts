@@ -5,9 +5,9 @@ import {
 import { UserPointTransactions } from "../../database/models/userPointTransactions";
 import { referralPercent } from "./constants";
 import { AnyBulkWriteOperation } from "mongodb";
-import { IWalletUser } from "src/database/interface/walletUser/walletUser";
-import { IUserPointTransactions } from "src/database/interface/userPoints/userPointsTransactions";
-import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
+import { IWalletUser } from "../../database/interface/walletUser/walletUser";
+import { IUserPointTransactions } from "../../database/interface/userPoints/userPointsTransactions";
+import { IWalletUserPoints } from "../../database/interface/walletUser/walletUserPoints";
 
 export interface IAssignPointsTask {
   userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];

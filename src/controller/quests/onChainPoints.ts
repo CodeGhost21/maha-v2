@@ -4,26 +4,12 @@ import CoinGecko from "coingecko-api";
 import axios from "axios";
 import {
   mantaProvider,
-  zksyncProvider,
-  blastProvider,
-  lineaProvider,
-  ethLrtProvider,
-  xLayerProvider,
+  zksyncProvider
 } from "../../utils/providers";
-import {
-  minSupplyAmount,
-  borrowPtsPerUSD,
-  supplyEthEthereumLrt,
-  supplyZksyncLido,
-  supplyEthereumLrtEsEth,
-} from "./constants";
-import { MulticallWrapper } from "ethers-multicall-provider";
 import nconf from "nconf";
 import poolABI from "../../abis/Pool.json";
-import stabilityPool from "../../abis/StabilityPool.json";
-import troveManagerABI from "../../abis/TroveManager.json";
 import cache from "../../utils/cache";
-import { IWalletUserModel } from "src/database/models/walletUsersV2";
+import { IWalletUserModel } from "../../database/models/walletUsersV2";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -72,7 +58,7 @@ export const supplyBorrowPointsGQL = async (
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }
-    const currentBlock = p.getBlockNumber(); // TODO: try eliminating this
+    const currentBlock = p.getBlockNumber();
     const graphQuery = `query {
       userReserves(
         block: {number: ${currentBlock}}
@@ -109,13 +95,12 @@ export const supplyBorrowPointsGQL = async (
     const supply = new Map();
     const borrow = new Map();
 
-    // TODO: confirm if balance*coinGecko price is required for both borrow and supply
     result.map((userReserve: any) => {
       const supplyData = supply.get(userReserve.user.id) || {};
       supplyData[userReserve.reserve.symbol.toLowerCase()] =
         userReserve.currentATokenBalance *
         marketPrice[`${userReserve.reserve.symbol}`] *
-        supplyMultiplier; // TODO: confirm supplyMultiplier
+        supplyMultiplier;
       supply.set(userReserve.user.id, supplyData);
 
       const borrowData = borrow.get(userReserve.user.id) || {};

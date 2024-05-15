@@ -3,8 +3,8 @@ import { AnyBulkWriteOperation } from "mongodb";
 
 import { _generateReferralCode } from "../controller/user";
 import { WalletUserV2 } from "../database/models/walletUsersV2";
-import { IWalletUser } from "src/database/interface/walletUser/walletUser";
-import { apiBlast, apiEth, apiLinea, apiManta, apiXLayer, apiZKSync } from "src/controller/quests/constants";
+import { IWalletUser } from "../database/interface/walletUser/walletUser";
+import { apiBlast, apiEth, apiLinea, apiManta, apiXLayer, apiZKSync } from "../controller/quests/constants";
 
 export const addUsers = async () => {
   console.log("Starting add new users process...");

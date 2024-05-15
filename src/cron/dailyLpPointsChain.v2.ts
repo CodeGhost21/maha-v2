@@ -1,10 +1,8 @@
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { supplyBorrowPointsGQL } from "../controller/quests/onChainPoints";
-import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
+import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
 import { getEpoch } from "../utils/epoch";
 import { AbstractProvider } from "ethers";
-import nconf from "nconf";
-import _ from "underscore";
 import {
   IAssignPointsTask,
   assignPointsPerSecondToBatch,
@@ -25,7 +23,7 @@ import {
   apiManta,
   apiXLayer,
   apiZKSync,
-} from "src/controller/quests/constants";
+} from "../controller/quests/constants";
 
 const _processBatch = async (
   api: string,
