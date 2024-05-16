@@ -7,12 +7,14 @@ import { IWalletUserModel } from "../../database/models/walletUsersV2";
 import {
   apiManta,
   apiZKSync,
+  assetDenomination,
   mantaMultiplier,
   minSupplyAmount,
   Multiplier,
   zksyncMultiplier,
 } from "./constants";
 import { getTotalPoints } from "../user";
+import { IAsset } from "src/database/interface/walletUser/assets";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -64,7 +66,7 @@ export const getPriceCoinGecko = async () => {
       weeth: data.data["wrapped-eeth"],
       sweth: data.data.sweth.usd,
       weth: data.data.weth.usd,
-      okb: data.data.okb.usd,
+      wokb: data.data.okb.usd,
       cake: 2.6, //could not fetch from coingecko
       mute: data.data.mute.usd,
       sword: data.data.sword.usd,
@@ -103,7 +105,6 @@ export const supplyBorrowPointsGQL = async (
 
     const graphQuery = `query {
       userReserves(
-        block: {number: ${currentBlock - 10}}
         where: {
           and: [
             {
@@ -112,7 +113,7 @@ export const supplyBorrowPointsGQL = async (
                 { currentATokenBalance_gt: 0 }
               ]
             },
-            {user_in: ["0x961e45e3666029709c3ac50a26319029cde4e067","0xf152da370fa509f08685fa37a09ba997e41fb65b","0x4724682104fdcbe5f8cdec1da2b9aa8a023c935b"]},
+            {user_in: ["0xf7f9dc517e41af495bf89652200e75a1222e191b"]},
           ]
         }
       ) {
@@ -128,22 +129,24 @@ export const supplyBorrowPointsGQL = async (
         }
       }
     }`;
-
+    // {user_in: [${userBatch.map((u) => `"${u.walletAddress}"`)}]},
     const headers = {
       "Content-Type": "application/json",
     };
     const data = await axios.post(api, { query: graphQuery }, { headers });
     const result = data.data.data.userReserves;
-    console.log("userreserve", result);
+
     const supply = new Map();
     const borrow = new Map();
 
     result.map((userReserve: any) => {
-      const asset = userReserve.reserve.symbol.toLowerCase();
+      const asset = userReserve.reserve.symbol.toLowerCase() as keyof IAsset;
       const supplyData = supply.get(userReserve.user.id) || {};
       const supplyMultiplier = multiplier[`${asset}Supply` as keyof Multiplier];
+
       supplyData[asset] =
-        (Number(userReserve.currentATokenBalance) / 1e18) *
+        (Number(userReserve.currentATokenBalance) /
+          assetDenomination[`${asset}`]) *
         Number(marketPrice[`${asset}`]) *
         (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
       supply.set(userReserve.user.id, supplyData);
@@ -151,7 +154,7 @@ export const supplyBorrowPointsGQL = async (
       const borrowData = borrow.get(userReserve.user.id) || {};
       const borrowMultiplier = multiplier[`${asset}Borrow` as keyof Multiplier];
       borrowData[asset] =
-        (Number(userReserve.currentTotalDebt) / 1e18) *
+        (Number(userReserve.currentTotalDebt) / assetDenomination[`${asset}`]) *
         Number(marketPrice[`${asset}`]) *
         (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
       borrow.set(userReserve.user.id, borrowData);

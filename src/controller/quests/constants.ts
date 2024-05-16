@@ -127,3 +127,35 @@ export const apiEth = baseUrl + "zerolend-mainnet-lrt/1.0.0/gn";
 export const apiLinea = baseUrl + "zerolend-linea/1.0.0/gn";
 export const apiBlast = baseUrl + "zerolend-blast/1.0.0/gn";
 export const apiXLayer = baseUrl + "zerolend-xlayer/1.0.0/gn";
+
+export const assetDenomination = {
+  usdc: 1e6, //done
+  usdt: 1e6, //done
+  usdb: 1e18, //done
+  lusd: 1e18, //no
+  busd: 1e18, //done
+  dai: 1e18, //done
+  mai: 1e18, //done
+
+  eth: 1e18, //done
+  ezeth: 1e18, //done
+  rseth: 1e18, //done
+  wrseth: 1e18, //done
+  pufeth: 1e18, //done
+  grai: 1e18, //done
+  wbtc: 1e8, //done
+  weeth: 1e18, //done
+  sweth: 1e18, //done
+  weth: 1e18, //done
+  wokb: 1e18, //done
+  cake: 1e18, //done
+  mute: 1e18, //no
+  sword: 1e18, //done
+  vc: 1e18, //no
+  wsteth: 1e18, //no
+  unieth: 1e18, //done
+  manta: 1e18, //done
+  stone: 1e18, //done
+  tia: 1e18, //no
+  wusdm: 1e18, //done
+};

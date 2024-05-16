@@ -17,7 +17,7 @@ export interface IAsset {
   weeth?: number; //done
   sweth?: number; //done
   weth?: number; //done
-  okb?: number; //done
+  wokb?: number; //done
   cake?: number; //done
   mute?: number; //done
   sword?: number; //done

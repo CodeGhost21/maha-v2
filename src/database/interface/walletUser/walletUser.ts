@@ -1,4 +1,4 @@
-import { IWalletUserPoints } from "./walletUserPoints";
+import { IWalletUserPoints, IEpoch } from "./walletUserPoints";
 
 export interface IWalletUser {
   discordId: string;
@@ -14,5 +14,5 @@ export interface IWalletUser {
   pointsUpdateTimestamp: IWalletUserPoints;
   pointsPerSecond: IWalletUserPoints;
   pointsPerSecondUpdateTimestamp: IWalletUserPoints;
-  epochs: IWalletUserPoints;
+  epochs: IEpoch;
 }
