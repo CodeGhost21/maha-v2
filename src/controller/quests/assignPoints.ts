@@ -120,39 +120,42 @@ export const assignPointsPerSecondToBatch = async (
   epoch?: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-  console.log(users, pointsData);
-
+  console.log("user", users);
+  console.log("pointsdata", pointsData);
   if (!users || !users.length) return;
 
-  users.map((user) => {
-    const latestPoints = pointsData.get(user.walletAddress);
-    console.log(128, latestPoints);
+  users
+    .filter((user) => pointsData.has(user.walletAddress))
+    .map((user) => {
+      const latestPoints = pointsData.get(user.walletAddress);
+      console.log("user", user);
+      console.log("latestPoints", latestPoints);
 
-    const Keys = Object.keys(latestPoints);
-    console.log(131, Keys);
+      const Keys = Object.keys(latestPoints);
+      console.log("keys", Keys, "\ntask", task);
 
-    const pointsPerSecond: { [key: string]: number } = {};
-    console.log(135, pointsPerSecond);
+      const pointsPerSecond: { [key: string]: number } = {};
+      console.log("pointsPerSecond", pointsPerSecond);
 
-    if (Keys.length) {
-      Keys.forEach((key) => {
-        pointsPerSecond[`pointsPerSecond.${task}.${key}`] =
-          latestPoints[key] / 86400;
-      });
-    }
+      if (Keys.length) {
+        Keys.forEach((key) => {
+          pointsPerSecond[`${key}`] = latestPoints[key] / 86400;
+        });
+      }
+      console.log("pps", pointsPerSecond);
 
-    userBulkWrites.push({
-      updateOne: {
-        filter: { _id: user.id },
-        update: {
-          $set: {
-            ...pointsPerSecond,
-            epoch: epoch || user.epoch,
+      userBulkWrites.push({
+        updateOne: {
+          filter: { _id: user.id },
+          update: {
+            $set: {
+              [`pointsPerSecond.${task}`]: pointsPerSecond,
+              epoch: epoch || user.epoch,
+            },
           },
         },
-      },
+      });
     });
-  });
 
   return {
     userBulkWrites,
