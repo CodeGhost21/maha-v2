@@ -12,6 +12,7 @@ import {
   Multiplier,
   zksyncMultiplier,
 } from "./constants";
+import { getTotalPoints } from "../user";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -133,7 +134,7 @@ export const supplyBorrowPointsGQL = async (
     };
     const data = await axios.post(api, { query: graphQuery }, { headers });
     const result = data.data.data.userReserves;
-
+    console.log("userreserve", result);
     const supply = new Map();
     const borrow = new Map();
 
@@ -206,21 +207,13 @@ export const userLpData = async (walletAddress: string) => {
     zksyncMultiplier
   );
 
-  let supplyManta = 0;
-  let supplyZksync = 0;
-
   const mantaSupply = mantaData.supply.get(walletAddress);
   const zksyncSupply = zksyncData.supply.get(walletAddress);
 
-  for (const [_, value] of Object.entries(mantaSupply)) {
-    supplyManta += Number(value) / 1e18;
-  }
+  const mantaPoints = getTotalPoints(mantaSupply);
+  const zksyncPoints = getTotalPoints(zksyncSupply);
 
-  for (const [_, value] of Object.entries(zksyncSupply)) {
-    supplyZksync += Number(value) / 1e18;
-  }
-
-  const totalSupply = supplyManta + supplyZksync;
+  const totalSupply = mantaPoints + zksyncPoints;
   if (totalSupply > minSupplyAmount && totalSupply <= minSupplyAmount * 10) {
     return "shrimp";
   } else if (

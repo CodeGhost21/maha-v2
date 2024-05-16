@@ -47,7 +47,7 @@ const _processBatch = async (
     const data = await supplyBorrowPointsGQL(api, userBatch, p, multiplier);
 
     const tasks: IAssignPointsTask[] = [];
-
+    console.log("data", data);
     // update supply points
     const supplyExecutable = await assignPointsPerSecondToBatch(
       userBatch,
