@@ -22,7 +22,7 @@ export const migrateUsers = async () => {
     batch = await WalletUser.find({
       isDeleted: false,
     })
-      .select("walletAddress discordId referralCode referredBy role")
+      .select("walletAddress discordId referralCode referredBy role rank")
       .skip(skip)
       .limit(batchSize);
 
@@ -33,7 +33,7 @@ export const migrateUsers = async () => {
     });
     try {
       await WalletUserV2.ensureIndexes();
-      await WalletUserV2.insertMany(batch,{ordered: false});
+      await WalletUserV2.insertMany(batch, { ordered: false });
       skip += batchSize;
     } catch (e) {
       console.log(e);
