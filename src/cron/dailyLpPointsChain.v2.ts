@@ -47,7 +47,7 @@ const _processBatch = async (
     const data = await supplyBorrowPointsGQL(api, userBatch, p, multiplier);
 
     const tasks: IAssignPointsTask[] = [];
-    console.log("data", data);
+
     // update supply points
     const supplyExecutable = await assignPointsPerSecondToBatch(
       userBatch,
@@ -88,10 +88,8 @@ const _dailyLpPoints = async (
   console.log("working with epoch", epoch);
 
   const query = {
-    $or: [
-      { [`epochs.${supplyTask}`]: 0 },
-      { [`epochs.${supplyTask}`]: undefined },
-    ],
+    walletAddress: { $exists: true, $ne: null, $not: { $eq: "" } },
+    [`epochs.${supplyTask}`]: { $ne: epoch },
   };
 
   const chunk = 1000;
@@ -131,21 +129,19 @@ const _dailyLpPointsChain = async (
   p: AbstractProvider,
   multiplier: Multiplier
 ) => {
-  console.log(supplyTask, "daily lp points");
-
   if (lock[supplyTask]) return;
   lock[supplyTask] = true;
   try {
     const count = await WalletUserV2.count({});
     await _dailyLpPoints(api, count, supplyTask, borrowTask, p, multiplier);
   } catch (error) {
-    console.log(supplyTask, "cron failed beacuse of", error);
+    console.log(supplyTask, "cron failed because of", error);
   }
   lock[supplyTask] = false;
 };
 
 // manta
-export const mantaCron = async () => {
+export const mantaPPSCron = async () => {
   return _dailyLpPointsChain(
     apiManta,
     "supplyManta",
@@ -156,7 +152,7 @@ export const mantaCron = async () => {
 };
 
 // zksync
-export const zksyncCron = async () => {
+export const zksyncPPSCron = async () => {
   return _dailyLpPointsChain(
     apiZKSync,
     "supplyZkSync",
@@ -167,7 +163,7 @@ export const zksyncCron = async () => {
 };
 
 // blast
-export const blastCron = async () => {
+export const blastPPSCron = async () => {
   return _dailyLpPointsChain(
     apiBlast,
     "supplyBlast",
@@ -178,7 +174,7 @@ export const blastCron = async () => {
 };
 
 // linea
-export const lineaCron = async () => {
+export const lineaPPSCron = async () => {
   return _dailyLpPointsChain(
     apiLinea,
     "supplyLinea",
@@ -189,7 +185,7 @@ export const lineaCron = async () => {
 };
 
 // etherum Lrt
-export const ethereumLrtCron = async () => {
+export const ethereumLrtPPSCron = async () => {
   return _dailyLpPointsChain(
     apiEth,
     "supplyEthereumLrt",
@@ -200,7 +196,7 @@ export const ethereumLrtCron = async () => {
 };
 
 // xlayer
-export const xLayerCron = async () => {
+export const xLayerPPSCron = async () => {
   return _dailyLpPointsChain(
     apiXLayer,
     "supplyXLayer",

@@ -159,3 +159,27 @@ export const assetDenomination = {
   tia: 1e18, //no
   wusdm: 1e18, //done
 };
+
+export const coingeckoIds = [
+  "ethereum",
+  "renzo-restaked-eth",
+  "kelp-dao-restaked-eth",
+  "zerolend",
+  "pufeth",
+  "grai",
+  "wrapped-bitcoin",
+  "wrapped-eeth",
+  "sweth",
+  "weth",
+  "okb",
+  // "pancakeswap",
+  "mute",
+  "sword",
+  "velocore",
+  "wrapped-steth",
+  "universal-eth",
+  "manta-network",
+  "stakestone-ether",
+  "celestia",
+  "wrapped-usdm",
+];

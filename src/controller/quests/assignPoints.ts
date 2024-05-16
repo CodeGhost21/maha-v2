@@ -8,7 +8,6 @@ import { AnyBulkWriteOperation } from "mongodb";
 import { IWalletUser } from "../../database/interface/walletUser/walletUser";
 import { IUserPointTransactions } from "../../database/interface/userPoints/userPointsTransactions";
 import {
-  IEpoch,
   IWalletUserPoints,
 } from "../../database/interface/walletUser/walletUserPoints";
 
@@ -123,24 +122,16 @@ export const assignPointsPerSecondToBatch = async (
   epoch: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-  // console.log("user", users);
   if (!users || !users.length) return;
   console.log("pointsData", pointsData);
-
-  console.log(users.filter((user) => pointsData.has(user.walletAddress)));
-  console.log(">>>>>>>>>>>");
 
   users
     .filter((user) => pointsData.has(user.walletAddress))
     .map((user) => {
-      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
       const latestPoints = pointsData.get(user.walletAddress);
-      console.log("user", user);
-      console.log("latestPoints", latestPoints);
 
       const Keys = Object.keys(latestPoints);
-      console.log("keys", Keys, "\ntask", task);
 
       const pointsPerSecond: { [key: string]: number } = {};
 
@@ -149,7 +140,6 @@ export const assignPointsPerSecondToBatch = async (
           pointsPerSecond[`${key}`] = latestPoints[key] / 86400;
         });
       }
-      console.log("pps", task, pointsPerSecond);
 
       userBulkWrites.push({
         updateOne: {

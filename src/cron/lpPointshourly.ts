@@ -36,17 +36,9 @@ export const updateLPPointsHourly = async () => {
       const userLpTasksKeys = Object.keys(user.pointsPerSecond) as Array<
         keyof IWalletUserPoints
       >;
-      console.log("userLpTasksKeys", userLpTasksKeys);
-      // await Promise.all(
       // each LP task
       userLpTasksKeys.map((lpTask) => {
-        console.log("task---------", lpTask);
         const assetPointsPerSecond = user.pointsPerSecond[lpTask] as IAsset;
-        console.log("assetPointsPerSecond", assetPointsPerSecond);
-        console.log(
-          "user.pointsPerSecond[lpTask]",
-          user.pointsPerSecond[lpTask]
-        );
         const assetPointsPerSecondKeys = Object.keys(
           assetPointsPerSecond
         ) as Array<keyof IAsset>;
@@ -67,13 +59,12 @@ export const updateLPPointsHourly = async () => {
             const timestamp = pointsPerSecondUpdateTimestamp
               ? Number(pointsPerSecondUpdateTimestamp[asset])
               : 0;
-            console.log("timestamp", timestamp);
+
             const pointsPerSecond = Number(assetPointsPerSecond[asset]) || 0;
-            console.log("pointsPerSecond", pointsPerSecond);
             const timeElapsed =
               timestamp <= 0 ? 0 : (Date.now() - timestamp) / 1000;
             const newPoints = Number(pointsPerSecond * timeElapsed);
-            console.log("newPoints", newPoints);
+
             let refPointForAsset = 0;
             if (newPoints > 0) {
               if (referredByUser && Object.keys(referredByUser).length) {
@@ -85,12 +76,10 @@ export const updateLPPointsHourly = async () => {
               const pointsToAdd =
                 timestamp > 0 ? newPoints + refPointForAsset : 0;
               (_points[lpTask] as IAsset)[asset] = pointsToAdd;
-              console.log("points1------", _points);
               _totalPoints += pointsToAdd;
             }
             _pointsPerSecondUpdateTimestamp[`${asset}`] = Date.now();
           });
-          console.log("points", _points);
           if (referredByUser && Object.keys(referredByUser).length) {
             userBulkWrites.push({
               updateOne: {

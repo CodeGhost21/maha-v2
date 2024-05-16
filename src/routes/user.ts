@@ -7,7 +7,7 @@ const router = Router();
 import {
   getLeaderBoard,
   walletVerify,
-  fetchMe,
+  // fetchMe,
   getTotalUsers,
   getTotalReferralOfUsers,
   getUsersData,
@@ -17,9 +17,11 @@ import {
   getUserTransactions,
   getLPData,
   getUserTotalPoints,
+  userInfo,
 } from "../controller/user";
 
 router.get("/", getUsersData);
+router.get("/userInfo", userInfo)
 router.post("/login", walletVerify);
 // router.get("/lb", getLeaderBoard);
 router.get("/referral", getUserReferralData); // {'totalPoints': '1000
@@ -28,7 +30,7 @@ router.get("/referral", getUserReferralData); // {'totalPoints': '1000
 // router.get("/userTotalPoints", getUserTotalPoints);
 
 router.use(deserializeUser, ensureLoggedIn);
-router.get("/me", fetchMe);
+// router.get("/me", fetchMe);
 router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
 // router.get("/transactions", getUserTransactions);

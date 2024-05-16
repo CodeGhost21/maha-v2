@@ -8,6 +8,7 @@ import {
   apiManta,
   apiZKSync,
   assetDenomination,
+  coingeckoIds,
   mantaMultiplier,
   minSupplyAmount,
   Multiplier,
@@ -20,29 +21,7 @@ const CoinGeckoClient = new CoinGecko();
 export const getPriceCoinGecko = async () => {
   try {
     const data = await CoinGeckoClient.simple.price({
-      ids: [
-        "ethereum",
-        "renzo-restaked-eth",
-        "kelp-dao-restaked-eth",
-        "zerolend",
-        "pufeth",
-        "grai",
-        "wrapped-bitcoin",
-        "wrapped-eeth",
-        "sweth",
-        "weth",
-        "okb",
-        // "pancakeswap",
-        "mute",
-        "sword",
-        "velocore",
-        "wrapped-steth",
-        "universal-eth",
-        "manta-network",
-        "stakestone-ether",
-        "celestia",
-        "wrapped-usdm",
-      ],
+      ids: coingeckoIds,
       vs_currencies: ["usd"],
     });
 
@@ -76,7 +55,7 @@ export const getPriceCoinGecko = async () => {
       manta: data.data["manta-network"].usd,
       stone: data.data["stakestone-ether"].usd,
       tia: data.data.celestia.usd,
-      wusdm: data.data["wrapped-usdm"].usd, //price not listed on coingecko
+      wusdm: 1, //data.data["wrapped-usdm"].usd, //price not listed on coingecko
 
       zerolend: data.data.zerolend.usd,
     };
@@ -101,10 +80,10 @@ export const supplyBorrowPointsGQL = async (
       marketPrice = await getPriceCoinGecko();
     }
     const currentBlock = await p.getBlockNumber();
-    console.log(currentBlock - 10); // cannot fetch data for latest block no
 
     const graphQuery = `query {
       userReserves(
+        block: {number: ${currentBlock - 5}},
         where: {
           and: [
             {
@@ -113,7 +92,7 @@ export const supplyBorrowPointsGQL = async (
                 { currentATokenBalance_gt: 0 }
               ]
             },
-            {user_in: ["0xf7f9dc517e41af495bf89652200e75a1222e191b"]},
+            {user_in: [${userBatch.map((u) => `"${u.walletAddress}"`)}]},
           ]
         }
       ) {
@@ -129,7 +108,7 @@ export const supplyBorrowPointsGQL = async (
         }
       }
     }`;
-    // {user_in: [${userBatch.map((u) => `"${u.walletAddress}"`)}]},
+
     const headers = {
       "Content-Type": "application/json",
     };
@@ -160,31 +139,6 @@ export const supplyBorrowPointsGQL = async (
       borrow.set(userReserve.user.id, borrowData);
     });
 
-    /*
-    return
-    {
-      supply: {
-        "address1": {
-          "asset1": value1,
-          "asset2": value2,
-        }
-        "address2": {
-          "asset1": value1,
-          "asset3": value3,
-        }
-      },
-      borrow: {
-        "address1": {
-          "asset1": value1,
-          "asset2": value2,
-        }
-        "address2": {
-          "asset1": value1,
-          "asset3": value3,
-        }
-      }
-    }
-    */
     return {
       supply,
       borrow,

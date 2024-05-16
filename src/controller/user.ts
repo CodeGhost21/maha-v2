@@ -11,7 +11,6 @@ import {
 import { SiweMessage } from "../siwe/lib/client";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
-import NotFoundError from "../errors/NotFoundError";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
 import { userLpData, supplyBorrowPointsGQL } from "./quests/onChainPoints";
 import {
@@ -26,7 +25,6 @@ import {
   lineaMultiplier,
   mantaMultiplier,
   minSupplyAmount,
-  whiteListTeam,
   xlayerMultiplier,
   zksyncMultiplier,
 } from "./quests/constants";
@@ -115,29 +113,42 @@ export const walletVerify = async (
   }
 };
 
-export const fetchMe = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const user = req.user as IWalletUserModel;
-  if (!user) return next(new NotFoundError());
+export const userInfo = async (req: Request, res: Response) => {
+  const walletAddress = req.body.address;
+  console.log(req.body);
+  if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    return res
+      .status(400)
+      .json({ success: false, error: "Address is required" });
+  }
 
+  const user = await WalletUserV2.findOne({
+    walletAddress: walletAddress.toLowerCase().trim(),
+  });
+
+  if (!user)
+    return res.status(404).json({
+      success: false,
+      message: "user not found",
+    });
+
+  console.log("first");
   // get supply points for all chains and their assets
-  const mantaSupply = user.points.supplyManta;
-  const zksyncSupply = user.points.supplyZkSync;
-  const xlayerSupply = user.points.supplyXLayer;
-  const ethereumLrtSupply = user.points.supplyEthereumLrt;
-  const blastSupply = user.points.supplyBlast;
-  const lineaSupply = user.points.supplyLinea;
+  const points = user.points;
+  const mantaSupply = points.supplyManta || 0;
+  const zksyncSupply = points.supplyZkSync || 0;
+  const xlayerSupply = points.supplyXLayer || 0;
+  const ethereumLrtSupply = points.supplyEthereumLrt || 0;
+  const blastSupply = points.supplyBlast || 0;
+  const lineaSupply = points.supplyLinea || 0;
 
   // get borrow points for all chains and their assets
-  const mantaBorrow = user.points.borrowManta;
-  const zksyncBorrow = user.points.borrowZkSync;
-  const xlayerBorrow = user.points.borrowXLayer;
-  const ethereumLrtBorrow = user.points.borrowEthereumLrt;
-  const blastBorrow = user.points.borrowBlast;
-  const lineaBorrow = user.points.borrowLinea;
+  const mantaBorrow = points.borrowManta || 0;
+  const zksyncBorrow = points.borrowZkSync || 0;
+  const xlayerBorrow = points.borrowXLayer || 0;
+  const ethereumLrtBorrow = points.borrowEthereumLrt || 0;
+  const blastBorrow = points.borrowBlast || 0;
+  const lineaBorrow = points.borrowLinea || 0;
 
   const totalSupplyPoints =
     getTotalPoints(mantaSupply) +
@@ -155,11 +166,13 @@ export const fetchMe = async (
     getTotalPoints(lineaBorrow);
 
   const userData = {
-    ...user,
+    rank: user.rank,
+    referralPoints: user.points.referral || 0,
+    totalPoints: user.totalPoints,
     totalSupplyPoints: totalSupplyPoints,
     totalBorrowPoints: totalBorrowPoints,
   };
-  res.json({ success: true, userData });
+  res.status(200).json({ success: true, userData });
 };
 
 export const getLeaderBoard = async (req: Request, res: Response) => {
@@ -201,7 +214,7 @@ export const getUsersData = async (req: Request, res: Response) => {
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
-  const user: any = await WalletUserV2.findOne({
+  const user: IWalletUserModel = await WalletUserV2.findOne({
     walletAddress: walletAddress.toLowerCase().trim(),
   }).select("totalPoints");
   if (!user) return res.json({ success: false, message: "no data found" });
