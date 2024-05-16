@@ -7,7 +7,10 @@ import { referralPercent } from "./constants";
 import { AnyBulkWriteOperation } from "mongodb";
 import { IWalletUser } from "../../database/interface/walletUser/walletUser";
 import { IUserPointTransactions } from "../../database/interface/userPoints/userPointsTransactions";
-import { IWalletUserPoints } from "../../database/interface/walletUser/walletUserPoints";
+import {
+  IEpoch,
+  IWalletUserPoints,
+} from "../../database/interface/walletUser/walletUserPoints";
 
 export interface IAssignPointsTask {
   userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];
@@ -117,16 +120,21 @@ export const assignPointsPerSecondToBatch = async (
   users: IWalletUserModel[],
   pointsData: Map<any, any>,
   task: string,
-  epoch?: number
+  epoch: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-  console.log("user", users);
-  console.log("pointsdata", pointsData);
+  // console.log("user", users);
   if (!users || !users.length) return;
+  console.log("pointsData", pointsData);
+
+  console.log(users.filter((user) => pointsData.has(user.walletAddress)));
+  console.log(">>>>>>>>>>>");
 
   users
     .filter((user) => pointsData.has(user.walletAddress))
     .map((user) => {
+      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
       const latestPoints = pointsData.get(user.walletAddress);
       console.log("user", user);
       console.log("latestPoints", latestPoints);
@@ -135,14 +143,13 @@ export const assignPointsPerSecondToBatch = async (
       console.log("keys", Keys, "\ntask", task);
 
       const pointsPerSecond: { [key: string]: number } = {};
-      console.log("pointsPerSecond", pointsPerSecond);
 
       if (Keys.length) {
         Keys.forEach((key) => {
           pointsPerSecond[`${key}`] = latestPoints[key] / 86400;
         });
       }
-      console.log("pps", pointsPerSecond);
+      console.log("pps", task, pointsPerSecond);
 
       userBulkWrites.push({
         updateOne: {
@@ -150,7 +157,7 @@ export const assignPointsPerSecondToBatch = async (
           update: {
             $set: {
               [`pointsPerSecond.${task}`]: pointsPerSecond,
-              epoch: epoch || user.epoch,
+              [`epochs.${task}`]: epoch,
             },
           },
         },
