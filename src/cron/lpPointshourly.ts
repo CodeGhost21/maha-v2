@@ -74,10 +74,11 @@ export const updateLPPointsHourly = async () => {
               timestamp <= 0 ? 0 : (Date.now() - timestamp) / 1000;
             const newPoints = Number(pointsPerSecond * timeElapsed);
             console.log("newPoints", newPoints);
+            let refPointForAsset = 0;
             if (newPoints > 0) {
-              const refPointForAsset =
-                timestamp > 0 ? Number(newPoints * referralPercent) : 0;
               if (referredByUser && Object.keys(referredByUser).length) {
+                refPointForAsset =
+                  timestamp > 0 ? Number(newPoints * referralPercent) : 0;
                 referralPoints += refPointForAsset;
               }
 
@@ -127,9 +128,8 @@ export const updateLPPointsHourly = async () => {
                 $inc: {
                   ...Object.keys(_points[lpTask] as IAsset).reduce(
                     (acc, key) => {
-                      acc[`points.${lpTask}.${key}`] = (
-                        _points[lpTask] as IAsset
-                      )[key as keyof IAsset] || 0;
+                      acc[`points.${lpTask}.${key}`] =
+                        (_points[lpTask] as IAsset)[key as keyof IAsset] || 0;
                       return acc;
                     },
                     {} as Record<string, number>
