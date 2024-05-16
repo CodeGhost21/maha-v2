@@ -14,11 +14,7 @@ import { open } from "../database";
 
 open();
 
-import {
-  IWalletUser,
-  IWalletUserPoints,
-  WalletUserV2,
-} from "../database/models/walletUsersV2";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 
 const updateDiscordPoints = async () => {
   const discordPoints = 100;
@@ -37,7 +33,8 @@ const updateDiscordPoints = async () => {
       let previousReferralPoints = 0;
       let actualPoints = discordPoints;
       if (previousDiscordFollowPoints > 0) {
-        if (user.referredBy && user.points.discordFollow > 120) {
+        // if (user.referredBy && user.points.discordFollow > 120) {
+        if (user.referredBy) {
           previousReferralPoints = previousDiscordFollowPoints / 1.2;
           actualPoints = discordPoints + referralPoints;
         }
