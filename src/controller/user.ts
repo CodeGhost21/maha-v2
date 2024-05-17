@@ -123,9 +123,9 @@ export const userInfo = async (req: Request, res: Response) => {
         .json({ success: false, data: { error: "Address is required" } });
     }
 
-    const user: IWalletUserModel | null = await WalletUserV2.findOne({
+    const user = await WalletUserV2.findOne({
       walletAddress: walletAddress.toLowerCase().trim(),
-    });
+    }).select("rank points totalPoints");
 
     if (!user)
       return res.status(404).json({
@@ -133,44 +133,13 @@ export const userInfo = async (req: Request, res: Response) => {
         data: { error: "user not found" },
       });
 
-    // get supply points for all chains and their assets
-    const points = user.points;
-    const mantaSupply = points.supplyManta || {};
-    const zksyncSupply = points.supplyZkSync || {};
-    const xlayerSupply = points.supplyXLayer || {};
-    const ethereumLrtSupply = points.supplyEthereumLrt || {};
-    const blastSupply = points.supplyBlast || {};
-    const lineaSupply = points.supplyLinea || {};
-
-    // get borrow points for all chains and their assets
-    const mantaBorrow = points.borrowManta || {};
-    const zksyncBorrow = points.borrowZkSync || {};
-    const xlayerBorrow = points.borrowXLayer || {};
-    const ethereumLrtBorrow = points.borrowEthereumLrt || {};
-    const blastBorrow = points.borrowBlast || {};
-    const lineaBorrow = points.borrowLinea || {};
-
-    const totalSupplyPoints =
-      getTotalPoints(mantaSupply) +
-      getTotalPoints(zksyncSupply) +
-      getTotalPoints(xlayerSupply) +
-      getTotalPoints(ethereumLrtSupply) +
-      getTotalPoints(blastSupply) +
-      getTotalPoints(lineaSupply);
-    const totalBorrowPoints =
-      getTotalPoints(mantaBorrow) +
-      getTotalPoints(zksyncBorrow) +
-      getTotalPoints(xlayerBorrow) +
-      getTotalPoints(ethereumLrtBorrow) +
-      getTotalPoints(blastBorrow) +
-      getTotalPoints(lineaBorrow);
-
+    const pointsTotal = getTotalSupplyBorrowPoints(user);
     const userData = {
       rank: user.rank,
       referralPoints: user.points.referral || 0,
       totalPoints: user.totalPoints,
-      totalSupplyPoints: totalSupplyPoints,
-      totalBorrowPoints: totalBorrowPoints,
+      totalSupplyPoints: pointsTotal.totalSupplyPoints,
+      totalBorrowPoints: pointsTotal.totalBorrowPoints,
     };
     res.status(200).json({ success: true, data: { userData } });
   } catch (error) {
@@ -443,4 +412,43 @@ export const getTotalPoints = (supplyOrBorrowObject: any) => {
     totalPoints += Number(value);
   }
   return totalPoints;
+};
+
+export const getTotalSupplyBorrowPoints = (user: IWalletUserModel) => {
+  // get supply points for all chains and their assets
+  const points = user.points;
+  const mantaSupply = points.supplyManta || {};
+  const zksyncSupply = points.supplyZkSync || {};
+  const xlayerSupply = points.supplyXLayer || {};
+  const ethereumLrtSupply = points.supplyEthereumLrt || {};
+  const blastSupply = points.supplyBlast || {};
+  const lineaSupply = points.supplyLinea || {};
+
+  // get borrow points for all chains and their assets
+  const mantaBorrow = points.borrowManta || {};
+  const zksyncBorrow = points.borrowZkSync || {};
+  const xlayerBorrow = points.borrowXLayer || {};
+  const ethereumLrtBorrow = points.borrowEthereumLrt || {};
+  const blastBorrow = points.borrowBlast || {};
+  const lineaBorrow = points.borrowLinea || {};
+
+  const totalSupplyPoints =
+    getTotalPoints(mantaSupply) +
+    getTotalPoints(zksyncSupply) +
+    getTotalPoints(xlayerSupply) +
+    getTotalPoints(ethereumLrtSupply) +
+    getTotalPoints(blastSupply) +
+    getTotalPoints(lineaSupply);
+  const totalBorrowPoints =
+    getTotalPoints(mantaBorrow) +
+    getTotalPoints(zksyncBorrow) +
+    getTotalPoints(xlayerBorrow) +
+    getTotalPoints(ethereumLrtBorrow) +
+    getTotalPoints(blastBorrow) +
+    getTotalPoints(lineaBorrow);
+
+  return {
+    totalSupplyPoints,
+    totalBorrowPoints,
+  };
 };
