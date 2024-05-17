@@ -115,8 +115,7 @@ export const walletVerify = async (
 
 export const userInfo = async (req: Request, res: Response) => {
   try {
-    console.log("request userInfo", req);
-    const walletAddress = req.body.address;
+    const walletAddress: string = req.query.address as string;
 
     if (!walletAddress || !ethers.isAddress(walletAddress)) {
       return res
