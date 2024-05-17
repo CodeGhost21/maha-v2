@@ -26,38 +26,44 @@ export interface Multiplier {
   lidoSupply?: number;
 }
 
+// 2x for ETH on all markets - Supply
+// 1x for all other assets - Supply
+// 4x for all assets including ETH - Borrow
 export const ethLrtMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
   ethSupply: 2,
-  ethBorrow: 8,
-  esethSupply: 1,
 };
 
 export const zksyncMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
+  ethSupply: 2,
   lidoSupply: 2,
 };
 
 export const blastMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
+  ethSupply: 2,
 };
 
 export const lineaMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
+  ethSupply: 2,
 };
 
 export const mantaMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
+  ethSupply: 2,
 };
 
 export const xlayerMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
+  ethSupply: 2,
 };
 
 export const blastStartDate = new Date("29 Feb 2024").getTime();
