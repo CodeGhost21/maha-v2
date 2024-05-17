@@ -135,20 +135,20 @@ export const userInfo = async (req: Request, res: Response) => {
   console.log("first");
   // get supply points for all chains and their assets
   const points = user.points;
-  const mantaSupply = points.supplyManta || 0;
-  const zksyncSupply = points.supplyZkSync || 0;
-  const xlayerSupply = points.supplyXLayer || 0;
-  const ethereumLrtSupply = points.supplyEthereumLrt || 0;
-  const blastSupply = points.supplyBlast || 0;
-  const lineaSupply = points.supplyLinea || 0;
+  const mantaSupply = points.supplyManta || {};
+  const zksyncSupply = points.supplyZkSync || {};
+  const xlayerSupply = points.supplyXLayer || {};
+  const ethereumLrtSupply = points.supplyEthereumLrt || {};
+  const blastSupply = points.supplyBlast || {};
+  const lineaSupply = points.supplyLinea || {};
 
   // get borrow points for all chains and their assets
-  const mantaBorrow = points.borrowManta || 0;
-  const zksyncBorrow = points.borrowZkSync || 0;
-  const xlayerBorrow = points.borrowXLayer || 0;
-  const ethereumLrtBorrow = points.borrowEthereumLrt || 0;
-  const blastBorrow = points.borrowBlast || 0;
-  const lineaBorrow = points.borrowLinea || 0;
+  const mantaBorrow = points.borrowManta || {};
+  const zksyncBorrow = points.borrowZkSync || {};
+  const xlayerBorrow = points.borrowXLayer || {};
+  const ethereumLrtBorrow = points.borrowEthereumLrt || {};
+  const blastBorrow = points.borrowBlast || {};
+  const lineaBorrow = points.borrowLinea || {};
 
   const totalSupplyPoints =
     getTotalPoints(mantaSupply) +
