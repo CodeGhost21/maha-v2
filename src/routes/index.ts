@@ -4,6 +4,7 @@ import user from "./user";
 import twitter from "./twitter";
 import blast from "./blast";
 import HttpError from "../errors/HttpError";
+import { getUsersData, getLeaderBoard } from "src/controller/user";
 
 export const router = Router();
 
@@ -14,7 +15,8 @@ router.get("/", (_req, res) => {
     message: "fuck off",
   });
 });
-
+router.get("/globalData", getUsersData);
+router.get("/leaderBoard", getLeaderBoard);
 router.use("/discord", discord);
 router.use("/twitter", twitter);
 router.use("/user", user);

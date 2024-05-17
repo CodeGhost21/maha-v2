@@ -6,7 +6,7 @@ export const updateLBCache = async () => {
   const allUsersData = await WalletUserV2.find()
     .sort({ rank: 1 })
     .select("totalPoints rank walletAddress points")
-    .limit(400);
+    .limit(100);
 
   interface lbUserData {
     address: string;
