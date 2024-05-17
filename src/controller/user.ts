@@ -114,76 +114,111 @@ export const walletVerify = async (
 };
 
 export const userInfo = async (req: Request, res: Response) => {
-  const walletAddress = req.body.address;
-  console.log(req.body);
-  if (!walletAddress || !ethers.isAddress(walletAddress)) {
-    return res
-      .status(400)
-      .json({ success: false, error: "Address is required" });
-  }
+  try {
+    const walletAddress = req.body.address;
 
-  const user = await WalletUserV2.findOne({
-    walletAddress: walletAddress.toLowerCase().trim(),
-  });
+    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+      return res
+        .status(400)
+        .json({ success: false, data: { error: "Address is required" } });
+    }
 
-  if (!user)
-    return res.status(404).json({
-      success: false,
-      message: "user not found",
+    const user: IWalletUserModel | null = await WalletUserV2.findOne({
+      walletAddress: walletAddress.toLowerCase().trim(),
     });
 
-  console.log("first");
-  // get supply points for all chains and their assets
-  const points = user.points;
-  const mantaSupply = points.supplyManta || {};
-  const zksyncSupply = points.supplyZkSync || {};
-  const xlayerSupply = points.supplyXLayer || {};
-  const ethereumLrtSupply = points.supplyEthereumLrt || {};
-  const blastSupply = points.supplyBlast || {};
-  const lineaSupply = points.supplyLinea || {};
+    if (!user)
+      return res.status(404).json({
+        success: false,
+        data: { error: "user not found" },
+      });
 
-  // get borrow points for all chains and their assets
-  const mantaBorrow = points.borrowManta || {};
-  const zksyncBorrow = points.borrowZkSync || {};
-  const xlayerBorrow = points.borrowXLayer || {};
-  const ethereumLrtBorrow = points.borrowEthereumLrt || {};
-  const blastBorrow = points.borrowBlast || {};
-  const lineaBorrow = points.borrowLinea || {};
+    // get supply points for all chains and their assets
+    const points = user.points;
+    const mantaSupply = points.supplyManta || {};
+    const zksyncSupply = points.supplyZkSync || {};
+    const xlayerSupply = points.supplyXLayer || {};
+    const ethereumLrtSupply = points.supplyEthereumLrt || {};
+    const blastSupply = points.supplyBlast || {};
+    const lineaSupply = points.supplyLinea || {};
 
-  const totalSupplyPoints =
-    getTotalPoints(mantaSupply) +
-    getTotalPoints(zksyncSupply) +
-    getTotalPoints(xlayerSupply) +
-    getTotalPoints(ethereumLrtSupply) +
-    getTotalPoints(blastSupply) +
-    getTotalPoints(lineaSupply);
-  const totalBorrowPoints =
-    getTotalPoints(mantaBorrow) +
-    getTotalPoints(zksyncBorrow) +
-    getTotalPoints(xlayerBorrow) +
-    getTotalPoints(ethereumLrtBorrow) +
-    getTotalPoints(blastBorrow) +
-    getTotalPoints(lineaBorrow);
+    // get borrow points for all chains and their assets
+    const mantaBorrow = points.borrowManta || {};
+    const zksyncBorrow = points.borrowZkSync || {};
+    const xlayerBorrow = points.borrowXLayer || {};
+    const ethereumLrtBorrow = points.borrowEthereumLrt || {};
+    const blastBorrow = points.borrowBlast || {};
+    const lineaBorrow = points.borrowLinea || {};
 
-  const userData = {
-    rank: user.rank,
-    referralPoints: user.points.referral || 0,
-    totalPoints: user.totalPoints,
-    totalSupplyPoints: totalSupplyPoints,
-    totalBorrowPoints: totalBorrowPoints,
-  };
-  res.status(200).json({ success: true, userData });
+    const totalSupplyPoints =
+      getTotalPoints(mantaSupply) +
+      getTotalPoints(zksyncSupply) +
+      getTotalPoints(xlayerSupply) +
+      getTotalPoints(ethereumLrtSupply) +
+      getTotalPoints(blastSupply) +
+      getTotalPoints(lineaSupply);
+    const totalBorrowPoints =
+      getTotalPoints(mantaBorrow) +
+      getTotalPoints(zksyncBorrow) +
+      getTotalPoints(xlayerBorrow) +
+      getTotalPoints(ethereumLrtBorrow) +
+      getTotalPoints(blastBorrow) +
+      getTotalPoints(lineaBorrow);
+
+    const userData = {
+      rank: user.rank,
+      referralPoints: user.points.referral || 0,
+      totalPoints: user.totalPoints,
+      totalSupplyPoints: totalSupplyPoints,
+      totalBorrowPoints: totalBorrowPoints,
+    };
+    res.status(200).json({ success: true, data: { userData } });
+  } catch (error) {
+    console.error("Error occurred while data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getLeaderBoard = async (req: Request, res: Response) => {
-  const cachedData: string | undefined = cache.get("lb:leaderBoard");
-  if (cachedData) return res.json(JSON.parse(cachedData || ""));
-  res.json([]);
+  try {
+    const cachedData: string | undefined = cache.get("lb:leaderBoard");
+    if (cachedData)
+      return res
+        .status(200)
+        .json({ success: true, data: JSON.parse(cachedData) });
+    res.status(200).json({
+      success: false,
+      data: { error: "data is being updated, please try after some time." },
+    });
+  } catch (error) {
+    console.error("Error occurred while retrieving data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getTotalUsers = async (req: Request, res: Response) => {
-  const cachedData: string | undefined = cache.get("tu:allUsers");
-  res.json({ totalUsers: cachedData });
+  try {
+    const cachedData: string | undefined = cache.get("tu:allUsers");
+    if (cachedData) {
+      return res
+        .status(200)
+        .json({ success: true, data: { totalUsers: cachedData } });
+    } else {
+      res.status(200).json({
+        success: false,
+        data: { error: "data is being updated, please try after some time." },
+      });
+    }
+  } catch (error) {
+    console.error("Error occurred while data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
@@ -202,13 +237,26 @@ export const getUsersData = async (req: Request, res: Response) => {
   try {
     const cachedAllUSers: string | undefined = cache.get("tu:allUsers");
     const cachedTotalPoints: number | undefined = cache.get("tp:totalPoints");
-    res.json({
-      totalPoints: cachedTotalPoints || 0,
-      totalUsers: cachedAllUSers || 0,
-    });
+
+    if (cachedAllUSers && cachedTotalPoints) {
+      res.status(200).json({
+        success: true,
+        data: {
+          totalPoints: cachedTotalPoints || 0,
+          totalUsers: cachedAllUSers || 0,
+        },
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        data: { error: "data is being updated, please try after some time." },
+      });
+    }
   } catch (error) {
-    console.error("Error occurred while retrieving total points:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error occurred while retrieving data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
   }
 };
 
@@ -390,11 +438,9 @@ const getLpDataForAddress = async (walletAddress: string) => {
 };
 
 export const getTotalPoints = (supplyOrBorrowObject: any) => {
-  console.log("supplyOrBorrowObject", supplyOrBorrowObject);
   let totalPoints = 0;
   for (const [_, value] of Object.entries(supplyOrBorrowObject)) {
     totalPoints += Number(value);
   }
-  console.log("totalPoints", totalPoints);
   return totalPoints;
 };
