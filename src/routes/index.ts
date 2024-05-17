@@ -4,7 +4,7 @@ import user from "./user";
 import twitter from "./twitter";
 import blast from "./blast";
 import HttpError from "../errors/HttpError";
-import { getUsersData, getLeaderBoard } from "src/controller/user";
+import { getUsersData, getLeaderBoard } from "../controller/user";
 
 export const router = Router();
 
