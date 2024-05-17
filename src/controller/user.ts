@@ -390,9 +390,11 @@ const getLpDataForAddress = async (walletAddress: string) => {
 };
 
 export const getTotalPoints = (supplyOrBorrowObject: any) => {
+  console.log("supplyOrBorrowObject", supplyOrBorrowObject);
   let totalPoints = 0;
   for (const [_, value] of Object.entries(supplyOrBorrowObject)) {
-    totalPoints += Number(value) / 1e18;
+    totalPoints += Number(value);
   }
+  console.log("totalPoints", totalPoints);
   return totalPoints;
 };
