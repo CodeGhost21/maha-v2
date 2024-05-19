@@ -56,9 +56,9 @@ export const updateLPPointsHourly = async () => {
             const pointsPerSecondUpdateTimestamp = user
               .pointsPerSecondUpdateTimestamp[lpTask] as IAsset;
             // asset level calculations
-            const timestamp = pointsPerSecondUpdateTimestamp
-              ? Number(pointsPerSecondUpdateTimestamp[asset])
-              : 0;
+            const timestamp = Number(
+              pointsPerSecondUpdateTimestamp?.[asset] ?? 0
+            );
 
             const pointsPerSecond = Number(assetPointsPerSecond[asset]) || 0;
             const timeElapsed =
