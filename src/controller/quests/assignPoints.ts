@@ -7,9 +7,7 @@ import { referralPercent } from "./constants";
 import { AnyBulkWriteOperation } from "mongodb";
 import { IWalletUser } from "../../database/interface/walletUser/walletUser";
 import { IUserPointTransactions } from "../../database/interface/userPoints/userPointsTransactions";
-import {
-  IWalletUserPoints,
-} from "../../database/interface/walletUser/walletUserPoints";
+import { IWalletUserPoints } from "../../database/interface/walletUser/walletUserPoints";
 
 export interface IAssignPointsTask {
   userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];
@@ -128,7 +126,6 @@ export const assignPointsPerSecondToBatch = async (
   users
     .filter((user) => pointsData.has(user.walletAddress))
     .map((user) => {
-
       const latestPoints = pointsData.get(user.walletAddress);
 
       const Keys = Object.keys(latestPoints);
@@ -137,21 +134,25 @@ export const assignPointsPerSecondToBatch = async (
 
       if (Keys.length) {
         Keys.forEach((key) => {
-          pointsPerSecond[`${key}`] = latestPoints[key] / 86400;
+          console.log("latestPoints[key] ", key, latestPoints[key]);
+          latestPoints[key]
+            ? (pointsPerSecond[`${key}`] = latestPoints[key] / 86400)
+            : "";
         });
       }
-
-      userBulkWrites.push({
-        updateOne: {
-          filter: { _id: user.id },
-          update: {
-            $set: {
-              [`pointsPerSecond.${task}`]: pointsPerSecond,
-              [`epochs.${task}`]: epoch,
+      if (Object.keys(pointsPerSecond).length) {
+        userBulkWrites.push({
+          updateOne: {
+            filter: { _id: user.id },
+            update: {
+              $set: {
+                [`pointsPerSecond.${task}`]: pointsPerSecond,
+                [`epochs.${task}`]: epoch,
+              },
             },
           },
-        },
-      });
+        });
+      }
     });
 
   return {

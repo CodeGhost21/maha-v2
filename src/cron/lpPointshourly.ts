@@ -7,38 +7,48 @@ import { referralPercent } from "../controller/quests/constants";
 import { IWalletUser } from "../database/interface/walletUser/walletUser";
 import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
 import { IAsset } from "../database/interface/walletUser/assets";
-import { IUserPointTransactions } from "src/database/interface/userPoints/userPointsTransactions";
+import { IUserPointTransactions } from "../database/interface/userPoints/userPointsTransactions";
+import { UserPointTransactions } from "../database/models/userPointTransactions";
 
 export const updateLPPointsHourly = async () => {
   console.log("updateLPPointsHourly");
 
-  const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-  const pointsBulkWrite: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
   const batchSize = 1000;
   const t1 = Date.now();
 
   let skip = 0;
-  let batch;
+  let batch: IWalletUserModel[] = [];
 
   console.log("----- user skip ----", skip);
   console.log("----- start time for user skip ----", t1);
 
+  const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+  const pointsBulkWrite: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
   do {
-    batch = await WalletUserV2.find().skip(skip).limit(batchSize);
+    try {
+      batch = await WalletUserV2.find().skip(skip).limit(batchSize);
+    } catch (error) {
+      throw new Error(`error while fetching wallet users, ${error}`);
+    }
 
     for (const user of batch) {
       let referredByUser = {} as IWalletUserModel;
       if (user.referredBy) {
-        referredByUser = await WalletUserV2.findOne({
-          _id: user.referredBy,
-        }).select("id totalPoints points");
+        try {
+          referredByUser = await WalletUserV2.findOne({
+            _id: user.referredBy,
+          }).select("id totalPoints points");
+        } catch (error) {
+          throw new Error(`error while fetching referred by users, ${error}`);
+        }
       }
       const userLpTasksKeys = Object.keys(user.pointsPerSecond) as Array<
         keyof IWalletUserPoints
       >;
       // each LP task
-      userLpTasksKeys.map((lpTask) => {
+      userLpTasksKeys.forEach((lpTask) => {
         const assetPointsPerSecond = user.pointsPerSecond[lpTask] as IAsset;
+        console.log("assetPointsPerSecond", assetPointsPerSecond);
         const assetPointsPerSecondKeys = Object.keys(
           assetPointsPerSecond
         ) as Array<keyof IAsset>;
@@ -52,19 +62,26 @@ export const updateLPPointsHourly = async () => {
           let referralPoints = 0;
 
           // each asset
-          assetPointsPerSecondKeys.map((asset) => {
-            const pointsPerSecondUpdateTimestamp = user
-              .pointsPerSecondUpdateTimestamp[lpTask] as IAsset;
+          assetPointsPerSecondKeys.forEach((asset) => {
+            console.log(asset, "-------------------------------");
+            const pointsPerSecondUpdateTimestamp =
+              (user.pointsPerSecondUpdateTimestamp?.[lpTask] as IAsset) ?? {};
             // asset level calculations
+            console.log(
+              "pointsPerSecondUpdateTimestamp",
+              pointsPerSecondUpdateTimestamp
+            );
+
             const timestamp = Number(
               pointsPerSecondUpdateTimestamp?.[asset] ?? 0
             );
-
+            console.log("timestamp", timestamp);
             const pointsPerSecond = Number(assetPointsPerSecond[asset]) || 0;
+            console.log("pps ---", pointsPerSecond);
             const timeElapsed =
               timestamp <= 0 ? 0 : (Date.now() - timestamp) / 1000;
             const newPoints = Number(pointsPerSecond * timeElapsed);
-
+            console.log("time elapsed = ", timeElapsed);
             let refPointForAsset = 0;
             if (newPoints > 0) {
               if (referredByUser && Object.keys(referredByUser).length) {
@@ -75,6 +92,7 @@ export const updateLPPointsHourly = async () => {
 
               const pointsToAdd =
                 timestamp > 0 ? newPoints + refPointForAsset : 0;
+              console.log("points to add", pointsToAdd);
               (_points[lpTask] as IAsset)[asset] = pointsToAdd;
               _totalPoints += pointsToAdd;
             }
@@ -109,6 +127,14 @@ export const updateLPPointsHourly = async () => {
               },
             });
           }
+          console.log(
+            "inc points obj--",
+            Object.keys(_points[lpTask] as IAsset).reduce((acc, key) => {
+              acc[`points.${lpTask}.${key}`] =
+                (_points[lpTask] as IAsset)[key as keyof IAsset] || 0;
+              return acc;
+            }, {} as Record<string, number>)
+          );
 
           userBulkWrites.push({
             updateOne: {
@@ -147,10 +173,21 @@ export const updateLPPointsHourly = async () => {
           });
         }
       });
-      // );
     }
 
-    await WalletUserV2.bulkWrite(userBulkWrites);
+    try {
+      if (userBulkWrites.length > 0) {
+        await WalletUserV2.bulkWrite(userBulkWrites);
+      }
+      if (pointsBulkWrite.length > 0) {
+        await UserPointTransactions.bulkWrite(pointsBulkWrite);
+      }
+    } catch (error) {
+      throw new Error(`error while bulk write operations, ${error}`);
+      
+    }
+    userBulkWrites.length = 0;
+    pointsBulkWrite.length = 0;
     skip += batchSize;
   } while (batch.length === batchSize);
 
