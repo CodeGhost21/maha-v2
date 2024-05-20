@@ -184,7 +184,6 @@ export const updateLPPointsHourly = async () => {
       }
     } catch (error) {
       throw new Error(`error while bulk write operations, ${error}`);
-      
     }
     userBulkWrites.length = 0;
     pointsBulkWrite.length = 0;
