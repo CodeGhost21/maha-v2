@@ -26,53 +26,53 @@ cron.schedule("0 1 * * * *", () => {
   });
 });
 
-cron.schedule("0 3 * * * *", () => {
+cron.schedule("30 2 * * * *", () => {
   addToQueue(async () => {
-    console.log("running manta lp points every day at 2 am");
+    console.log("running manta lp points every day at 2:30 am");
     await mantaPPSCron();
   });
 });
 
-cron.schedule("0 5 * * * *", () => {
+cron.schedule("0 4 * * * *", () => {
   addToQueue(async () => {
-    console.log("running blast lp points every day at 3 am");
+    console.log("running blast lp points every day at 4 am");
     await blastPPSCron();
+  });
+});
+
+cron.schedule("30 5 * * * *", () => {
+  addToQueue(async () => {
+    console.log("running ethereumLrt lp points every day at 5:30 am");
+    await ethereumLrtPPSCron();
   });
 });
 
 cron.schedule("0 7 * * * *", () => {
   addToQueue(async () => {
-    console.log("running ethereumLrt lp points every day at 4 am");
-    await ethereumLrtPPSCron();
-  });
-});
-
-cron.schedule("0 5 * * * *", () => {
-  addToQueue(async () => {
-    console.log("running linea lp points every day at 5 am");
+    console.log("running linea lp points every day at 7 am");
     await lineaPPSCron();
   });
 });
 
-cron.schedule("0 6 * * * *", () => {
+cron.schedule("30 8 * * * *", () => {
   addToQueue(async () => {
-    console.log("running xLayer lp points every day at 6 am");
+    console.log("running xLayer lp points every day at 8:30 am");
     await xLayerPPSCron();
   });
 });
 
 // -------------  Update Rank  -----------------
-cron.schedule("0 9 * * *", () => {
+cron.schedule("0 10 * * *", () => {
   addToQueue(async () => {
-    console.log("updating rank every day at 9am");
+    console.log("updating rank every day at 10am");
     await updateUsersRank();
   });
 });
 
 // -------------  Add Users  -----------------
-cron.schedule("0 10 * * *", () => {
+cron.schedule("30 11 * * *", () => {
   addToQueue(async () => {
-    console.log("adding new wallet users every day at 10 am");
+    console.log("adding new wallet users every day at 11:30 am");
     await addUsers();
   });
 });
