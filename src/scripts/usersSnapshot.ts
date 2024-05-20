@@ -20,7 +20,7 @@ export const main = async () => {
 };
 
 //write csv file
-const writeCsvFile = (data: any) => {
+export const writeCsvFile = (data: any) => {
   // Create a header for the CSV if the file doesn't exist yet
   if (!fs.existsSync(fileName)) {
     fs.writeFileSync(
