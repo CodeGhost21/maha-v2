@@ -455,12 +455,21 @@ export const getTotalSupplyBorrowPoints = (user: IWalletUserModel) => {
 };
 
 export const getOpensBlockData = async (req: Request, res: Response) => {
-  const address = req.query.user as string;
-  const url = `https://kx58j6x5me.execute-api.us-east-1.amazonaws.com/linea/getUserPointsSearch?user=${address}`;
-  const response = await axios.get(url);
+  const cachedData = cache.get(`xp:openApi`);
+  console.log("459", cachedData);
 
+  if (cachedData)
+    return res.status(200).json({
+      success: true,
+      xp: cachedData,
+    });
+  const url = `https://kx58j6x5me.execute-api.us-east-1.amazonaws.com/linea/getUserPointsSearch?user=0x0f6e98a756a40dd050dc78959f45559f98d3289d`;
+  const response = await axios.get(url);
+  const xp = response.data.length > 0 ? response.data[0].xp : 0;
+
+  cache.set("xp:openApi", xp, 60 * 60);
   res.status(200).json({
     success: true,
-    xp: response.data.length > 0 ? response.data[0].xp : 0,
+    xp: xp,
   });
 };

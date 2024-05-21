@@ -4,7 +4,11 @@ import user from "./user";
 import twitter from "./twitter";
 import blast from "./blast";
 import HttpError from "../errors/HttpError";
-import { getUsersData, getLeaderBoard } from "../controller/user";
+import {
+  getUsersData,
+  getLeaderBoard,
+  getOpensBlockData,
+} from "../controller/user";
 
 export const router = Router();
 
@@ -21,6 +25,7 @@ router.use("/discord", discord);
 router.use("/twitter", twitter);
 router.use("/user", user);
 router.use("/blast", blast);
+router.get("/referral/openBlock", getOpensBlockData);
 
 router.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
