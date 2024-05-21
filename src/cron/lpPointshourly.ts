@@ -32,6 +32,7 @@ export const updateLPPointsHourly = async () => {
     }
 
     for (const user of batch) {
+      console.log("user address", user.walletAddress);
       let referredByUser = {} as IWalletUserModel;
       if (user.referredBy) {
         try {
