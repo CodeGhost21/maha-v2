@@ -82,7 +82,8 @@ cron.schedule("*/60 * * * *", async () => {
   if (isQueueEmpty() && !isUpdatingPoints) {
     isUpdatingPoints = true;
     console.log("running lp points every 1 hour");
-    await updateLPPointsHourly();
+    addToQueue(async () => await updateLPPointsHourly());
+    // await updateLPPointsHourly();
     isUpdatingPoints = false;
   } else {
     console.log("skipping update points hourly");

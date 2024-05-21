@@ -46,8 +46,6 @@ const _processBatch = async (
   try {
     const data = await supplyBorrowPointsGQL(api, userBatch, p, multiplier);
 
-    const tasks: IAssignPointsTask[] = [];
-
     // update supply points
     const supplyExecutable = await assignPointsPerSecondToBatch(
       userBatch,
@@ -66,8 +64,6 @@ const _processBatch = async (
     );
 
     await borrowExecutable?.execute();
-
-    console.log("done with batch", tasks.length);
   } catch (error) {
     console.log(
       `processBatch error for ${supplyTask.substring(6)} chain`,
