@@ -36,6 +36,7 @@ import {
   xLayerProvider,
   zksyncProvider,
 } from "../utils/providers";
+import axios from "axios";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -451,4 +452,15 @@ export const getTotalSupplyBorrowPoints = (user: IWalletUserModel) => {
     totalSupplyPoints,
     totalBorrowPoints,
   };
+};
+
+export const getOpensBlockData = async (req: Request, res: Response) => {
+  const address = req.query.user as string;
+  const url = `https://kx58j6x5me.execute-api.us-east-1.amazonaws.com/linea/getUserPointsSearch?user=${address}`;
+  const response = await axios.get(url);
+
+  res.status(200).json({
+    success: true,
+    xp: response.data.length > 0 ? response.data[0].xp : 0,
+  });
 };

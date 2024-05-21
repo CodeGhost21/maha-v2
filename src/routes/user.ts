@@ -9,6 +9,7 @@ import {
   getTotalReferralOfUsers,
   getUserReferralData,
   getReferralUsers,
+  getOpensBlockData,
   // getLeaderBoard,
   // fetchMe,
   // getTotalUsers,
@@ -25,6 +26,7 @@ router.get("/userInfo", userInfo);
 router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
 router.get("/referral", getUserReferralData);
+router.get("/openBlock", getOpensBlockData);
 // router.get("/globalData", getUsersData);
 // router.get("/leaderBoard", getLeaderBoard);
 // router.get("/info", galxeLPCheck);
