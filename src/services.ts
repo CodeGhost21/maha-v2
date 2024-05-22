@@ -20,7 +20,7 @@ let isUpdatingPoints = false;
 console.log("starting");
 
 // -------------  Update LP Rate  -----------------
-cron.schedule("43 14 * * *", async () => {
+cron.schedule("0 1 * * *", async () => {
   await addToQueue(async () => {
     console.log("running zksyn lp points every day at 2:30 pm");
     await zksyncPPSCron();
@@ -28,7 +28,7 @@ cron.schedule("43 14 * * *", async () => {
   });
 });
 
-cron.schedule("46 14 * * *", async () => {
+cron.schedule("30 2 * * *", async () => {
   await addToQueue(async () => {
     console.log("running manta lp points every day at 3:30 pm");
     await mantaPPSCron();
@@ -36,7 +36,7 @@ cron.schedule("46 14 * * *", async () => {
   });
 });
 
-cron.schedule("47 14 * * *", async () => {
+cron.schedule("0 4 * * *", async () => {
   await addToQueue(async () => {
     console.log("running blast lp points every day at 5 pm");
     await blastPPSCron();
@@ -44,7 +44,7 @@ cron.schedule("47 14 * * *", async () => {
   });
 });
 
-cron.schedule("48 14 * * *", async () => {
+cron.schedule("30 5 * * *", async () => {
   await addToQueue(async () => {
     console.log("running ethereumLrt lp points every day at 6:30 pm");
     await ethereumLrtPPSCron();
@@ -52,7 +52,7 @@ cron.schedule("48 14 * * *", async () => {
   });
 });
 
-cron.schedule("49 14 * * *", async () => {
+cron.schedule("0 7 * * *", async () => {
   await addToQueue(async () => {
     console.log("running linea lp points every day at 8 pm");
     await lineaPPSCron();
@@ -60,7 +60,7 @@ cron.schedule("49 14 * * *", async () => {
   });
 });
 
-cron.schedule("50 14 * * *", async () => {
+cron.schedule("30 8 * * *", async () => {
   await addToQueue(async () => {
     console.log("running xLayer lp points every day at 9:30 pm");
     await xLayerPPSCron();
@@ -69,7 +69,7 @@ cron.schedule("50 14 * * *", async () => {
 });
 
 // -------------  Update Rank  -----------------
-cron.schedule("51 14 * * *", () => {
+cron.schedule("0 10 * * *", () => {
   addToQueue(async () => {
     console.log("updating rank every day at 11pm");
     await updateUsersRank();
@@ -77,7 +77,7 @@ cron.schedule("51 14 * * *", () => {
 });
 
 // -------------  Add Users  -----------------
-cron.schedule("52 14 * * *", async () => {
+cron.schedule("30 11 * * *", async () => {
   await addToQueue(async () => {
     console.log("adding new wallet users every day at 12:30 am");
     await addUsers();
