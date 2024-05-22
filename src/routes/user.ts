@@ -18,6 +18,7 @@ import {
   // getLPData,
   // getUserTotalPoints,
   userInfo,
+  getCurrentPoints,
 } from "../controller/user";
 
 router.post("/login", walletVerify);
@@ -25,6 +26,7 @@ router.get("/userInfo", userInfo);
 router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
 router.get("/referral", getUserReferralData);
+router.get("/currentPoints", getCurrentPoints);
 // router.get("/globalData", getUsersData);
 // router.get("/leaderBoard", getLeaderBoard);
 // router.get("/info", galxeLPCheck);

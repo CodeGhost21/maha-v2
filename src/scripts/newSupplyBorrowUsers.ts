@@ -4,7 +4,14 @@ import { AnyBulkWriteOperation } from "mongodb";
 import { _generateReferralCode } from "../controller/user";
 import { WalletUserV2 } from "../database/models/walletUsersV2";
 import { IWalletUser } from "../database/interface/walletUser/walletUser";
-import { apiBlast, apiEth, apiLinea, apiManta, apiXLayer, apiZKSync } from "../controller/quests/constants";
+import {
+  apiBlast,
+  apiEth,
+  apiLinea,
+  apiManta,
+  apiXLayer,
+  apiZKSync,
+} from "../controller/quests/constants";
 
 export const addUsers = async () => {
   console.log("Starting add new users process...");
@@ -119,13 +126,15 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
     const headers = {
       "Content-Type": "application/json",
     };
-    batch = await axios.post(queryURL, { query: graphQuery }, { headers, timeout:30000 });
+    batch = await axios.post(
+      queryURL,
+      { query: graphQuery },
+      { headers, timeout: 30000 }
+    );
     const addresses = batch.data.data.users.map((user: any) => user.id);
     const existingUsers = await WalletUserV2.find({
       walletAddress: {
-        $in: addresses.map(
-          (address: string) => address.toLowerCase().trim()
-        ),
+        $in: addresses.map((address: string) => address.toLowerCase().trim()),
       },
     }).select("walletAddress");
     const existingAddresses = existingUsers.map((user) => user.walletAddress);
@@ -161,7 +170,11 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
     const headers = {
       "Content-Type": "application/json",
     };
-    batch = await axios.post(queryURL, { query: graphQuery }, { headers });
+    batch = await axios.post(
+      queryURL,
+      { query: graphQuery },
+      { headers, timeout: 30000 }
+    );
     if (batch.data.data.users.length === 0) {
       console.log("No users to add");
       return;

@@ -32,7 +32,6 @@ export const updateLPPointsHourly = async () => {
     }
 
     for (const user of batch) {
-      console.log("user address", user.walletAddress);
       let referredByUser = {} as IWalletUserModel;
       if (user.referredBy) {
         try {
@@ -49,7 +48,6 @@ export const updateLPPointsHourly = async () => {
       // each LP task
       userLpTasksKeys.forEach((lpTask) => {
         const assetPointsPerSecond = user.pointsPerSecond[lpTask] as IAsset;
-        console.log("assetPointsPerSecond", assetPointsPerSecond);
         const assetPointsPerSecondKeys = Object.keys(
           assetPointsPerSecond
         ) as Array<keyof IAsset>;
@@ -64,25 +62,17 @@ export const updateLPPointsHourly = async () => {
 
           // each asset
           assetPointsPerSecondKeys.forEach((asset) => {
-            console.log(asset, "-------------------------------");
             const pointsPerSecondUpdateTimestamp =
               (user.pointsPerSecondUpdateTimestamp?.[lpTask] as IAsset) ?? {};
             // asset level calculations
-            console.log(
-              "pointsPerSecondUpdateTimestamp",
-              pointsPerSecondUpdateTimestamp
-            );
 
             const timestamp = Number(
               pointsPerSecondUpdateTimestamp?.[asset] ?? 0
             );
-            console.log("timestamp", timestamp);
             const pointsPerSecond = Number(assetPointsPerSecond[asset]) || 0;
-            console.log("pps ---", pointsPerSecond);
             const timeElapsed =
               timestamp <= 0 ? 0 : (Date.now() - timestamp) / 1000;
             const newPoints = Number(pointsPerSecond * timeElapsed);
-            console.log("time elapsed = ", timeElapsed);
             let refPointForAsset = 0;
             if (newPoints > 0) {
               if (referredByUser && Object.keys(referredByUser).length) {
@@ -93,7 +83,6 @@ export const updateLPPointsHourly = async () => {
 
               const pointsToAdd =
                 timestamp > 0 ? newPoints + refPointForAsset : 0;
-              console.log("points to add", pointsToAdd);
               (_points[lpTask] as IAsset)[asset] = pointsToAdd;
               _totalPoints += pointsToAdd;
             }
@@ -128,14 +117,6 @@ export const updateLPPointsHourly = async () => {
               },
             });
           }
-          console.log(
-            "inc points obj--",
-            Object.keys(_points[lpTask] as IAsset).reduce((acc, key) => {
-              acc[`points.${lpTask}.${key}`] =
-                (_points[lpTask] as IAsset)[key as keyof IAsset] || 0;
-              return acc;
-            }, {} as Record<string, number>)
-          );
 
           userBulkWrites.push({
             updateOne: {

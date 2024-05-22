@@ -25,6 +25,7 @@ import {
   lineaMultiplier,
   mantaMultiplier,
   minSupplyAmount,
+  referralPercent,
   xlayerMultiplier,
   zksyncMultiplier,
 } from "./quests/constants";
@@ -37,9 +38,87 @@ import {
   zksyncProvider,
 } from "../utils/providers";
 import axios from "axios";
+import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
+import { IAsset } from "src/database/interface/walletUser/assets";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
+export const getCurrentPoints = async (req: Request, res: Response) => {
+  const walletAddress = req.query.address;
+  if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    return res
+      .status(400)
+      .json({ success: false, data: { error: "Address is required" } });
+  }
+
+  const user = await WalletUserV2.findOne({
+    walletAddress: walletAddress.toLowerCase().trim(),
+  }).select(
+    "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy"
+  );
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      data: { error: "user not found" },
+    });
+  }
+
+  let referredByUser = {} as IWalletUserModel;
+  if (user.referredBy) {
+    try {
+      referredByUser = await WalletUserV2.findOne({
+        _id: user.referredBy,
+      }).select("id");
+    } catch (error) {
+      throw new Error(`error while fetching referred by users, ${error}`);
+    }
+  }
+
+  // current points will be calculated based on stored pps and ppsUpdateTimestamp
+  try {
+    const previousPoints = user.points;
+    const pointsPerSecond = user.pointsPerSecond;
+    const pppUpdateTimestamp = user.pointsPerSecondUpdateTimestamp;
+
+    const lpList = Object.keys(pointsPerSecond) as Array<
+      keyof IWalletUserPoints
+    >;
+
+    let currentPoints = {} as IWalletUserPoints;
+
+    lpList.forEach((lpTask) => {
+      const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
+      const pps = pointsPerSecond[lpTask] as IAsset;
+      const oldPoints = previousPoints[lpTask] as IAsset;
+
+      const _points: Partial<IWalletUserPoints> = {
+        [lpTask]: {} as IAsset,
+      };
+      for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
+        const secondsElapsed = (Date.now() - Number(value)) / 1000;
+        const newPoints = Number(pps[key as keyof IAsset]) * secondsElapsed;
+
+        let refPointForAsset = 0;
+        if (referredByUser && Object.keys(referredByUser).length) {
+          refPointForAsset = Number(newPoints * referralPercent);
+        }
+        const assetOldPoinst = oldPoints[key as keyof IAsset] || 0;
+        (_points[lpTask] as IAsset)[key as keyof IAsset] =
+          newPoints + refPointForAsset + assetOldPoinst;
+      }
+      currentPoints = { ...currentPoints, ..._points };
+    });
+
+    res.status(200).json({ success: true, data: currentPoints });
+
+  } catch (error) {
+    console.log("error in calculating current points:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
+};
 export const _generateReferralCode = () => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
