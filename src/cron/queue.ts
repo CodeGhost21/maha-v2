@@ -2,12 +2,12 @@ type TaskFunction = () => Promise<void>;
 
 const queue: TaskFunction[] = [];
 
-export function addToQueue(task: TaskFunction): void {
+export async function addToQueue(task: TaskFunction): Promise<void> {
   console.log("pushing task in queue", queue.length);
 
   queue.push(task);
   if (queue.length === 1) {
-    runNextTask();
+    await runNextTask();
   }
 }
 
@@ -26,5 +26,5 @@ async function runNextTask(): Promise<void> {
   await task();
   queue.shift();
   console.log("popping task from queue", queue.length);
-  runNextTask();
+  await runNextTask();
 }

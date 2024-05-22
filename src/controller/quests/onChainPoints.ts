@@ -112,7 +112,7 @@ export const supplyBorrowPointsGQL = async (
     const headers = {
       "Content-Type": "application/json",
     };
-    const data = await axios.post(api, { query: graphQuery }, { headers });
+    const data = await axios.post(api, { query: graphQuery }, { headers, timeout:300000 }); // 5 minute
     const result = data.data.data.userReserves;
 
     const supply = new Map();

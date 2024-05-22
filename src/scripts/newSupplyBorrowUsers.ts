@@ -63,7 +63,7 @@ export const addUsers = async () => {
 export const executeAddSupplyBorrowUsers = async (
   addressesToInsert: string[]
 ) => {
-  const batchSize = 100000;
+  const batchSize = 1000;
   console.log("addresses to insert", addressesToInsert.length);
   let rank = await WalletUserV2.count();
   for (let i = 0; i < addressesToInsert.length; i = i + batchSize) {
@@ -119,7 +119,7 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
     const headers = {
       "Content-Type": "application/json",
     };
-    batch = await axios.post(queryURL, { query: graphQuery }, { headers });
+    batch = await axios.post(queryURL, { query: graphQuery }, { headers, timeout:30000 });
     const addresses = batch.data.data.users.map((user: any) => user.id);
     const existingUsers = await WalletUserV2.find({
       walletAddress: {

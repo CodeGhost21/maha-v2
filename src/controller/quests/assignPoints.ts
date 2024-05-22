@@ -121,7 +121,7 @@ export const assignPointsPerSecondToBatch = async (
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   if (!users || !users.length) return;
-  console.log("pointsData", pointsData);
+  // console.log("pointsData", pointsData);
 
   users
     .filter((user) => pointsData.has(user.walletAddress))
@@ -134,7 +134,7 @@ export const assignPointsPerSecondToBatch = async (
 
       if (Keys.length) {
         Keys.forEach((key) => {
-          console.log("latestPoints[key] ", key, latestPoints[key]);
+          // console.log("latestPoints[key] ", key, latestPoints[key]);
           latestPoints[key]
             ? (pointsPerSecond[`${key}`] = latestPoints[key] / 86400)
             : "";
