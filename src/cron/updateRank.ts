@@ -1,15 +1,15 @@
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 
 export const updateUsersRank = async () => {
   const batchSize = 1000;
   let skip = 0;
 
-  const total = await WalletUser.count();
+  const total = await WalletUserV2.count();
 
   do {
     // Retrieve users in batches
-    const users = await WalletUser.find({ isDeleted: false })
-      .sort({ totalPointsV2: -1 })
+    const users = await WalletUserV2.find({}, { _id: 1, totalPointsV2: 1 })
+      .sort({ totalPoints: -1 })
       .skip(skip)
       .limit(batchSize)
       .exec();
@@ -27,7 +27,7 @@ export const updateUsersRank = async () => {
       },
     }));
 
-    const tx = await WalletUser.bulkWrite(updateCommands);
+    const tx = await WalletUserV2.bulkWrite(updateCommands);
     console.log("done updating ranks", tx);
 
     // Update skip for the next batch

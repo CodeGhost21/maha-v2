@@ -21,7 +21,8 @@
     "test": "mocha",
     "upgrade": "npx npm-check -u",
     "version": "npm run build && npm run changelog:update",
-    "start": "ts-node index.js"
+    "start": "ts-node index.js",
+    "start:services": "ts-node services.js"
   },
   "devDependencies": {
     "@types/async": "^3.2.16",

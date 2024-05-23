@@ -4,7 +4,10 @@ import passport from "passport";
 
 import axios from "axios";
 import urlJoin from "../utils/url-join";
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
+import {
+  IWalletUserModel,
+  WalletUserV2,
+} from "../database/models/walletUsersV2";
 import { checkGuildMember } from "../output/discord";
 import { points } from "./quests/constants";
 import { assignPoints } from "./quests/assignPoints";
@@ -43,11 +46,12 @@ export const requestToken = async (req: Request, res: Response) => {
 
 router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   const reqUser = req.user as any;
-  const user = await WalletUser.findById(req.query.state);
-  const discordUser = await WalletUser.findOne({
+  const user = await WalletUserV2.findById(req.query.state).select(
+    "points id totalPoints referredBy epoch"
+  );
+  const discordUser = await WalletUserV2.findOne({
     discordId: req.query.state,
-    isDeleted: false,
-  });
+  }).select("id");
 
   if (!user) return;
   let url = `/#/tasks?status=discord_error`;
@@ -55,9 +59,8 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   if (!discordUser) {
     const isFollow = await checkGuildMember(reqUser.id);
     if (isFollow) {
-      user.checked.discordFollow = true;
       await assignPoints(
-        user.id,
+        user,
         points.discordFollow,
         "Discord Follower",
         true,
@@ -65,8 +68,6 @@ router.get("/callback", passport.authenticate("discord"), async (req, res) => {
       );
     }
     user.discordId = reqUser.id;
-    user.checked.discordVerify = true;
-    user.checked.discordFollow = isFollow;
     await user.save();
     cache.del(`userId:${user._id}`);
     url = `/#/tasks?status=discord_success`;
@@ -119,9 +120,8 @@ export const registerUser = async (
       throw new BadRequestError("Invalid Discord token. Try logging again");
 
     // check if there is an existing user
-    const existingUser = await WalletUser.findOne({
+    const existingUser = await WalletUserV2.findOne({
       discordId: data.id,
-      isDeleted: false,
     });
     if (existingUser)
       throw new BadRequestError(
@@ -131,17 +131,12 @@ export const registerUser = async (
     const isGuildMember = await checkGuildMember(data.id);
 
     user.discordId = data.id;
-    user.checked = {
-      ...user.checked,
-      discordVerify: true,
-      discordFollow: isGuildMember,
-    };
 
     await user.save();
 
     if (isGuildMember) {
       const tx = await assignPoints(
-        user.id,
+        user,
         points.discordFollow,
         "Discord Follower",
         true,

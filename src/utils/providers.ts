@@ -32,3 +32,7 @@ export const sepoliaProvider = new ethers.JsonRpcProvider(
 export const moonbeamProvider = new ethers.JsonRpcProvider(
   nconf.get("MOONBEAM_RPC_URL")
 );
+
+export const xLayerProvider = new ethers.JsonRpcProvider(
+  nconf.get("OKX_RPC_URL")
+);

@@ -9,14 +9,14 @@ nconf
   .file({ file: path.resolve("./config.json") });
 
 import { open } from "../database";
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 
 open();
 
 const checkReferralCodeExists = async (referralCode: string) => {
   console.log(17, referralCode, new RegExp("^" + referralCode + "$", "i"));
 
-  const existingReferral = await WalletUser.findOne({
+  const existingReferral = await WalletUserV2.findOne({
     referralCode: { $regex: new RegExp("^" + referralCode + "$", "i") },
   });
   console.log(existingReferral);
@@ -307,7 +307,7 @@ const addPythUsers = async () => {
   referralCodesNew.map(async (item: string) => {
     if (!(await checkReferralCodeExists(item))) {
       console.log("does not exists");
-      await WalletUser.create({
+      await WalletUserV2.create({
         referralCode: item,
       });
     } else {
@@ -321,7 +321,7 @@ addPythUsers();
 const updateReferralCodes = async () => {
   updateReferralCode.map(async (item: any) => {
     if (await checkReferralCodeExists(item.old)) {
-      const response = await WalletUser.updateOne(
+      const response = await WalletUserV2.updateOne(
         { referralCode: item.old },
         { $set: { referralCode: item.new } }
       );
@@ -338,7 +338,7 @@ const updateReferralCodes = async () => {
 // const deletePythUsers = async () => {
 //   deleteReferral.map(async (item: string) => {
 //     if (await checkReferralCodeExists(item)) {
-//       const response = await WalletUser.deleteOne({
+//       const response = await WalletUserV2.deleteOne({
 //         referralCode: item,
 //       });
 //       console.log(response);

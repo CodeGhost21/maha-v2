@@ -13,7 +13,7 @@ import { open } from "../database";
 
 open();
 
-import { WalletUser } from "../database/models/walletUsers";
+import { WalletUserV2 } from "../database/models/walletUsersV2";
 
 const updateDiscordPoints = async () => {
   const discordPoints = 100;
@@ -23,7 +23,7 @@ const updateDiscordPoints = async () => {
   const skip = 0;
   let batch;
   do {
-    batch = await WalletUser.find({ isDeleted: false })
+    batch = await WalletUserV2.find({ isDeleted: false })
       .skip(skip)
       .limit(batchSize);
     for (const user of batch) {
@@ -32,7 +32,8 @@ const updateDiscordPoints = async () => {
       let previousReferralPoints = 0;
       let actualPoints = discordPoints;
       if (previousDiscordFollowPoints > 0) {
-        if (user.referredBy && user.points.discordFollow > 120) {
+        // if (user.referredBy && user.points.discordFollow > 120) {
+        if (user.referredBy) {
           previousReferralPoints = previousDiscordFollowPoints / 1.2;
           actualPoints = discordPoints + referralPoints;
         }

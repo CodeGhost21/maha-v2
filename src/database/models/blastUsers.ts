@@ -1,29 +1,6 @@
-import { Document, model, Schema } from "mongoose";
-
-export interface IBlastMetadata {
-  pointsGiven: number;
-  pointsPending: number;
-  pointsPendingUSDB: number;
-  pointsPendingWETH: number;
-  shares: number;
-  sharePercent: number;
-  timestamp: number;
-}
-
-export interface IBlastUser {
-  walletAddress: string;
-  blastPoints: IBlastMetadata;
-  blastGold: IBlastMetadata;
-}
-
-const BlastUserSchema = new Schema(
-  {
-    walletAddress: { type: String, index: true },
-    blastPoints: { type: Object, default: {} },
-    blastGold: { type: Object, default: {} },
-  },
-  { timestamps: true }
-);
+import { Document, model } from "mongoose";
+import { IBlastUser } from "../interface/blast/blastUser";
+import { BlastUserSchema } from "../schema/blastUser";
 
 export type IBlastUserModel = IBlastUser & Document;
 export const BlastUser = model<IBlastUserModel>("BlastUser", BlastUserSchema);

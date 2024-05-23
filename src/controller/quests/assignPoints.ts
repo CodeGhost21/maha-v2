@@ -1,48 +1,42 @@
 import {
-  IWalletUser,
-  IWalletUserPoints,
-  WalletUser,
-} from "../../database/models/walletUsers";
-import {
-  IUserPointTransactions,
-  UserPointTransactions,
-} from "../../database/models/userPointTransactions";
+  IWalletUserModel,
+  WalletUserV2,
+} from "../../database/models/walletUsersV2";
+import { UserPointTransactions } from "../../database/models/userPointTransactions";
 import { referralPercent } from "./constants";
 import { AnyBulkWriteOperation } from "mongodb";
+import { IWalletUser } from "../../database/interface/walletUser/walletUser";
+import { IUserPointTransactions } from "../../database/interface/userPoints/userPointsTransactions";
+import { IWalletUserPoints } from "../../database/interface/walletUser/walletUserPoints";
 
 export interface IAssignPointsTask {
   userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];
-  pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[];
-  execute: () => Promise<void>;
-}
-
-export interface IAssignPointsTaskLP {
-  userBulkWrites: AnyBulkWriteOperation<IWalletUser>[];
+  pointsBulkWrites?: AnyBulkWriteOperation<IUserPointTransactions>[];
   execute: () => Promise<void>;
 }
 
 export const assignPoints = async (
-  userId: string,
+  user: IWalletUserModel,
   points: number,
   message: string,
   isAdd: boolean,
   taskId: keyof IWalletUserPoints,
   epoch?: number
 ): Promise<IAssignPointsTask | undefined> => {
+  if (taskId.startsWith("supply") || taskId.startsWith("borrow")) {
+    throw Error("Cannot assign LP points");
+  }
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
 
-  const user = await WalletUser.findById(userId);
-  if (!user) return;
-
-  const previousPoints = Number(user.totalPointsV2) || 0;
+  const previousPoints = Number(user.totalPoints) || 0;
   let latestPoints = Number(points) || 0;
   let newMessage = message;
 
-  // if (points < 0.01 || isNaN(points)) return;
-
   if (user.referredBy) {
-    const referredByUser = await WalletUser.findOne({ _id: user.referredBy });
+    const referredByUser = await WalletUserV2.findOne({
+      _id: user.referredBy,
+    }).select("points id");
     if (referredByUser) {
       const referralPoints = Number(points * referralPercent) || 0;
       latestPoints = latestPoints + referralPoints;
@@ -69,7 +63,7 @@ export const assignPoints = async (
           update: {
             $inc: {
               ["points.referral"]: referralPoints,
-              totalPointsV2: referralPoints,
+              totalPoints: referralPoints,
             },
             $set: {
               ["pointsUpdateTimestamp.referral"]: Date.now(),
@@ -93,28 +87,17 @@ export const assignPoints = async (
     },
   });
 
-  const secondsSinceLastUpdate =
-    Date.now() - (user.pointsPerSecondUpdateTimestamp[taskId] || 0);
-  console.log(secondsSinceLastUpdate);
-
-  const pointsAccumulated =
-    user.pointsPerSecond[taskId] || 0 * secondsSinceLastUpdate;
-  console.log("pointsAccumulated", pointsAccumulated);
-
   userBulkWrites.push({
     updateOne: {
       filter: { _id: user.id },
       update: {
         $inc: {
-          [`points.${taskId}`]: pointsAccumulated,
-          totalPointsV2: pointsAccumulated,
+          [`points.${taskId}`]: latestPoints,
+          totalPoints: latestPoints,
         },
         $set: {
-          // [`pointsPerSecond.${taskId}`]: latestPoints / 86400,
-          // [`pointsPerSecondUpdateTimestamp.${taskId}`]:Date.now(),
           epoch: epoch || user.epoch,
           [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
-          [`checked.${taskId}`]: true,
         },
       },
     },
@@ -123,44 +106,57 @@ export const assignPoints = async (
     userBulkWrites,
     pointsBulkWrites,
     execute: async () => {
-      await WalletUser.bulkWrite(userBulkWrites);
+      await WalletUserV2.bulkWrite(userBulkWrites);
       await UserPointTransactions.bulkWrite(pointsBulkWrites);
     },
   };
 };
 
-export const assignPointsLP = async (
-  userId: string,
-  points: number,
-  isAdd: boolean,
-  taskId: keyof IWalletUserPoints,
-  epoch?: number
+//need to fix this to assign points per second
+export const assignPointsPerSecondToBatch = async (
+  users: IWalletUserModel[],
+  pointsData: Map<any, any>,
+  task: string,
+  epoch: number
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-  const pointsBulkWrites: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
+  if (!users || !users.length) return;
 
-  const user = await WalletUser.findById(userId);
-  if (!user) return;
+  users
+    .filter((user) => pointsData.has(user.walletAddress))
+    .map((user) => {
+      const latestPoints = pointsData.get(user.walletAddress);
 
-  const latestPoints = Number(points) || 0;
+      const Keys = Object.keys(latestPoints);
 
-  userBulkWrites.push({
-    updateOne: {
-      filter: { _id: user.id },
-      update: {
-        $set: {
-          [`pointsPerSecond.${taskId}`]: latestPoints / 86400,
-          epoch: epoch || user.epoch,
-        },
-      },
-    },
-  });
+      const pointsPerSecond: { [key: string]: number } = {};
+
+      if (Keys.length) {
+        Keys.forEach((key) => {
+          latestPoints[key]
+            ? (pointsPerSecond[`${key}`] = latestPoints[key] / 86400)
+            : "";
+        });
+      }
+      if (Object.keys(pointsPerSecond).length) {
+        userBulkWrites.push({
+          updateOne: {
+            filter: { _id: user.id },
+            update: {
+              $set: {
+                [`pointsPerSecond.${task}`]: pointsPerSecond,
+                [`epochs.${task}`]: epoch,
+              },
+            },
+          },
+        });
+      }
+    });
+
   return {
     userBulkWrites,
-    pointsBulkWrites,
     execute: async () => {
-      await WalletUser.bulkWrite(userBulkWrites);
-      await UserPointTransactions.bulkWrite(pointsBulkWrites);
+      await WalletUserV2.bulkWrite(userBulkWrites);
     },
   };
 };

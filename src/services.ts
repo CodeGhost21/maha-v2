@@ -1,63 +1,97 @@
 import { open } from "./database";
 import cron from "node-cron";
-import { updateLPRate } from "./cron/updateLPRate";
 import { updateUsersRank } from "./cron/updateRank";
-import { updatePythPoints } from "./scripts/updatePythPoints";
-import { updateMantaPoints } from "./scripts/updateMantaPoints";
-import {
-  addSupplyBorrowUsers,
-  addSupplyBorrowUsersManta,
-} from "./scripts/newSupplyBorrowUsers";
 import "./bots/gm";
-import { updateLPPointsHourly } from "./cron/updateLPPointsHourly";
+import {
+  mantaPPSCron,
+  zksyncPPSCron,
+  lineaPPSCron,
+  ethereumLrtPPSCron,
+  blastPPSCron,
+  xLayerPPSCron,
+} from "./cron/dailyLpPointsChain.v2";
+import { addUsers } from "./scripts/newSupplyBorrowUsers";
+import { updateLPPointsHourly } from "./cron/lpPointshourly";
+import { addToQueue, isQueueEmpty } from "./cron/queue";
+
 // connect to database
 open();
+let isUpdatingPoints = false;
+console.log("starting");
 
-cron.schedule("*/30 * * * *", async () => {
-  console.log("running lp points every 1 hour");
-  await updateLPPointsHourly();
+// -------------  Update LP Rate  -----------------
+cron.schedule("0 1 * * *", async () => {
+  await addToQueue(async () => {
+    console.log("running zksyn lp points every day at 1 am");
+    await zksyncPPSCron();
+    await updateLPPointsHourly();
+  });
 });
 
+cron.schedule("30 2 * * *", async () => {
+  await addToQueue(async () => {
+    console.log("running manta lp points every day at 2:30 am");
+    await mantaPPSCron();
+    await updateLPPointsHourly();
+  });
+});
+
+cron.schedule("0 4 * * *", async () => {
+  await addToQueue(async () => {
+    console.log("running blast lp points every day at 4 am");
+    await blastPPSCron();
+    await updateLPPointsHourly();
+  });
+});
+
+cron.schedule("30 5 * * *", async () => {
+  await addToQueue(async () => {
+    console.log("running ethereumLrt lp points every day at 5:30 am");
+    await ethereumLrtPPSCron();
+    await updateLPPointsHourly();
+  });
+});
+
+cron.schedule("0 7 * * *", async () => {
+  await addToQueue(async () => {
+    console.log("running linea lp points every day at 7 am");
+    await lineaPPSCron();
+    await updateLPPointsHourly();
+  });
+});
+
+cron.schedule("30 8 * * *", async () => {
+  await addToQueue(async () => {
+    console.log("running xLayer lp points every day at 8:30 am");
+    await xLayerPPSCron();
+    await updateLPPointsHourly();
+  });
+});
+
+// -------------  Update Rank  -----------------
+cron.schedule("0 10 * * *", () => {
+  addToQueue(async () => {
+    console.log("updating rank every day at 10 am");
+    await updateUsersRank();
+  });
+});
+
+// -------------  Add Users  -----------------
+cron.schedule("30 11 * * *", async () => {
+  await addToQueue(async () => {
+    console.log("adding new wallet users every day at 11:30 am");
+    await addUsers();
+  });
+});
+
+// -------------  Update LP Points hourly -----------------
 cron.schedule("*/60 * * * *", async () => {
-  console.log("running lp points rate every day");
-  await updateLPRate();
+  if (isQueueEmpty() && !isUpdatingPoints) {
+    isUpdatingPoints = true;
+    console.log("running lp points every 1 hour");
+    addToQueue(async () => await updateLPPointsHourly());
+    isUpdatingPoints = false;
+  } else {
+    console.log("skipping update points hourly");
+  }
 });
-
-cron.schedule("*/5 * * * *", async () => {
-  console.log("updating rank every 5 minutes");
-  await updateUsersRank();
-});
-
-cron.schedule("0 15 * * 5", async () => {
-  console.log("updating pyth points every Thursday at 3 PM minutes");
-  await updatePythPoints();
-});
-
-cron.schedule("0 15 * * 6", async () => {
-  console.log("updating manta points every saturday at 3 PM minutes");
-  await updateMantaPoints();
-});
-
-// cron.schedule("0 1 * * *", async () => {
-//   console.log("adding new wallet users every day at 1 am");
-
-//   //manta
-//   await addSupplyBorrowUsersManta();
-
-//   //zksync
-//   await addSupplyBorrowUsers(
-//     "https://api.studio.thegraph.com/query/49970/zerolend/version/latest"
-//   );
-//   //ethereum
-//   await addSupplyBorrowUsers(
-//     "https://api.studio.thegraph.com/query/65585/zerolend-ethereum-lrt-market/version/latest"
-//   );
-//   //linea
-//   await addSupplyBorrowUsers(
-//     "https://api.studio.thegraph.com/query/65585/zerolend-linea-market/version/latest"
-//   );
-// });
-// updateRank();
-// dailyLpPoints();
-// updatePythPoints();
-// updateWalletAddresses();

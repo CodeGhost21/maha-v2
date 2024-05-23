@@ -2,35 +2,120 @@ import _ from "underscore";
 import { getEpoch } from "../utils/epoch";
 import { NextFunction, Request, Response } from "express";
 import nconf from "nconf";
-import * as jwt from "jsonwebtoken";
 import { ethers } from "ethers";
-
-import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
-import { SiweMessage } from "../siwe/lib/client";
+import * as jwt from "jsonwebtoken";
 import {
-  userLpData,
-  supplyBorrowPointsMantaMulticall,
-  supplyBorrowPointsZksyncMulticall,
-  supplyBorrowPointsBlastMulticall,
-  supplyBorrowPointsLineaMulticall,
-  supplyBorrowPointsEthereumLrtMulticall,
-} from "./quests/onChainPoints";
+  IWalletUserModel,
+  WalletUserV2,
+} from "../database/models/walletUsersV2";
+import { SiweMessage } from "../siwe/lib/client";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
-
-import NotFoundError from "../errors/NotFoundError";
-import pythAddresses from "../addresses/pyth.json";
-import { IPythStaker } from "./interface/IPythStaker";
-import {
-  getMantaStakedData,
-  getMantaStakedDataAccumulate,
-  getMantaStakedDataBifrost,
-} from "./quests/stakeManta";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
-import { whiteListTeam } from "./quests/constants";
+import { userLpData, supplyBorrowPointsGQL } from "./quests/onChainPoints";
+import {
+  apiBlast,
+  apiEth,
+  apiLinea,
+  apiManta,
+  apiXLayer,
+  apiZKSync,
+  blastMultiplier,
+  ethLrtMultiplier,
+  lineaMultiplier,
+  mantaMultiplier,
+  minSupplyAmount,
+  referralPercent,
+  xlayerMultiplier,
+  zksyncMultiplier,
+} from "./quests/constants";
+import {
+  blastProvider,
+  ethLrtProvider,
+  lineaProvider,
+  mantaProvider,
+  xLayerProvider,
+  zksyncProvider,
+} from "../utils/providers";
+import axios from "axios";
+import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
+import { IAsset } from "src/database/interface/walletUser/assets";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
+export const getCurrentPoints = async (req: Request, res: Response) => {
+  const walletAddress = req.query.address;
+  if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    return res
+      .status(400)
+      .json({ success: false, data: { error: "Address is required" } });
+  }
+
+  const user = await WalletUserV2.findOne({
+    walletAddress: walletAddress.toLowerCase().trim(),
+  }).select("points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy");
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      data: { error: "user not found" },
+    });
+  }
+
+  let referredByUser = {} as IWalletUserModel;
+  if (user.referredBy) {
+    try {
+      referredByUser = await WalletUserV2.findOne({
+        _id: user.referredBy,
+      }).select("id");
+    } catch (error) {
+      throw new Error(`error while fetching referred by users, ${error}`);
+    }
+  }
+
+  // current points will be calculated based on stored pps and ppsUpdateTimestamp
+  try {
+    const previousPoints = user.points;
+    const pointsPerSecond = user.pointsPerSecond;
+    const pppUpdateTimestamp = user.pointsPerSecondUpdateTimestamp;
+
+    const lpList = Object.keys(pointsPerSecond) as Array<
+      keyof IWalletUserPoints
+    >;
+
+    let currentPoints = {} as IWalletUserPoints;
+
+    lpList.forEach((lpTask) => {
+      const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
+      const pps = pointsPerSecond[lpTask] as IAsset;
+      const oldPoints = previousPoints[lpTask] as IAsset;
+
+      const _points: Partial<IWalletUserPoints> = {
+        [lpTask]: {} as IAsset,
+      };
+      for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
+        const secondsElapsed = (Date.now() - Number(value)) / 1000;
+        const newPoints = Number(pps[key as keyof IAsset]) * secondsElapsed;
+
+        let refPointForAsset = 0;
+        if (referredByUser && Object.keys(referredByUser).length) {
+          refPointForAsset = Number(newPoints * referralPercent);
+        }
+        const assetOldPoinst = oldPoints[key as keyof IAsset] || 0;
+        (_points[lpTask] as IAsset)[key as keyof IAsset] =
+          newPoints + refPointForAsset + assetOldPoinst;
+      }
+      currentPoints = { ...currentPoints, ..._points };
+    });
+
+    res.status(200).json({ success: true, data: currentPoints });
+  } catch (error) {
+    console.log("error in calculating current points:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
+};
 export const _generateReferralCode = () => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -63,10 +148,9 @@ export const walletVerify = async (
 
     //assign role
     const role = await userLpData(address);
-    const user = await WalletUser.findOne({
+    const user = await WalletUserV2.findOne({
       walletAddress: address,
-      isDeleted: false,
-    });
+    }).select("id");
 
     if (user) {
       user.jwt = await jwt.sign({ id: String(user.id) }, accessTokenSecret);
@@ -75,23 +159,25 @@ export const walletVerify = async (
       return res.json({ success: true, user });
     }
 
-    const usersCount = await WalletUser.count();
+    const usersCount = await WalletUserV2.count();
     const referralCode = _generateReferralCode();
 
-    const newUser = await WalletUser.create({
+    const newUser = await WalletUserV2.create({
       walletAddress: address,
       rank: usersCount + 1,
       epoch: getEpoch(),
-      referralCode: referralCode ? referralCode : null,
+      referralCode: referralCode ? [referralCode] : [],
       role: role,
     });
 
     // referred by user added to user model
     if (req.body.referredByCode !== "") {
-      const referrer = await WalletUser.findOne({
-        referralCode: req.body.referredByCode,
-        isDeleted: false,
-      });
+      const referrer = await WalletUserV2.findOne(
+        {
+          referralCode: req.body.referredByCode,
+        },
+        { walletAddress: 1 }
+      );
       if (referrer) newUser.referredBy = referrer.id;
     }
 
@@ -104,32 +190,87 @@ export const walletVerify = async (
   }
 };
 
-export const fetchMe = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const user = req.user as IWalletUserModel;
-  if (!user) return next(new NotFoundError());
-  res.json({ success: true, user });
+export const userInfo = async (req: Request, res: Response) => {
+  try {
+    const walletAddress: string = req.query.address as string;
+
+    if (!walletAddress || !ethers.isAddress(walletAddress)) {
+      return res
+        .status(400)
+        .json({ success: false, data: { error: "Address is required" } });
+    }
+
+    const user = await WalletUserV2.findOne({
+      walletAddress: walletAddress.toLowerCase().trim(),
+    }).select("rank points totalPoints");
+
+    if (!user)
+      return res.status(404).json({
+        success: false,
+        data: { error: "user not found" },
+      });
+
+    const pointsTotal = getTotalSupplyBorrowPoints(user);
+    const userData = {
+      rank: user.rank,
+      referralPoints: user.points.referral || 0,
+      totalPoints: user.totalPoints,
+      totalSupplyPoints: pointsTotal.totalSupplyPoints,
+      totalBorrowPoints: pointsTotal.totalBorrowPoints,
+    };
+    res.status(200).json({ success: true, data: { userData } });
+  } catch (error) {
+    console.error("Error occurred while data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getLeaderBoard = async (req: Request, res: Response) => {
-  const cachedData: string | undefined = cache.get("lb:leaderBoard");
-  if (cachedData) return res.json(JSON.parse(cachedData || ""));
-  res.json([]);
+  try {
+    const cachedData: string | undefined = cache.get("lb:leaderBoard");
+    if (cachedData)
+      return res
+        .status(200)
+        .json({ success: true, data: JSON.parse(cachedData) });
+    res.status(200).json({
+      success: false,
+      data: { error: "data is being updated, please try after some time." },
+    });
+  } catch (error) {
+    console.error("Error occurred while retrieving data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getTotalUsers = async (req: Request, res: Response) => {
-  const cachedData: string | undefined = cache.get("tu:allUsers");
-  res.json({ totalUsers: cachedData });
+  try {
+    const cachedData: string | undefined = cache.get("tu:allUsers");
+    if (cachedData) {
+      return res
+        .status(200)
+        .json({ success: true, data: { totalUsers: cachedData } });
+    } else {
+      res.status(200).json({
+        success: false,
+        data: { error: "data is being updated, please try after some time." },
+      });
+    }
+  } catch (error) {
+    console.error("Error occurred while data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const totalReferrals = await WalletUser.find({
+  const totalReferrals = await WalletUserV2.find({
     referredBy: user.id,
-    isDeleted: false,
   }).select("totalPointsV2 walletAddress ");
 
   res.json({
@@ -138,82 +279,40 @@ export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   });
 };
 
-export const getPythData = async (req: Request, res: Response) => {
-  const walletAddress: string = req.query.walletAddress as string;
-  if (walletAddress && ethers.isAddress(walletAddress)) {
-    const typedAddresses: IPythStaker[] = pythAddresses as IPythStaker[];
-    const pythData = typedAddresses.find(
-      (item) =>
-        item.evm.toLowerCase().trim() === walletAddress.toLowerCase().trim()
-    );
+export const getUsersData = async (req: Request, res: Response) => {
+  try {
+    const cachedAllUSers: string | undefined = cache.get("tu:allUsers");
+    const cachedTotalPoints: number | undefined = cache.get("tp:totalPoints");
 
-    if (pythData) {
-      res.json({
+    if (cachedAllUSers && cachedTotalPoints) {
+      res.status(200).json({
         success: true,
-        pythData: {
-          ...pythData,
-          stakedAmount: pythData.stakedAmount / 1e6,
+        data: {
+          totalPoints: cachedTotalPoints || 0,
+          totalUsers: cachedAllUSers || 0,
         },
       });
     } else {
-      res.json({ success: false, message: "no data found" });
+      res.status(200).json({
+        success: false,
+        data: { error: "data is being updated, please try after some time." },
+      });
     }
-  } else {
-    res.json({
-      success: false,
-      message: "Wallet address not provided or is incorrect",
-    });
-  }
-};
-
-export const getMantaData = async (req: Request, res: Response) => {
-  const walletAddress: string = req.query.walletAddress as string;
-  if (walletAddress && ethers.isAddress(walletAddress)) {
-    const mantaData: any = await getMantaStakedData(walletAddress);
-    const mantaBifrost = await getMantaStakedDataBifrost(walletAddress);
-    const mantaAccumulate = await getMantaStakedDataAccumulate(walletAddress);
-    console.log(mantaData, mantaBifrost, mantaAccumulate);
-
-    const totalStaked = mantaData.success
-      ? mantaData.data.totalStakingAmount
-      : 0;
-    +mantaBifrost + mantaAccumulate;
-    // if (mantaData.success) {
-    res.json({
-      mantaData: mantaData.success ? mantaData.data.totalStakingAmount : 0,
-      mantaBifrost: mantaBifrost,
-      mantaAccumulate: mantaAccumulate,
-      totalStaked: totalStaked,
-    });
-    // } else {
-    //   res.json({ success: mantaData.success, message: mantaData.message });
-    // }
-  } else {
-    res.json({
-      success: false,
-      message: "Wallet address not provided or is incorrect",
-    });
-  }
-};
-
-export const getTotalPoints = async (req: Request, res: Response) => {
-  try {
-    const cachedData: number | undefined = cache.get("tp:totalPoints");
-    res.json({ totalPoints: cachedData || 0 });
   } catch (error) {
-    console.error("Error occurred while retrieving total points:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error occurred while retrieving data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
   }
 };
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   const walletAddress: string = req.query.walletAddress as string;
-  const user: any = await WalletUser.findOne({
+  const user: IWalletUserModel = await WalletUserV2.findOne({
     walletAddress: walletAddress.toLowerCase().trim(),
-    isDeleted: false,
-  });
+  }).select("totalPoints");
   if (!user) return res.json({ success: false, message: "no data found" });
-  res.json({ success: true, totalPoints: user.totalPointsV2 || 0 });
+  res.json({ success: true, totalPoints: user.totalPoints || 0 });
 };
 
 export const getUserReferralData = async (req: Request, res: Response) => {
@@ -223,12 +322,12 @@ export const getUserReferralData = async (req: Request, res: Response) => {
       success: false,
       message: "please provide referral code",
     });
-  const walletUser: IWalletUserModel = (await WalletUser.findOne({
+  const walletUser: IWalletUserModel = (await WalletUserV2.findOne({
     referralCode: referralCode,
     isDeleted: false,
   })) as IWalletUserModel;
   if (walletUser) {
-    const totalReferrals = await WalletUser.find({
+    const totalReferrals = await WalletUserV2.find({
       referredBy: walletUser.id,
       isDeleted: false,
     });
@@ -246,14 +345,13 @@ export const getUserReferralData = async (req: Request, res: Response) => {
 export const getReferralUsers = async (req: Request, res: Response) => {
   try {
     const user = req.user as IWalletUserModel;
-    const referralUsers = await WalletUser.find({
+    const referralUsers = await WalletUserV2.find({
       referredBy: user.id,
-      isDeleted: false,
     })
       // .sort({
       //   createdAt: -1,
       // })
-      .select("referralCode totalPointsV2 walletAddress rank");
+      .select("referralCode totalPoints walletAddress rank");
 
     console.log("referralUsers", referralUsers);
 
@@ -268,9 +366,27 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
   let success = false;
 
   try {
-    const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
-    const zksyncData = await supplyBorrowPointsZksyncMulticall([walletAddress]);
-    if (mantaData[0].supply.points > 100 || zksyncData[0].supply.points > 100) {
+    const mantaData = await supplyBorrowPointsGQL(
+      apiManta,
+      [{ walletAddress } as IWalletUserModel],
+      mantaProvider,
+      mantaMultiplier
+    );
+
+    const zksyncData = await supplyBorrowPointsGQL(
+      apiZKSync,
+      [{ walletAddress } as IWalletUserModel],
+      zksyncProvider,
+      zksyncMultiplier
+    );
+
+    const mantaSupply = mantaData.supply.get(walletAddress);
+    const zksyncSupply = zksyncData.supply.get(walletAddress);
+
+    const mantaPoints = getTotalPoints(mantaSupply);
+    const zksyncPoints = getTotalPoints(zksyncSupply);
+
+    if (mantaPoints > minSupplyAmount || zksyncPoints > minSupplyAmount) {
       success = true;
     }
     res.json({
@@ -285,12 +401,12 @@ export const galxeLPCheck = async (req: Request, res: Response) => {
 
 export const getUserTransactions = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const checkAdmin = whiteListTeam.includes(
-    user.walletAddress.toLowerCase().trim()
-  );
-  if (!checkAdmin) {
-    return res.json({ success: false, message: "Unauthorized" });
-  }
+  // const checkAdmin = whiteListTeam.includes(
+  //   user.walletAddress.toLowerCase().trim()
+  // );
+  // if (!checkAdmin) {
+  //   return res.json({ success: false, message: "Unauthorized" });
+  // }
   const transactions = await UserPointTransactions.find({
     userId: user.id,
   }).sort({
@@ -303,25 +419,12 @@ export const getLPData = async (req: Request, res: Response) => {
   try {
     const walletAddress: string = req.query.walletAddress as string;
     console.log(walletAddress);
-    console.log(ethers.isAddress(walletAddress));
 
     if (walletAddress && ethers.isAddress(walletAddress)) {
-      const mantaData = await supplyBorrowPointsMantaMulticall([walletAddress]);
-      const zksyncData = await supplyBorrowPointsZksyncMulticall([
-        walletAddress,
-      ]);
-      const blastData = await supplyBorrowPointsBlastMulticall([walletAddress]);
-      const lineaData = await supplyBorrowPointsLineaMulticall([walletAddress]);
-      const ethereumLrt = await supplyBorrowPointsEthereumLrtMulticall([
-        walletAddress,
-      ]);
+      const lpData = await getLpDataForAddress(walletAddress);
       res.json({
         success: true,
-        mantaData: mantaData[0],
-        zksyncData: zksyncData[0],
-        blastData: blastData[0],
-        lineaData: lineaData[0],
-        ethereumLrt: ethereumLrt[0],
+        ...lpData,
       });
     } else {
       res.json({
@@ -332,4 +435,119 @@ export const getLPData = async (req: Request, res: Response) => {
   } catch (e) {
     console.log(e);
   }
+};
+
+const getLpDataForAddress = async (walletAddress: string) => {
+  const mantaData = await supplyBorrowPointsGQL(
+    apiManta,
+    [{ walletAddress } as IWalletUserModel],
+    mantaProvider,
+    mantaMultiplier
+  );
+  const zksyncData = await supplyBorrowPointsGQL(
+    apiZKSync,
+    [{ walletAddress } as IWalletUserModel],
+    zksyncProvider,
+    zksyncMultiplier
+  );
+  const blastData = await supplyBorrowPointsGQL(
+    apiBlast,
+    [{ walletAddress } as IWalletUserModel],
+    blastProvider,
+    blastMultiplier
+  );
+  const lineaData = await supplyBorrowPointsGQL(
+    apiLinea,
+    [{ walletAddress } as IWalletUserModel],
+    lineaProvider,
+    lineaMultiplier
+  );
+  const ethereumLrtData = await supplyBorrowPointsGQL(
+    apiEth,
+    [{ walletAddress } as IWalletUserModel],
+    ethLrtProvider,
+    ethLrtMultiplier
+  );
+  const xlayerData = await supplyBorrowPointsGQL(
+    apiXLayer,
+    [{ walletAddress } as IWalletUserModel],
+    xLayerProvider,
+    xlayerMultiplier
+  );
+
+  return {
+    zksyncData,
+    mantaData,
+    xlayerData,
+    ethereumLrtData,
+    blastData,
+    lineaData,
+  };
+};
+
+export const getTotalPoints = (supplyOrBorrowObject: any) => {
+  let totalPoints = 0;
+  for (const [_, value] of Object.entries(supplyOrBorrowObject)) {
+    totalPoints += Number(value);
+  }
+  return totalPoints;
+};
+
+export const getTotalSupplyBorrowPoints = (user: IWalletUserModel) => {
+  // get supply points for all chains and their assets
+  const points = user.points;
+  const mantaSupply = points.supplyManta || {};
+  const zksyncSupply = points.supplyZkSync || {};
+  const xlayerSupply = points.supplyXLayer || {};
+  const ethereumLrtSupply = points.supplyEthereumLrt || {};
+  const blastSupply = points.supplyBlast || {};
+  const lineaSupply = points.supplyLinea || {};
+
+  // get borrow points for all chains and their assets
+  const mantaBorrow = points.borrowManta || {};
+  const zksyncBorrow = points.borrowZkSync || {};
+  const xlayerBorrow = points.borrowXLayer || {};
+  const ethereumLrtBorrow = points.borrowEthereumLrt || {};
+  const blastBorrow = points.borrowBlast || {};
+  const lineaBorrow = points.borrowLinea || {};
+
+  const totalSupplyPoints =
+    getTotalPoints(mantaSupply) +
+    getTotalPoints(zksyncSupply) +
+    getTotalPoints(xlayerSupply) +
+    getTotalPoints(ethereumLrtSupply) +
+    getTotalPoints(blastSupply) +
+    getTotalPoints(lineaSupply);
+  const totalBorrowPoints =
+    getTotalPoints(mantaBorrow) +
+    getTotalPoints(zksyncBorrow) +
+    getTotalPoints(xlayerBorrow) +
+    getTotalPoints(ethereumLrtBorrow) +
+    getTotalPoints(blastBorrow) +
+    getTotalPoints(lineaBorrow);
+
+  return {
+    totalSupplyPoints,
+    totalBorrowPoints,
+  };
+};
+
+export const getOpensBlockData = async (req: Request, res: Response) => {
+  const cachedData = cache.get(`xp:openApi`);
+  console.log("459", cachedData);
+
+  if (cachedData)
+    return res.status(200).json({
+      success: true,
+      xp: cachedData,
+    });
+  const url = `https://kx58j6x5me.execute-api.us-east-1.amazonaws.com/linea/getUserPointsSearch?user=0x0f6e98a756a40dd050dc78959f45559f98d3289d`;
+  const response = await axios.get(url);
+  const xp = response.data.length > 0 ? response.data[0].xp : 0;
+
+  cache.set("xp:openApi", xp, 60 * 60);
+  res.status(200).json({
+    success: true,
+    xp: xp,
+  });
 };
