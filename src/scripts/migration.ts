@@ -15,7 +15,7 @@ import { WalletUser } from "../database/models/walletUsers";
 import { WalletUserV2 } from "../database/models/walletUsersV2";
 
 export const migrateUsers = async () => {
-  const batchSize = 100;
+  const batchSize = 1000;
   let skip = 0;
   let batch;
   do {
@@ -25,19 +25,13 @@ export const migrateUsers = async () => {
       .select("walletAddress discordId referralCode referredBy role rank")
       .skip(skip)
       .limit(batchSize);
-
-    batch.forEach((user) => {
-      console.log(user);
-
-      console.log(user.walletAddress, user.id);
-    });
     try {
       await WalletUserV2.ensureIndexes();
       await WalletUserV2.insertMany(batch, { ordered: false });
-      skip += batchSize;
     } catch (e) {
       console.log(e);
     }
+    skip += batchSize;
   } while (batch.length === batchSize);
 };
 migrateUsers();

@@ -22,7 +22,7 @@ console.log("starting");
 // -------------  Update LP Rate  -----------------
 cron.schedule("0 1 * * *", async () => {
   await addToQueue(async () => {
-    console.log("running zksyn lp points every day at 2:30 pm");
+    console.log("running zksyn lp points every day at 1 am");
     await zksyncPPSCron();
     await updateLPPointsHourly();
   });
@@ -30,7 +30,7 @@ cron.schedule("0 1 * * *", async () => {
 
 cron.schedule("30 2 * * *", async () => {
   await addToQueue(async () => {
-    console.log("running manta lp points every day at 3:30 pm");
+    console.log("running manta lp points every day at 2:30 am");
     await mantaPPSCron();
     await updateLPPointsHourly();
   });
@@ -38,7 +38,7 @@ cron.schedule("30 2 * * *", async () => {
 
 cron.schedule("0 4 * * *", async () => {
   await addToQueue(async () => {
-    console.log("running blast lp points every day at 5 pm");
+    console.log("running blast lp points every day at 4 am");
     await blastPPSCron();
     await updateLPPointsHourly();
   });
@@ -46,7 +46,7 @@ cron.schedule("0 4 * * *", async () => {
 
 cron.schedule("30 5 * * *", async () => {
   await addToQueue(async () => {
-    console.log("running ethereumLrt lp points every day at 6:30 pm");
+    console.log("running ethereumLrt lp points every day at 5:30 am");
     await ethereumLrtPPSCron();
     await updateLPPointsHourly();
   });
@@ -54,7 +54,7 @@ cron.schedule("30 5 * * *", async () => {
 
 cron.schedule("0 7 * * *", async () => {
   await addToQueue(async () => {
-    console.log("running linea lp points every day at 8 pm");
+    console.log("running linea lp points every day at 7 am");
     await lineaPPSCron();
     await updateLPPointsHourly();
   });
@@ -62,7 +62,7 @@ cron.schedule("0 7 * * *", async () => {
 
 cron.schedule("30 8 * * *", async () => {
   await addToQueue(async () => {
-    console.log("running xLayer lp points every day at 9:30 pm");
+    console.log("running xLayer lp points every day at 8:30 am");
     await xLayerPPSCron();
     await updateLPPointsHourly();
   });
@@ -71,7 +71,7 @@ cron.schedule("30 8 * * *", async () => {
 // -------------  Update Rank  -----------------
 cron.schedule("0 10 * * *", () => {
   addToQueue(async () => {
-    console.log("updating rank every day at 11pm");
+    console.log("updating rank every day at 10 am");
     await updateUsersRank();
   });
 });
@@ -79,7 +79,7 @@ cron.schedule("0 10 * * *", () => {
 // -------------  Add Users  -----------------
 cron.schedule("30 11 * * *", async () => {
   await addToQueue(async () => {
-    console.log("adding new wallet users every day at 12:30 am");
+    console.log("adding new wallet users every day at 11:30 am");
     await addUsers();
   });
 });
