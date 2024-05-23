@@ -9,9 +9,8 @@ import {
   getTotalReferralOfUsers,
   getUserReferralData,
   getReferralUsers,
+  getTotalUsers,
   // getLeaderBoard,
-  // fetchMe,
-  // getTotalUsers,
   // getUsersData,
   // galxeLPCheck,
   // getUserTransactions,
@@ -27,6 +26,7 @@ router.get("/totalReferrals", getTotalReferralOfUsers);
 router.get("/referralUsers", getReferralUsers);
 router.get("/referral", getUserReferralData);
 router.get("/currentPoints", getCurrentPoints);
+router.get("/totalUsers", getTotalUsers);
 // router.get("/globalData", getUsersData);
 // router.get("/leaderBoard", getLeaderBoard);
 // router.get("/info", galxeLPCheck);
