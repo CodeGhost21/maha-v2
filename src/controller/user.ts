@@ -551,3 +551,19 @@ export const getOpensBlockData = async (req: Request, res: Response) => {
     xp: xp,
   });
 };
+
+export const getGlobalTotalPoints = async (req: Request, res: Response) => {
+  try {
+    const cachedData: number = cache.get("tp:totalPoints") as number;
+    if (cachedData >= 0) {
+      return res.status(200).json({ totalPoints: cachedData });
+    }
+    res.status(200).json({
+      success: false,
+      data: { error: "data is being updated, please try after some time." },
+    });
+  } catch (error) {
+    console.error("Error occurred while retrieving total points:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

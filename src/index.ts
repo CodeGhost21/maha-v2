@@ -51,5 +51,5 @@ cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
   await totalPoints();
 });
-
+totalPoints();
 updateLBCache();
