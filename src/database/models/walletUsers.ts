@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
-import { IWalletUser } from "../interface/walletUser/walletUser";
-import { WalletUserSchemaV2 } from "../schema/walletUserV2";
+import { IWalletUserLegacy } from "../interface/walletUser/walletUserLegacy";
+import { UserSchemaLegacy } from "../schema/walletUser";
 
-export type IWalletUserModel = IWalletUser & mongoose.Document;
-export const WalletUser = mongoose.model<IWalletUserModel>(
-  "WalletUser",
-  WalletUserSchemaV2
-);
+export type IWalletUserModel = IWalletUserLegacy & mongoose.Document;
+export const WalletUser = mongoose.model<IWalletUserModel>("WalletUser", UserSchemaLegacy);
