@@ -101,7 +101,7 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
         if (referredByUser && Object.keys(referredByUser).length) {
           refPointForAsset = Number(newPoints * referralPercent);
         }
-        const assetOldPoinst = oldPoints[key as keyof IAsset] || 0;
+        const assetOldPoinst = oldPoints[key as keyof IAsset] ?? 0;
         (_points[lpTask] as IAsset)[key as keyof IAsset] =
           newPoints + refPointForAsset + assetOldPoinst;
       }
