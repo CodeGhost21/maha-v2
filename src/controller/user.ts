@@ -307,12 +307,23 @@ export const getUsersData = async (req: Request, res: Response) => {
 };
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
-  const walletAddress: string = req.query.walletAddress as string;
-  const user: IWalletUserModel = await WalletUserV2.findOne({
-    walletAddress: walletAddress.toLowerCase().trim(),
-  }).select("totalPoints");
-  if (!user) return res.json({ success: false, message: "no data found" });
-  res.json({ success: true, totalPoints: user.totalPoints || 0 });
+  try {
+    const walletAddress: string = req.query.walletAddress as string;
+    const user: IWalletUserModel = await WalletUserV2.findOne({
+      walletAddress: walletAddress.toLowerCase().trim(),
+    }).select("totalPoints points");
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, data: { error: "user not found" } });
+    res
+      .status(200)
+      .json({ success: true, data: { totalPoints: user.totalPoints || 0 } });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getUserReferralData = async (req: Request, res: Response) => {

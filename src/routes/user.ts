@@ -11,12 +11,12 @@ import {
   getReferralUsers,
   getTotalUsers,
   getGlobalTotalPoints,
+  getUserTotalPoints,
   // getLeaderBoard,
   // getUsersData,
   // galxeLPCheck,
   // getUserTransactions,
   // getLPData,
-  // getUserTotalPoints,
   userInfo,
   getCurrentPoints,
 } from "../controller/user";
@@ -29,11 +29,11 @@ router.get("/referral", getUserReferralData);
 router.get("/currentPoints", getCurrentPoints);
 router.get("/totalUsers", getTotalUsers);
 router.get("/totalPoints", getGlobalTotalPoints);
+router.get("/userTotalPoints", getUserTotalPoints);
 // router.get("/globalData", getUsersData);
 // router.get("/leaderBoard", getLeaderBoard);
 // router.get("/info", galxeLPCheck);
 // router.get("/lpData", getLPData);
-// router.get("/userTotalPoints", getUserTotalPoints);
 // router.get("/me", fetchMe);
 // router.get("/transactions", getUserTransactions);
 

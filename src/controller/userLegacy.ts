@@ -82,30 +82,33 @@ export const getTotalPoints = async (req: Request, res: Response) => {
 };
 
 export const getUserTotalPoints = async (req: Request, res: Response) => {
- try {
-   const walletAddress: string = req.query.walletAddress as string;
-   if (!walletAddress) {
-     return res
-       .status(400)
-       .json({ success: false, data: { error: "Address is required" } });
-   }
+  try {
+    const walletAddress: string = req.query.walletAddress as string;
+    if (!walletAddress) {
+      return res
+        .status(400)
+        .json({ success: false, data: { error: "Address is required" } });
+    }
 
-   const user: any = await WalletUser.findOne({
-     walletAddress: walletAddress.toLowerCase().trim(),
-     isDeleted: false, //{ $regex: new RegExp("^" + walletAddress + "$", "i") },
-   }).select("totalPoints totalPointsV2 points");
+    const user: any = await WalletUser.findOne({
+      walletAddress: walletAddress.toLowerCase().trim(),
+      isDeleted: false, //{ $regex: new RegExp("^" + walletAddress + "$", "i") },
+    }).select("totalPoints totalPointsV2 points");
 
-   if (!user) return res.status(404).json({ success: false, message: "no data found" });
-   console.log(user, user.totalPointsV2);
-   res.json({
-     success: true,
-     totalPoints: user.totalPointsV2 || 0,
-     points: user.points,
-   });
- } catch (error) {
-  console.error("Error occurred while retrieving user's total points:", error);
-  res.status(500).json({ error: "Internal server error" });
- }
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, data: { error: "no data found" } });
+    console.log(user, user.totalPointsV2);
+    res.status(200).json({
+      success: true,
+      data: { totalPoints: user.totalPointsV2 || 0, points: user.points },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
 };
 
 export const getUserReferralData = async (req: Request, res: Response) => {
