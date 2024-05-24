@@ -134,6 +134,8 @@ export const apiLinea = baseUrl + "zerolend-linea/1.0.0/gn";
 export const apiBlast = baseUrl + "zerolend-blast/1.0.0/gn";
 export const apiXLayer = baseUrl + "zerolend-xlayer/1.0.0/gn";
 
+
+export const zeroveDenom = 1e18;
 export const assetDenomination = {
   usdc: 1e6, //done
   usdt: 1e6, //done

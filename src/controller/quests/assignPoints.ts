@@ -124,32 +124,49 @@ export const assignPointsPerSecondToBatch = async (
 
   users
     .filter((user) => pointsData.has(user.walletAddress))
-    .map((user) => {
+    .forEach((user) => {
       const latestPoints = pointsData.get(user.walletAddress);
 
-      const Keys = Object.keys(latestPoints);
-
-      const pointsPerSecond: { [key: string]: number } = {};
-
-      if (Keys.length) {
-        Keys.forEach((key) => {
-          latestPoints[key]
-            ? (pointsPerSecond[`${key}`] = latestPoints[key] / 86400)
-            : "";
-        });
-      }
-      if (Object.keys(pointsPerSecond).length) {
-        userBulkWrites.push({
-          updateOne: {
-            filter: { _id: user.id },
-            update: {
-              $set: {
-                [`pointsPerSecond.${task}`]: pointsPerSecond,
-                [`epochs.${task}`]: epoch,
+      if (task.startsWith("stake")) {
+        if (!latestPoints.Balance) {
+          const stakePointsPersecond = latestPoints.Balance / 86400;
+          userBulkWrites.push({
+            updateOne: {
+              filter: { _id: user.id },
+              update: {
+                $set: {
+                  [`pointsPerSecond.${task}`]: stakePointsPersecond,
+                  [`epochs.${task}`]: epoch,
+                },
               },
             },
-          },
-        });
+          });
+        }
+      } else {
+        const Keys = Object.keys(latestPoints);
+
+        const pointsPerSecond: { [key: string]: number } = {};
+
+        if (Keys.length) {
+          Keys.forEach((key) => {
+            latestPoints[key]
+              ? (pointsPerSecond[`${key}`] = latestPoints[key] / 86400)
+              : "";
+          });
+        }
+        if (Object.keys(pointsPerSecond).length) {
+          userBulkWrites.push({
+            updateOne: {
+              filter: { _id: user.id },
+              update: {
+                $set: {
+                  [`pointsPerSecond.${task}`]: pointsPerSecond,
+                  [`epochs.${task}`]: epoch,
+                },
+              },
+            },
+          });
+        }
       }
     });
 

@@ -12,6 +12,7 @@ import {
   mantaMultiplier,
   minSupplyAmount,
   Multiplier,
+  zeroveDenom,
   zksyncMultiplier,
 } from "./constants";
 import { getTotalPoints } from "../user";
@@ -191,5 +192,65 @@ export const userLpData = async (walletAddress: string) => {
     return "gigaWhale";
   } else {
     return "no role";
+  }
+};
+
+export const votingPowerGQL = async (
+  api: string,
+  userBatch: IWalletUserModel[],
+  // p: AbstractProvider,
+  // multiplier: Multiplier
+) => {
+  try {
+    let marketPrice: any = await cache.get("coingecko:PriceList");
+    if (!marketPrice) {
+      marketPrice = await getPriceCoinGecko();
+    }
+    // const currentBlock = await p.getBlockNumber();
+
+    const graphQuery = `query {
+      tokenBalances(where: {id_in: [${userBatch.map(
+        (u) => `"${u.walletAddress}"`
+      )}]}) {
+        id
+        balance
+      }
+    }`;
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const data = await axios.post(
+      api,
+      { query: graphQuery },
+      { headers, timeout: 300000 }
+    ); // 5 minute
+    const result = data.data.data.tokenBalances;
+
+    const tokenBalances = new Map();
+
+    result.forEach((user: any) => {
+      tokenBalances.set(user.id, (user.balance / zeroveDenom));
+    });
+    /**
+     * {
+        "data": {
+          "tokenBalances": [
+            {
+              "id": "0x00204acd48e582f710652b264145102edb0166a6",
+              "address": "0x00204acd48e582f710652b264145102edb0166a6",
+              "balance": "743555511352105530187"
+            },
+            {
+              "id": "0x00fc2b542ec0f5a7eaa3f348b842be0628bec2a6",
+              "address": "0x00fc2b542ec0f5a7eaa3f348b842be0628bec2a6",
+              "balance": "1592157985540334855403"
+        },
+     */
+    console.log(tokenBalances);
+    return tokenBalances;
+  } catch (error) {
+    console.log("error while fetching stake data");
+    throw error;
   }
 };

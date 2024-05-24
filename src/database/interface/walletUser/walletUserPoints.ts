@@ -5,6 +5,7 @@ export interface IWalletUserPoints {
   gm?: number;
   referral?: number;
   mahaXStaker?: number;
+  stakeLinea?: number;
   supplyZkSync?: IAsset;
   borrowZkSync?: IAsset;
   supplyManta?: IAsset;

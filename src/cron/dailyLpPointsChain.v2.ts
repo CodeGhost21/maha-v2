@@ -1,4 +1,7 @@
-import { supplyBorrowPointsGQL } from "../controller/quests/onChainPoints";
+import {
+  supplyBorrowPointsGQL,
+  votingPowerGQL,
+} from "../controller/quests/onChainPoints";
 import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
 import { getEpoch } from "../utils/epoch";
 import { AbstractProvider } from "ethers";
@@ -44,12 +47,18 @@ const _processBatch = async (
   multiplier: Multiplier
 ) => {
   try {
-    const data = await supplyBorrowPointsGQL(api, userBatch, p, multiplier);
-
+    const supplyBorrowData = await supplyBorrowPointsGQL(
+      api,
+      userBatch,
+      p,
+      multiplier
+    );
+    const stakingApi = "";
+    const stakeData = await votingPowerGQL(stakingApi, userBatch);
     // update supply points
     const supplyExecutable = await assignPointsPerSecondToBatch(
       userBatch,
-      data.supply,
+      supplyBorrowData.supply,
       supplyTask,
       epoch
     );
@@ -58,12 +67,22 @@ const _processBatch = async (
     // update borrow points
     const borrowExecutable = await assignPointsPerSecondToBatch(
       userBatch,
-      data.borrow,
+      supplyBorrowData.borrow,
       borrowTask,
       epoch
     );
 
     await borrowExecutable?.execute();
+
+    //update stakingPoints
+    const stakingExecutable = await assignPointsPerSecondToBatch(
+      userBatch,
+      stakeData,
+      "stakeLinea",
+      epoch
+    );
+
+    await stakingExecutable?.execute();
   } catch (error) {
     console.log(
       `processBatch error for ${supplyTask.substring(6)} chain`,
