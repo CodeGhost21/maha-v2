@@ -59,7 +59,6 @@ cron.schedule("30 8 * * *", async () => {
   await addToQueue(async () => {
     console.log("running xLayer lp points every day at 8:30 am");
     await xLayerPPSCron();
-    await updateLPPointsHourly();
   });
 });
 
