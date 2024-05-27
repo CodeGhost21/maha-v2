@@ -70,56 +70,52 @@ export const addUsers = async () => {
 export const executeAddSupplyBorrowUsers = async (
   addressesToInsert: string[]
 ) => {
-  const batchSize = 1000;
+  // const batchSize = 1000;
   console.log("addresses to insert", addressesToInsert.length);
   let rank = await WalletUserV2.count();
-  for (let i = 0; i < addressesToInsert.length; i = i + batchSize) {
-    const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
-    console.log("initial user bulk write", userBulkWrites.length);
-    const batchAddresses = addressesToInsert.slice(i, i + batchSize);
-    batchAddresses.forEach((address) => {
-      rank = rank + 1;
-      const referralCode = _generateReferralCode();
-      const user = new WalletUserV2({
-        walletAddress: address.toLowerCase().trim(),
-        referralCode,
-        rank: rank,
-      });
-      userBulkWrites.push({
-        insertOne: {
-          document: user,
-        },
-      });
+  // for (let i = 0; i < addressesToInsert.length; i = i + batchSize) {
+  const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+  console.log("initial user bulk write", userBulkWrites.length);
+  // const batchAddresses = addressesToInsert.slice(i, i + batchSize);
+  addressesToInsert.forEach((address) => {
+    rank = rank + 1;
+    const referralCode = _generateReferralCode();
+    const user = new WalletUserV2({
+      walletAddress: address.toLowerCase().trim(),
+      referralCode,
+      rank: rank,
     });
+    userBulkWrites.push({
+      insertOne: {
+        document: user,
+      },
+    });
+  });
 
-    if (userBulkWrites.length > 0) {
-      try {
-        // Execute bulk write operations
-        console.log("writing ", userBulkWrites.length, "entries to db");
-        await WalletUserV2.bulkWrite(userBulkWrites);
-        const remaining = addressesToInsert.length - (i + batchSize);
-        console.log(
-          "Bulk write operations executed successfully.Remaining addresses to write",
-          remaining > 0 ? remaining : 0
-        );
-      } catch (error) {
-        console.error("Error executing bulk write operations:", error);
-      }
-    } else {
-      console.log("No new users to insert.");
+  if (userBulkWrites.length > 0) {
+    try {
+      // Execute bulk write operations
+      console.log("writing ", userBulkWrites.length, "entries to db");
+      await WalletUserV2.bulkWrite(userBulkWrites);
+      // const remaining = addressesToInsert.length - (i + batchSize);
+      console.log("Bulk write operations executed successfully.");
+    } catch (error) {
+      console.error("Error executing bulk write operations:", error);
     }
+  } else {
+    console.log("No new users to insert.");
   }
-  console.log("Bulk write operations executed successfully.");
+  // }
 };
 
 export const addSupplyBorrowUsersManta = async (queryURL: string) => {
   const first = 1000;
   let skip = 0;
   let batch;
-  const addressesToInsert = [];
   do {
+    const addressesToInsert = [];
     const graphQuery = `query {
-      users(first: ${first}, skip: ${skip}) {
+    users(first: ${first}, skip: ${skip}) {
         id
       }
     }`;
@@ -132,6 +128,7 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
       { headers, timeout: 30000 }
     );
     const addresses = batch.data.data.users.map((user: any) => user.id);
+    console.log("addresses", addresses);
     const existingUsers = await WalletUserV2.find({
       walletAddress: {
         $in: addresses.map((address: string) => address.toLowerCase().trim()),
@@ -144,16 +141,17 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
     addressesToInsert.push(...newAddresses);
     skip += first;
     console.log(addressesToInsert.length, "addresses to insert");
+    await executeAddSupplyBorrowUsers(addressesToInsert);
   } while (batch.data.data.users.length === first);
-  await executeAddSupplyBorrowUsers(addressesToInsert);
+  console.log("add users operations executed successfully.");
 };
 
 export const addSupplyBorrowUsers = async (queryURL: string) => {
   const first = 1000;
   let batch;
   let lastAddress = "0x0000000000000000000000000000000000000000";
-  const addressesToInsert = [];
   do {
+    const addressesToInsert = [];
     // const queryURL =
     //   "https://api.studio.thegraph.com/query/49970/zerolend/version/latest";
 
@@ -200,7 +198,7 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
     addressesToInsert.push(...newAddresses);
     lastAddress = batch.data.data.users[batch.data.data.users.length - 1].id;
     console.log(addressesToInsert.length, "addresses to insert");
+    await executeAddSupplyBorrowUsers(addressesToInsert);
   } while (batch.data.data.users.length === first);
-
-  await executeAddSupplyBorrowUsers(addressesToInsert);
+  console.log("Bulk write operations executed successfully.");
 };
