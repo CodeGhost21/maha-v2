@@ -55,8 +55,8 @@ cron.schedule("0 7 * * *", () => {
   });
 });
 
-cron.schedule("30 8 * * *", async () => {
-  await addToQueue(async () => {
+cron.schedule("30 8 * * *", () => {
+  addToQueue(async () => {
     console.log("running xLayer lp points every day at 8:30 am");
     await xLayerPPSCron();
   });
@@ -71,18 +71,18 @@ cron.schedule("0 10 * * *", () => {
 });
 
 // -------------  Add Users  -----------------
-cron.schedule("30 11 * * *", async () => {
-  await addToQueue(async () => {
+cron.schedule("30 11 * * *", () => {
+  addToQueue(async () => {
     console.log("adding new wallet users every day at 11:30 am");
     await addUsers();
   });
 });
 
 // -------------  Update LP Points hourly -----------------
-cron.schedule("*/60 * * * *", async () => {
+cron.schedule("*/120 * * * *", () => {
   if (isQueueEmpty() && !isUpdatingPoints) {
     isUpdatingPoints = true;
-    console.log("running lp points every 1 hour");
+    console.log("running lp points once in every 2 hours");
     addToQueue(async () => await updateLPPointsHourly());
     isUpdatingPoints = false;
   } else {
