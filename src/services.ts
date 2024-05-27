@@ -20,7 +20,7 @@ let isUpdatingPoints = false;
 console.log("starting");
 
 // -------------  Update LP Rate  -----------------
-cron.schedule("15 19 * * *", () => {
+cron.schedule("50 18 * * *", () => {
   addToQueue(async () => {
     console.log("running zksyn lp points every day at 1 pm");
     await zksyncPPSCron();
