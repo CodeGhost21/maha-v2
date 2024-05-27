@@ -20,7 +20,7 @@ let isUpdatingPoints = false;
 console.log("starting");
 
 // -------------  Update LP Rate  -----------------
-cron.schedule("0 13 * * *", () => {
+cron.schedule("50 13 * * *", () => {
   addToQueue(async () => {
     console.log("running zksyn lp points every day at 1 pm");
     await zksyncPPSCron();
@@ -34,7 +34,7 @@ cron.schedule("30 14 * * *", () => {
   });
 });
 
-cron.schedule("0 16 * * *", () => {
+cron.schedule("10 16 * * *", () => {
   addToQueue(async () => {
     console.log("running blast lp points every day at 4 pm");
     await blastPPSCron();
@@ -48,7 +48,7 @@ cron.schedule("30 17 * * *", () => {
   });
 });
 
-cron.schedule("0 19 * * *", () => {
+cron.schedule("10 19 * * *", () => {
   addToQueue(async () => {
     console.log("running linea lp points every day at 7 pm");
     await lineaPPSCron();
@@ -63,7 +63,7 @@ cron.schedule("30 20 * * *", () => {
 });
 
 // -------------  Update Rank  -----------------
-cron.schedule("0 22 * * *", () => {
+cron.schedule("10 22 * * *", () => {
   addToQueue(async () => {
     console.log("updating rank every day at 10 pm");
     await updateUsersRank();
@@ -79,7 +79,7 @@ cron.schedule("30 23 * * *", () => {
 });
 
 // -------------  Update LP Points hourly -----------------
-cron.schedule("*/120 * * * *", () => {
+cron.schedule("*/59 * * * *", () => {
   if (isQueueEmpty() && !isUpdatingPoints) {
     isUpdatingPoints = true;
     console.log("running lp points once in every 2 hours");
