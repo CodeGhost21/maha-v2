@@ -34,7 +34,7 @@ export const updateLPPointsHourly = async () => {
       throw new Error(`error while fetching wallet users, ${error}`);
     }
 
-    for (const user of batch) {
+    await Promise.all(batch.map (async (user)=> {
       let referredByUser = {} as IWalletUserModel;
       if (user.referredBy) {
         try {
@@ -158,7 +158,7 @@ export const updateLPPointsHourly = async () => {
           });
         }
       });
-    }
+    }))
 
     try {
       if (userBulkWrites.length > 0) {

@@ -118,7 +118,8 @@ export const supplyBorrowPointsGQL = async (
       { headers, timeout: 600000 }
     ); // 5 minute
     if (!data.data.data.userReserves) {
-      throw new Error("no reserves found for batch");
+      console.log(data.data.error);
+      throw new Error(`no reserves found for batch, ${data.data.error}`);
     }
     const result = data.data.data.userReserves;
 
