@@ -23,6 +23,7 @@ export const isQueueEmpty = () => {
 
 async function runNextTask(): Promise<void> {
   if (queue.length === 0) {
+    cache.set("cq:cronQueue",queue)
     return;
   }
   const task = queue[0];
