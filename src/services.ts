@@ -21,14 +21,14 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "55 00 * * *",
+  "05 1 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running zksyn lp points every day at 1 pm");
       await zksyncPPSCron();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
   );
 
 cron.schedule(
@@ -39,7 +39,7 @@ cron.schedule(
       await mantaPPSCron();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
 
 cron.schedule(
@@ -50,7 +50,7 @@ cron.schedule(
       await blastPPSCron();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
 
 cron.schedule(
@@ -61,7 +61,7 @@ cron.schedule(
       await ethereumLrtPPSCron();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
 
 cron.schedule(
@@ -72,7 +72,7 @@ cron.schedule(
       await lineaPPSCron();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
 
 cron.schedule(
@@ -83,7 +83,7 @@ cron.schedule(
       await xLayerPPSCron();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
 
 // -------------  Update Rank  -----------------
@@ -95,7 +95,7 @@ cron.schedule(
       await updateUsersRank();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
 
 // -------------  Add Users  -----------------
@@ -107,7 +107,7 @@ cron.schedule(
       await addUsers();
     });
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
 
 // -------------  Update LP Points hourly -----------------
@@ -123,5 +123,5 @@ cron.schedule(
       console.log("skipping update points hourly");
     }
   },
-  { timezone: "UTC" }
+  { timezone: "Asia/Kolkata" }
 );
