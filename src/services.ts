@@ -24,7 +24,7 @@ cron.schedule(
   "05 1 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running zksyn lp points every day at 1 pm");
+      console.log("running zksyn lp points every day at 1:05 am");
       await zksyncPPSCron();
     });
   },
@@ -32,22 +32,11 @@ cron.schedule(
   );
 
 cron.schedule(
-  "05 2 * * *",
+  "35 2 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running manta lp points every day at 2:30 pm");
+      console.log("running manta lp points every day at 2:35 am");
       await mantaPPSCron();
-    });
-  },
-  { timezone: "Asia/Kolkata" }
-);
-
-cron.schedule(
-  "05 3 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("running blast lp points every day at 4 pm");
-      await blastPPSCron();
     });
   },
   { timezone: "Asia/Kolkata" }
@@ -57,19 +46,19 @@ cron.schedule(
   "05 4 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running ethereumLrt lp points every day at 5:30 pm");
-      await ethereumLrtPPSCron();
+      console.log("running blast lp points every day at 4:05 am");
+      await blastPPSCron();
     });
   },
   { timezone: "Asia/Kolkata" }
 );
 
 cron.schedule(
-  "05 6 * * *",
+  "35 5 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running linea lp points every day at 7 pm");
-      await lineaPPSCron();
+      console.log("running ethereumLrt lp points every day at 5:35 am");
+      await ethereumLrtPPSCron();
     });
   },
   { timezone: "Asia/Kolkata" }
@@ -79,7 +68,18 @@ cron.schedule(
   "05 7 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running xLayer lp points every day at 8:30 pm");
+      console.log("running linea lp points every day at 7:05 am");
+      await lineaPPSCron();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
+
+cron.schedule(
+  "35 8 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("running xLayer lp points every day at 8:35 am");
       await xLayerPPSCron();
     });
   },
@@ -88,10 +88,10 @@ cron.schedule(
 
 // -------------  Update Rank  -----------------
 cron.schedule(
-  "05 8 * * *",
+  "05 10 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("updating rank every day at 10 pm");
+      console.log("updating rank every day at 10:05 am");
       await updateUsersRank();
     });
   },
@@ -100,10 +100,10 @@ cron.schedule(
 
 // -------------  Add Users  -----------------
 cron.schedule(
-  "05 9 * * *",
+  "35 11 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("adding new wallet users every day at 11:30 am");
+      console.log("adding new wallet users every day at 11:35 am");
       await addUsers();
     });
   },
@@ -116,7 +116,7 @@ cron.schedule(
   async () => {
     if (isQueueEmpty() && !isUpdatingPoints) {
       isUpdatingPoints = true;
-      console.log("running lp points once in every 2 hours");
+      console.log("running lp points once every hour");
       addToQueue(async () => await updateLPPointsHourly());
       isUpdatingPoints = false;
     } else {
