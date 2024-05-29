@@ -28,13 +28,13 @@ export const updateLPPointsHourly = async () => {
   do {
     try {
       batch = await WalletUserV2.find().skip(skip).limit(batchSize);
-      console.log("lpPointsHourly: processing batch: ",batchNo, ".number of users in batch: ", batch.length);
+      // console.log("lpPointsHourly: processing batch: ",batchNo, ".number of users in batch: ", batch.length);
       batchNo++;
     } catch (error) {
       throw new Error(`error while fetching wallet users, ${error}`);
     }
 
-    await Promise.all(batch.map (async (user)=> {
+    await Promise.all(batch.map(async (user) => {
       let referredByUser = {} as IWalletUserModel;
       if (user.referredBy) {
         try {
