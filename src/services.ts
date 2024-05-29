@@ -21,7 +21,7 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "25 22 * * *",
+  "30 00 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running zksyn lp points every day at 1:05 am");
@@ -94,7 +94,7 @@ cron.schedule(
 
 // -------------  Update Rank  -----------------
 cron.schedule(
-  "05 23 * * *",
+  "05 7 * * *",
   async () => {
     addToQueue(async () => {
       console.log("updating rank every day at 10:05 am");
@@ -106,7 +106,7 @@ cron.schedule(
 
 // -------------  Add Users  -----------------
 cron.schedule(
-  "05 00 * * *",
+  "05 9 * * *",
   async () => {
     addToQueue(async () => {
       console.log("adding new wallet users every day at 11:35 am");

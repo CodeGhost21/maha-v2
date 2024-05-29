@@ -156,7 +156,6 @@ export const assignPointsPerSecondToBatch = async (
         setObj[`epochs.${taskStake}`] = epoch;
       }
 
-
       if (latestPointsSupply) {
         const pointsPerSecondSupply: { [key: string]: number } = {};
         const supplyKeys = Object.keys(latestPointsSupply);
@@ -186,7 +185,6 @@ export const assignPointsPerSecondToBatch = async (
           setObj[`epochs.${taskBorrow}`] = epoch;
         }
       }
-
       userBulkWrites.push({
         updateOne: {
           filter: { _id: user.id },

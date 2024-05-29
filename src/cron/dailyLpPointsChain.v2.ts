@@ -66,8 +66,8 @@ const _processBatch = async (
       userBatch,
       pointsData,
       epoch,
-      borrowTask,
       supplyTask,
+      borrowTask,
       stakeTask
     );
     await dbExecutable?.execute();
@@ -145,7 +145,7 @@ const _dailyLpPointsChain = async (
   borrowTask: keyof IWalletUserPoints,
   stakeTask?: keyof IWalletUserPoints
 ) => {
-  if (lock[supplyTask]) return;
+  if (lock[supplyTask]) return; // not required
   lock[supplyTask] = true;
   try {
     const count = await WalletUserV2.count({});
