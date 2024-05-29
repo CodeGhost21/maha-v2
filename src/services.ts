@@ -106,7 +106,7 @@ cron.schedule(
 
 // -------------  Add Users  -----------------
 cron.schedule(
-  "05 24 * * *",
+  "05 00 * * *",
   async () => {
     addToQueue(async () => {
       console.log("adding new wallet users every day at 11:35 am");
