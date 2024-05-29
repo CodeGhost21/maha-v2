@@ -12,7 +12,7 @@ export const WalletUserSchemaV2 = new Schema(
     role: { type: String },
     epoch: { type: Number, default: 0 },
     points: { type: Object, default: {} },
-    pointsUpdateTimestamp: { type: Object, default: {} },
+    // pointsUpdateTimestamp: { type: Object, default: {} },
     pointsPerSecond: { type: Object, default: {} },
     pointsPerSecondUpdateTimestamp: { type: Object, default: {} },
     epochs: { type: Object, default: {} },

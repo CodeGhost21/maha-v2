@@ -27,6 +27,7 @@ import {
   apiEth,
   apiLinea,
   apiManta,
+  apiStakeLinea,
   apiXLayer,
   apiZKSync,
   blastMultiplier,
@@ -41,10 +42,11 @@ const _processBatch = async (
   api: string,
   userBatch: IWalletUserModel[],
   epoch: number,
+  p: AbstractProvider,
+  multiplier: Multiplier,
   supplyTask: keyof IWalletUserPoints,
   borrowTask: keyof IWalletUserPoints,
-  p: AbstractProvider,
-  multiplier: Multiplier
+  stakeTask?: keyof IWalletUserPoints
 ) => {
   try {
     const supplyBorrowData = await supplyBorrowPointsGQL(
@@ -53,8 +55,7 @@ const _processBatch = async (
       p,
       multiplier
     );
-    const stakingApi = "";
-    const stakeData = await votingPowerGQL(stakingApi, userBatch);
+    
     // update supply points
     const supplyExecutable = await assignPointsPerSecondToBatch(
       userBatch,
@@ -63,7 +64,7 @@ const _processBatch = async (
       epoch
     );
     await supplyExecutable?.execute();
-
+    
     // update borrow points
     const borrowExecutable = await assignPointsPerSecondToBatch(
       userBatch,
@@ -71,18 +72,24 @@ const _processBatch = async (
       borrowTask,
       epoch
     );
-
+    
     await borrowExecutable?.execute();
-
-    //update stakingPoints
-    const stakingExecutable = await assignPointsPerSecondToBatch(
-      userBatch,
-      stakeData,
-      "stakeLinea",
-      epoch
-    );
-
-    await stakingExecutable?.execute();
+    
+    if (stakeTask) {
+      //update stakingPoints
+      const stakeData = await votingPowerGQL(apiStakeLinea, userBatch);
+      console.log("stake data", stakeData);
+      if (stakeData.size) {
+        const stakingExecutable = await assignPointsPerSecondToBatch(
+          userBatch,
+          stakeData,
+          stakeTask,
+          epoch
+        );
+  
+        await stakingExecutable?.execute();
+    }
+    }
   } catch (error) {
     console.log(
       `processBatch error for ${supplyTask.substring(6)} chain`,
@@ -94,10 +101,11 @@ const _processBatch = async (
 const _dailyLpPoints = async (
   api: string,
   count: number,
+  p: AbstractProvider,
+  multiplier: Multiplier,
   supplyTask: keyof IWalletUserPoints,
   borrowTask: keyof IWalletUserPoints,
-  p: AbstractProvider,
-  multiplier: Multiplier
+  stakeTask?: keyof IWalletUserPoints
 ) => {
   const epoch = getEpoch();
   console.log("working with epoch", epoch);
@@ -118,15 +126,26 @@ const _dailyLpPoints = async (
         .select(["walletAddress", "totalPoints", "referredBy"]);
 
       console.log("working on batch", i);
-      await _processBatch(
-        api,
-        users,
-        epoch,
-        supplyTask,
-        borrowTask,
-        p,
-        multiplier
-      );
+      stakeTask
+        ? await _processBatch(
+            api,
+            users,
+            epoch,
+            p,
+            multiplier,
+            supplyTask,
+            borrowTask,
+            stakeTask
+          )
+        : await _processBatch(
+            api,
+            users,
+            epoch,
+            p,
+            multiplier,
+            supplyTask,
+            borrowTask,
+          );
     } catch (error) {
       console.log("error", error);
       console.log("failure working with batch", i);
@@ -139,16 +158,27 @@ const _dailyLpPoints = async (
 const lock: { [chain: string]: boolean } = {};
 const _dailyLpPointsChain = async (
   api: string,
+  p: AbstractProvider,
+  multiplier: Multiplier,
   supplyTask: keyof IWalletUserPoints,
   borrowTask: keyof IWalletUserPoints,
-  p: AbstractProvider,
-  multiplier: Multiplier
+  stakeTask?: keyof IWalletUserPoints
 ) => {
   if (lock[supplyTask]) return;
   lock[supplyTask] = true;
   try {
     const count = await WalletUserV2.count({});
-    await _dailyLpPoints(api, count, supplyTask, borrowTask, p, multiplier);
+    stakeTask
+      ? await _dailyLpPoints(
+          api,
+          count,
+          p,
+          multiplier,
+          supplyTask,
+          borrowTask,
+          stakeTask
+        )
+      : await _dailyLpPoints(api, count, p, multiplier, supplyTask, borrowTask);
   } catch (error) {
     console.log(supplyTask, "cron failed because of", error);
   }
@@ -159,10 +189,10 @@ const _dailyLpPointsChain = async (
 export const mantaPPSCron = async () => {
   return _dailyLpPointsChain(
     apiManta,
-    "supplyManta",
-    "borrowManta",
     mantaProvider,
-    mantaMultiplier
+    mantaMultiplier,
+    "supplyManta",
+    "borrowManta"
   );
 };
 
@@ -170,10 +200,10 @@ export const mantaPPSCron = async () => {
 export const zksyncPPSCron = async () => {
   return _dailyLpPointsChain(
     apiZKSync,
-    "supplyZkSync",
-    "borrowZkSync",
     zksyncProvider,
-    zksyncMultiplier
+    zksyncMultiplier,
+    "supplyZkSync",
+    "borrowZkSync"
   );
 };
 
@@ -181,10 +211,10 @@ export const zksyncPPSCron = async () => {
 export const blastPPSCron = async () => {
   return _dailyLpPointsChain(
     apiBlast,
-    "supplyBlast",
-    "borrowBlast",
     blastProvider,
-    blastMultiplier
+    blastMultiplier,
+    "supplyBlast",
+    "borrowBlast"
   );
 };
 
@@ -192,10 +222,11 @@ export const blastPPSCron = async () => {
 export const lineaPPSCron = async () => {
   return _dailyLpPointsChain(
     apiLinea,
+    lineaProvider,
+    lineaMultiplier,
     "supplyLinea",
     "borrowLinea",
-    lineaProvider,
-    lineaMultiplier
+    "stakeLinea"
   );
 };
 
@@ -203,10 +234,10 @@ export const lineaPPSCron = async () => {
 export const ethereumLrtPPSCron = async () => {
   return _dailyLpPointsChain(
     apiEth,
-    "supplyEthereumLrt",
-    "borrowEthereumLrt",
     ethLrtProvider,
-    ethLrtMultiplier
+    ethLrtMultiplier,
+    "supplyEthereumLrt",
+    "borrowEthereumLrt"
   );
 };
 
@@ -214,9 +245,9 @@ export const ethereumLrtPPSCron = async () => {
 export const xLayerPPSCron = async () => {
   return _dailyLpPointsChain(
     apiXLayer,
-    "supplyXLayer",
-    "borrowXLayer",
     xLayerProvider,
-    xlayerMultiplier
+    xlayerMultiplier,
+    "supplyXLayer",
+    "borrowXLayer"
   );
 };

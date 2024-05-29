@@ -103,7 +103,7 @@ export const updateLPPointsHourly = async () => {
                       totalPoints: referralPoints,
                     },
                     $set: {
-                      ["pointsUpdateTimestamp.referral"]: Date.now(),
+                      ["pointsPerSecondUpdateTimestamp.referral"]: Date.now(),
                     },
                   },
                 },
@@ -180,7 +180,7 @@ export const updateLPPointsHourly = async () => {
                       totalPoints: _referralPoints,
                     },
                     $set: {
-                      ["pointsUpdateTimestamp.referral"]: Date.now(),
+                      ["pointsPerSecondUpdateTimestamp.referral"]: Date.now(),
                     },
                   },
                 },

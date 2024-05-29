@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import nconf from "nconf";
 
 mongoose.set("strictQuery", false);
-mongoose.set("debug", nconf.get("NODE_ENV") === "development");
+mongoose.set("debug", false);
 
 export const open = () => {
   return new Promise<void>((resolve) => {

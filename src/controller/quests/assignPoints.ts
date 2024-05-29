@@ -23,7 +23,11 @@ export const assignPoints = async (
   taskId: keyof IWalletUserPoints,
   epoch?: number
 ): Promise<IAssignPointsTask | undefined> => {
-  if (taskId.startsWith("supply") || taskId.startsWith("borrow")) {
+  if (
+    taskId.startsWith("supply") ||
+    taskId.startsWith("borrow") ||
+    taskId.startsWith("stake")
+  ) {
     throw Error("Cannot assign LP points");
   }
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
@@ -66,7 +70,7 @@ export const assignPoints = async (
               totalPoints: referralPoints,
             },
             $set: {
-              ["pointsUpdateTimestamp.referral"]: Date.now(),
+              ["pointsPerSecondUpdateTimestamp.referral"]: Date.now(),
             },
           },
         },
@@ -97,7 +101,7 @@ export const assignPoints = async (
         },
         $set: {
           epoch: epoch || user.epoch,
-          [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
+          [`pointsPerSecondUpdateTimestamp.${taskId}`]: Date.now(),
         },
       },
     },
@@ -128,8 +132,8 @@ export const assignPointsPerSecondToBatch = async (
       const latestPoints = pointsData.get(user.walletAddress);
 
       if (task.startsWith("stake")) {
-        if (!latestPoints.Balance) {
-          const stakePointsPersecond = latestPoints.Balance / 86400;
+        if (latestPoints) {
+          const stakePointsPersecond = latestPoints / 86400;
           userBulkWrites.push({
             updateOne: {
               filter: { _id: user.id },

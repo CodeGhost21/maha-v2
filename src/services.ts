@@ -19,72 +19,91 @@ open();
 let isUpdatingPoints = false;
 console.log("starting");
 
+async function retry(fn : any, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 // -------------  Update LP Rate  -----------------
-cron.schedule(
-  "05 12 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("running zksyn lp points every day at 1:05 am");
-      await zksyncPPSCron();
-    });
-  },
-  { timezone: "Asia/Kolkata" }
-);
-
-cron.schedule(
-  "35 14 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("running manta lp points every day at 2:35 am");
-      await mantaPPSCron();
-    });
-  },
-  { timezone: "Asia/Kolkata" }
-);
-
-cron.schedule(
-  "05 16 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("running blast lp points every day at 4:05 am");
-      await blastPPSCron();
-    });
-  },
-  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
-);
-
-cron.schedule(
-  "35 17 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("running ethereumLrt lp points every day at 5:35 am");
-      await ethereumLrtPPSCron();
-    });
-  },
-  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
-);
-
-cron.schedule(
-  "05 19 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("running linea lp points every day at 7:05 am");
-      await lineaPPSCron();
-    });
-  },
-  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
-);
-
 cron.schedule(
   "35 20 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running xLayer lp points every day at 8:35 am");
-      await xLayerPPSCron();
+      console.log("running zksyn lp points every day at 1:05 am");
+      await Promise.all([
+        retry(zksyncPPSCron),
+        retry(mantaPPSCron),
+        retry(blastPPSCron),
+        retry(ethereumLrtPPSCron),
+        retry(lineaPPSCron),
+        retry(xLayerPPSCron),
+      ]);
     });
   },
-  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+  { timezone: "Asia/Kolkata" }
 );
+
+// cron.schedule(
+//   "35 14 * * *",
+//   async () => {
+//     addToQueue(async () => {
+//       console.log("running manta lp points every day at 2:35 am");
+//       await mantaPPSCron();
+//     });
+//   },
+//   { timezone: "Asia/Kolkata" }
+// );
+
+// cron.schedule(
+//   "05 16 * * *",
+//   async () => {
+//     addToQueue(async () => {
+//       console.log("running blast lp points every day at 4:05 am");
+//       await blastPPSCron();
+//     });
+//   },
+//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+// );
+
+// cron.schedule(
+//   "35 17 * * *",
+//   async () => {
+//     addToQueue(async () => {
+//       console.log("running ethereumLrt lp points every day at 5:35 am");
+//       await ethereumLrtPPSCron();
+//     });
+//   },
+//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+// );
+
+// cron.schedule(
+//   "05 19 * * *",
+//   async () => {
+//     addToQueue(async () => {
+//       console.log("running linea lp points every day at 7:05 am");
+//       await lineaPPSCron();
+//     });
+//   },
+//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+// );
+
+// cron.schedule(
+//   "35 20 * * *",
+//   async () => {
+//     addToQueue(async () => {
+//       console.log("running xLayer lp points every day at 8:35 am");
+//       await xLayerPPSCron();
+//     });
+//   },
+//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+// );
+
 
 // -------------  Update Rank  -----------------
 cron.schedule(
@@ -95,7 +114,7 @@ cron.schedule(
       await updateUsersRank();
     });
   },
-  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+  { timezone: "Asia/Kolkata" }
 );
 
 // -------------  Add Users  -----------------
@@ -123,5 +142,5 @@ cron.schedule(
       console.log("skipping update points hourly");
     }
   },
-  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+  { timezone: "Asia/Kolkata" }
 );

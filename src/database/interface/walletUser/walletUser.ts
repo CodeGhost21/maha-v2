@@ -11,7 +11,7 @@ export interface IWalletUser {
   role: string;
   epoch: number;
   points: IWalletUserPoints;
-  pointsUpdateTimestamp: IWalletUserPoints;
+  // pointsUpdateTimestamp: IWalletUserPoints;
   pointsPerSecond: IWalletUserPoints;
   pointsPerSecondUpdateTimestamp: IWalletUserPoints;
   epochs: IEpoch;

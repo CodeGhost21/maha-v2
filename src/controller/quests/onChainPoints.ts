@@ -201,16 +201,13 @@ export const userLpData = async (walletAddress: string) => {
 
 export const votingPowerGQL = async (
   api: string,
-  userBatch: IWalletUserModel[],
-  // p: AbstractProvider,
-  // multiplier: Multiplier
+  userBatch: IWalletUserModel[]
 ) => {
   try {
     let marketPrice: any = await cache.get("coingecko:PriceList");
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }
-    // const currentBlock = await p.getBlockNumber();
 
     const graphQuery = `query {
       tokenBalances(where: {id_in: [${userBatch.map(
@@ -233,9 +230,11 @@ export const votingPowerGQL = async (
 
     const tokenBalances = new Map();
 
-    result.forEach((user: any) => {
-      tokenBalances.set(user.id, (user.balance / zeroveDenom));
-    });
+    if (result.length) {
+      result.forEach((user: any) => {
+        tokenBalances.set(user.id, user.balance / zeroveDenom);
+      });
+    }
     /**
      * {
         "data": {
@@ -251,7 +250,7 @@ export const votingPowerGQL = async (
               "balance": "1592157985540334855403"
         },
      */
-    console.log(tokenBalances);
+    // console.log(tokenBalances);
     return tokenBalances;
   } catch (error) {
     console.log("error while fetching stake data");
