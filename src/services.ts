@@ -21,7 +21,7 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "05 22 * * *",
+  "20 22 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running zksyn lp points every day at 1:05 am");
