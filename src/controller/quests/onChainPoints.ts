@@ -80,11 +80,11 @@ export const supplyBorrowPointsGQL = async (
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }
-    const currentBlock = await p.getBlockNumber();
+    // const currentBlock = await p.getBlockNumber();
+    // block: {number: ${currentBlock - 5}},
 
     const graphQuery = `query {
       userReserves(
-        block: {number: ${currentBlock - 5}},
         where: {
           and: [
             {
@@ -116,8 +116,12 @@ export const supplyBorrowPointsGQL = async (
     const data = await axios.post(
       api,
       { query: graphQuery },
-      { headers, timeout: 300000 }
+      { headers, timeout: 600000 }
     ); // 5 minute
+    if (!data.data.data.userReserves) {
+      console.log(data.data.error);
+      throw new Error(`no reserves found for batch, ${data.data.error}`);
+    }
     const result = data.data.data.userReserves;
 
     const supply = new Map();

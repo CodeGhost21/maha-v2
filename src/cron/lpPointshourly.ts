@@ -24,14 +24,17 @@ export const updateLPPointsHourly = async () => {
 
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrite: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
+  let batchNo = 0;
   do {
     try {
       batch = await WalletUserV2.find().skip(skip).limit(batchSize);
+      console.log("lpPointsHourly: processing batch: ",batchNo, ".number of users in batch: ", batch.length);
+      batchNo++;
     } catch (error) {
       throw new Error(`error while fetching wallet users, ${error}`);
     }
 
-    for (const user of batch) {
+    await Promise.all(batch.map (async (user)=> {
       let referredByUser = {} as IWalletUserModel;
       if (user.referredBy) {
         try {
@@ -227,7 +230,7 @@ export const updateLPPointsHourly = async () => {
           }
         }
       });
-    }
+    }))
 
     try {
       if (userBulkWrites.length > 0) {

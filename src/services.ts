@@ -20,78 +20,108 @@ let isUpdatingPoints = false;
 console.log("starting");
 
 // -------------  Update LP Rate  -----------------
-cron.schedule("0 1 * * *", async () => {
-  await addToQueue(async () => {
-    console.log("running zksyn lp points every day at 1 am");
-    await zksyncPPSCron();
-    await updateLPPointsHourly();
-  });
-});
+cron.schedule(
+  "05 1 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("running zksyn lp points every day at 1:05 am");
+      await zksyncPPSCron();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+  );
 
-cron.schedule("30 2 * * *", async () => {
-  await addToQueue(async () => {
-    console.log("running manta lp points every day at 2:30 am");
-    await mantaPPSCron();
-    await updateLPPointsHourly();
-  });
-});
+cron.schedule(
+  "35 2 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("running manta lp points every day at 2:35 am");
+      await mantaPPSCron();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
 
-cron.schedule("0 4 * * *", async () => {
-  await addToQueue(async () => {
-    console.log("running blast lp points every day at 4 am");
-    await blastPPSCron();
-    await updateLPPointsHourly();
-  });
-});
+cron.schedule(
+  "05 4 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("running blast lp points every day at 4:05 am");
+      await blastPPSCron();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
 
-cron.schedule("30 5 * * *", async () => {
-  await addToQueue(async () => {
-    console.log("running ethereumLrt lp points every day at 5:30 am");
-    await ethereumLrtPPSCron();
-    await updateLPPointsHourly();
-  });
-});
+cron.schedule(
+  "35 5 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("running ethereumLrt lp points every day at 5:35 am");
+      await ethereumLrtPPSCron();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
 
-cron.schedule("0 7 * * *", async () => {
-  await addToQueue(async () => {
-    console.log("running linea lp points every day at 7 am");
-    await lineaPPSCron();
-    await updateLPPointsHourly();
-  });
-});
+cron.schedule(
+  "05 7 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("running linea lp points every day at 7:05 am");
+      await lineaPPSCron();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
 
-cron.schedule("30 8 * * *", async () => {
-  await addToQueue(async () => {
-    console.log("running xLayer lp points every day at 8:30 am");
-    await xLayerPPSCron();
-    await updateLPPointsHourly();
-  });
-});
+cron.schedule(
+  "35 8 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("running xLayer lp points every day at 8:35 am");
+      await xLayerPPSCron();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
 
 // -------------  Update Rank  -----------------
-cron.schedule("0 10 * * *", () => {
-  addToQueue(async () => {
-    console.log("updating rank every day at 10 am");
-    await updateUsersRank();
-  });
-});
+cron.schedule(
+  "05 10 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("updating rank every day at 10:05 am");
+      await updateUsersRank();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
 
 // -------------  Add Users  -----------------
-cron.schedule("30 11 * * *", async () => {
-  await addToQueue(async () => {
-    console.log("adding new wallet users every day at 11:30 am");
-    await addUsers();
-  });
-});
+cron.schedule(
+  "35 11 * * *",
+  async () => {
+    addToQueue(async () => {
+      console.log("adding new wallet users every day at 11:35 am");
+      await addUsers();
+    });
+  },
+  { timezone: "Asia/Kolkata" }
+);
 
 // -------------  Update LP Points hourly -----------------
-cron.schedule("*/60 * * * *", async () => {
-  if (isQueueEmpty() && !isUpdatingPoints) {
-    isUpdatingPoints = true;
-    console.log("running lp points every 1 hour");
-    addToQueue(async () => await updateLPPointsHourly());
-    isUpdatingPoints = false;
-  } else {
-    console.log("skipping update points hourly");
-  }
-});
+cron.schedule(
+  "*/59 * * * *",
+  async () => {
+    if (isQueueEmpty() && !isUpdatingPoints) {
+      isUpdatingPoints = true;
+      console.log("running lp points once every hour");
+      addToQueue(async () => await updateLPPointsHourly());
+      isUpdatingPoints = false;
+    } else {
+      console.log("skipping update points hourly");
+    }
+  },
+  { timezone: "Asia/Kolkata" }
+);
