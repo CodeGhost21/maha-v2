@@ -15,6 +15,12 @@ export interface IAssignPointsTask {
   execute: () => Promise<void>;
 }
 
+export interface PointsData {
+  supply: Map<any, any>;
+  borrow: Map<any, any>;
+  stake?: Map<any, any>;
+}
+
 export const assignPoints = async (
   user: IWalletUserModel,
   points: number,
@@ -116,62 +122,79 @@ export const assignPoints = async (
   };
 };
 
-//need to fix this to assign points per second
 export const assignPointsPerSecondToBatch = async (
   users: IWalletUserModel[],
-  pointsData: Map<any, any>,
-  task: string,
-  epoch: number
+  pointsData: PointsData,
+  epoch: number,
+  taskSupply: string,
+  taskBorrow: string,
+  taskStake?: string
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   if (!users || !users.length) return;
 
   users
-    .filter((user) => pointsData.has(user.walletAddress))
+    .filter(
+      (user) =>
+        pointsData.supply.has(user.walletAddress) ||
+        pointsData.borrow.has(user.walletAddress) ||
+        (pointsData.stake ? pointsData.stake.has(user.walletAddress) : false)
+    )
     .forEach((user) => {
-      const latestPoints = pointsData.get(user.walletAddress);
+      const latestPointsSupply = pointsData.supply.get(user.walletAddress);
+      const latestPointsBorrow = pointsData.borrow.get(user.walletAddress);
 
-      if (task.startsWith("stake")) {
-        if (latestPoints) {
-          const stakePointsPersecond = latestPoints / 86400;
-          userBulkWrites.push({
-            updateOne: {
-              filter: { _id: user.id },
-              update: {
-                $set: {
-                  [`pointsPerSecond.${task}`]: stakePointsPersecond,
-                  [`epochs.${task}`]: epoch,
-                },
-              },
-            },
-          });
+      const setObj: any = {};
+      let stakePointsPerSecond = 0;
+
+      if (pointsData.stake && taskStake && taskStake.startsWith("stake")) {
+        const latestPointsStake = pointsData.stake.get(user.walletAddress);
+        if (latestPointsStake) {
+          stakePointsPerSecond = latestPointsStake / 86400;
         }
-      } else {
-        const Keys = Object.keys(latestPoints);
+        setObj[`pointsPerSecond.${taskStake}`] = stakePointsPerSecond;
+        setObj[`epochs.${taskStake}`] = epoch;
+      }
 
-        const pointsPerSecond: { [key: string]: number } = {};
 
-        if (Keys.length) {
-          Keys.forEach((key) => {
-            latestPoints[key]
-              ? (pointsPerSecond[`${key}`] = latestPoints[key] / 86400)
+      if (latestPointsSupply) {
+        const pointsPerSecondSupply: { [key: string]: number } = {};
+        const supplyKeys = Object.keys(latestPointsSupply);
+        if (supplyKeys.length) {
+          supplyKeys.forEach((key) => {
+            latestPointsSupply[key]
+              ? (pointsPerSecondSupply[`${key}`] =
+                  latestPointsSupply[key] / 86400)
               : "";
           });
-        }
-        if (Object.keys(pointsPerSecond).length) {
-          userBulkWrites.push({
-            updateOne: {
-              filter: { _id: user.id },
-              update: {
-                $set: {
-                  [`pointsPerSecond.${task}`]: pointsPerSecond,
-                  [`epochs.${task}`]: epoch,
-                },
-              },
-            },
-          });
+          setObj[`pointsPerSecond.${taskSupply}`] = pointsPerSecondSupply;
+          setObj[`epochs.${taskSupply}`] = epoch;
         }
       }
+
+      if (latestPointsBorrow) {
+        const pointsPerSecondBorrow: { [key: string]: number } = {};
+        const borrowKeys = Object.keys(latestPointsBorrow);
+        if (borrowKeys.length) {
+          borrowKeys.forEach((key) => {
+            latestPointsBorrow[key]
+              ? (pointsPerSecondBorrow[`${key}`] =
+                  latestPointsBorrow[key] / 86400)
+              : "";
+          });
+          setObj[`pointsPerSecond.${taskBorrow}`] = pointsPerSecondBorrow;
+          setObj[`epochs.${taskBorrow}`] = epoch;
+        }
+      }
+
+      userBulkWrites.push({
+        updateOne: {
+          filter: { _id: user.id },
+          update: {
+            $set: setObj,
+          },
+        },
+      });
     });
 
   return {

@@ -19,31 +19,18 @@ open();
 let isUpdatingPoints = false;
 console.log("starting");
 
-async function retry(fn : any, retries = 3, delay = 1000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await fn();
-    } catch (error) {
-      if (i === retries - 1) throw error;
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-}
-
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "35 20 * * *",
+  "05 22 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running zksyn lp points every day at 1:05 am");
-      await Promise.all([
-        retry(zksyncPPSCron),
-        retry(mantaPPSCron),
-        retry(blastPPSCron),
-        retry(ethereumLrtPPSCron),
-        retry(lineaPPSCron),
-        retry(xLayerPPSCron),
-      ]);
+        await zksyncPPSCron(),
+        await mantaPPSCron(),
+        await blastPPSCron(),
+        await ethereumLrtPPSCron(),
+        await lineaPPSCron(),
+        await xLayerPPSCron()
     });
   },
   { timezone: "Asia/Kolkata" }
@@ -107,7 +94,7 @@ cron.schedule(
 
 // -------------  Update Rank  -----------------
 cron.schedule(
-  "05 22 * * *",
+  "05 23 * * *",
   async () => {
     addToQueue(async () => {
       console.log("updating rank every day at 10:05 am");
@@ -119,14 +106,14 @@ cron.schedule(
 
 // -------------  Add Users  -----------------
 cron.schedule(
-  "35 21 * * *",
+  "05 24 * * *",
   async () => {
     addToQueue(async () => {
       console.log("adding new wallet users every day at 11:35 am");
       await addUsers();
     });
   },
-  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
+  { timezone: "Asia/Kolkata"}
 );
 
 // -------------  Update LP Points hourly -----------------

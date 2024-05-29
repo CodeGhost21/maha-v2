@@ -7,6 +7,7 @@ import { getEpoch } from "../utils/epoch";
 import { AbstractProvider } from "ethers";
 import {
   IAssignPointsTask,
+  PointsData,
   assignPointsPerSecondToBatch,
 } from "../controller/quests/assignPoints";
 import {
@@ -49,47 +50,27 @@ const _processBatch = async (
   stakeTask?: keyof IWalletUserPoints
 ) => {
   try {
-    const supplyBorrowData = await supplyBorrowPointsGQL(
+    const pointsData: PointsData = await supplyBorrowPointsGQL(
       api,
       userBatch,
       p,
       multiplier
     );
-    
-    // update supply points
-    const supplyExecutable = await assignPointsPerSecondToBatch(
-      userBatch,
-      supplyBorrowData.supply,
-      supplyTask,
-      epoch
-    );
-    await supplyExecutable?.execute();
-    
-    // update borrow points
-    const borrowExecutable = await assignPointsPerSecondToBatch(
-      userBatch,
-      supplyBorrowData.borrow,
-      borrowTask,
-      epoch
-    );
-    
-    await borrowExecutable?.execute();
-    
+
     if (stakeTask) {
-      //update stakingPoints
       const stakeData = await votingPowerGQL(apiStakeLinea, userBatch);
-      console.log("stake data", stakeData);
-      if (stakeData.size) {
-        const stakingExecutable = await assignPointsPerSecondToBatch(
-          userBatch,
-          stakeData,
-          stakeTask,
-          epoch
-        );
-  
-        await stakingExecutable?.execute();
+      pointsData.stake = stakeData;
     }
-    }
+    // update supply borrow and stake points
+    const dbExecutable = await assignPointsPerSecondToBatch(
+      userBatch,
+      pointsData,
+      epoch,
+      borrowTask,
+      supplyTask,
+      stakeTask
+    );
+    await dbExecutable?.execute();
   } catch (error) {
     console.log(
       `processBatch error for ${supplyTask.substring(6)} chain`,
@@ -144,7 +125,7 @@ const _dailyLpPoints = async (
             p,
             multiplier,
             supplyTask,
-            borrowTask,
+            borrowTask
           );
     } catch (error) {
       console.log("error", error);
