@@ -21,7 +21,7 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "05 1 * * *",
+  "05 12 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running zksyn lp points every day at 1:05 am");
@@ -29,10 +29,10 @@ cron.schedule(
     });
   },
   { timezone: "Asia/Kolkata" }
-  );
+);
 
 cron.schedule(
-  "35 2 * * *",
+  "35 14 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running manta lp points every day at 2:35 am");
@@ -43,71 +43,71 @@ cron.schedule(
 );
 
 cron.schedule(
-  "05 4 * * *",
+  "05 16 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running blast lp points every day at 4:05 am");
       await blastPPSCron();
     });
   },
-  { timezone: "Asia/Kolkata" }
+  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
 );
 
 cron.schedule(
-  "35 5 * * *",
+  "35 17 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running ethereumLrt lp points every day at 5:35 am");
       await ethereumLrtPPSCron();
     });
   },
-  { timezone: "Asia/Kolkata" }
+  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
 );
 
 cron.schedule(
-  "05 7 * * *",
+  "05 19 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running linea lp points every day at 7:05 am");
       await lineaPPSCron();
     });
   },
-  { timezone: "Asia/Kolkata" }
+  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
 );
 
 cron.schedule(
-  "35 8 * * *",
+  "35 20 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running xLayer lp points every day at 8:35 am");
       await xLayerPPSCron();
     });
   },
-  { timezone: "Asia/Kolkata" }
+  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
 );
 
 // -------------  Update Rank  -----------------
 cron.schedule(
-  "05 10 * * *",
+  "05 22 * * *",
   async () => {
     addToQueue(async () => {
       console.log("updating rank every day at 10:05 am");
       await updateUsersRank();
     });
   },
-  { timezone: "Asia/Kolkata" }
+  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
 );
 
 // -------------  Add Users  -----------------
 cron.schedule(
-  "35 11 * * *",
+  "35 21 * * *",
   async () => {
     addToQueue(async () => {
       console.log("adding new wallet users every day at 11:35 am");
       await addUsers();
     });
   },
-  { timezone: "Asia/Kolkata" }
+  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
 );
 
 // -------------  Update LP Points hourly -----------------
@@ -123,5 +123,5 @@ cron.schedule(
       console.log("skipping update points hourly");
     }
   },
-  { timezone: "Asia/Kolkata" }
+  { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
 );
