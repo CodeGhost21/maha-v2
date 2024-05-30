@@ -12,7 +12,7 @@ export interface IAsset {
   rseth?: number; //done
   wrseth?: number; //done
   pufeth?: number; //done
-  grai?: number;
+  grai?: number; //done
   wbtc?: number; //done
   weeth?: number; //done
   sweth?: number; //done
@@ -28,5 +28,5 @@ export interface IAsset {
   stone?: number; //done
   tia?: number; //done
   wusdm?: number; //done
-  ethfi?:number;
+  ethfi?: number;//done
 }

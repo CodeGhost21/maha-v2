@@ -43,7 +43,7 @@ export const getPriceCoinGecko = async () => {
       pufeth: data.data.pufeth.usd,
       grai: data.data.grai.usd,
       wbtc: data.data["wrapped-bitcoin"].usd,
-      weeth: data.data["wrapped-eeth"],
+      weeth: data.data["wrapped-eeth"].usd,
       sweth: data.data.sweth.usd,
       weth: data.data.weth.usd,
       wokb: data.data.okb.usd,
@@ -57,9 +57,12 @@ export const getPriceCoinGecko = async () => {
       stone: data.data["stakestone-ether"].usd,
       tia: data.data.celestia.usd,
       wusdm: 1, //data.data["wrapped-usdm"].usd, //price not listed on coingecko
-
+      ethfi: data.data["ether-fi"].usd,
       zerolend: data.data.zerolend.usd,
     };
+
+    console.log(priceList);
+
     cache.set("coingecko:PriceList", priceList, 60 * 60);
 
     return priceList;
@@ -212,8 +215,8 @@ export const votingPowerGQL = async (
 
     const graphQuery = `query {
       tokenBalances(where: {id_in: [${userBatch.map(
-        (u) => `"${u.walletAddress}"`
-      )}]}) {
+      (u) => `"${u.walletAddress}"`
+    )}]}) {
         id
         balance
       }

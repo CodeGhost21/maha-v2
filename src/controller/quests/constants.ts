@@ -181,14 +181,13 @@ export const assetDenomination = {
   stone: 1e18, //done
   tia: 1e18, //no
   wusdm: 1e18, //done
-  ethfi:1e18,
+  ethfi: 1e18,
 };
 
 export const coingeckoIds = [
   "ethereum",
   "renzo-restaked-eth",
   "kelp-dao-restaked-eth",
-  "zerolend",
   "pufeth",
   "grai",
   "wrapped-bitcoin",
@@ -206,4 +205,6 @@ export const coingeckoIds = [
   "stakestone-ether",
   "celestia",
   "wrapped-usdm",
+  "ether-fi",
+  "zerolend",
 ];
