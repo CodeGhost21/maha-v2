@@ -24,9 +24,6 @@ export interface Multiplier {
   lidoSupply?: number; // 2x on zksync
   ezethSupply?: number; //2x all chains
   ethfiSupply?: number; //2x all chains
-  daiSupply?: number; //2x all chains
-  usdtSupply?: number; //2x all chains
-  usdcSupply?: number; //2x all chains
   rsethSupply?: number; //2x all chains
   wrsethSupply?: number; //2x all chains
 }
@@ -39,9 +36,6 @@ export const ethLrtMultiplier: Multiplier = {
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
-  daiSupply: 2,
-  usdtSupply: 2,
-  usdcSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
 };
@@ -53,9 +47,6 @@ export const zksyncMultiplier: Multiplier = {
   lidoSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
-  daiSupply: 2,
-  usdtSupply: 2,
-  usdcSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
 };
@@ -66,9 +57,6 @@ export const blastMultiplier: Multiplier = {
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
-  daiSupply: 2,
-  usdtSupply: 2,
-  usdcSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
 };
@@ -79,9 +67,6 @@ export const lineaMultiplier: Multiplier = {
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
-  daiSupply: 2,
-  usdtSupply: 2,
-  usdcSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
 };
@@ -92,9 +77,6 @@ export const mantaMultiplier: Multiplier = {
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
-  daiSupply: 2,
-  usdtSupply: 2,
-  usdcSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
 };
@@ -105,9 +87,6 @@ export const xlayerMultiplier: Multiplier = {
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
-  daiSupply: 2,
-  usdtSupply: 2,
-  usdcSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
 };
