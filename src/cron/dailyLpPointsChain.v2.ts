@@ -59,7 +59,11 @@ const _processBatch = async (
     );
 
     if (stakeTask) {
-      const stakeData = await votingPowerGQL(apiStakeLinea, userBatch, stakeZeroMultiplier);
+      const stakeData = await votingPowerGQL(
+        apiStakeLinea,
+        userBatch,
+        stakeZeroMultiplier
+      );
       pointsData.stake = stakeData;
     }
     // update supply borrow and stake points
@@ -146,7 +150,7 @@ const _dailyLpPointsChain = async (
   borrowTask: keyof IWalletUserPoints,
   stakeTask?: keyof IWalletUserPoints
 ) => {
-  if (lock[supplyTask]) return; // not required
+  if (lock[supplyTask]) return;
   lock[supplyTask] = true;
   try {
     const count = await WalletUserV2.count({});
@@ -169,6 +173,7 @@ const _dailyLpPointsChain = async (
 
 // manta
 export const mantaPPSCron = async () => {
+  console.log("starting Manta points per second calculations");
   return _dailyLpPointsChain(
     apiManta,
     mantaProvider,
@@ -180,6 +185,7 @@ export const mantaPPSCron = async () => {
 
 // zksync
 export const zksyncPPSCron = async () => {
+  console.log("starting ZkSync points per second calculations");
   return _dailyLpPointsChain(
     apiZKSync,
     zksyncProvider,
@@ -191,6 +197,7 @@ export const zksyncPPSCron = async () => {
 
 // blast
 export const blastPPSCron = async () => {
+  console.log("starting Blast points per second calculations");
   return _dailyLpPointsChain(
     apiBlast,
     blastProvider,
@@ -202,6 +209,7 @@ export const blastPPSCron = async () => {
 
 // linea
 export const lineaPPSCron = async () => {
+  console.log("starting Linea points per second calculations");
   return _dailyLpPointsChain(
     apiLinea,
     lineaProvider,
@@ -214,6 +222,7 @@ export const lineaPPSCron = async () => {
 
 // etherum Lrt
 export const ethereumLrtPPSCron = async () => {
+  console.log("starting EthereumLrt points per second calculations");
   return _dailyLpPointsChain(
     apiEth,
     ethLrtProvider,
@@ -225,6 +234,7 @@ export const ethereumLrtPPSCron = async () => {
 
 // xlayer
 export const xLayerPPSCron = async () => {
+  console.log("starting XLayer points per second calculations");
   return _dailyLpPointsChain(
     apiXLayer,
     xLayerProvider,

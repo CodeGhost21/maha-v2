@@ -238,7 +238,7 @@ export const votingPowerGQL = async (
       result.forEach((user: any) => {
         tokenBalances.set(
           user.id,
-          (user.balance / zeroveDenom) * marketPrice.vezero * multiplier
+          (user.balance / zeroveDenom) * marketPrice.zerolend * multiplier
         );
       });
     }

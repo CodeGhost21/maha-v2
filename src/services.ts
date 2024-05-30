@@ -24,7 +24,7 @@ cron.schedule(
   "30 00 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running zksyn lp points every day at 1:05 am");
+      console.log("running lp points every day at 12:30 am");
         await zksyncPPSCron(),
         await mantaPPSCron(),
         await blastPPSCron(),
@@ -97,7 +97,7 @@ cron.schedule(
   "05 7 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("updating rank every day at 10:05 am");
+      console.log("updating rank every day at 7:05 am");
       await updateUsersRank();
     });
   },
@@ -109,7 +109,7 @@ cron.schedule(
   "05 9 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("adding new wallet users every day at 11:35 am");
+      console.log("adding new wallet users every day at 9:05 am");
       await addUsers();
     });
   },

@@ -226,8 +226,9 @@ export const userInfo = async (req: Request, res: Response) => {
     const pointsTotal = getTotalSupplyBorrowPoints(user);
     const userData = {
       rank: user.rank,
-      referralPoints: user.points.referral || 0,
+      referralPoints: user.points.referral ?? 0,
       totalPoints: user.totalPoints,
+      stakeZeroPoints: user.points.stakeZero ?? 0,
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
     };

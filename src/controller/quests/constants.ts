@@ -18,69 +18,100 @@ export const stakePtsPerCake = 0.25;
 export const stakePtsPerMAHA = 1000;
 
 export interface Multiplier {
-  defaultSupply: number;
-  defaultBorrow: number;
-  ethSupply?: number;
-  ethBorrow?: number;
-  esethSupply?: number;
-  lidoSupply?: number;
-  ezethSupply?: number;
-  ethfiSupply?: number;
+  defaultSupply: number; // 1x
+  defaultBorrow: number; // 3x
+  ethSupply?: number; //2x all chains
+  lidoSupply?: number; // 2x on zksync
+  ezethSupply?: number; //2x all chains
+  ethfiSupply?: number; //2x all chains
+  daiSupply?: number; //2x all chains
+  usdtSupply?: number; //2x all chains
+  usdcSupply?: number; //2x all chains
+  rsethSupply?: number; //2x all chains
+  wrsethSupply?: number; //2x all chains
 }
 
-// 2x for ETH on all markets - Supply
-// 1x for all other assets - Supply
-// 4x for all assets including ETH - Borrow
+export const stakeZeroMultiplier = 1.5;
+
 export const ethLrtMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 4,
+  defaultBorrow: 3,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
+  daiSupply: 2,
+  usdtSupply: 2,
+  usdcSupply: 2,
+  rsethSupply: 2,
+  wrsethSupply: 2,
 };
 
 export const zksyncMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 4,
+  defaultBorrow: 3,
   ethSupply: 2,
   lidoSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
+  daiSupply: 2,
+  usdtSupply: 2,
+  usdcSupply: 2,
+  rsethSupply: 2,
+  wrsethSupply: 2,
 };
 
 export const blastMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 4,
+  defaultBorrow: 3,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
+  daiSupply: 2,
+  usdtSupply: 2,
+  usdcSupply: 2,
+  rsethSupply: 2,
+  wrsethSupply: 2,
 };
 
 export const lineaMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 4,
+  defaultBorrow: 3,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
+  daiSupply: 2,
+  usdtSupply: 2,
+  usdcSupply: 2,
+  rsethSupply: 2,
+  wrsethSupply: 2,
 };
 
 export const mantaMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 4,
+  defaultBorrow: 3,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
+  daiSupply: 2,
+  usdtSupply: 2,
+  usdcSupply: 2,
+  rsethSupply: 2,
+  wrsethSupply: 2,
 };
 
 export const xlayerMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 4,
+  defaultBorrow: 3,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
+  daiSupply: 2,
+  usdtSupply: 2,
+  usdcSupply: 2,
+  rsethSupply: 2,
+  wrsethSupply: 2,
 };
 
-export const stakeZeroMultiplier = 5;
 export const blastStartDate = new Date("29 Feb 2024").getTime();
 
 export const LQTYHolders: string[] = [
