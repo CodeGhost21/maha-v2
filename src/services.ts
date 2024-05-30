@@ -1,7 +1,7 @@
 import { open } from "./database";
 import cron from "node-cron";
 import { updateUsersRank } from "./cron/updateRank";
-import "./bots/gm";
+
 import {
   mantaPPSCron,
   zksyncPPSCron,
