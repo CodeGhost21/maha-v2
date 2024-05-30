@@ -10,6 +10,7 @@ export const updateLBCache = async () => {
 
   interface lbUserData {
     address: string;
+    totalStakePoints: number;
     totalSupplyPoints: number;
     totalBorrowPoints: number;
     totalPoints: number;
@@ -19,6 +20,7 @@ export const updateLBCache = async () => {
     const pointsTotal = getTotalSupplyBorrowPoints(user);
     lbData.push({
       address: user.walletAddress,
+      totalStakePoints: user.points.stakeZero ?? 0,
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
       totalPoints: user.totalPoints,

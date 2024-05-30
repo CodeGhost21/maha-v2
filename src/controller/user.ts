@@ -95,7 +95,8 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
               1000
             : 0;
           currentPoints.stakeZero =
-            stakingTimeElapsed * user.pointsPerSecond.stakeZero;
+            stakingTimeElapsed * user.pointsPerSecond.stakeZero +
+              (user.points.stakeZero ?? 0);
         }
       } else {
         const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
