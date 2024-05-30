@@ -81,8 +81,8 @@ export const supplyBorrowPointsGQL = async (
       marketPrice = await getPriceCoinGecko();
     }
     // const currentBlock = await p.getBlockNumber();
-    // block: {number: ${currentBlock - 5}},
 
+    // block: {number: ${currentBlock - 5}},
     const graphQuery = `query {
       userReserves(
         where: {
@@ -201,7 +201,8 @@ export const userLpData = async (walletAddress: string) => {
 
 export const votingPowerGQL = async (
   api: string,
-  userBatch: IWalletUserModel[]
+  userBatch: IWalletUserModel[],
+  multiplier: number
 ) => {
   try {
     let marketPrice: any = await cache.get("coingecko:PriceList");
@@ -232,25 +233,13 @@ export const votingPowerGQL = async (
 
     if (result.length) {
       result.forEach((user: any) => {
-        tokenBalances.set(user.id, user.balance / zeroveDenom);
+        tokenBalances.set(
+          user.id,
+          (user.balance / zeroveDenom) * marketPrice.vezero * multiplier
+        );
       });
     }
-    /**
-     * {
-        "data": {
-          "tokenBalances": [
-            {
-              "id": "0x00204acd48e582f710652b264145102edb0166a6",
-              "address": "0x00204acd48e582f710652b264145102edb0166a6",
-              "balance": "743555511352105530187"
-            },
-            {
-              "id": "0x00fc2b542ec0f5a7eaa3f348b842be0628bec2a6",
-              "address": "0x00fc2b542ec0f5a7eaa3f348b842be0628bec2a6",
-              "balance": "1592157985540334855403"
-        },
-     */
-    // console.log(tokenBalances);
+
     return tokenBalances;
   } catch (error) {
     console.log("error while fetching stake data");

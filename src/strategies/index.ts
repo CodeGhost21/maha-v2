@@ -1,5 +1,5 @@
 import "./discord";
-import "./twitter";
+// import "./twitter";
 // import "./google";
 import passport from "passport";
 

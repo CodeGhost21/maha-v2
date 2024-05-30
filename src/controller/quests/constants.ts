@@ -24,6 +24,8 @@ export interface Multiplier {
   ethBorrow?: number;
   esethSupply?: number;
   lidoSupply?: number;
+  ezethSupply?: number;
+  ethfiSupply?: number;
 }
 
 // 2x for ETH on all markets - Supply
@@ -33,6 +35,8 @@ export const ethLrtMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
   ethSupply: 2,
+  ezethSupply: 2,
+  ethfiSupply: 2,
 };
 
 export const zksyncMultiplier: Multiplier = {
@@ -40,32 +44,43 @@ export const zksyncMultiplier: Multiplier = {
   defaultBorrow: 4,
   ethSupply: 2,
   lidoSupply: 2,
+  ezethSupply: 2,
+  ethfiSupply: 2,
 };
 
 export const blastMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
   ethSupply: 2,
+  ezethSupply: 2,
+  ethfiSupply: 2,
 };
 
 export const lineaMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
   ethSupply: 2,
+  ezethSupply: 2,
+  ethfiSupply: 2,
 };
 
 export const mantaMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
   ethSupply: 2,
+  ezethSupply: 2,
+  ethfiSupply: 2,
 };
 
 export const xlayerMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
   ethSupply: 2,
+  ezethSupply: 2,
+  ethfiSupply: 2,
 };
 
+export const stakeZeroMultiplier = 5;
 export const blastStartDate = new Date("29 Feb 2024").getTime();
 
 export const LQTYHolders: string[] = [
@@ -166,6 +181,7 @@ export const assetDenomination = {
   stone: 1e18, //done
   tia: 1e18, //no
   wusdm: 1e18, //done
+  ethfi:1e18,
 };
 
 export const coingeckoIds = [

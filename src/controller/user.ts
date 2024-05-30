@@ -86,29 +86,42 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
     let currentPoints = {} as IWalletUserPoints;
 
     lpList.forEach((lpTask) => {
-      const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
-      const pps = pointsPerSecond[lpTask] as IAsset;
-      const oldPoints = previousPoints[lpTask] as IAsset;
-
-      const _points: Partial<IWalletUserPoints> = {
-        [lpTask]: {} as IAsset,
-      };
-      for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
-        const secondsElapsed = (Date.now() - Number(value)) / 1000;
-        const newPoints = Number(pps[key as keyof IAsset]) * secondsElapsed;
-
-        let refPointForAsset = 0;
-        if (referredByUser && Object.keys(referredByUser).length) {
-          refPointForAsset = Number(newPoints * referralPercent);
+      if (lpTask.startsWith("stake")) {
+        if (user.pointsPerSecond.stakeZero) {
+          const stakingTimeElapsed = user.pointsPerSecondUpdateTimestamp
+            .stakeZero
+            ? (Date.now() -
+                Number(user.pointsPerSecondUpdateTimestamp.stakeZero)) /
+              1000
+            : 0;
+          currentPoints.stakeZero =
+            stakingTimeElapsed * user.pointsPerSecond.stakeZero;
         }
-        const assetOldPoinst = oldPoints[key as keyof IAsset] ?? 0;
-        (_points[lpTask] as IAsset)[key as keyof IAsset] =
-          newPoints + refPointForAsset + assetOldPoinst;
+      } else {
+        const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
+        const pps = pointsPerSecond[lpTask] as IAsset;
+        const oldPoints = previousPoints[lpTask] as IAsset;
+
+        const _points: Partial<IWalletUserPoints> = {
+          [lpTask]: {} as IAsset,
+        };
+        for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
+          const secondsElapsed = (Date.now() - Number(value)) / 1000;
+          const newPoints = Number(pps[key as keyof IAsset]) * secondsElapsed;
+
+          let refPointForAsset = 0;
+          if (referredByUser && Object.keys(referredByUser).length) {
+            refPointForAsset = Number(newPoints * referralPercent);
+          }
+          const assetOldPoinst = oldPoints[key as keyof IAsset] ?? 0;
+          (_points[lpTask] as IAsset)[key as keyof IAsset] =
+            newPoints + refPointForAsset + assetOldPoinst;
+        }
+        currentPoints = { ...currentPoints, ..._points };
       }
-      currentPoints = { ...currentPoints, ..._points };
     });
 
-    res.status(200).json({ success: true, data: currentPoints });
+    res.status(200).json({ success: true, data: { ...currentPoints } });
   } catch (error) {
     console.log("error in calculating current points:", error);
     res

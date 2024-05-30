@@ -28,4 +28,5 @@ export interface IAsset {
   stone?: number; //done
   tia?: number; //done
   wusdm?: number; //done
+  ethfi?:number;
 }

@@ -12,6 +12,8 @@ import routes from "./routes";
 import session from "express-session";
 import { totalPoints } from "./cron/totalPoints";
 import "./strategies";
+import { blastPPSCron, lineaPPSCron } from "./cron/dailyLpPointsChain.v2";
+import { updateLPPointsHourly } from "./cron/lpPointshourly";
 
 const app = express();
 const server = new http.Server(app);
@@ -51,5 +53,7 @@ cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
   await totalPoints();
 });
-totalPoints();
-updateLBCache();
+
+// totalPoints();
+// updateLBCache();
+updateLPPointsHourly();

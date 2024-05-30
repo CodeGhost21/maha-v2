@@ -35,6 +35,7 @@ import {
   ethLrtMultiplier,
   lineaMultiplier,
   mantaMultiplier,
+  stakeZeroMultiplier,
   xlayerMultiplier,
   zksyncMultiplier,
 } from "../controller/quests/constants";
@@ -58,7 +59,7 @@ const _processBatch = async (
     );
 
     if (stakeTask) {
-      const stakeData = await votingPowerGQL(apiStakeLinea, userBatch);
+      const stakeData = await votingPowerGQL(apiStakeLinea, userBatch, stakeZeroMultiplier);
       pointsData.stake = stakeData;
     }
     // update supply borrow and stake points
@@ -207,7 +208,7 @@ export const lineaPPSCron = async () => {
     lineaMultiplier,
     "supplyLinea",
     "borrowLinea",
-    "stakeLinea"
+    "stakeZero"
   );
 };
 
