@@ -111,7 +111,7 @@ const _dailyLpPoints = async (
         .skip(i * chunk)
         .select(["walletAddress", "totalPoints", "referredBy"]);
 
-      console.log("working on batch", i);
+      console.log("working on batch", i, "for", supplyTask.substr(6));
       stakeTask
         ? await _processBatch(
             api,
