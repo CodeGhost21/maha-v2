@@ -28,7 +28,7 @@ import {
   apiEth,
   apiLinea,
   apiManta,
-  apiStakeLinea,
+  apiStakeZero,
   apiXLayer,
   apiZKSync,
   blastMultiplier,
@@ -60,7 +60,7 @@ const _processBatch = async (
 
     if (stakeTask) {
       const stakeData = await votingPowerGQL(
-        apiStakeLinea,
+        apiStakeZero,
         userBatch,
         stakeZeroMultiplier
       );

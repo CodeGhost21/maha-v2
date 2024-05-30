@@ -169,18 +169,14 @@ export const updateLPPointsHourly = async () => {
             user.pointsPerSecond[lpTask]
           ) {
             const stakePointsPerSecond = user.pointsPerSecond[lpTask] as number;
-            console.log(
-              "stakePointsPerSecond",
-              user.pointsPerSecond[lpTask],
-              user.pointsPerSecondUpdateTimestamp[lpTask]
-            );
+
             const timeStamp =
               (user.pointsPerSecondUpdateTimestamp[lpTask] as number) ?? 0;
-            console.log("timestamp", timeStamp);
+
             const timeElapsed =
               timeStamp <= 0 ? 0 : (Date.now() - timeStamp) / 1000;
             const newPoints = stakePointsPerSecond * timeElapsed;
-            console.log("new stake points", newPoints);
+
             // if (newPoints > 0) {
               if (referredByUser && Object.keys(referredByUser).length) {
                 const _referralPoints =
@@ -220,7 +216,7 @@ export const updateLPPointsHourly = async () => {
                   filter: { _id: user.id },
                   update: {
                     $inc: {
-                      ["points.stakeLinea"]: newPoints,
+                      ["points.stakeZero"]: newPoints,
                       totalPoints: newPoints,
                     },
                     $set: {
