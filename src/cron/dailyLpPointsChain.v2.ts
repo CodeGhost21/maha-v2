@@ -101,7 +101,7 @@ const _dailyLpPoints = async (
     [`epochs.${supplyTask}`]: { $ne: epoch },
   };
 
-  const chunk = 1000;
+  const chunk = 100;
   const loops = Math.floor(count / chunk) + 1;
 
   for (let i = 0; i < loops; i++) {
@@ -114,24 +114,24 @@ const _dailyLpPoints = async (
       console.log("working on batch", i, "for", supplyTask.substr(6));
       stakeTask
         ? await _processBatch(
-            api,
-            users,
-            epoch,
-            p,
-            multiplier,
-            supplyTask,
-            borrowTask,
-            stakeTask
-          )
+          api,
+          users,
+          epoch,
+          p,
+          multiplier,
+          supplyTask,
+          borrowTask,
+          stakeTask
+        )
         : await _processBatch(
-            api,
-            users,
-            epoch,
-            p,
-            multiplier,
-            supplyTask,
-            borrowTask
-          );
+          api,
+          users,
+          epoch,
+          p,
+          multiplier,
+          supplyTask,
+          borrowTask
+        );
     } catch (error) {
       console.log("error", error);
       console.log("failure working with batch", i);
@@ -156,14 +156,14 @@ const _dailyLpPointsChain = async (
     const count = await WalletUserV2.count({});
     stakeTask
       ? await _dailyLpPoints(
-          api,
-          count,
-          p,
-          multiplier,
-          supplyTask,
-          borrowTask,
-          stakeTask
-        )
+        api,
+        count,
+        p,
+        multiplier,
+        supplyTask,
+        borrowTask,
+        stakeTask
+      )
       : await _dailyLpPoints(api, count, p, multiplier, supplyTask, borrowTask);
   } catch (error) {
     console.log(supplyTask, "cron failed because of", error);

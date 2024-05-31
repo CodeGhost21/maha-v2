@@ -99,6 +99,7 @@ export const supplyBorrowPointsGQL = async (
             {user_in: [${userBatch.map((u) => `"${u.walletAddress}"`)}]},
           ]
         }
+        first:1000
       ) {
         user {
           id
@@ -121,9 +122,9 @@ export const supplyBorrowPointsGQL = async (
       { query: graphQuery },
       { headers, timeout: 600000 }
     ); // 5 minute
-    if (!data.data.data.userReserves) {
-      console.log(data.data.data.error);
-      throw new Error(`no reserves found for batch, ${data.data.data.error}`);
+    if (!data.data.errors) {
+      console.log(data.data.errors);
+      throw new Error(`no reserves found for batch, ${JSON.stringify(data.data.errors)}`);
     }
     const result = data.data.data.userReserves;
 
@@ -214,9 +215,9 @@ export const votingPowerGQL = async (
     }
 
     const graphQuery = `query {
-      tokenBalances(where: {id_in: [${userBatch.map(
+      tokenBalances(where: {id_in:  [${userBatch.map(
       (u) => `"${u.walletAddress}"`
-    )}]}) {
+    )}]}, first: 1000) {
         id
         balance
       }
