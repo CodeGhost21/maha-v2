@@ -101,7 +101,7 @@ const _dailyLpPoints = async (
     [`epochs.${supplyTask}`]: { $ne: epoch },
   };
 
-  const chunk = 100;
+  const chunk = 1000;
   const loops = Math.floor(count / chunk) + 1;
 
   for (let i = 0; i < loops; i++) {

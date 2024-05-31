@@ -83,74 +83,85 @@ export const supplyBorrowPointsGQL = async (
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }
-    // const currentBlock = await p.getBlockNumber();
-
-    // block: {number: ${currentBlock - 5}},
-    const graphQuery = `query {
-      userReserves(
-        where: {
-          and: [
-            {
-              or: [
-                { currentTotalDebt_gt: 0 },
-                { currentATokenBalance_gt: 0 }
-              ]
-            },
-            {user_in: [${userBatch.map((u) => `"${u.walletAddress}"`)}]},
-          ]
-        }
-        first:1000
-      ) {
-        user {
-          id
-        }
-        currentTotalDebt
-        currentATokenBalance
-        reserve {
-          underlyingAsset
-          symbol
-          name
-        }
-      }
-    }`;
-
     const headers = {
       "Content-Type": "application/json",
     };
-    const data = await axios.post(
-      api,
-      { query: graphQuery },
-      { headers, timeout: 600000 }
-    ); // 5 minute
-    if (data.data.errors) {
-      console.log(data.data.errors);
-      throw new Error(`no reserves found for batch, ${JSON.stringify(data.data.errors)}`);
-    }
-    const result = data.data.data.userReserves;
 
     const supply = new Map();
     const borrow = new Map();
 
-    result.map((userReserve: any) => {
-      const asset = userReserve.reserve.symbol.toLowerCase() as keyof IAsset;
-      const supplyData = supply.get(userReserve.user.id) || {};
-      const supplyMultiplier = multiplier[`${asset}Supply` as keyof Multiplier];
+    while (userBatch.length) {
+      const subBatch = userBatch.splice(0, 100);
 
-      supplyData[asset] =
-        (Number(userReserve.currentATokenBalance) /
-          assetDenomination[`${asset}`]) *
-        Number(marketPrice[`${asset}`]) *
-        (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
-      supply.set(userReserve.user.id, supplyData);
+      const graphQuery = `query {
+        userReserves(
+          where: {
+            and: [
+              {
+                or: [
+                  { currentTotalDebt_gt: 0 },
+                  { currentATokenBalance_gt: 0 }
+                ]
+              },
+              {user_in: [${subBatch.map((u) => `"${u.walletAddress}"`)}]},
+            ]
+          }
+          first:1000
+        ) {
+          user {
+            id
+          }
+          currentTotalDebt
+          currentATokenBalance
+          reserve {
+            underlyingAsset
+            symbol
+            name
+          }
+        }
+      }`;
 
-      const borrowData = borrow.get(userReserve.user.id) || {};
-      const borrowMultiplier = multiplier[`${asset}Borrow` as keyof Multiplier];
-      borrowData[asset] =
-        (Number(userReserve.currentTotalDebt) / assetDenomination[`${asset}`]) *
-        Number(marketPrice[`${asset}`]) *
-        (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
-      borrow.set(userReserve.user.id, borrowData);
-    });
+      const data = await axios.post(
+        api,
+        { query: graphQuery },
+        { headers, timeout: 600000 }
+      ); // 10 minute
+
+      if (data.data.errors) {
+        console.log(data.data.errors);
+        throw new Error(
+          `no reserves found for batch, ${JSON.stringify(data.data.errors)}`
+        );
+      }
+      const result = data.data.data.userReserves;
+
+      if (result.length > 0) {
+        result.forEach((userReserve: any) => {
+          const asset =
+            userReserve.reserve.symbol.toLowerCase() as keyof IAsset;
+          const supplyData = supply.get(userReserve.user.id) || {};
+          const supplyMultiplier =
+            multiplier[`${asset}Supply` as keyof Multiplier];
+
+          supplyData[asset] =
+            (Number(userReserve.currentATokenBalance) /
+              assetDenomination[`${asset}`]) *
+            Number(marketPrice[`${asset}`]) *
+            (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
+          supply.set(userReserve.user.id, supplyData);
+
+          const borrowData = borrow.get(userReserve.user.id) || {};
+          const borrowMultiplier =
+            multiplier[`${asset}Borrow` as keyof Multiplier];
+          borrowData[asset] =
+            (Number(userReserve.currentTotalDebt) /
+              assetDenomination[`${asset}`]) *
+            Number(marketPrice[`${asset}`]) *
+            (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
+          borrow.set(userReserve.user.id, borrowData);
+        });
+      }
+    }
 
     return {
       supply,
@@ -214,36 +225,38 @@ export const votingPowerGQL = async (
       marketPrice = await getPriceCoinGecko();
     }
 
-    const graphQuery = `query {
-      tokenBalances(where: {id_in:  [${userBatch.map(
-      (u) => `"${u.walletAddress}"`
-    )}]}, first: 1000) {
-        id
-        balance
-      }
-    }`;
-
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    const data = await axios.post(
-      api,
-      { query: graphQuery },
-      { headers, timeout: 300000 }
-    ); // 5 minute
-    const result = data.data.data.tokenBalances;
-
     const tokenBalances = new Map();
 
-    if (result.length) {
-      result.forEach((user: any) => {
-        tokenBalances.set(
-          user.id,
-          (user.balance / zeroveDenom) * marketPrice.zerolend * multiplier
-        );
-      });
-    }
+    while (userBatch.length) {
+      const subBatch = userBatch.splice(0, 100);
+      const graphQuery = `query {
+        tokenBalances(where: {id_in:  [${subBatch.map(
+          (u) => `"${u.walletAddress}"`
+        )}]}, first: 1000) {
+          id
+          balance
+        }
+      }`;
 
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      const data = await axios.post(
+        api,
+        { query: graphQuery },
+        { headers, timeout: 300000 }
+      ); // 5 minute
+      const result = data.data.data.tokenBalances;
+
+      if (result.length) {
+        result.forEach((user: any) => {
+          tokenBalances.set(
+            user.id,
+            (user.balance / zeroveDenom) * marketPrice.zerolend * multiplier
+          );
+        });
+      }
+    }
     return tokenBalances;
   } catch (error) {
     console.log("error while fetching stake data");
