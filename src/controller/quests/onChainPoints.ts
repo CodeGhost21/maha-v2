@@ -122,7 +122,7 @@ export const supplyBorrowPointsGQL = async (
       { query: graphQuery },
       { headers, timeout: 600000 }
     ); // 5 minute
-    if (!data.data.errors) {
+    if (data.data.errors) {
       console.log(data.data.errors);
       throw new Error(`no reserves found for batch, ${JSON.stringify(data.data.errors)}`);
     }
