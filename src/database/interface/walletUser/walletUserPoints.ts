@@ -1,9 +1,9 @@
-import { IAsset } from "./assets";
+import { IAsset, IStakeAsset } from "./assets";
 
 export interface IWalletUserPoints {
   discordFollow?: number;
   referral?: number;
-  stakeZero?: number;
+  stakeLinea?: IStakeAsset;
   supplyZkSync?: IAsset;
   borrowZkSync?: IAsset;
   supplyManta?: IAsset;
@@ -21,6 +21,7 @@ export interface IWalletUserPoints {
 export interface IEpoch {
   discordFollow?: number;
   referral?: number;
+  stakeLinea?:number;
   supplyZkSync?: number;
   borrowZkSync?: number;
   supplyManta?: number;

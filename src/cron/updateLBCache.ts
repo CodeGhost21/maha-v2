@@ -1,4 +1,4 @@
-import { getTotalSupplyBorrowPoints } from "../controller/user";
+import { getTotalStakePoints, getTotalSupplyBorrowPoints } from "../controller/user";
 import { WalletUserV2 } from "../database/models/walletUsersV2";
 import cache from "../utils/cache";
 
@@ -20,7 +20,7 @@ export const updateLBCache = async () => {
     const pointsTotal = getTotalSupplyBorrowPoints(user);
     lbData.push({
       address: user.walletAddress,
-      totalStakePoints: user.points.stakeZero ?? 0,
+      totalStakePoints: getTotalStakePoints(user),
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
       totalPoints: user.totalPoints,

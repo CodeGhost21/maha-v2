@@ -30,3 +30,8 @@ export interface IAsset {
   wusdm?: number; //done
   ethfi?: number;//done
 }
+
+export interface IStakeAsset{
+  zero?: number;
+  lockerLp?:number;
+}

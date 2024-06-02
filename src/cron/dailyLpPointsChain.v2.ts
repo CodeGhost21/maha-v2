@@ -1,6 +1,6 @@
 import {
   supplyBorrowPointsGQL,
-  votingPowerGQL,
+  stakingPointsGQL,
 } from "../controller/quests/onChainPoints";
 import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
 import { getEpoch } from "../utils/epoch";
@@ -57,15 +57,16 @@ const _processBatch = async (
       p,
       multiplier
     );
-
+    // console.log(pointsData);
     if (stakeTask) {
-      const stakeData = await votingPowerGQL(
+      const stakeData = await stakingPointsGQL(
         apiStakeZero,
         userBatch,
         stakeZeroMultiplier
       );
       pointsData.stake = stakeData;
     }
+
     // update supply borrow and stake points
     const dbExecutable = await assignPointsPerSecondToBatch(
       userBatch,
@@ -112,26 +113,17 @@ const _dailyLpPoints = async (
         .select(["walletAddress", "totalPoints", "referredBy"]);
 
       console.log("working on batch", i, "for", supplyTask.substr(6));
-      stakeTask
-        ? await _processBatch(
-          api,
-          users,
-          epoch,
-          p,
-          multiplier,
-          supplyTask,
-          borrowTask,
-          stakeTask
-        )
-        : await _processBatch(
-          api,
-          users,
-          epoch,
-          p,
-          multiplier,
-          supplyTask,
-          borrowTask
-        );
+
+      await _processBatch(
+        api,
+        users,
+        epoch,
+        p,
+        multiplier,
+        supplyTask,
+        borrowTask,
+        stakeTask
+      );
     } catch (error) {
       console.log("error", error);
       console.log("failure working with batch", i);
@@ -154,17 +146,15 @@ const _dailyLpPointsChain = async (
   lock[supplyTask] = true;
   try {
     const count = await WalletUserV2.count({});
-    stakeTask
-      ? await _dailyLpPoints(
-        api,
-        count,
-        p,
-        multiplier,
-        supplyTask,
-        borrowTask,
-        stakeTask
-      )
-      : await _dailyLpPoints(api, count, p, multiplier, supplyTask, borrowTask);
+    await _dailyLpPoints(
+      api,
+      count,
+      p,
+      multiplier,
+      supplyTask,
+      borrowTask,
+      stakeTask
+    );
   } catch (error) {
     console.log(supplyTask, "cron failed because of", error);
   }
@@ -216,7 +206,7 @@ export const lineaPPSCron = async () => {
     lineaMultiplier,
     "supplyLinea",
     "borrowLinea",
-    "stakeZero"
+    "stakeLinea"
   );
 };
 

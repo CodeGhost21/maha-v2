@@ -61,7 +61,7 @@ export const getPriceCoinGecko = async () => {
       zerolend: data.data.zerolend.usd,
     };
 
-    console.log(priceList);
+    // console.log(priceList);
 
     cache.set("coingecko:PriceList", priceList, 60 * 60);
 
@@ -89,9 +89,9 @@ export const supplyBorrowPointsGQL = async (
 
     const supply = new Map();
     const borrow = new Map();
-
-    while (userBatch.length) {
-      const subBatch = userBatch.splice(0, 100);
+    const tempBatch = Array.from(userBatch);
+    while (tempBatch.length) {
+      const subBatch = tempBatch.splice(0, 100);
 
       const graphQuery = `query {
         userReserves(
@@ -139,26 +139,28 @@ export const supplyBorrowPointsGQL = async (
         result.forEach((userReserve: any) => {
           const asset =
             userReserve.reserve.symbol.toLowerCase() as keyof IAsset;
-          const supplyData = supply.get(userReserve.user.id) || {};
-          const supplyMultiplier =
-            multiplier[`${asset}Supply` as keyof Multiplier];
+          if (assetDenomination[`${asset}`]) {
+            const supplyData = supply.get(userReserve.user.id) || {};
+            const supplyMultiplier =
+              multiplier[`${asset}Supply` as keyof Multiplier];
 
-          supplyData[asset] =
-            (Number(userReserve.currentATokenBalance) /
-              assetDenomination[`${asset}`]) *
-            Number(marketPrice[`${asset}`]) *
-            (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
-          supply.set(userReserve.user.id, supplyData);
+            supplyData[asset] =
+              (Number(userReserve.currentATokenBalance) /
+                assetDenomination[`${asset}`]) *
+              Number(marketPrice[`${asset}`]) *
+              (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply);
+            supply.set(userReserve.user.id, supplyData);
 
-          const borrowData = borrow.get(userReserve.user.id) || {};
-          const borrowMultiplier =
-            multiplier[`${asset}Borrow` as keyof Multiplier];
-          borrowData[asset] =
-            (Number(userReserve.currentTotalDebt) /
-              assetDenomination[`${asset}`]) *
-            Number(marketPrice[`${asset}`]) *
-            (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
-          borrow.set(userReserve.user.id, borrowData);
+            const borrowData = borrow.get(userReserve.user.id) || {};
+            const borrowMultiplier =
+              multiplier[`${asset}Borrow` as keyof Multiplier];
+            borrowData[asset] =
+              (Number(userReserve.currentTotalDebt) /
+                assetDenomination[`${asset}`]) *
+              Number(marketPrice[`${asset}`]) *
+              (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow);
+            borrow.set(userReserve.user.id, borrowData);
+          }
         });
       }
     }
@@ -214,7 +216,7 @@ export const userLpData = async (walletAddress: string) => {
   }
 };
 
-export const votingPowerGQL = async (
+export const stakingPointsGQL = async (
   api: string,
   userBatch: IWalletUserModel[],
   multiplier: number
@@ -227,14 +229,16 @@ export const votingPowerGQL = async (
 
     const tokenBalances = new Map();
 
-    while (userBatch.length) {
-      const subBatch = userBatch.splice(0, 100);
+    const tempBatch = Array.from(userBatch);
+    while (tempBatch.length) {
+      const subBatch = tempBatch.splice(0, 100);
       const graphQuery = `query {
         tokenBalances(where: {id_in:  [${subBatch.map(
           (u) => `"${u.walletAddress}"`
         )}]}, first: 1000) {
           id
-          balance
+          balance_omni
+          balance_omni_lp
         }
       }`;
 
@@ -246,14 +250,23 @@ export const votingPowerGQL = async (
         { query: graphQuery },
         { headers, timeout: 300000 }
       ); // 5 minute
+      if (data.data.errors) {
+        console.log(data.data.errors);
+      }
       const result = data.data.data.tokenBalances;
 
       if (result.length) {
         result.forEach((user: any) => {
-          tokenBalances.set(
-            user.id,
-            (user.balance / zeroveDenom) * marketPrice.zerolend * multiplier
-          );
+          tokenBalances.set(user.id, {
+            zero:
+              (user.balance_omni / zeroveDenom) *
+              marketPrice.zerolend *
+              multiplier,
+            lockerLP:
+              (user.balance_omni_lp / zeroveDenom) *
+              marketPrice.zerolend *
+              multiplier, // TODO check multiplier
+          });
         });
       }
     }

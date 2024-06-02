@@ -39,7 +39,7 @@ import {
 } from "../utils/providers";
 import axios from "axios";
 import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
-import { IAsset } from "src/database/interface/walletUser/assets";
+import { IAsset, IStakeAsset } from "src/database/interface/walletUser/assets";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -87,21 +87,33 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
 
     lpList.forEach((lpTask) => {
       if (lpTask.startsWith("stake")) {
-        if (user.pointsPerSecond.stakeZero) {
-          const stakingTimeElapsed = user.pointsPerSecondUpdateTimestamp
-            .stakeZero
-            ? (Date.now() -
-                Number(user.pointsPerSecondUpdateTimestamp.stakeZero)) /
-              1000
-            : 0;
-          currentPoints.stakeZero =
-            stakingTimeElapsed * user.pointsPerSecond.stakeZero +
-              (user.points.stakeZero ?? 0);
+        const pppUpdateTimestampForTask = pppUpdateTimestamp[
+          lpTask
+        ] as IStakeAsset;
+        const pps = pointsPerSecond[lpTask] as IStakeAsset;
+        const oldPoints = previousPoints[lpTask] as IStakeAsset;
+
+        const _points: Partial<IWalletUserPoints> = {
+          [lpTask]: {} as IStakeAsset,
+        };
+        for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
+          const secondsElapsed = (Date.now() - Number(value)) / 1000;
+          const newPoints =
+            Number(pps[key as keyof IStakeAsset]) * secondsElapsed;
+
+          let refPointForAsset = 0;
+          if (referredByUser && Object.keys(referredByUser).length) {
+            refPointForAsset = Number(newPoints * referralPercent);
+          }
+          const assetOldPoinst = oldPoints[key as keyof IStakeAsset] ?? 0;
+          (_points[lpTask] as IStakeAsset)[key as keyof IStakeAsset] =
+            newPoints + refPointForAsset + assetOldPoinst;
         }
+        currentPoints = { ...currentPoints,..._points };
       } else {
         const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
         const pps = pointsPerSecond[lpTask] as IAsset;
-        const oldPoints = previousPoints[lpTask] as IAsset;
+        const oldPoints = (previousPoints[lpTask] as IAsset) ?? {};
 
         const _points: Partial<IWalletUserPoints> = {
           [lpTask]: {} as IAsset,
@@ -229,7 +241,8 @@ export const userInfo = async (req: Request, res: Response) => {
       rank: user.rank,
       referralPoints: user.points.referral ?? 0,
       totalPoints: user.totalPoints,
-      stakeZeroPoints: user.points.stakeZero ?? 0,
+      stakeZeroPoints: user.points.stakeLinea?.zero ?? 0,
+      totalStakePoints: getTotalStakePoints(user),
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
     };
@@ -556,6 +569,16 @@ export const getTotalSupplyBorrowPoints = (user: IWalletUserModel) => {
     totalSupplyPoints,
     totalBorrowPoints,
   };
+};
+
+export const getTotalStakePoints = (user: IWalletUserModel) => {
+  const points = user.points;
+  if (!user.points.stakeLinea) {
+    return 0;
+  }
+  const stakeLinea = points.stakeLinea;
+  const totalPoints = getTotalPoints(stakeLinea);
+  return totalPoints;
 };
 
 export const getOpensBlockData = async (req: Request, res: Response) => {

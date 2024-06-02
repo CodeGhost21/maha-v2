@@ -131,6 +131,7 @@ export const assignPointsPerSecondToBatch = async (
   taskStake?: string
 ): Promise<IAssignPointsTask | undefined> => {
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
+
   if (!users || !users.length) return;
 
   users
@@ -141,19 +142,26 @@ export const assignPointsPerSecondToBatch = async (
         (pointsData.stake ? pointsData.stake.has(user.walletAddress) : false)
     )
     .forEach((user) => {
+
       const latestPointsSupply = pointsData.supply.get(user.walletAddress);
       const latestPointsBorrow = pointsData.borrow.get(user.walletAddress);
 
       const setObj: any = {};
-      let stakePointsPerSecond = 0;
 
       if (pointsData.stake && taskStake && taskStake.startsWith("stake")) {
         const latestPointsStake = pointsData.stake.get(user.walletAddress);
         if (latestPointsStake) {
-          stakePointsPerSecond = latestPointsStake / 86400;
+          const pointsPerSecondStake: { [key: string]: number } = {};
+          const stakeKeys = Object.keys(latestPointsStake);
+          if (stakeKeys.length) {
+            stakeKeys.forEach((key) => {
+              pointsPerSecondStake[key] = latestPointsStake[key] / 86400;
+            });
+          }
+
+          setObj[`pointsPerSecond.${taskStake}`] = pointsPerSecondStake;
+          setObj[`epochs.${taskStake}`] = epoch;
         }
-        setObj[`pointsPerSecond.${taskStake}`] = stakePointsPerSecond;
-        setObj[`epochs.${taskStake}`] = epoch;
       }
 
       if (latestPointsSupply) {
@@ -161,10 +169,7 @@ export const assignPointsPerSecondToBatch = async (
         const supplyKeys = Object.keys(latestPointsSupply);
         if (supplyKeys.length) {
           supplyKeys.forEach((key) => {
-            latestPointsSupply[key]
-              ? (pointsPerSecondSupply[`${key}`] =
-                  latestPointsSupply[key] / 86400)
-              : "";
+            pointsPerSecondSupply[`${key}`] = latestPointsSupply[key] / 86400;
           });
           setObj[`pointsPerSecond.${taskSupply}`] = pointsPerSecondSupply;
           setObj[`epochs.${taskSupply}`] = epoch;
@@ -176,15 +181,13 @@ export const assignPointsPerSecondToBatch = async (
         const borrowKeys = Object.keys(latestPointsBorrow);
         if (borrowKeys.length) {
           borrowKeys.forEach((key) => {
-            latestPointsBorrow[key]
-              ? (pointsPerSecondBorrow[`${key}`] =
-                  latestPointsBorrow[key] / 86400)
-              : "";
+            pointsPerSecondBorrow[`${key}`] = latestPointsBorrow[key] / 86400;
           });
           setObj[`pointsPerSecond.${taskBorrow}`] = pointsPerSecondBorrow;
           setObj[`epochs.${taskBorrow}`] = epoch;
         }
       }
+      // console.log(setObj);
       userBulkWrites.push({
         updateOne: {
           filter: { _id: user.id },
