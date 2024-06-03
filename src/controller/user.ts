@@ -222,15 +222,22 @@ export const linkNewReferral = async (req: Request, res: Response) => {
 
     const _walletAddress = walletAddress.toLowerCase().trim();
 
+    if (!walletAddress || !message || !signHash || !referralCode) {
+      return res.status(400).json({
+        success: false,
+        data: { error: "bad request" },
+      });
+    }
     const user = await WalletUserV2.findOne({
       walletAddress: _walletAddress,
     }).select("referralCode");
 
-    if (!user)
+    if (!user) {
       return res.status(404).json({
         success: false,
         data: { error: "user not found" },
       });
+    }
 
     const siweMessage = new SiweMessage(message);
     const result = await siweMessage.verify({ signature: signHash });
@@ -239,9 +246,10 @@ export const linkNewReferral = async (req: Request, res: Response) => {
 
     // todo: verify other data
     if (address !== _walletAddress) {
-      throw new BadRequestError(
-        "Signature verification failed. Invalid signature."
-      );
+      return res.status(500).json({
+        success: false,
+        data: { error: "Signature verification failed. Invalid signature." },
+      });
     }
 
     const referralCodes = user?.referralCode;
@@ -275,7 +283,10 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     console.error("Error occurred in linking custom referral:", error);
     res
       .status(500)
-      .json({ success: false, data: { error: "Internal server error" } });
+      .json({
+        success: false,
+        data: { error: `Internal server error: ${error}` },
+      });
   }
 };
 
