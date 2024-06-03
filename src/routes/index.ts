@@ -9,7 +9,7 @@ import {
   getUsersData,
   getLeaderBoard,
   getOpensBlockData,
-  addCustomReferral,
+  linkNewReferral,
 } from "../controller/user";
 
 export const router = Router();
@@ -22,7 +22,7 @@ router.get("/", (_req, res) => {
   });
 });
 router.get("/globalData", getUsersData);
-router.patch("/addCustomReferral", addCustomReferral)
+router.patch("/linkReferral", linkNewReferral);
 router.get("/leaderBoard", getLeaderBoard);
 router.use("/discord", discord);
 router.use("/twitter", twitter);

@@ -216,7 +216,7 @@ export const walletVerify = async (
   }
 };
 
-export const addCustomReferral = async (req: Request, res: Response) => {
+export const linkNewReferral = async (req: Request, res: Response) => {
   try {
     const { walletAddress, message, signHash, referralCode } = req.body;
 
@@ -249,14 +249,14 @@ export const addCustomReferral = async (req: Request, res: Response) => {
     if (referralCodes?.length === 2) {
       return res.status(406).json({
         success: false,
-        data: { error: "failed to add referral code limit reached" },
+        data: { error: "failed to link referral code limit reached" },
       });
     }
 
     if (referralCodes[0] === referralCode) {
       return res.status(406).json({
         success: false,
-        data: { error: "provided referral code already exists" },
+        data: { error: "provided referral code already linked" },
       });
     }
 
@@ -269,10 +269,10 @@ export const addCustomReferral = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      data: { message: "referral code added successfully!" },
+      data: { message: "referral code linked successfully!" },
     });
   } catch (error) {
-    console.error("Error occurred in add custom referral:", error);
+    console.error("Error occurred in linking custom referral:", error);
     res
       .status(500)
       .json({ success: false, data: { error: "Internal server error" } });
