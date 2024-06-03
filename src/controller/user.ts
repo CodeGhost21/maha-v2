@@ -292,7 +292,6 @@ export const linkNewReferral = async (req: Request, res: Response) => {
   try {
     const { walletAddress, message, signHash, referralCode } = req.body;
 
-    
     if (!walletAddress || !message || !signHash || !referralCode) {
       return res.status(400).json({
         success: false,
@@ -302,7 +301,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
 
     const _walletAddress = walletAddress.toLowerCase().trim();
 
-    // find user 
+    // find user
     const user = await WalletUserV2.findOne({
       walletAddress: _walletAddress,
     }).select("walletAddress id referredBy referralCode");
@@ -311,8 +310,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         data: {
-          error:
-            "walletAddress not found",
+          error: "walletAddress not found",
         },
       });
     }
@@ -346,8 +344,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         data: {
-          error:
-            "invalid referral code",
+          error: "invalid referral code",
         },
       });
     }
@@ -356,7 +353,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     const siweMessage = new SiweMessage(message);
     const result = await siweMessage.verify({ signature: signHash });
     const address = result.data.address.toLowerCase().trim();
-    
+
     if (
       address !== _walletAddress &&
       result.data.prepareMessage() === message
@@ -394,7 +391,7 @@ export const userInfo = async (req: Request, res: Response) => {
 
     const user = await WalletUserV2.findOne({
       walletAddress: walletAddress.toLowerCase().trim(),
-    }).select("rank points totalPoints");
+    }).select("rank points totalPoints referralCode referredBy");
 
     if (!user)
       return res.status(404).json({
@@ -403,16 +400,27 @@ export const userInfo = async (req: Request, res: Response) => {
       });
 
     const pointsTotal = getTotalSupplyBorrowPoints(user);
+    
+    let refererReferralCode = undefined;
+    if (user.referredBy) {
+      const userReferer = await WalletUserV2.findOne({
+        _id: user.referredBy,
+      }).select("referralCode");
+      refererReferralCode = userReferer?.referralCode;
+    }
+
     const userData = {
       rank: user.rank,
       referralPoints: user.points.referral ?? 0,
       referralCode: user.referralCode,
+      referrerCode: refererReferralCode,
       totalPoints: user.totalPoints,
       stakeZeroPoints: user.points.stakeLinea?.zero ?? 0,
       totalStakePoints: getTotalStakePoints(user),
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
     };
+
     res.status(200).json({ success: true, data: { userData } });
   } catch (error) {
     console.error("Error occurred in userInfo:", error);
