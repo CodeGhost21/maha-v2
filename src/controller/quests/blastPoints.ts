@@ -172,67 +172,86 @@ export const saveBlastPointUsers = async () => {
   }
 };
 
-export const assignBlastPoints = async () => {
-  const batchSize = 2000;
-  let skip = 0;
-  let batch;
+export const assignBlastPoints = async (usersShare: Map<any, any>) => {
   const addressUSDB = "0x23A58cbe25E36e26639bdD969B0531d3aD5F9c34";
   const addressWETH = "0x53a3Aa617afE3C12550a93BA6262430010037B04";
-  const challenge = await getBlastChallenge(addressUSDB);
-  const token = await getBearerToken(challenge);
-  const tokenName = "USDB";
-  let batchId = 2854; //Math.floor(Date.now() / 86400 / 7 / 1000);
-  do {
-    //USDB
-    console.log("batchId", batchId);
-    batch = await BlastUser.find({
-      [`blastPoints.pointsPending${tokenName}`]: { $gt: 0 },
-    })
-      .skip(skip)
-      .limit(batchSize);
-    const transferBatch = [];
-    if (batch.length > 0) {
-      for (const user of batch) {
-        if (user.blastPoints[`pointsPending${tokenName}`] > 0.01) {
-          const transfer: Transfer = {
-            toAddress: user.walletAddress,
-            points: user.blastPoints[`pointsPending${tokenName}`].toFixed(2),
-          };
-          transferBatch.push(transfer);
-        }
-      }
-      console.log(transferBatch[287]);
-      // console.log();
 
-      console.log(transferBatch.length);
+  const challengeUSDB = await getBlastChallenge(addressUSDB);
+  const challengeWETH = await getBlastChallenge(addressWETH);
 
-      const request: Request = {
-        pointType: "LIQUIDITY",
-        transfers: transferBatch,
-        secondsToFinalize: 3600,
-      };
-      const url = `${baseUrl}/v1/contracts/${addressUSDB}/batches/${batchId}`;
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-      try {
-        const response = await axios.put(url, request, { headers });
-        console.log(response.data);
-        if (response.data.success) {
-          //saving batch
-          await BlastBatches.create({
-            batchId,
-            batch: transferBatch,
-          });
-        }
-      } catch (e: any) {
-        console.log(e.response.data);
-      }
+  const tokenUSDB = await getBearerToken(challengeUSDB);
+  const tokenWETH = await getBearerToken(challengeWETH);
 
-      skip += batchSize;
-      batchId += 1;
+  const batchId = Math.floor(Date.now() / 86400 / 7 / 1000);
+
+  // console.log("batchId", batchId);
+
+  const transferBatchUSDB = [];
+  const transferBatchWETH = [];
+
+  for (const [walletAddress, share] of usersShare) {
+    const transferUSDB: Transfer = {
+      toAddress: walletAddress,
+      points: share.pointUSDB.toFixed(2),
+    };
+    const transferWETH: Transfer = {
+      toAddress: walletAddress,
+      points: share.pointWETH.toFixed(2),
+    };
+
+    transferBatchUSDB.push(transferUSDB);
+    transferBatchWETH.push(transferWETH);
+  }
+
+  const requestUSDB: Request = {
+    pointType: "LIQUIDITY",
+    transfers: transferBatchUSDB,
+    secondsToFinalize: 3600,
+  };
+
+  const requestWETH: Request = {
+    pointType: "LIQUIDITY",
+    transfers: transferBatchWETH,
+    secondsToFinalize: 3600,
+  };
+
+  const urlUSDB = `${baseUrl}/v1/contracts/${addressUSDB}/batches/${batchId}`;
+  const urlWETH = `${baseUrl}/v1/contracts/${addressWETH}/batches/${batchId}`;
+
+  const headersUSDB = {
+    Authorization: `Bearer ${tokenUSDB}`,
+  };
+  const headersWETH = {
+    Authorization: `Bearer ${tokenWETH}`,
+  };
+
+  // send request for USDB
+  try {
+    const responseUSDB = await axios.put(urlUSDB, requestUSDB, {
+      headers: headersUSDB,
+    });
+
+    if (responseUSDB.data.success) {
+      //saving batch
+      await BlastBatches.create({
+        batchId: `${batchId}_usdb`,
+        batch: transferBatchUSDB,
+      });
     }
-  } while (batch.length === batchSize);
+    const responseWETH = await axios.put(urlWETH, requestWETH, {
+      headers: headersWETH,
+    });
+
+    if (responseWETH.data.success) {
+      //saving batch
+      await BlastBatches.create({
+        batchId: `${batchId}_weth`,
+        batch: transferBatchWETH,
+      });
+    }
+  } catch (e: any) {
+    console.log(e.response.data);
+  }
 };
 
 export const updateBlastPoints = async () => {
@@ -245,7 +264,9 @@ export const updateBlastPoints = async () => {
         updateOne: {
           filter: { walletAddress: item.toAddress },
           update: {
-            $inc: {},
+            $inc: {
+              // update given = given + pending
+            },
             $set: {
               "blastPoints.pointsPending": 0,
               "blastPoints.pointsPendingUSDB": 0,
@@ -315,4 +336,157 @@ export const test = async () => {
       `Updated ${bulkOperations.length} documents in BlastUser collection.`
     );
   }
+};
+
+const getUSDBWETHPoints = async (
+  userBatch: any,
+  usdbPointsTotal: number,
+  wethPointsTotal: number
+) => {
+  console.log("analyzing users");
+  console.log("blast points earned from USDB contract", usdbPointsTotal);
+  console.log("blast points earned from WETH contract", wethPointsTotal);
+
+  const url =
+    "https://api.goldsky.com/api/public/project_clsk1wzatdsls01wchl2e4n0y/subgraphs/zerolend-blast-points/1.0.0/gn";
+
+  const query = `{
+    usdbusers(where: {id_in: [${userBatch.map((u: any) => `"${u.id}"`)}]}) {
+      id
+      balance
+      debt
+      lastUpdatedAt
+      accumulatedPoints
+    }
+    wethusers(where: {id_in: [${userBatch.map((u: any) => `"${u.id}"`)}]}) {
+      id
+      balance
+      debt
+      lastUpdatedAt
+    }
+    core(id:"1") {
+      id
+      totalPointsUSDB
+      totalPointsWETH
+    }
+  }`;
+
+  const data = await axios.post(url, {
+    query,
+  });
+
+  const results = data.data.data;
+
+  const usdbusers = results.usdbusers;
+  const wethusers = results.wethusers;
+  const core = results.core;
+  const pointsEarnedMap = new Map();
+
+  const percentage = 100000000;
+
+  usdbusers.forEach((user: any) => {
+    const usdbPointsEarnedPercentage =
+      (BigInt(user.accumulatedPoints) * BigInt(percentage)) /
+      BigInt(core.totalPointsUSDB);
+    const usdbPointsEarned =
+      Number(usdbPointsEarnedPercentage * BigInt(usdbPointsTotal)) / percentage;
+
+    pointsEarnedMap.set(user.id, { usdbPointsEarned });
+  });
+
+  wethusers.forEach((user: any) => {
+    const wethPointsEarnedPercentage =
+      (BigInt(user.accumulatedPoints) * BigInt(percentage)) /
+      BigInt(core.totalPointsUSDB);
+    const wethPointsEarned =
+      Number(wethPointsEarnedPercentage * BigInt(wethPointsTotal)) / percentage;
+    const usdbPointsEarned = pointsEarnedMap.get(user.id);
+    pointsEarnedMap.set(user.id, { ...usdbPointsEarned, wethPointsEarned });
+  });
+
+  return pointsEarnedMap;
+};
+
+const distributeBlastPoints = async () => {
+  const blastPoints = await BlastData();
+  const usdbPointsTotal: number = blastPoints.blastUSDB;
+  const wethPointsTotal: number = blastPoints.blastWETH;
+
+  const first = 1000;
+  let batch;
+  let lastAddress = "0x0000000000000000000000000000000000000000";
+  const queryURL =
+    "https://api.studio.thegraph.com/query/65585/zerolend-blast-market/version/latest";
+  const bulkOperations = [];
+  const allBlastUsers = await BlastUser.find({}, { walletAddress: 1, _id: 0 });
+  const allBlastUsersAddress: any = allBlastUsers.map((user: any) =>
+    user.walletAddress.toLowerCase().trim()
+  );
+  do {
+    const graphQuery = `query {
+    users(where: {id_gt: "${lastAddress}"}, first: ${first}) {
+      id
+      }
+    }`;
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    batch = await axios.post(queryURL, { query: graphQuery }, { headers });
+
+    const users = batch.data.data.users;
+    const usersShare = await getUSDBWETHPoints(
+      users,
+      usdbPointsTotal,
+      wethPointsTotal
+    );
+
+    // assign pending blast points
+    await assignBlastPoints(usersShare);
+
+    // update db
+    for (const [walletAddress, share] of usersShare) {
+      if (allBlastUsersAddress.includes(walletAddress)) {
+        console.log("share", walletAddress, share);
+
+        bulkOperations.push({
+          updateOne: {
+            filter: { walletAddress },
+            update: {
+              $set: {
+                "blastPoints.timestamp": Date.now(),
+              },
+              $inc: {
+                "blastPoints.pointsGivenUSDB": Number(share.pointUSDB),
+                "blastPoints.pointsGivenWETH": Number(share.pointWETH),
+              },
+            },
+          },
+        });
+      } else {
+        bulkOperations.push({
+          insertOne: {
+            document: {
+              walletAddress,
+              blastPoints: {
+                pointsPendingUSDB: Number(share.pointUSDB),
+                pointsPendingWETH: Number(share.pointWETH),
+                timestamp: Date.now(),
+              },
+            },
+          },
+        });
+      }
+    }
+
+    // store pending points
+    if (bulkOperations.length > 0) {
+      await BlastUser.bulkWrite(bulkOperations);
+      console.log(
+        `Inserted ${bulkOperations.length} documents into BlastUser collection.`
+      );
+    }
+
+    lastAddress = batch.data.data.users[batch.data.data.users.length - 1].id;
+  } while (batch.data.data.users.length === first);
 };
