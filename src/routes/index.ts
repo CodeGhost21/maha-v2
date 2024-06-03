@@ -9,6 +9,7 @@ import {
   getUsersData,
   getLeaderBoard,
   getOpensBlockData,
+  addCustomReferral,
 } from "../controller/user";
 
 export const router = Router();
@@ -21,6 +22,7 @@ router.get("/", (_req, res) => {
   });
 });
 router.get("/globalData", getUsersData);
+router.post("/addCustomReferral", addCustomReferral)
 router.get("/leaderBoard", getLeaderBoard);
 router.use("/discord", discord);
 router.use("/twitter", twitter);

@@ -109,7 +109,7 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
           (_points[lpTask] as IStakeAsset)[key as keyof IStakeAsset] =
             newPoints + refPointForAsset + assetOldPoinst;
         }
-        currentPoints = { ...currentPoints,..._points };
+        currentPoints = { ...currentPoints, ..._points };
       } else {
         const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
         const pps = pointsPerSecond[lpTask] as IAsset;
@@ -216,6 +216,69 @@ export const walletVerify = async (
   }
 };
 
+export const addCustomReferral = async (req: Request, res: Response) => {
+  try {
+    const { walletAddress, message, signHash, referralCode } = req.body;
+
+    const _walletAddress = walletAddress.toLowerCase().trim();
+
+    const user = await WalletUserV2.findOne({
+      walletAddress: _walletAddress,
+    }).select("referralCode");
+
+    if (!user)
+      return res.status(404).json({
+        success: false,
+        data: { error: "user not found" },
+      });
+
+    const siweMessage = new SiweMessage(message);
+    const result = await siweMessage.verify({ signature: signHash });
+
+    const address = result.data.address.toLowerCase().trim();
+
+    // todo: verify other data
+    if (address !== _walletAddress) {
+      throw new BadRequestError(
+        "Signature verification failed. Invalid signature."
+      );
+    }
+
+    const referralCodes = user?.referralCode;
+
+    if (referralCodes?.length === 2) {
+      return res.status(406).json({
+        success: false,
+        data: { error: "failed to add referral code limit reached" },
+      });
+    }
+
+    if (referralCodes[0] === referralCode) {
+      return res.status(406).json({
+        success: false,
+        data: { error: "provided referral code already exists" },
+      });
+    }
+
+    referralCodes?.push(referralCode);
+
+    await WalletUserV2.updateOne(
+      { walletAddress: _walletAddress },
+      { $set: { referralCode: referralCodes } }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: { message: "referral code added successfully!" },
+    });
+  } catch (error) {
+    console.error("Error occurred in add custom referral:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
+};
+
 export const userInfo = async (req: Request, res: Response) => {
   try {
     const walletAddress: string = req.query.address as string;
@@ -240,6 +303,7 @@ export const userInfo = async (req: Request, res: Response) => {
     const userData = {
       rank: user.rank,
       referralPoints: user.points.referral ?? 0,
+      referralCode: user.referralCode,
       totalPoints: user.totalPoints,
       stakeZeroPoints: user.points.stakeLinea?.zero ?? 0,
       totalStakePoints: getTotalStakePoints(user),
@@ -248,7 +312,7 @@ export const userInfo = async (req: Request, res: Response) => {
     };
     res.status(200).json({ success: true, data: { userData } });
   } catch (error) {
-    console.error("Error occurred while data:", error);
+    console.error("Error occurred in userInfo:", error);
     res
       .status(500)
       .json({ success: false, data: { error: "Internal server error" } });
