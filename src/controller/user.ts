@@ -216,7 +216,7 @@ export const walletVerify = async (
   }
 };
 
-export const linkNewReferral = async (req: Request, res: Response) => {
+export const addCustomReferral = async (req: Request, res: Response) => {
   try {
     const { walletAddress, message, signHash, referralCode } = req.body;
 
@@ -281,15 +281,107 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error occurred in linking custom referral:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        data: { error: `Internal server error: ${error}` },
-      });
+    res.status(500).json({
+      success: false,
+      data: { error: `Internal server error: ${error}` },
+    });
   }
 };
 
+export const linkNewReferral = async (req: Request, res: Response) => {
+  try {
+    const { walletAddress, message, signHash, referralCode } = req.body;
+
+    
+    if (!walletAddress || !message || !signHash || !referralCode) {
+      return res.status(400).json({
+        success: false,
+        data: { error: "bad request" },
+      });
+    }
+
+    const _walletAddress = walletAddress.toLowerCase().trim();
+
+    // find user 
+    const user = await WalletUserV2.findOne({
+      walletAddress: _walletAddress,
+    }).select("walletAddress id referredBy referralCode");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        data: {
+          error:
+            "walletAddress not found",
+        },
+      });
+    }
+
+    // should not refer to self
+    if (user.referralCode.includes(referralCode)) {
+      return res.status(404).json({
+        success: false,
+        data: {
+          error: "cannot refer to self",
+        },
+      });
+    }
+
+    // if user is already referred by some other user, return
+    if (user.referredBy) {
+      return res.status(406).json({
+        success: false,
+        data: {
+          error: "already linked to a referral code",
+        },
+      });
+    }
+
+    // find referrer
+    const userReferrer = await WalletUserV2.findOne({
+      referralCode: referralCode,
+    }).select("walletAddress id");
+
+    if (!userReferrer) {
+      return res.status(404).json({
+        success: false,
+        data: {
+          error:
+            "invalid referral code",
+        },
+      });
+    }
+
+    // verify signature
+    const siweMessage = new SiweMessage(message);
+    const result = await siweMessage.verify({ signature: signHash });
+    const address = result.data.address.toLowerCase().trim();
+    
+    if (
+      address !== _walletAddress &&
+      result.data.prepareMessage() === message
+    ) {
+      return res.status(500).json({
+        success: false,
+        data: { error: "Signature verification failed. Invalid signature." },
+      });
+    }
+
+    user.referredBy = userReferrer.id;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: { message: "referral code linked successfully!" },
+    });
+  } catch (error) {
+    console.error("Error occurred in linking custom referral:", error);
+    res.status(500).json({
+      success: false,
+      data: { error: `Internal server error: ${error}` },
+    });
+  }
+};
 export const userInfo = async (req: Request, res: Response) => {
   try {
     const walletAddress: string = req.query.address as string;
