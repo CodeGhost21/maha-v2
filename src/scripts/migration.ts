@@ -22,7 +22,7 @@ export const migrateUsers = async () => {
     batch = await WalletUser.find({
       isDeleted: false,
     })
-      .select("walletAddress discordId referralCode referredBy role rank")
+      .select("walletAddress discordId referralCode referredBy role rank createdAt updatedAt")
       .skip(skip)
       .limit(batchSize);
     try {
@@ -32,6 +32,8 @@ export const migrateUsers = async () => {
       console.log(e);
     }
     skip += batchSize;
+    console.log('migration done for batch ', skip);
   } while (batch.length === batchSize);
+  console.log('migration done')
 };
 migrateUsers();
