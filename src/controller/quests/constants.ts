@@ -19,76 +19,83 @@ export const stakePtsPerMAHA = 1000;
 
 export interface Multiplier {
   defaultSupply: number; // 1x
-  defaultBorrow: number; // 3x
+  defaultBorrow: number; // 3x --> 4x
   ethSupply?: number; //2x all chains
   lidoSupply?: number; // 2x on zksync
   ezethSupply?: number; //2x all chains
   ethfiSupply?: number; //2x all chains
   rsethSupply?: number; //2x all chains
   wrsethSupply?: number; //2x all chains
+  usdcSupply?: number; //2x al chains //TODO: get confirmation 
 }
 
-export const stakeZeroMultiplier = 1.5;
+export const stakeZeroMultiplier = 1.5; //TODO: get confirmation
 
 export const ethLrtMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 3,
+  defaultBorrow: 4,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
+  usdcSupply: 2,
 };
 
 export const zksyncMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 3,
+  defaultBorrow: 4,
   ethSupply: 2,
   lidoSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
+  usdcSupply: 2,
 };
 
 export const blastMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 3,
+  defaultBorrow: 4,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
+  usdcSupply: 2,
 };
 
 export const lineaMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 3,
+  defaultBorrow: 4,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
+  usdcSupply: 2,
 };
 
 export const mantaMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 3,
+  defaultBorrow: 4,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
+  usdcSupply: 2,
 };
 
 export const xlayerMultiplier: Multiplier = {
   defaultSupply: 1,
-  defaultBorrow: 3,
+  defaultBorrow: 4,
   ethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
   wrsethSupply: 2,
+  usdcSupply: 2,
 };
 
 export const blastStartDate = new Date("29 Feb 2024").getTime();

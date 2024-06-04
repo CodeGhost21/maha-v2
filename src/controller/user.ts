@@ -304,7 +304,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     // find user
     const user = await WalletUserV2.findOne({
       walletAddress: _walletAddress,
-    }).select("walletAddress id referredBy referralCode");
+    }).select("walletAddress id referredBy referralCode referrerCode");
 
     if (!user) {
       return res.status(404).json({
@@ -338,7 +338,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     // find referrer
     const userReferrer = await WalletUserV2.findOne({
       referralCode: referralCode,
-    }).select("walletAddress id");
+    }).select("walletAddress id referralCode");
 
     if (!userReferrer) {
       return res.status(404).json({
@@ -365,6 +365,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     }
 
     user.referredBy = userReferrer.id;
+    user.referrerCode = userReferrer.referralCode[0];
     await user.save();
 
     res.status(200).json({
@@ -391,7 +392,7 @@ export const userInfo = async (req: Request, res: Response) => {
 
     const user = await WalletUserV2.findOne({
       walletAddress: walletAddress.toLowerCase().trim(),
-    }).select("rank points totalPoints referralCode referredBy");
+    }).select("rank points totalPoints referralCode referredBy referrerCode");
 
     if (!user)
       return res.status(404).json({
@@ -401,19 +402,12 @@ export const userInfo = async (req: Request, res: Response) => {
 
     const pointsTotal = getTotalSupplyBorrowPoints(user);
     
-    let refererReferralCode = undefined;
-    if (user.referredBy) {
-      const userReferer = await WalletUserV2.findOne({
-        _id: user.referredBy,
-      }).select("referralCode");
-      refererReferralCode = userReferer?.referralCode;
-    }
 
     const userData = {
       rank: user.rank,
       referralPoints: user.points.referral ?? 0,
       referralCode: user.referralCode,
-      referrerCode: refererReferralCode,
+      referrerCode: user.referrerCode,
       totalPoints: user.totalPoints,
       stakeZeroPoints: user.points.stakeLinea?.zero ?? 0,
       totalStakePoints: getTotalStakePoints(user),

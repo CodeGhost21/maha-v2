@@ -5,6 +5,7 @@ export interface IWalletUser {
   jwt: string;
   rank: number;
   referralCode: string[];
+  referrerCode: string;
   referredBy: string;
   totalPoints: number;
   walletAddress: string;
