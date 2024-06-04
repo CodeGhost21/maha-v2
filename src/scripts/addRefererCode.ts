@@ -29,7 +29,7 @@ export const updateRefererCode = async () => {
     console.log("skipped users", skip);
     await Promise.all(
       batch.map(async (user: any) => {
-        const referer = await WalletUserV2.findOne({ _id: user.id }).select(
+        const referer = await WalletUserV2.findOne({ _id: user.referredBy }).select(
           "referralCode"
         );
         user.referrerCode = referer?.referralCode[0];
