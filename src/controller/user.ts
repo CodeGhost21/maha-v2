@@ -44,104 +44,79 @@ import { IAsset, IStakeAsset } from "src/database/interface/walletUser/assets";
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
 export const getCurrentPoints = async (req: Request, res: Response) => {
-  const walletAddress = req.query.address;
-  if (!walletAddress || !ethers.isAddress(walletAddress)) {
-    return res
-      .status(400)
-      .json({ success: false, data: { error: "Address is required" } });
-  }
+  const walletAddress = req.query.address?.toString();
 
-  const user = await WalletUserV2.findOne({
-    walletAddress: walletAddress.toLowerCase().trim(),
-  }).select("points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy");
-
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      data: { error: "user not found" },
-    });
-  }
-
-  let referredByUser = {} as IWalletUserModel;
-  if (user.referredBy) {
-    try {
-      referredByUser = await WalletUserV2.findOne({
-        _id: user.referredBy,
-      }).select("id");
-    } catch (error) {
-      throw new Error(`error while fetching referred by users, ${error}`);
-    }
-  }
-
-  // current points will be calculated based on stored pps and ppsUpdateTimestamp
   try {
-    const previousPoints = user.points;
-    const pointsPerSecond = user.pointsPerSecond;
-    const pppUpdateTimestamp = user.pointsPerSecondUpdateTimestamp;
+    const user = await _verifyAndGetUser(
+      walletAddress,
+      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy"
+    );
 
-    const lpList = Object.keys(pointsPerSecond) as Array<
-      keyof IWalletUserPoints
-    >;
-
-    let currentPoints = {} as IWalletUserPoints;
-
-    lpList.forEach((lpTask) => {
-      if (lpTask.startsWith("stake")) {
-        const pppUpdateTimestampForTask = pppUpdateTimestamp[
-          lpTask
-        ] as IStakeAsset;
-        const pps = pointsPerSecond[lpTask] as IStakeAsset;
-        const oldPoints = previousPoints[lpTask] as IStakeAsset;
-
-        const _points: Partial<IWalletUserPoints> = {
-          [lpTask]: {} as IStakeAsset,
-        };
-        for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
-          const secondsElapsed = (Date.now() - Number(value)) / 1000;
-          const newPoints =
-            Number(pps[key as keyof IStakeAsset]) * secondsElapsed;
-
-          let refPointForAsset = 0;
-          if (referredByUser && Object.keys(referredByUser).length) {
-            refPointForAsset = Number(newPoints * referralPercent);
-          }
-          const assetOldPoinst = oldPoints[key as keyof IStakeAsset] ?? 0;
-          (_points[lpTask] as IStakeAsset)[key as keyof IStakeAsset] =
-            newPoints + refPointForAsset + assetOldPoinst;
-        }
-        currentPoints = { ...currentPoints, ..._points };
-      } else {
-        const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
-        const pps = pointsPerSecond[lpTask] as IAsset;
-        const oldPoints = (previousPoints[lpTask] as IAsset) ?? {};
-
-        const _points: Partial<IWalletUserPoints> = {
-          [lpTask]: {} as IAsset,
-        };
-        for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
-          const secondsElapsed = (Date.now() - Number(value)) / 1000;
-          const newPoints = Number(pps[key as keyof IAsset]) * secondsElapsed;
-
-          let refPointForAsset = 0;
-          if (referredByUser && Object.keys(referredByUser).length) {
-            refPointForAsset = Number(newPoints * referralPercent);
-          }
-          const assetOldPoinst = oldPoints[key as keyof IAsset] ?? 0;
-          (_points[lpTask] as IAsset)[key as keyof IAsset] =
-            newPoints + refPointForAsset + assetOldPoinst;
-        }
-        currentPoints = { ...currentPoints, ..._points };
-      }
-    });
+    const currentPoints = await _getCurrentPoints(user);
 
     res.status(200).json({ success: true, data: { ...currentPoints } });
-  } catch (error) {
-    console.log("error in calculating current points:", error);
+  } catch (error: any) {
+    try {
+      const errorObj = JSON.parse(error.message);
+      return res.status(errorObj.status).json(errorObj.obj);
+    } catch (error) {
+      console.log("oops!!");
+    }
     res
       .status(500)
       .json({ success: false, data: { error: "Internal server error" } });
   }
 };
+
+export const getCurrentTotalPointsWithPPS = async (
+  req: Request,
+  res: Response
+) => {
+  const walletAddress = req.query.address?.toString();
+
+  try {
+    const user = await _verifyAndGetUser(
+      walletAddress,
+      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy"
+    );
+
+    const currentPoints = await _getCurrentPoints(user);
+
+    const currentPointsProcessed = getTotalSupplyBorrowPoints({
+      points: currentPoints,
+    } as IWalletUserModel);
+    const totalPoints =
+      currentPointsProcessed.totalSupplyPoints +
+      currentPointsProcessed.totalBorrowPoints +
+      currentPointsProcessed.totalStakePoints;
+
+    const returnData = {
+      totalCurrentSupplyPointsPerSec:
+        currentPointsProcessed.totalSupplyPoints / 86400,
+      totalCurrentBorrowPointsPerSec:
+        currentPointsProcessed.totalBorrowPoints / 86400,
+      totalCurrentStakingPointsPerSec:
+        currentPointsProcessed.totalStakePoints / 86400,
+      totalCurrentPointsPerSec: totalPoints / 86400,
+      totalCurrentSupplyPoints: currentPointsProcessed.totalSupplyPoints,
+      totalCurrentBorrowPoints: currentPointsProcessed.totalBorrowPoints,
+      totalCurrentStakingPoints: currentPointsProcessed.totalStakePoints,
+      totalCurrentPoints: totalPoints,
+    };
+    res.status(200).json({ success: true, data: { ...returnData } });
+  } catch (error: any) {
+    try {
+      const errorObj = JSON.parse(error.message);
+      return res.status(errorObj.status).json(errorObj.obj);
+    } catch (error) {
+      console.log("oops!!");
+    }
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
+};
+
 export const _generateReferralCode = () => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -380,28 +355,19 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const userInfo = async (req: Request, res: Response) => {
   try {
     const walletAddress: string = req.query.address as string;
 
-    if (!walletAddress || !ethers.isAddress(walletAddress)) {
-      return res
-        .status(400)
-        .json({ success: false, data: { error: "Address is required" } });
-    }
-
-    const user = await WalletUserV2.findOne({
-      walletAddress: walletAddress.toLowerCase().trim(),
-    }).select("rank points totalPoints referralCode referredBy referrerCode");
-
-    if (!user)
-      return res.status(404).json({
-        success: false,
-        data: { error: "user not found" },
-      });
+    const user = await _verifyAndGetUser(
+      walletAddress,
+      "rank points totalPoints"
+    );
 
     const pointsTotal = getTotalSupplyBorrowPoints(user);
-    
+
+    console.log(pointsTotal);
 
     const userData = {
       rank: user.rank,
@@ -410,14 +376,19 @@ export const userInfo = async (req: Request, res: Response) => {
       referrerCode: user.referrerCode,
       totalPoints: user.totalPoints,
       stakeZeroPoints: user.points.stakeLinea?.zero ?? 0,
-      totalStakePoints: getTotalStakePoints(user),
+      totalStakePoints: pointsTotal.totalStakePoints,
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
     };
 
     res.status(200).json({ success: true, data: { userData } });
-  } catch (error) {
-    console.error("Error occurred in userInfo:", error);
+  } catch (error: any) {
+    try {
+      const errorObj = JSON.parse(error.message);
+      return res.status(errorObj.status).json(errorObj.obj);
+    } catch (error) {
+      console.log("oops!!");
+    }
     res
       .status(500)
       .json({ success: false, data: { error: "Internal server error" } });
@@ -506,17 +477,18 @@ export const getUsersData = async (req: Request, res: Response) => {
 export const getUserTotalPoints = async (req: Request, res: Response) => {
   try {
     const walletAddress: string = req.query.walletAddress as string;
-    const user: IWalletUserModel = await WalletUserV2.findOne({
-      walletAddress: walletAddress.toLowerCase().trim(),
-    }).select("totalPoints points");
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, data: { error: "user not found" } });
+    const user = await _verifyAndGetUser(walletAddress, "totalPoints");
+
     res
       .status(200)
       .json({ success: true, data: { totalPoints: user.totalPoints || 0 } });
-  } catch (error) {
+  } catch (error: any) {
+    try {
+      const errorObj = JSON.parse(error.message);
+      return res.status(errorObj.status).json(errorObj.obj);
+    } catch (error) {
+      console.log("oops!!");
+    }
     res
       .status(500)
       .json({ success: false, data: { error: "Internal server error" } });
@@ -734,20 +706,17 @@ export const getTotalSupplyBorrowPoints = (user: IWalletUserModel) => {
     getTotalPoints(blastBorrow) +
     getTotalPoints(lineaBorrow);
 
+  let totalStakePoints = 0;
+  if (user.points.stakeLinea) {
+    const stakeLinea = points.stakeLinea;
+    totalStakePoints = getTotalPoints(stakeLinea);
+  }
+
   return {
     totalSupplyPoints,
     totalBorrowPoints,
+    totalStakePoints,
   };
-};
-
-export const getTotalStakePoints = (user: IWalletUserModel) => {
-  const points = user.points;
-  if (!user.points.stakeLinea) {
-    return 0;
-  }
-  const stakeLinea = points.stakeLinea;
-  const totalPoints = getTotalPoints(stakeLinea);
-  return totalPoints;
 };
 
 export const getOpensBlockData = async (req: Request, res: Response) => {
@@ -785,3 +754,115 @@ export const getGlobalTotalPoints = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+const _getCurrentPoints = async (user: IWalletUserModel) => {
+  let referredByUser = {} as IWalletUserModel;
+
+  if (user.referredBy) {
+    try {
+      referredByUser = await WalletUserV2.findOne({
+        _id: user.referredBy,
+      }).select("id");
+    } catch (error) {
+      throw new Error(`error while fetching referred by users, ${error}`);
+    }
+  }
+
+  const previousPoints = user.points;
+  const pointsPerSecond = user.pointsPerSecond;
+  const pppUpdateTimestamp = user.pointsPerSecondUpdateTimestamp;
+
+  const lpList = Object.keys(pointsPerSecond) as Array<keyof IWalletUserPoints>;
+
+  let currentPoints = {} as IWalletUserPoints;
+
+  lpList.forEach((lpTask) => {
+    if (lpTask.startsWith("stake")) {
+      const pppUpdateTimestampForTask = pppUpdateTimestamp[
+        lpTask
+      ] as IStakeAsset;
+      const pps = pointsPerSecond[lpTask] as IStakeAsset;
+      const oldPoints = previousPoints[lpTask] as IStakeAsset;
+
+      const _points: Partial<IWalletUserPoints> = {
+        [lpTask]: {} as IStakeAsset,
+      };
+      for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
+        const secondsElapsed = (Date.now() - Number(value)) / 1000;
+        const newPoints =
+          Number(pps[key as keyof IStakeAsset]) * secondsElapsed;
+
+        let refPointForAsset = 0;
+        if (referredByUser && Object.keys(referredByUser).length) {
+          refPointForAsset = Number(newPoints * referralPercent);
+        }
+        const assetOldPoinst = oldPoints[key as keyof IStakeAsset] ?? 0;
+        (_points[lpTask] as IStakeAsset)[key as keyof IStakeAsset] =
+          newPoints + refPointForAsset + assetOldPoinst;
+      }
+      currentPoints = { ...currentPoints, ..._points };
+    } else {
+      const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
+      const pps = pointsPerSecond[lpTask] as IAsset;
+      const oldPoints = (previousPoints[lpTask] as IAsset) ?? {};
+
+      const _points: Partial<IWalletUserPoints> = {
+        [lpTask]: {} as IAsset,
+      };
+      for (const [key, value] of Object.entries(pppUpdateTimestampForTask)) {
+        const secondsElapsed = (Date.now() - Number(value)) / 1000;
+        const newPoints = Number(pps[key as keyof IAsset]) * secondsElapsed;
+
+        let refPointForAsset = 0;
+        if (referredByUser && Object.keys(referredByUser).length) {
+          refPointForAsset = Number(newPoints * referralPercent);
+        }
+        const assetOldPoinst = oldPoints[key as keyof IAsset] ?? 0;
+        (_points[lpTask] as IAsset)[key as keyof IAsset] =
+          newPoints + refPointForAsset + assetOldPoinst;
+      }
+      currentPoints = { ...currentPoints, ..._points };
+    }
+  });
+  return currentPoints;
+};
+
+const _verifyAndGetUser = async (
+  walletAddress: string | undefined,
+  fields = "rank points totalPoints referralCode referredBy referrerCode"
+) => {
+  if (!walletAddress || !ethers.isAddress(walletAddress)) {
+    const errorObj = {
+      status: 400,
+      obj: { success: false, data: { error: "Address is required" } },
+    };
+    throw Error(JSON.stringify(errorObj));
+  }
+
+  const user = await WalletUserV2.findOne({
+    walletAddress: walletAddress.toLowerCase().trim(),
+  }).select(fields);
+
+  if (!user) {
+    const errorObj = {
+      status: 400,
+      obj: {
+        success: false,
+        data: { error: "user not found" },
+      },
+    };
+    throw Error(JSON.stringify(errorObj));
+  }
+
+  return user;
+};
+
+// const _getTotalStakePoints = (user: IWalletUserModel) => {
+//   const points = user.points;
+//   if (!user.points.stakeLinea) {
+//     return 0;
+//   }
+//   const stakeLinea = points.stakeLinea;
+//   const totalPoints = getTotalPoints(stakeLinea);
+//   return totalPoints;
+// };
