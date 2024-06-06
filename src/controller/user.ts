@@ -362,7 +362,7 @@ export const userInfo = async (req: Request, res: Response) => {
 
     const user = await _verifyAndGetUser(
       walletAddress,
-      "rank points totalPoints"
+      "rank points totalPoints referralCode referrerCode"
     );
 
     const pointsTotal = getTotalSupplyBorrowPoints(user);
