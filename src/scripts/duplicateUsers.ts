@@ -20,7 +20,7 @@ export const findDuplicateWalletAddresses = async () => {
       {
         $match: {
           isDeleted: false,
-        }
+        },
       },
       {
         $group: {
@@ -38,41 +38,56 @@ export const findDuplicateWalletAddresses = async () => {
     ]);
     console.log("Duplicate wallet addresses:", duplicates, duplicates.length);
     for (const user of duplicates) {
-      const fetchUsers = await WalletUser.find({ walletAddress: user._id })
+      const fetchUsers = await WalletUser.find({ walletAddress: user._id });
 
-      const user1: any = fetchUsers[0]
-      const user2: any = fetchUsers[1]
+      const user0: any = fetchUsers[0];
+      const user1: any = fetchUsers[1];
 
-      const user1ReferredBy = await WalletUser.findOne({ referredBy: user1._id })
-      const user2ReferredBy = await WalletUser.findOne({ referredBy: user2._id })
+      const referredByUser0 = await WalletUser.findOne({
+        referredBy: user0._id,
+      });
+      const referredByUser1 = await WalletUser.findOne({
+        referredBy: user1._id,
+      });
 
-      if (!user1ReferredBy) {
-        if (!user1.referredBy) {
-
-
-          if (new Date(user1.createdAt) < new Date(user2.createdAt)) {
-            //update user2 to isDeleted to true
-          }
-        }
+      if (user0.referredBy && user1.referredBy) {
+        continue;
+      } else if (referredByUser0 && referredByUser1) {
+        continue;
+      } else if (user0.referredBy) {
+        fetchUsers[1].isDeleted = true;
+        await fetchUsers[1].save();
+      } else if (user1.referredBy) {
+        fetchUsers[0].isDeleted = true;
+        await fetchUsers[0].save();
+      } else if (referredByUser0) {
+        fetchUsers[1].isDeleted = true;
+        await fetchUsers[1].save();
+      } else if (referredByUser1) {
+        fetchUsers[0].isDeleted = true;
+        await fetchUsers[0].save();
+      } else if (new Date(user0.createdAt) > new Date(user1.createdAt)) {
+        fetchUsers[1].isDeleted = true;
+        await fetchUsers[1].save();
+      } else {
+        fetchUsers[0].isDeleted = true;
+        await fetchUsers[0].save();
       }
     }
   } catch (error) {
     console.error("Error:", error);
   }
-
 };
 // findDuplicateWalletAddresses();
 
-
 const convertWalletAddressCase = async () => {
-  const bulkWrite = []
+  const bulkWrite = [];
 
   const users = await WalletUser.find({
-    walletAddress: { $regex: /[A-Z]/ }
-  }).select('walletAddress')
+    walletAddress: { $regex: /[A-Z]/ },
+  }).select("walletAddress");
 
   console.log(users.length);
-
 
   for (const user of users) {
     bulkWrite.push({
@@ -80,13 +95,13 @@ const convertWalletAddressCase = async () => {
         filter: { _id: user._id },
         update: {
           $set: {
-            walletAddress: user.walletAddress.toLowerCase().trim()
+            walletAddress: user.walletAddress.toLowerCase().trim(),
           },
         },
-      }
-    })
+      },
+    });
   }
-  await WalletUserV2.bulkWrite(bulkWrite)
-}
+  await WalletUserV2.bulkWrite(bulkWrite);
+};
 
 // convertWalletAddressCase()
