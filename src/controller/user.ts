@@ -82,7 +82,7 @@ export const getCurrentTotalPointsWithPPS = async (
 
     const currentPoints = await _getCurrentPoints(user);
 
-    const currentPointsProcessed = getTotalSupplyBorrowPoints({
+    const currentPointsProcessed = getTotalSupplyBorrowStakePoints({
       points: currentPoints,
     } as IWalletUserModel);
     const totalPoints =
@@ -362,12 +362,8 @@ export const userInfo = async (req: Request, res: Response) => {
 
     const user = await _verifyAndGetUser(
       walletAddress,
-      "rank points totalPoints referralCode referrerCode"
+      "rank points totalPoints referralCode referrerCode totalStakePoints totalSupplyPoints totalBorrowPoints"
     );
-
-    const pointsTotal = getTotalSupplyBorrowPoints(user);
-
-    console.log(pointsTotal);
 
     const userData = {
       rank: user.rank,
@@ -376,9 +372,9 @@ export const userInfo = async (req: Request, res: Response) => {
       referrerCode: user.referrerCode,
       totalPoints: user.totalPoints,
       stakeZeroPoints: user.points.stakeLinea?.zero ?? 0,
-      totalStakePoints: pointsTotal.totalStakePoints,
-      totalSupplyPoints: pointsTotal.totalSupplyPoints,
-      totalBorrowPoints: pointsTotal.totalBorrowPoints,
+      totalStakePoints: user.totalStakePoints,
+      totalSupplyPoints: user.totalSupplyPoints,
+      totalBorrowPoints: user.totalBorrowPoints,
     };
 
     res.status(200).json({ success: true, data: { userData } });
@@ -673,7 +669,7 @@ export const getTotalPoints = (supplyOrBorrowObject: any) => {
   return totalPoints;
 };
 
-export const getTotalSupplyBorrowPoints = (user: IWalletUserModel) => {
+export const getTotalSupplyBorrowStakePoints = (user: IWalletUserModel) => {
   // get supply points for all chains and their assets
   const points = user.points;
   const mantaSupply = points.supplyManta || {};

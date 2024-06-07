@@ -40,12 +40,15 @@ export type Request = {
 export const getBlastChallenge = async (contractAddress: string) => {
   const url = "v1/dapp-auth/challenge";
   const operatorAddress = nconf.get("OPERATOR_ADDRESS");
+
   const requestBody: RequestChallenge = {
     contractAddress: contractAddress,
     operatorAddress: operatorAddress,
   };
+
   const response = await axios.post(`${baseUrl}/${url}`, requestBody);
-  return response.data as ResponseChallenge;
+
+  return response?.data as ResponseChallenge;
 };
 
 export const getBearerToken = async (challengeData: any) => {
@@ -78,6 +81,7 @@ export const BlastData = async () => {
   const contractAddressUSDB = "0x23A58cbe25E36e26639bdD969B0531d3aD5F9c34";
   const challengeUSDB = await getBlastChallenge(contractAddressUSDB);
   const tokenUSDB = await getBearerToken(challengeUSDB);
+
   const pointsUSDB = await getPoints(tokenUSDB, contractAddressUSDB);
   // console.log(pointsUSDB);
 

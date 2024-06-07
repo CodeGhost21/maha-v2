@@ -1,4 +1,8 @@
+export type Transfer = {
+  toAddress: string;
+  points: string;
+};
 export interface IBlastBatches {
-  batchId: number;
-  batch: any[];
+  batchId: string;
+  batch: Transfer[];
 }

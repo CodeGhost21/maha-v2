@@ -8,6 +8,9 @@ export interface IWalletUser {
   referrerCode: string;
   referredBy: string;
   totalPoints: number;
+  totalSupplyPoints: number;
+  totalBorrowPoints: number;
+  totalStakePoints: number;
   walletAddress: string;
   role: string;
   epoch: number;

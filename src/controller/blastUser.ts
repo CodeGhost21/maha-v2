@@ -10,8 +10,12 @@ export const getBlastUser = async (req: Request, res: Response) => {
     });
     if (result) {
       const response = {
-        blastPoint: result.blastPoints.pointsGiven || 0,
-        blastGold: result.blastGold.pointsGiven || 0,
+        blastPoint:
+          result.blastPoints.pointsGivenUSDB +
+            result.blastPoints.pointsGivenWETH || 0,
+        blastGold:
+          result.blastGold.pointsGivenUSDB + result.blastGold.pointsGivenWETH ||
+          0,
       };
 
       res.json({ success: true, response });
