@@ -20,6 +20,7 @@ export const findDuplicateWalletAddresses = async () => {
       {
         $match: {
           isDeleted: false,
+          walletAddress: { $ne: " " }
         },
       },
       {
@@ -34,8 +35,8 @@ export const findDuplicateWalletAddresses = async () => {
           count: { $gt: 1 }, // Filter groups with more than one document
           // createdAt: { $gt: timestampThreshold },
         },
-      },
-    ]);
+      }
+    ], { allowDiskUse: true });
     console.log("Duplicate wallet addresses:", duplicates, duplicates.length);
     for (const user of duplicates) {
       const fetchUsers = await WalletUser.find({ walletAddress: user._id });
@@ -51,6 +52,11 @@ export const findDuplicateWalletAddresses = async () => {
       });
 
       if (user0.referredBy && user1.referredBy) {
+        if ((new Date(user0.createdAt) > new Date(user1.createdAt)) && user0.referredBy === user1.referredBy) {
+          console.log(72);
+          fetchUsers[1].isDeleted = true;
+          await fetchUsers[1].save();
+        }
         continue;
       } else if (referredByUser0 && referredByUser1) {
         continue;
@@ -78,7 +84,7 @@ export const findDuplicateWalletAddresses = async () => {
     console.error("Error:", error);
   }
 };
-// findDuplicateWalletAddresses();
+findDuplicateWalletAddresses();
 
 const convertWalletAddressCase = async () => {
   const bulkWrite = [];
