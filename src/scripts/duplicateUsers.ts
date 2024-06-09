@@ -20,7 +20,7 @@ export const findDuplicateWalletAddresses = async () => {
       {
         $match: {
           isDeleted: false,
-          walletAddress: { $ne: " " }
+          walletAddress: { $ne: "" }
         },
       },
       {
@@ -37,8 +37,11 @@ export const findDuplicateWalletAddresses = async () => {
         },
       }
     ], { allowDiskUse: true });
-    console.log("Duplicate wallet addresses:", duplicates, duplicates.length);
+    console.log("Duplicate wallet addresses:", duplicates.length);
+    const bulkWrite = []
     for (const user of duplicates) {
+      console.log(user._id);
+
       const fetchUsers = await WalletUser.find({ walletAddress: user._id });
 
       const user0: any = fetchUsers[0];
@@ -53,33 +56,112 @@ export const findDuplicateWalletAddresses = async () => {
 
       if (user0.referredBy && user1.referredBy) {
         if ((new Date(user0.createdAt) > new Date(user1.createdAt)) && user0.referredBy === user1.referredBy) {
-          console.log(72);
-          fetchUsers[1].isDeleted = true;
-          await fetchUsers[1].save();
+          console.log(57);
+          // fetchUsers[1].isDeleted = true;
+          // await fetchUsers[1].save();
+          bulkWrite.push({
+            updateOne: {
+              filter: { _id: fetchUsers[1].id },
+              update: {
+                $set: {
+                  isDeleted: true
+                },
+              },
+            },
+          })
         }
         continue;
       } else if (referredByUser0 && referredByUser1) {
         continue;
       } else if (user0.referredBy) {
-        fetchUsers[1].isDeleted = true;
-        await fetchUsers[1].save();
+        console.log(75);
+        // fetchUsers[1].isDeleted = true;
+        // await fetchUsers[1].save();
+        bulkWrite.push({
+          updateOne: {
+            filter: { _id: fetchUsers[1].id },
+            update: {
+              $set: {
+                isDeleted: true
+              },
+            },
+          },
+        })
       } else if (user1.referredBy) {
-        fetchUsers[0].isDeleted = true;
-        await fetchUsers[0].save();
+        console.log(89);
+        // fetchUsers[0].isDeleted = true;
+        // await fetchUsers[0].save();
+        bulkWrite.push({
+          updateOne: {
+            filter: { _id: fetchUsers[0].id },
+            update: {
+              $set: {
+                isDeleted: true
+              },
+            },
+          },
+        })
       } else if (referredByUser0) {
-        fetchUsers[1].isDeleted = true;
-        await fetchUsers[1].save();
+        console.log(103)
+        // fetchUsers[1].isDeleted = true;
+        // await fetchUsers[1].save();
+        bulkWrite.push({
+          updateOne: {
+            filter: { _id: fetchUsers[1].id },
+            update: {
+              $set: {
+                isDeleted: true
+              },
+            },
+          },
+        })
       } else if (referredByUser1) {
-        fetchUsers[0].isDeleted = true;
-        await fetchUsers[0].save();
+        console.log(117)
+        // fetchUsers[0].isDeleted = true;
+        // await fetchUsers[0].save();
+        bulkWrite.push({
+          updateOne: {
+            filter: { _id: fetchUsers[0].id },
+            update: {
+              $set: {
+                isDeleted: true
+              },
+            },
+          },
+        })
       } else if (new Date(user0.createdAt) > new Date(user1.createdAt)) {
-        fetchUsers[1].isDeleted = true;
-        await fetchUsers[1].save();
+        console.log(131);
+        // fetchUsers[1].isDeleted = true;
+        // await fetchUsers[1].save();
+        bulkWrite.push({
+          updateOne: {
+            filter: { _id: fetchUsers[1].id },
+            update: {
+              $set: {
+                isDeleted: true
+              },
+            },
+          },
+        })
       } else {
-        fetchUsers[0].isDeleted = true;
-        await fetchUsers[0].save();
+        console.log(145);
+        // fetchUsers[0].isDeleted = true;
+        // await fetchUsers[0].save();
+        bulkWrite.push({
+          updateOne: {
+            filter: { _id: fetchUsers[0].id },
+            update: {
+              $set: {
+                isDeleted: true
+              },
+            },
+          },
+        })
       }
+      console.log(bulkWrite[0])
+
     }
+    await WalletUser.bulkWrite(bulkWrite)
   } catch (error) {
     console.error("Error:", error);
   }
