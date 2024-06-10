@@ -205,10 +205,6 @@ export const distributeBlastPoints = async () => {
   const queryURL =
     "https://api.studio.thegraph.com/query/65585/zerolend-blast-market/version/latest";
   const bulkOperations = [];
-  const allBlastUsers = await BlastUser.find({}, { walletAddress: 1, _id: 0 });
-  const allBlastUsersAddress: any = allBlastUsers.map((user: any) =>
-    user.walletAddress.toLowerCase().trim()
-  );
   do {
     const graphQuery = `query {
     users(where: {id_gt: "${lastAddress}"}, first: ${first}) {
@@ -234,35 +230,21 @@ export const distributeBlastPoints = async () => {
     // update db
     if (isSuccess) {
       for (const [walletAddress, share] of usersShare) {
-        if (allBlastUsersAddress.includes(walletAddress)) {
-          bulkOperations.push({
-            updateOne: {
-              filter: { walletAddress },
-              update: {
-                $set: {
-                  "blastPoints.timestamp": Date.now(),
-                },
-                $inc: {
-                  "blastPoints.pointsGivenUSDB": Number(share.pointUSDB),
-                  "blastPoints.pointsGivenWETH": Number(share.pointWETH),
-                },
+        bulkOperations.push({
+          updateOne: {
+            filter: { walletAddress },
+            update: {
+              $set: {
+                "blastPoints.timestamp": Date.now(),
+              },
+              $inc: {
+                "blastPoints.pointsGivenUSDB": Number(share.pointUSDB),
+                "blastPoints.pointsGivenWETH": Number(share.pointWETH),
               },
             },
-          });
-        } else {
-          bulkOperations.push({
-            insertOne: {
-              document: {
-                walletAddress,
-                blastPoints: {
-                  pointsGivenUSDB: Number(share.pointUSDB),
-                  pointsGivenWETH: Number(share.pointWETH),
-                  timestamp: Date.now(),
-                },
-              },
-            },
-          });
-        }
+            upsert: true,
+          },
+        });
       }
     }
 
