@@ -21,7 +21,7 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "30 00 * * *",
+  "40 17 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running lp points every day at 12:30 am");
