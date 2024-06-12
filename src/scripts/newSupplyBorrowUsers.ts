@@ -9,6 +9,7 @@ import {
   apiEth,
   apiLinea,
   apiManta,
+  apiStakeZero,
   apiXLayer,
   apiZKSync,
 } from "../controller/quests/constants";
@@ -64,6 +65,13 @@ export const addUsers = async () => {
     console.log("adding X Layer users failed with error:", e);
   }
 
+  //linea stake
+  try {
+    console.log("adding linea wallet users (stakers)");
+    await addSupplyBorrowUsers(apiStakeZero);
+  } catch (e) {
+    console.log("adding ETH Mainnet LRTs users failed with error:", e);
+  }
   console.log("add new users process completed.");
 };
 
@@ -148,14 +156,14 @@ export const addSupplyBorrowUsersManta = async (queryURL: string) => {
 
 export const addSupplyBorrowUsers = async (queryURL: string) => {
   const first = 1000;
-  let batch;
+  let users;
   let lastAddress = "0x0000000000000000000000000000000000000000";
   do {
     const addressesToInsert = [];
     // const queryURL =
     //   "https://api.studio.thegraph.com/query/49970/zerolend/version/latest";
 
-    const graphQuery = `query {
+    let graphQuery = `query {
       users(
         where: {lastUpdateTimestamp_gte: 1710282994, id_gt: "${lastAddress}"},
         first: 1000
@@ -165,20 +173,34 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
       }
     }`;
 
+    if (queryURL.includes("zerolend-omnistaking")) {
+      graphQuery = `query {
+        tokenBalances(first: 1000, where: {id_gt: "${lastAddress}"}) {
+          id
+
+        }
+      }`;
+    }
+
     const headers = {
       "Content-Type": "application/json",
     };
-    batch = await axios.post(
+    const batch = await axios.post(
       queryURL,
       { query: graphQuery },
       { headers, timeout: 30000 }
     );
-    if (batch.data.data.users.length === 0) {
+
+    users = queryURL.includes("zerolend-omnistaking")
+      ? batch.data.data.tokenBalances
+      : batch.data.data.users;
+
+    if (users.length === 0) {
       console.log("No users to add");
       return;
     }
 
-    const addresses = batch.data.data.users.map((user: any) => user.id);
+    const addresses = users.map((user: any) => user.id);
     const existingAddresses = (
       await WalletUserV2.find(
         {
@@ -196,9 +218,9 @@ export const addSupplyBorrowUsers = async (queryURL: string) => {
       (address: string) => !existingAddresses.includes(address.toLowerCase())
     );
     addressesToInsert.push(...newAddresses);
-    lastAddress = batch.data.data.users[batch.data.data.users.length - 1].id;
+    lastAddress = users[users.length - 1].id;
     console.log(addressesToInsert.length, "addresses to insert");
     await executeAddSupplyBorrowUsers(addressesToInsert);
-  } while (batch.data.data.users.length === first);
+  } while (users.length === first);
   console.log("Bulk write operations executed successfully.");
 };
