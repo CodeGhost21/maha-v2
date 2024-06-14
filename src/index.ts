@@ -12,8 +12,7 @@ import routes from "./routes";
 import session from "express-session";
 import { totalPoints } from "./cron/totalPoints";
 import "./strategies";
-import { blastPPSCron, lineaPPSCron } from "./cron/dailyLpPointsChain.v2";
-import { updateLPPointsHourly } from "./cron/lpPointshourly";
+import buyNotifBot from "./scripts/buyNotifBot";
 
 const app = express();
 const server = new http.Server(app);
@@ -42,7 +41,10 @@ app.set("port", nconf.get("PORT") || 5002);
 const port = app.get("port");
 server.listen(port, () => console.log(`server started on port ${port}`));
 
-// // setup LB cache
+// notification for $ZERO buy
+buyNotifBot()
+
+// setup LB cache
 cron.schedule("*/10 * * * *", async () => {
   console.log("updating leaderboard cache 10 minutes");
   await updateLBCache();
@@ -53,7 +55,3 @@ cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
   await totalPoints();
 });
-
-// totalPoints();
-// updateLBCache();
-updateLPPointsHourly();

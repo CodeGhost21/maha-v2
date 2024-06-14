@@ -21,11 +21,11 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "40 17 * * *",
+  "30 12 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running lp points every day at 12:30 am");
-      await zksyncPPSCron(),
+        await zksyncPPSCron(),
         await mantaPPSCron(),
         await blastPPSCron(),
         await ethereumLrtPPSCron(),
@@ -35,61 +35,6 @@ cron.schedule(
   },
   { timezone: "Asia/Kolkata" }
 );
-
-// cron.schedule(
-//   "35 14 * * *",
-//   async () => {
-//     addToQueue(async () => {
-//       console.log("running manta lp points every day at 2:35 am");
-//       await mantaPPSCron();
-//     });
-//   },
-//   { timezone: "Asia/Kolkata" }
-// );
-
-// cron.schedule(
-//   "05 16 * * *",
-//   async () => {
-//     addToQueue(async () => {
-//       console.log("running blast lp points every day at 4:05 am");
-//       await blastPPSCron();
-//     });
-//   },
-//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
-// );
-
-// cron.schedule(
-//   "35 17 * * *",
-//   async () => {
-//     addToQueue(async () => {
-//       console.log("running ethereumLrt lp points every day at 5:35 am");
-//       await ethereumLrtPPSCron();
-//     });
-//   },
-//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
-// );
-
-// cron.schedule(
-//   "05 19 * * *",
-//   async () => {
-//     addToQueue(async () => {
-//       console.log("running linea lp points every day at 7:05 am");
-//       await lineaPPSCron();
-//     });
-//   },
-//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
-// );
-
-// cron.schedule(
-//   "35 20 * * *",
-//   async () => {
-//     addToQueue(async () => {
-//       console.log("running xLayer lp points every day at 8:35 am");
-//       await xLayerPPSCron();
-//     });
-//   },
-//   { timezone: "Asia/Kolkata", recoverMissedExecutions: true }
-// );
 
 
 // -------------  Update Rank  -----------------
