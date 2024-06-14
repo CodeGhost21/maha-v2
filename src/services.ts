@@ -25,8 +25,8 @@ cron.schedule(
   async () => {
     addToQueue(async () => {
       console.log("running lp points every day at 12:30 am");
-        await zksyncPPSCron(),
-        await mantaPPSCron(),
+      // await zksyncPPSCron(),
+      await mantaPPSCron(),
         await blastPPSCron(),
         await ethereumLrtPPSCron(),
         await lineaPPSCron(),
