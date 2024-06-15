@@ -21,12 +21,12 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "05 01 * * *",
+  "30 00 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running lp points every day at 12:30 am");
-      // await zksyncPPSCron(),
-      await mantaPPSCron(),
+      await zksyncPPSCron(),
+        await mantaPPSCron(),
         await blastPPSCron(),
         await ethereumLrtPPSCron(),
         await lineaPPSCron(),
