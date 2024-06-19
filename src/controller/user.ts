@@ -90,14 +90,15 @@ export const getCurrentTotalPointsWithPPS = async (
       currentPointsProcessed.totalBorrowPoints +
       currentPointsProcessed.totalStakePoints;
 
+    const { totalSum, supplySum, borrowSum, stakeSum } = _sumPointsPerSecond(
+      user.pointsPerSecond
+    );
+
     const returnData = {
-      totalCurrentSupplyPointsPerSec:
-        currentPointsProcessed.totalSupplyPoints / 86400,
-      totalCurrentBorrowPointsPerSec:
-        currentPointsProcessed.totalBorrowPoints / 86400,
-      totalCurrentStakingPointsPerSec:
-        currentPointsProcessed.totalStakePoints / 86400,
-      totalCurrentPointsPerSec: totalPoints / 86400,
+      totalCurrentSupplyPointsPerSec: supplySum,
+      totalCurrentBorrowPointsPerSec: borrowSum,
+      totalCurrentStakingPointsPerSec: stakeSum,
+      totalCurrentPointsPerSec: totalSum,
       totalCurrentSupplyPoints: currentPointsProcessed.totalSupplyPoints,
       totalCurrentBorrowPoints: currentPointsProcessed.totalBorrowPoints,
       totalCurrentStakingPoints: currentPointsProcessed.totalStakePoints,
@@ -852,6 +853,34 @@ const _verifyAndGetUser = async (
 
   return user;
 };
+
+function _sumPointsPerSecond(obj:any) {
+  let totalSum = 0;
+  let supplySum = 0;
+  let borrowSum = 0;
+  let stakeSum = 0;
+
+  function recurse(innerObj:any, parentKey: string) {
+    for (const key in innerObj) {
+      if (typeof innerObj[key] === "object" && innerObj[key] !== null) {
+        recurse(innerObj[key], parentKey || key);
+      } else if (typeof innerObj[key] === "number") {
+        totalSum += innerObj[key];
+        if (parentKey && parentKey.includes("supply")) {
+          supplySum += innerObj[key];
+        } else if (parentKey && parentKey.includes("borrow")) {
+          borrowSum += innerObj[key];
+        } else if (parentKey && parentKey.includes("stake")) {
+          stakeSum += innerObj[key];
+        }
+      }
+    }
+  }
+
+  recurse(obj, "");
+
+  return { totalSum, supplySum, borrowSum, stakeSum };
+}
 
 // const _getTotalStakePoints = (user: IWalletUserModel) => {
 //   const points = user.points;

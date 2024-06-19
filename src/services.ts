@@ -10,7 +10,7 @@ import {
   blastPPSCron,
   xLayerPPSCron,
 } from "./cron/dailyLpPointsChain.v2";
-import { addUsers } from "./scripts/newSupplyBorrowUsers";
+// import { addUsers } from "./scripts/newSupplyBorrowUsers";
 import { updateLPPointsHourly } from "./cron/lpPointshourly";
 import { addToQueue, isQueueEmpty } from "./cron/queue";
 
@@ -50,16 +50,17 @@ cron.schedule(
 );
 
 // -------------  Add Users  -----------------
-cron.schedule(
-  "05 9 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("adding new wallet users every day at 9:05 am");
-      await addUsers();
-    });
-  },
-  { timezone: "Asia/Kolkata" }
-);
+// cron.schedule(
+//   "05 9 * * *",
+//   async () => {
+//     addToQueue(async () => {
+//       console.log("adding new wallet users every day at 9:05 am");
+//       await addUsers();
+//     });
+//   },
+//   { timezone: "Asia/Kolkata" }
+// );
+
 
 // -------------  Update LP Points hourly -----------------
 cron.schedule(

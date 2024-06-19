@@ -39,6 +39,7 @@ import {
   xlayerMultiplier,
   zksyncMultiplier,
 } from "../controller/quests/constants";
+import { lpRateHourly } from "./updateRatesHourly";
 
 const _processBatch = async (
   api: string,
@@ -164,21 +165,14 @@ const _dailyLpPointsChain = async (
 // manta
 export const mantaPPSCron = async () => {
   console.log("starting Manta points per second calculations");
-  return _dailyLpPointsChain(
-    apiManta,
-    mantaProvider,
-    mantaMultiplier,
-    "supplyManta",
-    "borrowManta"
-  );
+  await lpRateHourly(apiManta, mantaMultiplier, "supplyManta", "borrowManta");
 };
 
 // zksync
 export const zksyncPPSCron = async () => {
   console.log("starting ZkSync points per second calculations");
-  return _dailyLpPointsChain(
+  await lpRateHourly(
     apiZKSync,
-    zksyncProvider,
     zksyncMultiplier,
     "supplyZkSync",
     "borrowZkSync"
@@ -188,34 +182,28 @@ export const zksyncPPSCron = async () => {
 // blast
 export const blastPPSCron = async () => {
   console.log("starting Blast points per second calculations");
-  return _dailyLpPointsChain(
-    apiBlast,
-    blastProvider,
-    blastMultiplier,
-    "supplyBlast",
-    "borrowBlast"
-  );
+  await lpRateHourly(apiBlast, blastMultiplier, "supplyBlast", "borrowBlast");
 };
 
 // linea
 export const lineaPPSCron = async () => {
   console.log("starting Linea points per second calculations");
-  return _dailyLpPointsChain(
+  await lpRateHourly(
     apiLinea,
-    lineaProvider,
     lineaMultiplier,
     "supplyLinea",
     "borrowLinea",
-    "stakeLinea"
+    "stakeLinea",
+    apiStakeZero,
+    stakeZeroMultiplier
   );
 };
 
 // etherum Lrt
 export const ethereumLrtPPSCron = async () => {
   console.log("starting EthereumLrt points per second calculations");
-  return _dailyLpPointsChain(
+  await lpRateHourly(
     apiEth,
-    ethLrtProvider,
     ethLrtMultiplier,
     "supplyEthereumLrt",
     "borrowEthereumLrt"
@@ -225,9 +213,8 @@ export const ethereumLrtPPSCron = async () => {
 // xlayer
 export const xLayerPPSCron = async () => {
   console.log("starting XLayer points per second calculations");
-  return _dailyLpPointsChain(
+  await lpRateHourly(
     apiXLayer,
-    xLayerProvider,
     xlayerMultiplier,
     "supplyXLayer",
     "borrowXLayer"
