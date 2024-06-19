@@ -19,7 +19,7 @@ axiosRetry(axios, {
   },
   retryCondition: (error) => {
     // if retry condition is not specified, by default idempotent requests are retried
-    return (error.response?.status === 429 || error.response?.status === 520);
+    return error.response?.status === 429 || error.response?.status === 520;
   },
 });
 
@@ -82,6 +82,12 @@ export const assignBlastPoints = async (actualPoints: Map<any, any>) => {
           $set: {
             "blastPoints.pointsPendingUSDB": 0,
             "blastPoints.pointsPendingWETH": 0,
+            "blastPoints.pointsPending": 0,
+          },
+          $inc: {
+            "blastPoints.pointsGivenUSDB": actualUSDB ?? 0,
+            "blastPoints.pointsGivenWETH": actualWETH ?? 0,
+            "blastPoints.pointsGiven": actualWETH ?? 0 + actualUSDB ?? 0,
           },
         },
       },
@@ -113,7 +119,7 @@ export const assignBlastPoints = async (actualPoints: Map<any, any>) => {
   // send request for USDB
   try {
     // await BlastUser.bulkWrite(bulkOperations);
-    
+
     // const responseUSDB = await axios.put(urlUSDB, requestUSDB, {
     //   headers: headersUSDB,
     // });
@@ -291,29 +297,34 @@ const calculateAndUpdatePositivePointsInDb = async (
     const valuesToSet: any = {};
 
     // if USDB points to give are +ve, update db
-    pointsToGiveUSDB > 0
-      ? (valuesToSet["blastPoints.pointsPendingUSDB"] = pointsToGiveUSDB)
-      : "";
+    if (pointsToGiveUSDB > 0) {
+      valuesToSet["blastPoints.pointsPendingUSDB"] = pointsToGiveUSDB;
+      valuesToSet["blastPoints.pointsPending"] = pointsToGiveUSDB;
+    }
+
 
     // if WETH points to give are +ve, update db
-    pointsToGiveWETH > 0
-      ? (valuesToSet["blastPoints.pointsPendingWETH"] = pointsToGiveWETH)
-      : "";
+    if (pointsToGiveWETH > 0) {
+      valuesToSet["blastPoints.pointsPendingWETH"] = pointsToGiveWETH;
+      if (!valuesToSet["blastPoints.pointsPending"]) {
+        valuesToSet["blastPoints.pointsPending"] = pointsToGiveWETH;
+      } else {
+        valuesToSet["blastPoints.pointsPending"] += pointsToGiveWETH;
+      }
+    }
 
     if (Object.keys(valuesToSet).length > 0) {
       // set timeStamp
       valuesToSet["blastPoints.timestamp"] = Date.now();
+
       actualPoints.set(walletAddress, valuesToSet);
+
       // push update/insert op in bulk ops
       bulkOperations.push({
         updateOne: {
           filter: { walletAddress },
           update: {
             $set: valuesToSet,
-            $inc: {
-              "blastPoints.pointsGivenWETH": pointsToGiveWETH ?? 0,
-              "blastPoints.pointsGivenUSDC": pointsToGiveUSDB ?? 0,
-            },
           },
           upsert: true, // creates new user if walletAddress is not found
         },
