@@ -19,7 +19,7 @@ axiosRetry(axios, {
   },
   retryCondition: (error) => {
     // if retry condition is not specified, by default idempotent requests are retried
-    return error.response?.status === 429;
+    return (error.response?.status === 429 || error.response?.status === 520);
   },
 });
 
@@ -112,35 +112,35 @@ export const assignBlastPoints = async (actualPoints: Map<any, any>) => {
 
   // send request for USDB
   try {
-    await BlastUser.bulkWrite(bulkOperations);
+    // await BlastUser.bulkWrite(bulkOperations);
     
-    const responseUSDB = await axios.put(urlUSDB, requestUSDB, {
-      headers: headersUSDB,
-    });
+    // const responseUSDB = await axios.put(urlUSDB, requestUSDB, {
+    //   headers: headersUSDB,
+    // });
 
-    if (responseUSDB.data.success) {
-      console.log("USDB transfer successful, saving batch");
+    // if (responseUSDB.data.success) {
+    //   console.log("USDB transfer successful, saving batch");
 
-      //saving batch
-      await BlastBatches.create({
-        batchId: `${batchId}_usdb`,
-        batch: transferBatchUSDB,
-      });
-    }
+    //   //saving batch
+    //   await BlastBatches.create({
+    //     batchId: `${batchId}_usdb`,
+    //     batch: transferBatchUSDB,
+    //   });
+    // }
 
-    const responseWETH = await axios.put(urlWETH, requestWETH, {
-      headers: headersWETH,
-    });
+    // const responseWETH = await axios.put(urlWETH, requestWETH, {
+    //   headers: headersWETH,
+    // });
 
-    if (responseWETH.data.success) {
-      console.log("WETH transfer successful, saving batch");
+    // if (responseWETH.data.success) {
+    //   console.log("WETH transfer successful, saving batch");
 
-      //saving batch
-      await BlastBatches.create({
-        batchId: `${batchId}_weth`,
-        batch: transferBatchWETH,
-      });
-    }
+    //   //saving batch
+    //   await BlastBatches.create({
+    //     batchId: `${batchId}_weth`,
+    //     batch: transferBatchWETH,
+    //   });
+    // }
 
     return true;
   } catch (e: any) {
@@ -311,8 +311,8 @@ const calculateAndUpdatePositivePointsInDb = async (
           update: {
             $set: valuesToSet,
             $inc: {
-              "blastPoints.pointsGivenWETH": pointsToGiveUSDB ?? 0,
-              "blastPoints.pointsGivenUSDC": pointsToGiveWETH ?? 0,
+              "blastPoints.pointsGivenWETH": pointsToGiveWETH ?? 0,
+              "blastPoints.pointsGivenUSDC": pointsToGiveUSDB ?? 0,
             },
           },
           upsert: true, // creates new user if walletAddress is not found
