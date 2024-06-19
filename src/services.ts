@@ -21,7 +21,7 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "30 00 * * *",
+  "0 */6 * * *",
   async () => {
     addToQueue(async () => {
       console.log("running lp points every day at 12:30 am");
@@ -30,7 +30,7 @@ cron.schedule(
         await blastPPSCron(),
         await ethereumLrtPPSCron(),
         await lineaPPSCron(),
-        await xLayerPPSCron()
+        await xLayerPPSCron();
     });
   },
   { timezone: "Asia/Kolkata" }
@@ -64,7 +64,7 @@ cron.schedule(
 
 // -------------  Update LP Points hourly -----------------
 cron.schedule(
-  "*/59 * * * *",
+  "*/57 * * * *",
   async () => {
     if (isQueueEmpty() && !isUpdatingPoints) {
       isUpdatingPoints = true;

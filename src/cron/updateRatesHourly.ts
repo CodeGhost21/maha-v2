@@ -13,6 +13,8 @@ import {
 } from "../controller/quests/constants";
 import axiosRetry from "axios-retry";
 import { WalletUserV2 } from "../database/models/walletUsersV2";
+import { CacheDB } from "../database/models/cache";
+import { ICache } from "../database/interface/walletUser/cache";
 
 // Exponential back-off retry delay between requests
 axiosRetry(axios, {
@@ -26,14 +28,13 @@ axiosRetry(axios, {
   },
   retryCondition: (error) => {
     // if retry condition is not specified, by default idempotent requests are retried
-    return error.response?.status === 429 || error.response?.status === 520;
+    return (
+      error.response?.status === 429 ||
+      error.response?.status === 520 ||
+      error.response?.status === 408
+    );
   },
 });
-interface IResponse {
-  data: {
-    userReserves: IData[];
-  };
-}
 
 interface IData {
   user: {
@@ -46,7 +47,6 @@ interface IData {
     symbol: string;
     name: string;
   };
-  liquidityRate: "0";
 }
 
 export const lpRateHourly = async (
@@ -60,10 +60,10 @@ export const lpRateHourly = async (
 ) => {
   // get supply and borrow data
   console.log(
-    `starting rates calculations for ${supplyTask.substr(6)} at`,
+    `starting rates calculations for ${supplyTask.substring(6)} at`,
     Date.now()
   );
-  
+
   await _getSupplyBorrowStakeData(
     api,
     multiplier,
@@ -73,10 +73,6 @@ export const lpRateHourly = async (
     stakeAPI,
     stakeMultiplier
   );
-
-  // console.log(`Got reserves for ${supplyTask.substr(6)} at`, Date.now());
-  // // calculate rates and update in db
-  // await _calculateAndUpdateRates(reserves, supplyTask, borrowTask, stakeTask);
 
   console.log("done at", Date.now());
 };
@@ -94,13 +90,21 @@ const _getSupplyBorrowStakeData = async (
   let lastAddress = "0x0000000000000000000000000000000000000000";
 
   // const currentBlock = await provider.getBlockNumber();
-  // block: {number: ${currentBlock - 5}}
+  let supplyBorrowBlock = 0;
+  const cacheDb = await CacheDB.findOne({ cacheId: "cache-blocks-queried" });
+  if (cacheDb) {
+    console.log(cacheDb)
+    supplyBorrowBlock =
+      (cacheDb[
+        `blockNumber${supplyTask.substring(6)}` as keyof ICache
+      ] as number) ?? 0;
+  }
 
   let marketPrice: any = await cache.get("coingecko:PriceList");
   if (!marketPrice) {
     marketPrice = await getPriceCoinGecko();
   }
-  console.log("starting for new batch");
+
   do {
     const reservesMap = new Map();
     const query = `{
@@ -116,7 +120,8 @@ const _getSupplyBorrowStakeData = async (
               {user_gte: "${lastAddress}"}
               ]
             }
-        first: ${first}
+        first: ${first},
+        block: {number_gte: ${supplyBorrowBlock}}
       ) {
         user {
           id
@@ -128,21 +133,24 @@ const _getSupplyBorrowStakeData = async (
           symbol
           name
         }
-        liquidityRate
+      }
+      _meta {
+        block {
+          number
+        }
       }
     }`;
 
-    // TODO use axios with axios-retry
-    const response = await fetch(api, {
-      method: "POST",
-      body: JSON.stringify({ query }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const batch: IResponse = await response.json();
-
+    const response = await axios.post(
+      api,
+      { query: query },
+      { headers: { "Content-Type": "application/json" }, timeout: 300000 }
+    );
+    const batch = response.data;
     // TODO: will break in case of too many requests, axios-retry will help in this case
-    if (!batch.data || batch.data.userReserves.length == 0) break;
+    if (!batch.data || batch.data.userReserves.length == 0) {
+      break;
+    }
 
     // calculate supply and borrow points for each asset
     batch.data.userReserves.forEach((data: IData) => {
@@ -177,21 +185,42 @@ const _getSupplyBorrowStakeData = async (
       lastAddress = data.user.id;
     });
 
-    console.log(
-      "processed batch, last address =",
-      lastAddress,
-      "writing in db"
-    );
-
+    supplyBorrowBlock = batch.data._meta.block.number;
     // calculate rates and update in db
     await _calculateAndUpdateRates(reservesMap, supplyTask, borrowTask);
 
     // eslint-disable-next-line no-constant-condition
   } while (true);
 
+  // update db cache with block number
+  console.log(
+    `blockNumber${supplyTask.substring(6)}`,
+    "saved for supply borrow task",
+    supplyBorrowBlock
+  );
+
+  await CacheDB.updateOne(
+    {
+      cacheId: "cache-blocks-queried",
+    },
+    {
+      $set: {
+        [`blockNumber${supplyTask.substring(6)}`]: supplyBorrowBlock ?? 0,
+      },
+    },
+    { upsert: true }
+  );
   // if stake is available then get stake points
   if (stakeAPI && stakeMultiplier) {
-    lastAddress = "0x0000000000000000000000000000000000000000";
+    let stakeBlock = 0;
+    if (cacheDb) {
+      stakeBlock =
+        (cacheDb[
+          `blockNumberStake${supplyTask.substring(6)}` as keyof ICache
+        ] as number) ?? 0;
+    }
+    let lastAddressStake = "0x0000000000000000000000000000000000000000";
+
     do {
       const reservesMap = new Map();
       const query = `query {
@@ -204,14 +233,20 @@ const _getSupplyBorrowStakeData = async (
                 {balance_omni_lp_gt: 0}
                 ]
               },
-              {user_gt: "${lastAddress}"}
+              {id_gt: "${lastAddressStake}"}
               ]
             }
         first: ${first}
+        block: {number_gte: ${stakeBlock}}
       ) {
           id
           balance_omni
           balance_omni_lp
+        }
+        _meta {
+          block {
+            number
+          }
         }
       }`;
 
@@ -219,13 +254,13 @@ const _getSupplyBorrowStakeData = async (
         "Content-Type": "application/json",
       };
 
-      const data = await axios.post(
+      const response = await axios.post(
         stakeAPI,
         { query: query },
         { headers, timeout: 300000 }
       );
+      const result = response.data.data.tokenBalances;
 
-      const result = data.data.data.tokenBalances;
 
       if (result.length) {
         result.forEach((user: any) => {
@@ -245,9 +280,11 @@ const _getSupplyBorrowStakeData = async (
           };
 
           reservesMap.set(user.id.toLowerCase(), userData);
+          lastAddressStake = user.id;
         });
       } else break;
-      console.log("processed batch, last address =", lastAddress);
+
+      stakeBlock = response.data.data._meta.block.number;
       // calculate rates and update in db
       await _calculateAndUpdateRates(
         reservesMap,
@@ -258,8 +295,21 @@ const _getSupplyBorrowStakeData = async (
 
       // eslint-disable-next-line no-constant-condition
     } while (true);
+
+    // update db cache with block number
+    console.log("lastblock saved for stake task", supplyTask.substring(6));
+    await CacheDB.updateOne(
+      {
+        cacheId: "cache-blocks-queried",
+      },
+      {
+        $set: {
+          [`blockNumberStake${supplyTask.substring(6)}`]: stakeBlock,
+        },
+      },
+      { upsert: true }
+    );
   }
-  // return reservesMap;
 };
 
 const _calculateAndUpdateRates = async (
