@@ -21,7 +21,7 @@ axiosRetry(axios, {
   // retries: 3, // default is 3
   retryDelay: (retryCount) => {
     console.log(`next retry in: ${retryCount * 5000}`);
-    return retryCount * 5000; // time interval between retries
+    return retryCount * 10000; // time interval between retries
   },
   onRetry: (retryCount) => {
     console.log("retrying count: ", retryCount);
@@ -93,7 +93,6 @@ const _getSupplyBorrowStakeData = async (
   let supplyBorrowBlock = 0;
   const cacheDb = await CacheDB.findOne({ cacheId: "cache-blocks-queried" });
   if (cacheDb) {
-    console.log(cacheDb)
     supplyBorrowBlock =
       (cacheDb[
         `blockNumber${supplyTask.substring(6)}` as keyof ICache
@@ -117,7 +116,7 @@ const _getSupplyBorrowStakeData = async (
                 {currentATokenBalance_gt: 0}
                 ]
               },
-              {user_gte: "${lastAddress}"}
+              {user_gt: "${lastAddress}"}
               ]
             }
         first: ${first},
@@ -147,8 +146,8 @@ const _getSupplyBorrowStakeData = async (
       { headers: { "Content-Type": "application/json" }, timeout: 300000 }
     );
     const batch = response.data;
-    // TODO: will break in case of too many requests, axios-retry will help in this case
-    if (!batch.data || batch.data.userReserves.length == 0) {
+
+    if (batch.data.userReserves.length === 0) {
       break;
     }
 
@@ -186,6 +185,13 @@ const _getSupplyBorrowStakeData = async (
     });
 
     supplyBorrowBlock = batch.data._meta.block.number;
+    console.log(
+      "fetched block from",
+      supplyTask.substring(6),
+      supplyBorrowBlock,
+      "last address",
+      lastAddress
+    );
     // calculate rates and update in db
     await _calculateAndUpdateRates(reservesMap, supplyTask, borrowTask);
 
@@ -261,7 +267,6 @@ const _getSupplyBorrowStakeData = async (
       );
       const result = response.data.data.tokenBalances;
 
-
       if (result.length) {
         result.forEach((user: any) => {
           const userData = reservesMap.get(user.id.toLowerCase()) || {
@@ -285,6 +290,13 @@ const _getSupplyBorrowStakeData = async (
       } else break;
 
       stakeBlock = response.data.data._meta.block.number;
+          console.log(
+            "fetched block from",
+            supplyTask.substring(6),
+            stakeAPI,
+            "last staker address",
+            lastAddress
+          );
       // calculate rates and update in db
       await _calculateAndUpdateRates(
         reservesMap,
@@ -371,6 +383,6 @@ const _calculateAndUpdateRates = async (
       },
     });
   }
-
+  console.log("writing in db")
   await WalletUserV2.bulkWrite(userBulkWrites);
 };
