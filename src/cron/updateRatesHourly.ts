@@ -382,7 +382,7 @@ const _calculateAndUpdateRates = async (
         upsert: true,
       },
     });
-    console.log(tx)
+
   }
   console.log("writing in db");
   await WalletUserV2.bulkWrite(userBulkWrites);
