@@ -21,10 +21,10 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "0 */6 * * *",
+  "35 12 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running lp points every day at 12:30 am");
+      console.log("running lp points every 12:35pm");
       await zksyncPPSCron(),
         await mantaPPSCron(),
         await blastPPSCron(),
@@ -39,10 +39,10 @@ cron.schedule(
 
 // -------------  Update Rank  -----------------
 cron.schedule(
-  "05 7 * * *",
+  "40 12 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("updating rank every day at 7:05 am");
+      console.log("updating rank every day at 12:40");
       await updateUsersRank();
     });
   },
