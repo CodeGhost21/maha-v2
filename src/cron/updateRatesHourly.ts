@@ -87,8 +87,8 @@ const _getSupplyBorrowStakeData = async (
   stakeMultiplier?: number
 ) => {
   const first = 1000;
-  let lastAddress = "0x0000000000000000000000000000000000000000";
-
+  // let lastAddress = "0x0000000000000000000000000000000000000000";
+  let skip = 0;
   // const currentBlock = await provider.getBlockNumber();
   let supplyBorrowBlock = 0;
   const cacheDb = await CacheDB.findOne({ cacheId: "cache-blocks-queried" });
@@ -116,10 +116,10 @@ const _getSupplyBorrowStakeData = async (
                 {currentATokenBalance_gt: 0}
                 ]
               },
-              {user_gt: "${lastAddress}"}
               ]
             }
         first: ${first},
+        skip: ${skip},
         block: {number_gte: ${supplyBorrowBlock}}
       ) {
         user {
@@ -181,16 +181,16 @@ const _getSupplyBorrowStakeData = async (
         reservesMap.set(data.user.id.toLowerCase(), userData);
       }
 
-      lastAddress = data.user.id;
     });
 
+    skip += batch.data.userReserves.length;
     supplyBorrowBlock = batch.data._meta.block.number;
     console.log(
       "fetched block from",
       supplyTask.substring(6),
       supplyBorrowBlock,
-      "last address",
-      lastAddress
+      "skipping entries:",
+      skip
     );
     // calculate rates and update in db
     await _calculateAndUpdateRates(reservesMap, supplyTask, borrowTask);
@@ -290,13 +290,13 @@ const _getSupplyBorrowStakeData = async (
       } else break;
 
       stakeBlock = response.data.data._meta.block.number;
-          console.log(
-            "fetched block from",
-            supplyTask.substring(6),
-            stakeAPI,
-            "last staker address",
-            lastAddress
-          );
+      console.log(
+        "fetched block from",
+        supplyTask.substring(6),
+        stakeAPI,
+        "last staker address",
+        lastAddressStake
+      );
       // calculate rates and update in db
       await _calculateAndUpdateRates(
         reservesMap,
@@ -373,7 +373,7 @@ const _calculateAndUpdateRates = async (
     }
 
     // update/insert in db
-    userBulkWrites.push({
+    const tx = userBulkWrites.push({
       updateOne: {
         filter: { walletAddress: walletAddress.toLowerCase() },
         update: {
@@ -382,7 +382,8 @@ const _calculateAndUpdateRates = async (
         upsert: true,
       },
     });
+    console.log(tx)
   }
-  console.log("writing in db")
+  console.log("writing in db");
   await WalletUserV2.bulkWrite(userBulkWrites);
 };

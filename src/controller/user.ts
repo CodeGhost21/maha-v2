@@ -60,7 +60,7 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
       const errorObj = JSON.parse(error.message);
       return res.status(errorObj.status).json(errorObj.obj);
     } catch (error) {
-      console.log("oops!!");
+      console.log("oops!!", error);
     }
     res
       .status(500)
@@ -80,8 +80,11 @@ export const getCurrentTotalPointsWithPPS = async (
       "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy"
     );
 
+    if (!user.pointsPerSecondUpdateTimestamp) {
+      throw new Error("pointsPerSecondUpdateTimestamp not available");
+    }
     const currentPoints = await _getCurrentPoints(user);
-
+    console.log(currentPoints)
     const currentPointsProcessed = getTotalSupplyBorrowStakePoints({
       points: currentPoints,
     } as IWalletUserModel);
@@ -94,6 +97,7 @@ export const getCurrentTotalPointsWithPPS = async (
       user.pointsPerSecond
     );
 
+    console.log(totalSum, supplySum, borrowSum, stakeSum);
     const returnData = {
       totalCurrentSupplyPointsPerSec: supplySum,
       totalCurrentBorrowPointsPerSec: borrowSum,
@@ -109,8 +113,8 @@ export const getCurrentTotalPointsWithPPS = async (
     try {
       const errorObj = JSON.parse(error.message);
       return res.status(errorObj.status).json(errorObj.obj);
-    } catch (error) {
-      console.log("oops!!");
+    } catch (_error:any) {
+      console.log("oops!!", error);
     }
     res
       .status(500)
@@ -384,7 +388,7 @@ export const userInfo = async (req: Request, res: Response) => {
       const errorObj = JSON.parse(error.message);
       return res.status(errorObj.status).json(errorObj.obj);
     } catch (error) {
-      console.log("oops!!");
+      console.log("oops!!", error);
     }
     res
       .status(500)
@@ -484,7 +488,7 @@ export const getUserTotalPoints = async (req: Request, res: Response) => {
       const errorObj = JSON.parse(error.message);
       return res.status(errorObj.status).json(errorObj.obj);
     } catch (error) {
-      console.log("oops!!");
+      console.log("oops!!", error);
     }
     res
       .status(500)
@@ -765,7 +769,7 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
     }
   }
 
-  const previousPoints = user.points;
+  const previousPoints = user.points ?? {};
   const pointsPerSecond = user.pointsPerSecond;
   const pppUpdateTimestamp = user.pointsPerSecondUpdateTimestamp;
 
@@ -779,7 +783,7 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
         lpTask
       ] as IStakeAsset;
       const pps = pointsPerSecond[lpTask] as IStakeAsset;
-      const oldPoints = previousPoints[lpTask] as IStakeAsset;
+      const oldPoints = previousPoints[lpTask] as IStakeAsset ?? {};
 
       const _points: Partial<IWalletUserPoints> = {
         [lpTask]: {} as IStakeAsset,

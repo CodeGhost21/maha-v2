@@ -21,10 +21,10 @@ console.log("starting");
 
 // -------------  Update LP Rate  -----------------
 cron.schedule(
-  "35 12 * * *",
+  "0 */4 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("running lp points every 12:35pm");
+      console.log("running lp points every 4 hours");
       await zksyncPPSCron(),
         await mantaPPSCron(),
         await blastPPSCron(),
@@ -39,28 +39,15 @@ cron.schedule(
 
 // -------------  Update Rank  -----------------
 cron.schedule(
-  "40 12 * * *",
+  "05 7 * * *",
   async () => {
     addToQueue(async () => {
-      console.log("updating rank every day at 12:40");
+      console.log("updating rank every day at 7:05 am");
       await updateUsersRank();
     });
   },
   { timezone: "Asia/Kolkata" }
 );
-
-// -------------  Add Users  -----------------
-// cron.schedule(
-//   "05 9 * * *",
-//   async () => {
-//     addToQueue(async () => {
-//       console.log("adding new wallet users every day at 9:05 am");
-//       await addUsers();
-//     });
-//   },
-//   { timezone: "Asia/Kolkata" }
-// );
-
 
 // -------------  Update LP Points hourly -----------------
 cron.schedule(
