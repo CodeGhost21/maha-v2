@@ -18,7 +18,7 @@ import { ICache } from "../database/interface/walletUser/cache";
 
 // Exponential back-off retry delay between requests
 axiosRetry(axios, {
-  // retries: 3, // default is 3
+  retries: 5, // default is 3
   retryDelay: (retryCount) => {
     console.log(`next retry in: ${retryCount * 5000}`);
     return retryCount * 10000; // time interval between retries
@@ -31,7 +31,10 @@ axiosRetry(axios, {
     return (
       error.response?.status === 429 ||
       error.response?.status === 520 ||
-      error.response?.status === 408
+      error.response?.status === 408 ||
+      error.response?.status === 502 ||
+      error.response?.status === 503 ||
+      error.response?.status === 504
     );
   },
 });
@@ -104,9 +107,10 @@ const _getSupplyBorrowStakeData = async (
     marketPrice = await getPriceCoinGecko();
   }
 
-  do {
-    const reservesMap = new Map();
-    const query = `{
+  try {
+    do {
+      const reservesMap = new Map();
+      const query = `{
       userReserves(
         where: {
           and: [
@@ -140,96 +144,95 @@ const _getSupplyBorrowStakeData = async (
       }
     }`;
 
-    const response = await axios.post(
-      api,
-      { query: query },
-      { headers: { "Content-Type": "application/json" }, timeout: 300000 }
-    );
-    const batch = response.data;
+      const response = await axios.post(
+        api,
+        { query: query },
+        { headers: { "Content-Type": "application/json" }, timeout: 300000 }
+      );
+      const batch = response.data;
 
-    if (batch.data.userReserves.length === 0) {
-      break;
-    }
-
-    // calculate supply and borrow points for each asset
-    batch.data.userReserves.forEach((data: IData) => {
-      const asset = data.reserve.symbol.toLowerCase() as keyof IAsset;
-      // @dev to calculate rates for asset, it must be available in assetDenomination in src/controller/quests/constants.ts
-      if (assetDenomination[`${asset}`]) {
-        const userData = reservesMap.get(data.user.id.toLowerCase()) || {
-          supply: {},
-          borrow: {},
-        };
-        const supplyMultiplier =
-          multiplier[`${asset}Supply` as keyof Multiplier];
-
-        userData.supply[asset] = Number(data.currentATokenBalance)
-          ? (Number(data.currentATokenBalance) /
-              assetDenomination[`${asset}`]) *
-            Number(marketPrice[`${asset}`]) *
-            (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply)
-          : 0;
-
-        const borrowMultiplier =
-          multiplier[`${asset}Borrow` as keyof Multiplier];
-        userData.borrow[asset] = Number(data.currentTotalDebt)
-          ? (Number(data.currentTotalDebt) / assetDenomination[`${asset}`]) *
-            Number(marketPrice[`${asset}`]) *
-            (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow)
-          : 0;
-
-        reservesMap.set(data.user.id.toLowerCase(), userData);
+      if (batch.data.userReserves.length === 0) {
+        break;
       }
 
-    });
+      // calculate supply and borrow points for each asset
+      batch.data.userReserves.forEach((data: IData) => {
+        const asset = data.reserve.symbol.toLowerCase() as keyof IAsset;
+        // @dev to calculate rates for asset, it must be available in assetDenomination in src/controller/quests/constants.ts
+        if (assetDenomination[`${asset}`]) {
+          const userData = reservesMap.get(data.user.id.toLowerCase()) || {
+            supply: {},
+            borrow: {},
+          };
+          const supplyMultiplier =
+            multiplier[`${asset}Supply` as keyof Multiplier];
 
-    skip += batch.data.userReserves.length;
-    supplyBorrowBlock = batch.data._meta.block.number;
+          userData.supply[asset] = Number(data.currentATokenBalance)
+            ? (Number(data.currentATokenBalance) /
+                assetDenomination[`${asset}`]) *
+              Number(marketPrice[`${asset}`]) *
+              (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply)
+            : 0;
+
+          const borrowMultiplier =
+            multiplier[`${asset}Borrow` as keyof Multiplier];
+          userData.borrow[asset] = Number(data.currentTotalDebt)
+            ? (Number(data.currentTotalDebt) / assetDenomination[`${asset}`]) *
+              Number(marketPrice[`${asset}`]) *
+              (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow)
+            : 0;
+
+          reservesMap.set(data.user.id.toLowerCase(), userData);
+        }
+      });
+
+      skip += batch.data.userReserves.length;
+      supplyBorrowBlock = batch.data._meta.block.number;
+      console.log(
+        "fetched block from",
+        supplyTask.substring(6),
+        supplyBorrowBlock,
+        "skipping entries:",
+        skip
+      );
+      // calculate rates and update in db
+      await _calculateAndUpdateRates(reservesMap, supplyTask, borrowTask);
+
+      // eslint-disable-next-line no-constant-condition
+    } while (true);
+
+    // update db cache with block number
     console.log(
-      "fetched block from",
-      supplyTask.substring(6),
-      supplyBorrowBlock,
-      "skipping entries:",
-      skip
+      `blockNumber${supplyTask.substring(6)}`,
+      "saved for supply borrow task",
+      supplyBorrowBlock
     );
-    // calculate rates and update in db
-    await _calculateAndUpdateRates(reservesMap, supplyTask, borrowTask);
 
-    // eslint-disable-next-line no-constant-condition
-  } while (true);
-
-  // update db cache with block number
-  console.log(
-    `blockNumber${supplyTask.substring(6)}`,
-    "saved for supply borrow task",
-    supplyBorrowBlock
-  );
-
-  await CacheDB.updateOne(
-    {
-      cacheId: "cache-blocks-queried",
-    },
-    {
-      $set: {
-        [`blockNumber${supplyTask.substring(6)}`]: supplyBorrowBlock ?? 0,
+    await CacheDB.updateOne(
+      {
+        cacheId: "cache-blocks-queried",
       },
-    },
-    { upsert: true }
-  );
-  // if stake is available then get stake points
-  if (stakeAPI && stakeMultiplier) {
-    let stakeBlock = 0;
-    if (cacheDb) {
-      stakeBlock =
-        (cacheDb[
-          `blockNumberStake${supplyTask.substring(6)}` as keyof ICache
-        ] as number) ?? 0;
-    }
-    let lastAddressStake = "0x0000000000000000000000000000000000000000";
+      {
+        $set: {
+          [`blockNumber${supplyTask.substring(6)}`]: supplyBorrowBlock ?? 0,
+        },
+      },
+      { upsert: true }
+    );
+    // if stake is available then get stake points
+    if (stakeAPI && stakeMultiplier) {
+      let stakeBlock = 0;
+      if (cacheDb) {
+        stakeBlock =
+          (cacheDb[
+            `blockNumberStake${supplyTask.substring(6)}` as keyof ICache
+          ] as number) ?? 0;
+      }
+      let lastAddressStake = "0x0000000000000000000000000000000000000000";
 
-    do {
-      const reservesMap = new Map();
-      const query = `query {
+      do {
+        const reservesMap = new Map();
+        const query = `query {
         tokenBalances(
         where: {
           and: [
@@ -256,71 +259,75 @@ const _getSupplyBorrowStakeData = async (
         }
       }`;
 
-      const headers = {
-        "Content-Type": "application/json",
-      };
+        const headers = {
+          "Content-Type": "application/json",
+        };
 
-      const response = await axios.post(
-        stakeAPI,
-        { query: query },
-        { headers, timeout: 300000 }
-      );
-      const result = response.data.data.tokenBalances;
+        const response = await axios.post(
+          stakeAPI,
+          { query: query },
+          { headers, timeout: 300000 }
+        );
+        const result = response.data.data.tokenBalances;
 
-      if (result.length) {
-        result.forEach((user: any) => {
-          const userData = reservesMap.get(user.id.toLowerCase()) || {
-            stake: {},
-          };
+        if (result.length) {
+          result.forEach((user: any) => {
+            const userData = reservesMap.get(user.id.toLowerCase()) || {
+              stake: {},
+            };
 
-          userData.stake = {
-            zero:
-              (user.balance_omni / zeroveDenom) *
-              marketPrice.zerolend *
-              stakeMultiplier,
-            lp:
-              (user.balance_omni_lp / zeroveDenom) *
-              marketPrice.zerolend *
-              stakeMultiplier,
-          };
+            userData.stake = {
+              zero:
+                (user.balance_omni / zeroveDenom) *
+                marketPrice.zerolend *
+                stakeMultiplier,
+              lp:
+                (user.balance_omni_lp / zeroveDenom) *
+                marketPrice.zerolend *
+                stakeMultiplier,
+            };
 
-          reservesMap.set(user.id.toLowerCase(), userData);
-          lastAddressStake = user.id;
-        });
-      } else break;
+            reservesMap.set(user.id.toLowerCase(), userData);
+            lastAddressStake = user.id;
+          });
+        } else break;
 
-      stakeBlock = response.data.data._meta.block.number;
-      console.log(
-        "fetched block from",
-        supplyTask.substring(6),
-        stakeAPI,
-        "last staker address",
-        lastAddressStake
-      );
-      // calculate rates and update in db
-      await _calculateAndUpdateRates(
-        reservesMap,
-        supplyTask,
-        borrowTask,
-        stakeTask
-      );
+        stakeBlock = response.data.data._meta.block.number;
+        console.log(
+          "fetched block from",
+          supplyTask.substring(6),
+          stakeAPI,
+          "last staker address",
+          lastAddressStake
+        );
+        // calculate rates and update in db
+        await _calculateAndUpdateRates(
+          reservesMap,
+          supplyTask,
+          borrowTask,
+          stakeTask
+        );
 
-      // eslint-disable-next-line no-constant-condition
-    } while (true);
+        // eslint-disable-next-line no-constant-condition
+      } while (true);
 
-    // update db cache with block number
-    console.log("lastblock saved for stake task", supplyTask.substring(6));
-    await CacheDB.updateOne(
-      {
-        cacheId: "cache-blocks-queried",
-      },
-      {
-        $set: {
-          [`blockNumberStake${supplyTask.substring(6)}`]: stakeBlock,
+      // update db cache with block number
+      console.log("lastblock saved for stake task", supplyTask.substring(6));
+      await CacheDB.updateOne(
+        {
+          cacheId: "cache-blocks-queried",
         },
-      },
-      { upsert: true }
-    );
+        {
+          $set: {
+            [`blockNumberStake${supplyTask.substring(6)}`]: stakeBlock,
+          },
+        },
+        { upsert: true }
+      );
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 };
 
@@ -382,7 +389,6 @@ const _calculateAndUpdateRates = async (
         upsert: true,
       },
     });
-
   }
   console.log("writing in db");
   await WalletUserV2.bulkWrite(userBulkWrites);

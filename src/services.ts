@@ -25,12 +25,22 @@ cron.schedule(
   async () => {
     addToQueue(async () => {
       console.log("running lp points every 4 hours");
-      await zksyncPPSCron(),
-        await mantaPPSCron(),
-        await blastPPSCron(),
-        await ethereumLrtPPSCron(),
-        await lineaPPSCron(),
-        await xLayerPPSCron();
+        const cronJobs = [
+          zksyncPPSCron,
+          mantaPPSCron,
+          blastPPSCron,
+          ethereumLrtPPSCron,
+          lineaPPSCron,
+          xLayerPPSCron,
+        ];
+
+        for (const job of cronJobs) {
+          try {
+            await job();
+          } catch (error) {
+            console.error(`Error occurred in ${job.name}:`, error);
+          }
+        }
     });
   },
   { timezone: "Asia/Kolkata" }
