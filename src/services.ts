@@ -58,14 +58,14 @@ cron.schedule(
   { timezone: "Asia/Kolkata" }
 );
 
-cron.schedule(
-  "16 21 * * *",
-  async () => {
-    console.log("Distributing blast points every day at 10:30 pm");
-    await distributeBlastPoints();
-  },
-  { timezone: "Asia/Kolkata" }
-);
+// cron.schedule(
+//   "16 21 * * *",
+//   async () => {
+//     console.log("Distributing blast points every day at 10:30 pm");
+//     await distributeBlastPoints();
+//   },
+//   { timezone: "Asia/Kolkata" }
+// );
 
 // -------------  Update LP Points hourly -----------------
 cron.schedule(
