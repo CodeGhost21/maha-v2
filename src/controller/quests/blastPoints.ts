@@ -409,6 +409,7 @@ export const distributeBlastPoints = async () => {
     }
 
     lastAddress = batch.data.data.users[batch.data.data.users.length - 1].id;
+    console.log("executed blast-points for batch. last address", lastAddress)
   } while (batch.data.data.users.length === first);
   console.log("done");
 };
