@@ -59,7 +59,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  "05 22 * * *",
+  "55 19 * * *",
   async () => {
     console.log("Distributing blast points every day at 10:30 pm");
     await distributeBlastPoints();
