@@ -300,7 +300,6 @@ const _getSupplyBorrowStakeData = async (
         console.log(
           "fetched block from",
           supplyTask.substring(6),
-          stakeAPI,
           "last staker address",
           lastAddressStake
         );
@@ -400,14 +399,16 @@ const _calculateAndUpdateRates = async (
 // const referralCode = _generateReferralCode();
 
 const addReferralCodesToNewUsers = async () => {
-  const userBulkWrites = [];
+  const userBulkWrites: any = [];
+  console.log("fetching new users");
   const newUsers = await WalletUserV2.find({
-    referralCode:{
-      $eq: []
-    }
+    referralCode: {
+      $eq: [],
+    },
   }).select("walletAddress");
 
-  newUsers.forEach((user)=>{
+  console.log("found new users:", newUsers.length);
+  newUsers.forEach((user) => {
     userBulkWrites.push({
       updateOne: {
         filter: { walletAddress: user.walletAddress },
@@ -419,5 +420,9 @@ const addReferralCodesToNewUsers = async () => {
         upsert: true,
       },
     });
-  })
-}
+  });
+  if (userBulkWrites.length) {
+    await WalletUserV2.bulkWrite(userBulkWrites);
+  }
+  console.log("done");
+};
