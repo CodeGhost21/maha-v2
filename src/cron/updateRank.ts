@@ -27,10 +27,10 @@ export const updateUsersRank = async () => {
       },
     }));
 
-    const tx = await WalletUserV2.bulkWrite(updateCommands);
-    console.log("done updating ranks", tx);
-
+    await WalletUserV2.bulkWrite(updateCommands);
+    
     // Update skip for the next batch
     skip += batchSize;
   } while (skip <= total);
+  console.log("done updating ranks", );
 };

@@ -33,5 +33,5 @@ export interface IAsset {
 
 export interface IStakeAsset{
   zero?: number;
-  lockerLp?:number;
+  lp?:number;
 }
