@@ -10,9 +10,9 @@ import {
   blastPPSCron,
   xLayerPPSCron,
 } from "./cron/dailyLpPointsChain.v2";
-// import { addUsers } from "./scripts/newSupplyBorrowUsers";
 import { updateLPPointsHourly } from "./cron/lpPointshourly";
 import { addToQueue, isQueueEmpty } from "./cron/queue";
+import { distributeBlastPoints } from "./controller/quests/blastPoints";
 
 // connect to database
 open();
@@ -36,7 +36,6 @@ cron.schedule(
   { timezone: "Asia/Kolkata" }
 );
 
-
 // -------------  Update Rank  -----------------
 cron.schedule(
   "05 7 * * *",
@@ -45,6 +44,15 @@ cron.schedule(
       console.log("updating rank every day at 7:05 am");
       await updateUsersRank();
     });
+  },
+  { timezone: "Asia/Kolkata" }
+);
+
+cron.schedule(
+  "05 22 * * *",
+  async () => {
+    console.log("Distributing blast points every day at 10:30 pm");
+    await distributeBlastPoints();
   },
   { timezone: "Asia/Kolkata" }
 );
