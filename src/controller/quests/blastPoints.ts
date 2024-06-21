@@ -118,35 +118,35 @@ export const assignBlastPoints = async (actualPoints: Map<any, any>) => {
 
   // send request for USDB
   try {
-    // await BlastUser.bulkWrite(bulkOperations);
+    await BlastUser.bulkWrite(bulkOperations);
 
-    // const responseUSDB = await axios.put(urlUSDB, requestUSDB, {
-    //   headers: headersUSDB,
-    // });
+    const responseUSDB = await axios.put(urlUSDB, requestUSDB, {
+      headers: headersUSDB,
+    });
 
-    // if (responseUSDB.data.success) {
-    //   console.log("USDB transfer successful, saving batch");
+    if (responseUSDB.data.success) {
+      console.log("USDB transfer successful, saving batch");
 
-    //   //saving batch
-    //   await BlastBatches.create({
-    //     batchId: `${batchId}_usdb`,
-    //     batch: transferBatchUSDB,
-    //   });
-    // }
+      //saving batch
+      await BlastBatches.create({
+        batchId: `${batchId}_usdb`,
+        batch: transferBatchUSDB,
+      });
+    }
 
-    // const responseWETH = await axios.put(urlWETH, requestWETH, {
-    //   headers: headersWETH,
-    // });
+    const responseWETH = await axios.put(urlWETH, requestWETH, {
+      headers: headersWETH,
+    });
 
-    // if (responseWETH.data.success) {
-    //   console.log("WETH transfer successful, saving batch");
+    if (responseWETH.data.success) {
+      console.log("WETH transfer successful, saving batch");
 
-    //   //saving batch
-    //   await BlastBatches.create({
-    //     batchId: `${batchId}_weth`,
-    //     batch: transferBatchWETH,
-    //   });
-    // }
+      //saving batch
+      await BlastBatches.create({
+        batchId: `${batchId}_weth`,
+        batch: transferBatchWETH,
+      });
+    }
 
     return true;
   } catch (e: any) {
@@ -249,9 +249,22 @@ const calculateAndUpdatePositivePointsInDb = async (
   usersShare: Map<any, any>,
   users: IBlastUserModel[]
 ) => {
+  const correctedDateString = "2024-06-21T13:25:06.631+0000".replace(
+    "+0000",
+    "Z"
+  );
+
+  // Convert the string to a JavaScript Date object
+  const date = new Date(correctedDateString);
+  console.log(date);
   // fetch stored users from batch ids
   const storedBatch = await BlastUser.find({
-    walletAddress: { $in: users.map((u: any) => u.id) },
+    $and: [
+      {
+        walletAddress: { $in: users.map((u: any) => u.id) },
+      },
+      { updatedAt: { $lt: date } },
+    ],
   }).select("walletAddress blastPoints");
 
   // use map to return points, this will eliminate fetch operation while assigning points
@@ -301,7 +314,6 @@ const calculateAndUpdatePositivePointsInDb = async (
       valuesToSet["blastPoints.pointsPendingUSDB"] = pointsToGiveUSDB;
       valuesToSet["blastPoints.pointsPending"] = pointsToGiveUSDB;
     }
-
 
     // if WETH points to give are +ve, update db
     if (pointsToGiveWETH > 0) {
