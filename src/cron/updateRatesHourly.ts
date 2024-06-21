@@ -15,6 +15,7 @@ import axiosRetry from "axios-retry";
 import { WalletUserV2 } from "../database/models/walletUsersV2";
 import { CacheDB } from "../database/models/cache";
 import { ICache } from "../database/interface/walletUser/cache";
+import { _generateReferralCode } from "../controller/user";
 
 // Exponential back-off retry delay between requests
 axiosRetry(axios, {
@@ -77,6 +78,9 @@ export const lpRateHourly = async (
     stakeMultiplier
   );
 
+  console.log("assigning referral Codes to new users");
+  await addReferralCodesToNewUsers();
+  
   console.log("done at", Date.now());
 };
 
@@ -380,7 +384,7 @@ const _calculateAndUpdateRates = async (
     }
 
     // update/insert in db
-    const tx = userBulkWrites.push({
+  userBulkWrites.push({
       updateOne: {
         filter: { walletAddress: walletAddress.toLowerCase() },
         update: {
@@ -393,3 +397,27 @@ const _calculateAndUpdateRates = async (
   console.log("writing in db");
   await WalletUserV2.bulkWrite(userBulkWrites);
 };
+// const referralCode = _generateReferralCode();
+
+const addReferralCodesToNewUsers = async () => {
+  const userBulkWrites = [];
+  const newUsers = await WalletUserV2.find({
+    referralCode:{
+      $eq: []
+    }
+  }).select("walletAddress");
+
+  newUsers.forEach((user)=>{
+    userBulkWrites.push({
+      updateOne: {
+        filter: { walletAddress: user.walletAddress },
+        update: {
+          $set: {
+            referralCode: [_generateReferralCode()],
+          },
+        },
+        upsert: true,
+      },
+    });
+  })
+}
