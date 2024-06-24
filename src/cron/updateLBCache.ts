@@ -125,9 +125,9 @@ import cache from "../utils/cache";
 //   cache.set("lb:leaderBoard", data, 60 * 60);
 // };
 export const updateLBCache = async () => {
-  const allUsersData = await WalletUserV2.find()
+  const allUsersData = await WalletUserV2.find({rank:{$exists:true}})
     .sort({ rank: 1 })
-    .select("totalPoints rank walletAddress points")
+    .select("totalPoints totalSupplyPoints totalBorrowPoints totalStakePoints rank walletAddress points")
     .limit(100);
 
   interface lbUserData {
