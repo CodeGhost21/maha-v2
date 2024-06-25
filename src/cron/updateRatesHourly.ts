@@ -35,7 +35,8 @@ axiosRetry(axios, {
       error.response?.status === 408 ||
       error.response?.status === 502 ||
       error.response?.status === 503 ||
-      error.response?.status === 504
+      error.response?.status === 504 ||
+      error.message.toLowerCase().includes("store error")
     );
   },
 });
@@ -300,6 +301,7 @@ const _getSupplyBorrowStakeData = async (
         console.log(
           "fetched block from",
           supplyTask.substring(6),
+          stakeBlock,
           "last staker address",
           lastAddressStake
         );

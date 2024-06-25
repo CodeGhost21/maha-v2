@@ -1,10 +1,31 @@
 import axios from "axios";
 import { BlastBatches } from "../../database/models/blastBatches";
-import { BlastUser } from "../../database/models/blastUsers";
 import { getBlastChallenge, getBearerToken } from "./blast";
 import path from "path";
-
 import fs from "fs";
+import axiosRetry from "axios-retry";
+
+axiosRetry(axios, {
+  // retries: 3, // default is 3
+  retryDelay: (retryCount) => {
+    console.log(`next retry in: ${retryCount * 5} seconds`);
+    return retryCount * 5000; // time interval between retries
+  },
+  onRetry: (retryCount) => {
+    console.log("retrying count: ", retryCount);
+  },
+  retryCondition: (error) => {
+    // if retry condition is not specified, by default idempotent requests are retried
+    return (
+      error.response?.status === 429 ||
+      error.response?.status === 520 ||
+      error.response?.status === 408 ||
+      error.response?.status === 502 ||
+      error.response?.status === 503 ||
+      error.response?.status === 504
+    );
+  },
+});
 
 const baseUrl = "https://waitlist-api.prod.blast.io";
 const csvFilePath = path.join(
@@ -162,7 +183,7 @@ export const distributeBlastPointsFromCSV = async () => {
     if (points.usdb) {
       const transferUSDB: Transfer = {
         toAddress: walletAddress,
-        points: (points.usdb as number).toFixed(2),
+        points: (points.usdb as number).toFixed(6),
       };
       transferBatchUSDB.push(transferUSDB);
     }
@@ -170,7 +191,7 @@ export const distributeBlastPointsFromCSV = async () => {
     if (points.weth) {
       const transferWETH: Transfer = {
         toAddress: walletAddress,
-        points: (points.weth as number).toFixed(2),
+        points: (points.weth as number).toFixed(6),
       };
       transferBatchWETH.push(transferWETH);
     }
