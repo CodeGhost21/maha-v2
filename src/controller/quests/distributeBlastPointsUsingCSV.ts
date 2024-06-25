@@ -4,6 +4,7 @@ import { getBlastChallenge, getBearerToken } from "./blast";
 import path from "path";
 import fs from "fs";
 import axiosRetry from "axios-retry";
+import { BlastUser } from "src/database/models/blastUsers";
 
 axiosRetry(axios, {
   // retries: 3, // default is 3
@@ -32,7 +33,6 @@ const csvFilePath = path.join(
   __dirname,
   "./pointsBlastCsv/blast_points_data - Sheet1.csv"
 );
-
 
 type PointType = "LIQUIDITY" | "DEVELOPER";
 
@@ -117,7 +117,6 @@ const sendUSDBBatch = async (
     } catch (error) {
       console.log("failed to write USDB batch", error);
     }
-    
   }
 };
 
@@ -175,6 +174,8 @@ export const distributeBlastPointsFromCSV = async () => {
 
   const transferBatchUSDB = [];
   const transferBatchWETH = [];
+  const bulkOperationsUSDB: any = [];
+  const bulkOperationsWETH: any = [];
 
   // get data from csv
   const pointsData = readBlastPointsDataFromCSV(csvFilePath);
@@ -186,6 +187,20 @@ export const distributeBlastPointsFromCSV = async () => {
         points: (points.usdb as number).toFixed(6),
       };
       transferBatchUSDB.push(transferUSDB);
+
+      // update points given
+      bulkOperationsUSDB.push({
+        updateOne: {
+          filter: { walletAddress },
+          update: {
+            $inc: {
+              "blastPoints.pointsGivenUSDB": points.usdb,
+              "blastPoints.pointsGiven": points.usdb,
+            },
+          },
+          upsert: true,
+        },
+      });
     }
 
     if (points.weth) {
@@ -194,6 +209,20 @@ export const distributeBlastPointsFromCSV = async () => {
         points: (points.weth as number).toFixed(6),
       };
       transferBatchWETH.push(transferWETH);
+
+      // update points given
+      bulkOperationsWETH.push({
+        updateOne: {
+          filter: { walletAddress },
+          update: {
+            $inc: {
+              "blastPoints.pointsGivenWETH": points.weth,
+              "blastPoints.pointsGiven": points.weth,
+            },
+          },
+          upsert:true,
+        },
+      });
     }
 
     // send a batch of 100 Transfer
@@ -201,6 +230,9 @@ export const distributeBlastPointsFromCSV = async () => {
       console.log("sending USDB batch of 100 to prod api");
       await sendUSDBBatch(transferBatchUSDB, headersUSDB, addressUSDB);
       transferBatchUSDB.length = 0;
+
+      // update DB
+      await BlastUser.bulkWrite(bulkOperationsUSDB)
     }
 
     // send a batch of 100 Transfer
@@ -208,6 +240,9 @@ export const distributeBlastPointsFromCSV = async () => {
       console.log("sending WETH batch of 100 to prod api");
       await sendWETHData(transferBatchWETH, headersWETH, addressWETH);
       transferBatchWETH.length = 0;
+
+      // update DB
+      await BlastUser.bulkWrite(bulkOperationsWETH);
     }
   }
 
@@ -219,6 +254,9 @@ export const distributeBlastPointsFromCSV = async () => {
       "to prod api"
     );
     await sendUSDBBatch(transferBatchUSDB, headersUSDB, addressUSDB);
+
+    // update DB
+    await BlastUser.bulkWrite(bulkOperationsUSDB);
   }
   if (transferBatchWETH.length > 0) {
     console.log(
@@ -227,8 +265,10 @@ export const distributeBlastPointsFromCSV = async () => {
       "to prod api"
     );
     await sendWETHData(transferBatchWETH, headersWETH, addressWETH);
+
+    // update DB
+    await BlastUser.bulkWrite(bulkOperationsWETH);
   }
 
   console.log("done");
 };
-

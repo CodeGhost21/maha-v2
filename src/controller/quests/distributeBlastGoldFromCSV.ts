@@ -150,7 +150,7 @@ export const distributeBlastGoldPointsFromCSV = async () => {
       transferBatchBlastGold.length,
       "to prod api"
     );
-    // await sendGoldData(transferBatchBlastGold, headersWETH, addressWETH);
+    await sendGoldData(transferBatchBlastGold, headersWETH, addressWETH);
   }
 
   console.log("done");
