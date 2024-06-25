@@ -4,7 +4,7 @@ import { getBlastChallenge, getBearerToken } from "./blast";
 import path from "path";
 import fs from "fs";
 import axiosRetry from "axios-retry";
-import { BlastUser } from "src/database/models/blastUsers";
+import { BlastUser } from "../../database/models/blastUsers";
 
 axiosRetry(axios, {
   // retries: 3, // default is 3
@@ -220,7 +220,7 @@ export const distributeBlastPointsFromCSV = async () => {
               "blastPoints.pointsGiven": points.weth,
             },
           },
-          upsert:true,
+          upsert: true,
         },
       });
     }
@@ -232,7 +232,8 @@ export const distributeBlastPointsFromCSV = async () => {
       transferBatchUSDB.length = 0;
 
       // update DB
-      await BlastUser.bulkWrite(bulkOperationsUSDB)
+      await BlastUser.bulkWrite(bulkOperationsUSDB);
+      bulkOperationsUSDB.length = 0;
     }
 
     // send a batch of 100 Transfer
@@ -243,6 +244,7 @@ export const distributeBlastPointsFromCSV = async () => {
 
       // update DB
       await BlastUser.bulkWrite(bulkOperationsWETH);
+      bulkOperationsWETH.length = 0;
     }
   }
 
@@ -254,7 +256,7 @@ export const distributeBlastPointsFromCSV = async () => {
       "to prod api"
     );
     await sendUSDBBatch(transferBatchUSDB, headersUSDB, addressUSDB);
-
+ 
     // update DB
     await BlastUser.bulkWrite(bulkOperationsUSDB);
   }

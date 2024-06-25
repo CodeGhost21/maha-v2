@@ -4,6 +4,7 @@ import { getBlastChallenge, getBearerToken } from "./blast";
 import path from "path";
 import fs from "fs";
 import axiosRetry from "axios-retry";
+import { BlastUser } from "src/database/models/blastUsers";
 
 axiosRetry(axios, {
   // retries: 3, // default is 3
@@ -120,7 +121,7 @@ export const distributeBlastGoldPointsFromCSV = async () => {
   };
 
   const transferBatchBlastGold = [];
-
+  const bulkOperationsGold: any = [];
   // get data from csv
   const pointsData = readBlastGoldDataFromCSV(csvFilePath);
 
@@ -131,6 +132,18 @@ export const distributeBlastGoldPointsFromCSV = async () => {
         points: (goldPoints as number).toFixed(6),
       };
       transferBatchBlastGold.push(transferBlastGold);
+			bulkOperationsGold.push({
+        updateOne: {
+          filter: { walletAddress },
+          update: {
+            $inc: {
+              "blastGold.pointsGivenWETH": goldPoints,
+              "blastGold.pointsGiven": goldPoints,
+            },
+          },
+          upsert: true,
+        },
+      });
     }
 
 
@@ -139,6 +152,10 @@ export const distributeBlastGoldPointsFromCSV = async () => {
       console.log("sending Blast Gold batch of 100 to prod api");
       await sendGoldData(transferBatchBlastGold, headersWETH, addressWETH);
       transferBatchBlastGold.length = 0;
+
+      // update DB
+      await BlastUser.bulkWrite(bulkOperationsGold);
+      bulkOperationsGold.length = 0;
     }
 
   }
@@ -151,6 +168,8 @@ export const distributeBlastGoldPointsFromCSV = async () => {
       "to prod api"
     );
     await sendGoldData(transferBatchBlastGold, headersWETH, addressWETH);
+    // update DB
+    await BlastUser.bulkWrite(bulkOperationsGold);
   }
 
   console.log("done");
