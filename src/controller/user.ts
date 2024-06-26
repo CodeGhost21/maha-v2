@@ -415,6 +415,25 @@ export const getLeaderBoard = async (req: Request, res: Response) => {
   }
 };
 
+export const getLeaderBoardWithSortKeys = async (req: Request, res: Response) => {
+  try {
+    const cachedData: string | undefined = cache.get("lb:leaderBoardWithSortKeys");
+    if (cachedData)
+      return res
+        .status(200)
+        .json({ success: true, data: JSON.parse(cachedData) });
+    res.status(200).json({
+      success: false,
+      data: { error: "data is being updated, please try after some time." },
+    });
+  } catch (error) {
+    console.error("Error occurred while retrieving data:", error);
+    res
+      .status(500)
+      .json({ success: false, data: { error: "Internal server error" } });
+  }
+};
+
 export const getTotalUsers = async (req: Request, res: Response) => {
   try {
     const cachedData: string | undefined = cache.get("tu:allUsers");

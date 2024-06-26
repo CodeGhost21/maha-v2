@@ -10,6 +10,7 @@ import {
   getLeaderBoard,
   getOpensBlockData,
   linkNewReferral,
+  getLeaderBoardWithSortKeys,
 } from "../controller/user";
 
 export const router = Router();
@@ -24,6 +25,7 @@ router.get("/", (_req, res) => {
 router.get("/globalData", getUsersData);
 router.patch("/linkReferral", linkNewReferral);
 router.get("/leaderBoard", getLeaderBoard);
+router.get("/leaderBoardWithSortKeys", getLeaderBoardWithSortKeys);
 router.use("/discord", discord);
 router.use("/twitter", twitter);
 router.use("/user", user);

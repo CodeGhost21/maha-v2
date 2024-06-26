@@ -1,5 +1,5 @@
 import { open } from "./database";
-import { updateLBCache } from "./cron/updateLBCache";
+import { updateLBCache, updateLBWithSortKeysCache } from "./cron/updateLBCache";
 import { totalUsers } from "./cron/totalUser";
 import * as http from "http";
 import bodyParser from "body-parser";
@@ -48,6 +48,7 @@ server.listen(port, () => console.log(`server started on port ${port}`));
 cron.schedule("*/10 * * * *", async () => {
   console.log("updating leaderboard cache 10 minutes");
   await updateLBCache();
+  await updateLBWithSortKeysCache();
   await totalUsers();
 });
 
