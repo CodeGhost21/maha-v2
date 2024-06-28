@@ -24,16 +24,22 @@ export const updateLPPointsHourly = async () => {
 
   const userBulkWrites: AnyBulkWriteOperation<IWalletUser>[] = [];
   const pointsBulkWrite: AnyBulkWriteOperation<IUserPointTransactions>[] = [];
-  let batchNo = 0;
+
   do {
     try {
-      batch = await WalletUserV2.find().skip(skip).limit(batchSize);
-      // console.log("lpPointsHourly: processing batch: ",batchNo, ".number of users in batch: ", batch.length);
-      batchNo++;
+      batch = await WalletUserV2.find({ pointsPerSecond: { $exists: true } })
+        .skip(skip)
+        .limit(batchSize).select("pointsPerSecond pointsPerSecondUpdateTimestamp referredBy totalPoints id boostStake");
     } catch (error) {
       throw new Error(`error while fetching wallet users, ${error}`);
     }
-
+    console.log(
+      "calculating points for",
+      batch.length,
+      "users,",
+      "total =",
+      skip + batch.length
+    );
     await Promise.all(
       batch.map(async (user) => {
         let referredByUser = {} as IWalletUserModel;
@@ -41,7 +47,7 @@ export const updateLPPointsHourly = async () => {
           try {
             referredByUser = await WalletUserV2.findOne({
               _id: user.referredBy,
-            }).select("id totalPoints points");
+            }).select("id totalPoints");
           } catch (error) {
             throw new Error(`error while fetching referred by users, ${error}`);
           }
@@ -75,33 +81,41 @@ export const updateLPPointsHourly = async () => {
                   {};
                 // asset level calculations
 
-                const timestamp = Number(
-                  pointsPerSecondUpdateTimestamp?.[asset] ?? 0
-                );
                 const pointsPerSecond =
                   Number(assetPointsPerSecond[asset]) || 0;
-                const timeElapsed =
-                  timestamp <= 0 ? 0 : (Date.now() - timestamp) / 1000;
-                const newPoints = Number(pointsPerSecond * timeElapsed);
-                let refPointForAsset = 0;
-                if (newPoints > 0) {
-                  if (referredByUser && Object.keys(referredByUser).length) {
-                    refPointForAsset =
-                      timestamp > 0 ? Number(newPoints * referralPercent) : 0;
-                    referralPoints += refPointForAsset;
-                  }
+                if (pointsPerSecond) {
+                  const timestamp = Number(
+                    pointsPerSecondUpdateTimestamp?.[asset] ?? 0
+                  );
+                  const timeElapsed =
+                    timestamp <= 0 ? 0 : (Date.now() - timestamp) / 1000;
+                  const newPoints = Number(pointsPerSecond * timeElapsed);
+                  let refPointForAsset = 0;
+                  if (newPoints > 0) {
+                    if (referredByUser && Object.keys(referredByUser).length) {
+                      refPointForAsset =
+                        timestamp > 0 ? Number(newPoints * referralPercent) : 0;
+                      referralPoints += refPointForAsset;
+                    }
 
-                  const pointsToAdd =
-                    timestamp > 0 ? newPoints + refPointForAsset : 0;
-                  (_points[lpTask] as IAsset)[asset] = pointsToAdd;
-                  _totalPoints += pointsToAdd;
-                  lpTask.startsWith("supply")
-                    ? (_totalSupplyPoints += pointsToAdd)
-                    : (_totalBorrowPoints += pointsToAdd);
+                    const pointsToAdd =
+                      timestamp > 0
+                        ? newPoints * (user.boostStake ?? 1) + refPointForAsset
+                        : 0;
+                    (_points[lpTask] as IAsset)[asset] = pointsToAdd;
+                    _totalPoints += pointsToAdd;
+                    lpTask.startsWith("supply")
+                      ? (_totalSupplyPoints += pointsToAdd)
+                      : (_totalBorrowPoints += pointsToAdd);
+                  }
+                  _pointsPerSecondUpdateTimestamp[`${asset}`] = Date.now();
                 }
-                _pointsPerSecondUpdateTimestamp[`${asset}`] = Date.now();
               });
-              if (referredByUser && Object.keys(referredByUser).length) {
+              if (
+                referredByUser &&
+                Object.keys(referredByUser).length &&
+                referralPoints
+              ) {
                 userBulkWrites.push({
                   updateOne: {
                     filter: { _id: referredByUser.id },
@@ -171,7 +185,7 @@ export const updateLPPointsHourly = async () => {
                 },
               });
             }
-          } else if (
+          } /*  else if (
             lpTask.startsWith("stake") &&
             user.pointsPerSecond[lpTask]
           ) {
@@ -294,7 +308,7 @@ export const updateLPPointsHourly = async () => {
                 },
               });
             }
-          }
+          } */
         });
       })
     );

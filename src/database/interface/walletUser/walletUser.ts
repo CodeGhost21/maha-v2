@@ -11,6 +11,7 @@ export interface IWalletUser {
   totalSupplyPoints: number;
   totalBorrowPoints: number;
   totalStakePoints: number;
+  boostStake: number;
   walletAddress: string;
   role: string;
   epoch: number;

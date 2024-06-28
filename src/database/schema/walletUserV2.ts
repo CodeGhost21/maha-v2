@@ -15,15 +15,19 @@ export const WalletUserSchemaV2 = new Schema(
     totalStakePoints: { type: Number, default: 0, index: true },
     walletAddress: { type: String, unique: true, index: true },
     role: { type: String },
-    epoch: { type: Number, default: 0 },
-    points: { type: {} as IWalletUserPoints, default: {} },
+    epoch: { type: Number },
+    points: { type: {} as IWalletUserPoints },
     // pointsUpdateTimestamp: { type: Object, default: {} },
-    pointsPerSecond: { type: {} as IWalletUserPoints, default: {} },
+    pointsPerSecond: {
+      type: {} as IWalletUserPoints,
+      index: true,
+    },
     pointsPerSecondUpdateTimestamp: {
       type: {} as IWalletUserPoints,
-      default: {},
+      index: true,
     },
-    epochs: { type: {} as IWalletUserPoints, default: {} },
+    epochs: { type: {} as IWalletUserPoints },
+    boostStake: { type: Number, default: 1, index: true },
   },
   { timestamps: true }
 );

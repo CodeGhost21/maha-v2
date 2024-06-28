@@ -12,7 +12,6 @@ import {
 } from "./cron/dailyLpPointsChain.v2";
 import { updateLPPointsHourly } from "./cron/lpPointshourly";
 import { addToQueue, isQueueEmpty } from "./cron/queue";
-import { distributeBlastPoints } from "./controller/quests/blastPoints";
 
 // connect to database
 open();
@@ -25,12 +24,13 @@ cron.schedule(
   async () => {
     addToQueue(async () => {
       console.log("running lp points every 4 hours");
+      // always execute linea first to calculate staking boost
         const cronJobs = [
+          lineaPPSCron,
           zksyncPPSCron,
           mantaPPSCron,
           blastPPSCron,
           ethereumLrtPPSCron,
-          lineaPPSCron,
           xLayerPPSCron,
         ];
 
@@ -57,15 +57,6 @@ cron.schedule(
   },
   { timezone: "Asia/Kolkata" }
 );
-
-// cron.schedule(
-//   "16 21 * * *",
-//   async () => {
-//     console.log("Distributing blast points every day at 10:30 pm");
-//     await distributeBlastPoints();
-//   },
-//   { timezone: "Asia/Kolkata" }
-// );
 
 // -------------  Update LP Points hourly -----------------
 cron.schedule(
