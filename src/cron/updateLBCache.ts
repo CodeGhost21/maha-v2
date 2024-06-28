@@ -4,13 +4,13 @@ import cache from "../utils/cache";
 import { totalPoints } from "./totalPoints";
 
 interface LBData {
-  byTotalPoints: lbUserData[];
-  byReferralPoints: lbUserData[];
-  byStakePoints: lbUserData[];
-  bySupplyPoints: lbUserData[];
-  byBorrowPoints: lbUserData[];
+  byTotalPoints: LBUserData[];
+  byReferralPoints: LBUserData[];
+  byStakePoints: LBUserData[];
+  bySupplyPoints: LBUserData[];
+  byBorrowPoints: LBUserData[];
 }
-interface lbUserData {
+interface LBUserData {
   address: string;
   referralPoints: number;
   totalStakePoints: number;
@@ -65,7 +65,7 @@ export const updateLBWithSortKeysCache = async () => {
     });
   });
 
-  const sortTotalStakePoints = await WalletUserV2.find()
+  /* const sortTotalStakePoints = await WalletUserV2.find()
     .sort({ totalStakePoints: -1 })
     .select(
       "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints"
@@ -81,8 +81,10 @@ export const updateLBWithSortKeysCache = async () => {
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
     });
-  });
+  }); */
 
+  lbData.byStakePoints = [{} as LBUserData];
+  
   const sortTotalSupplyPoints = await WalletUserV2.find()
     .sort({ totalSupplyPoints: -1 })
     .select(
@@ -143,7 +145,7 @@ export const updateLBCache = async () => {
     lbData.push({
       address: user.walletAddress,
       referralPoints: user.points.referral ?? 0,
-      totalStakePoints: pointsTotal.totalStakePoints,
+      totalStakePoints: 0,
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
       totalPoints: user.totalPoints,

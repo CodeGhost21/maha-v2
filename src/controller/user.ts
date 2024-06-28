@@ -84,28 +84,27 @@ export const getCurrentTotalPointsWithPPS = async (
       throw new Error("pointsPerSecondUpdateTimestamp not available");
     }
     const currentPoints = await _getCurrentPoints(user);
-    console.log(currentPoints)
+    console.log(currentPoints);
     const currentPointsProcessed = getTotalSupplyBorrowStakePoints({
       points: currentPoints,
     } as IWalletUserModel);
     const totalPoints =
       currentPointsProcessed.totalSupplyPoints +
-      currentPointsProcessed.totalBorrowPoints +
-      currentPointsProcessed.totalStakePoints;
+      currentPointsProcessed.totalBorrowPoints; /*  +
+      currentPointsProcessed.totalStakePoints */
 
-    const { totalSum, supplySum, borrowSum, stakeSum } = _sumPointsPerSecond(
+    const { totalSum, supplySum, borrowSum/* , stakeSum */ } = _sumPointsPerSecond(
       user.pointsPerSecond
     );
 
-    console.log(totalSum, supplySum, borrowSum, stakeSum);
     const returnData = {
       totalCurrentSupplyPointsPerSec: supplySum,
       totalCurrentBorrowPointsPerSec: borrowSum,
-      totalCurrentStakingPointsPerSec: stakeSum,
+      totalCurrentStakingPointsPerSec: 0/* stakeSum */,
       totalCurrentPointsPerSec: totalSum,
       totalCurrentSupplyPoints: currentPointsProcessed.totalSupplyPoints,
       totalCurrentBorrowPoints: currentPointsProcessed.totalBorrowPoints,
-      totalCurrentStakingPoints: currentPointsProcessed.totalStakePoints,
+      totalCurrentStakingPoints: 0/*  currentPointsProcessed.totalStakePoints */,
       totalCurrentPoints: totalPoints,
     };
     res.status(200).json({ success: true, data: { ...returnData } });
@@ -113,7 +112,7 @@ export const getCurrentTotalPointsWithPPS = async (
     try {
       const errorObj = JSON.parse(error.message);
       return res.status(errorObj.status).json(errorObj.obj);
-    } catch (_error:any) {
+    } catch (_error: any) {
       console.log("oops!!", error);
     }
     res
@@ -367,7 +366,7 @@ export const userInfo = async (req: Request, res: Response) => {
 
     const user = await _verifyAndGetUser(
       walletAddress,
-      "rank points totalPoints referralCode referrerCode totalStakePoints totalSupplyPoints totalBorrowPoints"
+      "rank points totalPoints referralCode referrerCode totalSupplyPoints totalBorrowPoints boostStake"
     );
 
     const userData = {
@@ -376,10 +375,11 @@ export const userInfo = async (req: Request, res: Response) => {
       referralCode: user.referralCode,
       referrerCode: user.referrerCode,
       totalPoints: user.totalPoints,
-      stakeZeroPoints: user.points.stakeLinea?.zero ?? 0,
-      totalStakePoints: user.totalStakePoints,
+      stakeZeroPoints: /* user.points.stakeLinea?.zero ?? */ 0,
+      totalStakePoints: /*  user.totalStakePoints */ 0,
       totalSupplyPoints: user.totalSupplyPoints,
       totalBorrowPoints: user.totalBorrowPoints,
+      stakeBoost: user.boostStake,
     };
 
     res.status(200).json({ success: true, data: { userData } });
@@ -415,9 +415,14 @@ export const getLeaderBoard = async (req: Request, res: Response) => {
   }
 };
 
-export const getLeaderBoardWithSortKeys = async (req: Request, res: Response) => {
+export const getLeaderBoardWithSortKeys = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const cachedData: string | undefined = cache.get("lb:leaderBoardWithSortKeys");
+    const cachedData: string | undefined = cache.get(
+      "lb:leaderBoardWithSortKeys"
+    );
     if (cachedData)
       return res
         .status(200)
@@ -797,7 +802,7 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
   let currentPoints = {} as IWalletUserPoints;
 
   lpList.forEach((lpTask) => {
-    if (lpTask.startsWith("stake")) {
+    /* if (lpTask.startsWith("stake")) {
       const pppUpdateTimestampForTask = pppUpdateTimestamp[
         lpTask
       ] as IStakeAsset;
@@ -821,7 +826,8 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
           newPoints + refPointForAsset + assetOldPoinst;
       }
       currentPoints = { ...currentPoints, ..._points };
-    } else {
+    } */
+    if (lpTask.startsWith("supply") || lpTask.startsWith("borrow")) {
       const pppUpdateTimestampForTask = pppUpdateTimestamp[lpTask] as IAsset;
       const pps = pointsPerSecond[lpTask] as IAsset;
       const oldPoints = (previousPoints[lpTask] as IAsset) ?? {};
@@ -877,13 +883,13 @@ const _verifyAndGetUser = async (
   return user;
 };
 
-function _sumPointsPerSecond(obj:any) {
+function _sumPointsPerSecond(obj: any) {
   let totalSum = 0;
   let supplySum = 0;
   let borrowSum = 0;
-  let stakeSum = 0;
+  // let stakeSum = 0;
 
-  function recurse(innerObj:any, parentKey: string) {
+  function recurse(innerObj: any, parentKey: string) {
     for (const key in innerObj) {
       if (typeof innerObj[key] === "object" && innerObj[key] !== null) {
         recurse(innerObj[key], parentKey || key);
@@ -893,16 +899,16 @@ function _sumPointsPerSecond(obj:any) {
           supplySum += innerObj[key];
         } else if (parentKey && parentKey.includes("borrow")) {
           borrowSum += innerObj[key];
-        } else if (parentKey && parentKey.includes("stake")) {
+        } /* else if (parentKey && parentKey.includes("stake")) {
           stakeSum += innerObj[key];
-        }
+        } */
       }
     }
   }
 
   recurse(obj, "");
 
-  return { totalSum, supplySum, borrowSum, stakeSum };
+  return { totalSum, supplySum, borrowSum };
 }
 
 // const _getTotalStakePoints = (user: IWalletUserModel) => {
