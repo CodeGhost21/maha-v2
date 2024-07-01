@@ -77,35 +77,42 @@ export const getCurrentTotalPointsWithPPS = async (
   try {
     const user = await _verifyAndGetUser(
       walletAddress,
-      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy boostStake"
+      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy boostStake totalSupplyPoints totalBorrowPoints"
     );
 
     if (!user.pointsPerSecondUpdateTimestamp) {
       throw new Error("pointsPerSecondUpdateTimestamp not available");
     }
-    
+
     const currentPoints = await _getCurrentPoints(user);
     const boost = user.boostStake ?? 1;
 
     const currentPointsProcessed = getTotalSupplyBorrowStakePoints({
       points: currentPoints,
     } as IWalletUserModel);
-    const totalPoints =
-      currentPointsProcessed.totalSupplyPoints +
-      currentPointsProcessed.totalBorrowPoints; /*  +
+
+    const currentSupplyPoints =
+      currentPointsProcessed.totalSupplyPoints <= 0
+        ? user.totalSupplyPoints
+        : 0;
+    const currentBorrowPoints =
+      currentPointsProcessed.totalBorrowPoints <= 0
+        ? user.totalBorrowPoints
+        : 0;
+
+    const totalPoints = currentSupplyPoints + currentBorrowPoints; /*  +
       currentPointsProcessed.totalStakePoints */
 
-    const { totalSum, supplySum, borrowSum/* , stakeSum */ } = _sumPointsPerSecond(
-      user.pointsPerSecond
-    );
+    const { totalSum, supplySum, borrowSum /* , stakeSum */ } =
+      _sumPointsPerSecond(user.pointsPerSecond);
 
     const returnData = {
       totalCurrentSupplyPointsPerSec: supplySum * boost,
       totalCurrentBorrowPointsPerSec: borrowSum * boost,
       totalCurrentStakingPointsPerSec: 0 /* stakeSum */,
       totalCurrentPointsPerSec: totalSum,
-      totalCurrentSupplyPoints: currentPointsProcessed.totalSupplyPoints,
-      totalCurrentBorrowPoints: currentPointsProcessed.totalBorrowPoints,
+      totalCurrentSupplyPoints: currentSupplyPoints,
+      totalCurrentBorrowPoints: currentBorrowPoints,
       totalCurrentStakingPoints: 0 /*  currentPointsProcessed.totalStakePoints */,
       totalCurrentPoints: totalPoints,
     };
@@ -735,7 +742,7 @@ export const getTotalSupplyBorrowStakePoints = (user: IWalletUserModel) => {
 
   let totalStakePoints = 0;
   if (user.points.stakeLinea) {
-    totalStakePoints = 0
+    totalStakePoints = 0;
   }
 
   return {
@@ -800,7 +807,6 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
   const boost = user.boostStake ?? 1;
 
   const lpList = Object.keys(pointsPerSecond) as Array<keyof IWalletUserPoints>;
-
   let currentPoints = {} as IWalletUserPoints;
 
   lpList.forEach((lpTask) => {
@@ -846,8 +852,9 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
           refPointForAsset = Number(newPoints * referralPercent);
         }
         const assetOldPoinst = oldPoints[key as keyof IAsset] ?? 0;
+
         (_points[lpTask] as IAsset)[key as keyof IAsset] =
-          (newPoints * boost) + refPointForAsset + assetOldPoinst;
+          newPoints * boost + refPointForAsset + assetOldPoinst;
       }
       currentPoints = { ...currentPoints, ..._points };
     }

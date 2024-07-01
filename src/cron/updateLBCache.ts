@@ -19,6 +19,7 @@ interface LBUserData {
   totalBorrowPoints: number;
   totalPoints: number;
   stakeBoost: number;
+  rank: number;
 }
 
 export const updateLBWithSortKeysCache = async () => {
@@ -31,10 +32,12 @@ export const updateLBWithSortKeysCache = async () => {
     byStakeBoost: [],
   };
 
-  const sortKeyTotalPoints = await WalletUserV2.find({totalPoints:{$exists: true}})
+  const sortKeyTotalPoints = await WalletUserV2.find({
+    totalPoints: { $exists: true },
+  })
     .sort({ totalPoints: -1 })
     .select(
-      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
+      "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
 
@@ -47,6 +50,7 @@ export const updateLBWithSortKeysCache = async () => {
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
       stakeBoost: user.boostStake ?? 1,
+      rank: user.rank,
     });
   });
 
@@ -66,6 +70,7 @@ export const updateLBWithSortKeysCache = async () => {
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
       stakeBoost: user.boostStake ?? 1,
+      rank: user.rank,
     });
   });
 
@@ -106,6 +111,7 @@ export const updateLBWithSortKeysCache = async () => {
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
       stakeBoost: user.boostStake ?? 1,
+      rank: user.rank,
     });
   });
 
@@ -114,7 +120,7 @@ export const updateLBWithSortKeysCache = async () => {
   const sortTotalSupplyPoints = await WalletUserV2.find()
     .sort({ totalSupplyPoints: -1 })
     .select(
-      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
+      "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
 
@@ -127,13 +133,14 @@ export const updateLBWithSortKeysCache = async () => {
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
       stakeBoost: user.boostStake ?? 1,
+      rank: user.rank,
     });
   });
 
   const totalBorrowPoints = await WalletUserV2.find()
     .sort({ totalBorrowPoints: -1 })
     .select(
-      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
+      "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
 
@@ -146,6 +153,7 @@ export const updateLBWithSortKeysCache = async () => {
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
       stakeBoost: user.boostStake ?? 1,
+      rank: user.rank,
     });
   });
 
@@ -169,6 +177,7 @@ export const updateLBCache = async () => {
     totalBorrowPoints: number;
     totalPoints: number;
     stakeBoost: number;
+    rank:number;
   }
 
   const lbData: lbUserData[] = [];
@@ -182,6 +191,7 @@ export const updateLBCache = async () => {
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
       totalPoints: user.totalPoints,
       stakeBoost: user.boostStake ?? 1,
+      rank: user.rank,
     });
   });
 
