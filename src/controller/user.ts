@@ -94,11 +94,11 @@ export const getCurrentTotalPointsWithPPS = async (
     const currentSupplyPoints =
       currentPointsProcessed.totalSupplyPoints <= 0
         ? user.totalSupplyPoints
-        : 0;
+        : currentPointsProcessed.totalSupplyPoints;
     const currentBorrowPoints =
       currentPointsProcessed.totalBorrowPoints <= 0
         ? user.totalBorrowPoints
-        : 0;
+        : currentPointsProcessed.totalBorrowPoints;
 
     const totalPoints = currentSupplyPoints + currentBorrowPoints; /*  +
       currentPointsProcessed.totalStakePoints */
