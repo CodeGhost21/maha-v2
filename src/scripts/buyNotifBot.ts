@@ -2,7 +2,14 @@ import { MessageEmbed, WebhookClient } from "discord.js";
 import { ethers } from "ethers";
 import { lineaProvider } from "../utils/providers";
 import nconf from "nconf";
-// import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
+import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
+import axios from "axios";
+
+const getMarketCap = async () => {
+  const response = await axios.get('https://api.zerolend.xyz/supply/circulating')
+  console.log(response);
+  return response
+}
 
 const zeroTokenABI = [
   {
@@ -245,20 +252,43 @@ export default () => {
     .setColor("GREEN")
     .setTitle("$ZERO buy notification");
 
-  zero.on("Transfer", async (from, to, value) => {
-    // const marketPrice = await getPriceCoinGecko();
+  zero.on("Transfer", async (from, to, value, event) => {
     // if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
-      const _value = ethers.formatEther(value);
-      const message = `${to} bought ${_value} $ZERO`;
-      /* , worth of ${
-        marketPrice["zerolend"] * _value
-      } */
-      webhookClient.send({
-        username: "ZERO-Buy-bot",
-        avatarURL:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4KPJ9jv03VeOT1ORvwAMyFfs53CCay4mDfQ1cJETiHFQQgH3xO7fRyeQ4dw&s",
-        embeds: [emb.setDescription(message)],
-      });
+    const _value = ethers.formatEther(value);
+    const marketPrice = await getPriceCoinGecko()
+    const usdValue = Number(_value) * marketPrice.zerolend
+
+    /* , worth of ${
+      marketPrice["zerolend"] * _value
+    } */
+
+    // Example additional data, replace with actual data retrieval
+    const spent = `$${usdValue.toFixed(2)} (${(usdValue / marketPrice.eth).toFixed(4)} WETH)`;
+    const got = `${_value} ZERO`;
+    const buyer = `${to}`;
+    // const rank = "423rd Whale";
+    const price = `$${marketPrice.zerolend} (${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)`;
+    const marketCap = await getMarketCap()
+
+
+    const message = `
+       🟢🟢🟢🟢\n
+       💰 Spent: ${spent}
+       💱 Got: ${got}
+       🤵‍♂️ ${buyer}
+       💵 Price: ${price}
+       🧢 MCap: ${marketCap.data}\n
+       Transaction: https://lineascan.build/tx/${event.log.transactionHash}
+     `;
+
+    webhookClient.send({
+      username: "ZERO-Buy-bot",
+      avatarURL:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4KPJ9jv03VeOT1ORvwAMyFfs53CCay4mDfQ1cJETiHFQQgH3xO7fRyeQ4dw&s",
+      embeds: [emb.setDescription(message)],
+    });
     // }
+
+
   });
 };
