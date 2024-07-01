@@ -90,22 +90,18 @@ export const BlastData = async () => {
   const challengeWETH = await getBlastChallenge(contractAddressWETH);
   const tokenWETH = await getBearerToken(challengeWETH);
   const pointsWETH = await getPoints(tokenWETH, contractAddressWETH);
-  // console.log(pointsWETH);
+  console.log(pointsWETH);
 
   const totalPoints =
-    Number(pointsUSDB.balancesByPointType.LIQUIDITY.earnedCumulative) +
-    Number(pointsWETH.balancesByPointType.LIQUIDITY.earnedCumulative);
-  // console.log(totalPoints);
+    Number(pointsUSDB.balancesByPointType.PHASE2_POINTS.earnedCumulative) +
+    Number(pointsWETH.balancesByPointType.PHASE2_POINTS.earnedCumulative);
+  console.log(totalPoints);
 
   return {
-    blastUSDB: Number(
-      pointsUSDB.balancesByPointType.LIQUIDITY.earnedCumulative
-    ),
-    blastWETH: Number(
-      pointsWETH.balancesByPointType.LIQUIDITY.earnedCumulative
-    ),
+    blastUSDB: Number(pointsUSDB.balancesByPointType.PHASE2_POINTS.available),
+    blastWETH: Number(pointsWETH.balancesByPointType.PHASE2_POINTS.available),
     blastGoldWETH: Number(
-      pointsWETH.balancesByPointType.DEVELOPER.earnedCumulative
+      pointsWETH.balancesByPointType.PHASE2_GOLD.earnedCumulative
     ),
     totalPoints: totalPoints,
   };
