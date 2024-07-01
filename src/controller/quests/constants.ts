@@ -20,21 +20,21 @@ export const stakePtsPerMAHA = 1000;
 export interface Multiplier {
   defaultSupply: number; // 1x
   defaultBorrow: number; // 3x --> 4x
-  ethSupply?: number; //2x all chains
+  wethSupply?: number; //2x all chains
   lidoSupply?: number; // 2x on zksync
   ezethSupply?: number; //2x all chains
   ethfiSupply?: number; //2x all chains
   rsethSupply?: number; //2x all chains
   wrsethSupply?: number; //2x all chains
-  usdcSupply?: number; //2x al chains //TODO: get confirmation 
+  usdcSupply?: number; //2x al chains
 }
 
-export const stakeZeroMultiplier = 1.5; //TODO: get confirmation
+export const stakeZeroMultiplier = 1.5;
 
 export const ethLrtMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
-  ethSupply: 2,
+  wethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
@@ -45,7 +45,7 @@ export const ethLrtMultiplier: Multiplier = {
 export const zksyncMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
-  ethSupply: 2,
+  wethSupply: 2,
   lidoSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
@@ -57,7 +57,7 @@ export const zksyncMultiplier: Multiplier = {
 export const blastMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
-  ethSupply: 2,
+  wethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
@@ -68,7 +68,7 @@ export const blastMultiplier: Multiplier = {
 export const lineaMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
-  ethSupply: 2,
+  wethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
@@ -79,7 +79,7 @@ export const lineaMultiplier: Multiplier = {
 export const mantaMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
-  ethSupply: 2,
+  wethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
@@ -90,7 +90,7 @@ export const mantaMultiplier: Multiplier = {
 export const xlayerMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
-  ethSupply: 2,
+  wethSupply: 2,
   ezethSupply: 2,
   ethfiSupply: 2,
   rsethSupply: 2,
