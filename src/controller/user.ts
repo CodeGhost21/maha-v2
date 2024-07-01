@@ -77,14 +77,16 @@ export const getCurrentTotalPointsWithPPS = async (
   try {
     const user = await _verifyAndGetUser(
       walletAddress,
-      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy"
+      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy boostStake"
     );
 
     if (!user.pointsPerSecondUpdateTimestamp) {
       throw new Error("pointsPerSecondUpdateTimestamp not available");
     }
+    
     const currentPoints = await _getCurrentPoints(user);
-    console.log(currentPoints);
+    const boost = user.boostStake ?? 1;
+
     const currentPointsProcessed = getTotalSupplyBorrowStakePoints({
       points: currentPoints,
     } as IWalletUserModel);
@@ -98,13 +100,13 @@ export const getCurrentTotalPointsWithPPS = async (
     );
 
     const returnData = {
-      totalCurrentSupplyPointsPerSec: supplySum,
-      totalCurrentBorrowPointsPerSec: borrowSum,
-      totalCurrentStakingPointsPerSec: 0/* stakeSum */,
+      totalCurrentSupplyPointsPerSec: supplySum * boost,
+      totalCurrentBorrowPointsPerSec: borrowSum * boost,
+      totalCurrentStakingPointsPerSec: 0 /* stakeSum */,
       totalCurrentPointsPerSec: totalSum,
       totalCurrentSupplyPoints: currentPointsProcessed.totalSupplyPoints,
       totalCurrentBorrowPoints: currentPointsProcessed.totalBorrowPoints,
-      totalCurrentStakingPoints: 0/*  currentPointsProcessed.totalStakePoints */,
+      totalCurrentStakingPoints: 0 /*  currentPointsProcessed.totalStakePoints */,
       totalCurrentPoints: totalPoints,
     };
     res.status(200).json({ success: true, data: { ...returnData } });
@@ -379,7 +381,7 @@ export const userInfo = async (req: Request, res: Response) => {
       totalStakePoints: /*  user.totalStakePoints */ 0,
       totalSupplyPoints: user.totalSupplyPoints,
       totalBorrowPoints: user.totalBorrowPoints,
-      stakeBoost: user.boostStake,
+      stakeBoost: user.boostStake ?? 1,
     };
 
     res.status(200).json({ success: true, data: { userData } });
@@ -733,8 +735,7 @@ export const getTotalSupplyBorrowStakePoints = (user: IWalletUserModel) => {
 
   let totalStakePoints = 0;
   if (user.points.stakeLinea) {
-    const stakeLinea = points.stakeLinea;
-    totalStakePoints = getTotalPoints(stakeLinea);
+    totalStakePoints = 0
   }
 
   return {
@@ -796,6 +797,7 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
   const previousPoints = user.points ?? {};
   const pointsPerSecond = user.pointsPerSecond;
   const pppUpdateTimestamp = user.pointsPerSecondUpdateTimestamp;
+  const boost = user.boostStake ?? 1;
 
   const lpList = Object.keys(pointsPerSecond) as Array<keyof IWalletUserPoints>;
 
@@ -845,7 +847,7 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
         }
         const assetOldPoinst = oldPoints[key as keyof IAsset] ?? 0;
         (_points[lpTask] as IAsset)[key as keyof IAsset] =
-          newPoints + refPointForAsset + assetOldPoinst;
+          (newPoints * boost) + refPointForAsset + assetOldPoinst;
       }
       currentPoints = { ...currentPoints, ..._points };
     }

@@ -9,6 +9,7 @@ interface LBData {
   byStakePoints: LBUserData[];
   bySupplyPoints: LBUserData[];
   byBorrowPoints: LBUserData[];
+  byStakeBoost: LBUserData[];
 }
 interface LBUserData {
   address: string;
@@ -17,6 +18,7 @@ interface LBUserData {
   totalSupplyPoints: number;
   totalBorrowPoints: number;
   totalPoints: number;
+  stakeBoost: number;
 }
 
 export const updateLBWithSortKeysCache = async () => {
@@ -26,42 +28,44 @@ export const updateLBWithSortKeysCache = async () => {
     byStakePoints: [],
     bySupplyPoints: [],
     byBorrowPoints: [],
+    byStakeBoost: [],
   };
-  
-  const sortKeyTotalPoints = await WalletUserV2.find()
+
+  const sortKeyTotalPoints = await WalletUserV2.find({totalPoints:{$exists: true}})
     .sort({ totalPoints: -1 })
     .select(
-      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints"
+      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
-
 
   sortKeyTotalPoints.map((user) => {
     lbData.byTotalPoints.push({
       address: user.walletAddress,
-      referralPoints: user.points.referral ?? 0,
+      referralPoints: user.points?.referral ?? 0,
       totalStakePoints: user.totalStakePoints,
       totalSupplyPoints: user.totalSupplyPoints,
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
+      stakeBoost: user.boostStake ?? 1,
     });
   });
 
   const sortKeyReferralPoints = await WalletUserV2.find()
     .sort({ "points.referral": -1 })
     .select(
-      "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints"
+      "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
-
+    
   sortKeyReferralPoints.map((user) => {
     lbData.byReferralPoints.push({
       address: user.walletAddress,
-      referralPoints: user.points.referral ?? 0,
+      referralPoints: user.points?.referral ?? 0,
       totalStakePoints: user.totalStakePoints,
       totalSupplyPoints: user.totalSupplyPoints,
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
+      stakeBoost: user.boostStake ?? 1,
     });
   });
 
@@ -84,40 +88,64 @@ export const updateLBWithSortKeysCache = async () => {
   }); */
 
   lbData.byStakePoints = [{} as LBUserData];
+
+  const sortStakeBoost = await WalletUserV2.find()
+    .sort({ boostStake: -1 })
+    .select(
+      "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
+    )
+    .limit(25);
+    console.log(sortStakeBoost)
   
+  sortStakeBoost.map((user) => {
+    lbData.byStakeBoost.push({
+      address: user.walletAddress,
+      referralPoints: user.points?.referral ?? 0,
+      totalStakePoints: user.totalStakePoints,
+      totalSupplyPoints: user.totalSupplyPoints,
+      totalBorrowPoints: user.totalBorrowPoints,
+      totalPoints: user.totalPoints,
+      stakeBoost: user.boostStake ?? 1,
+    });
+  });
+
+
+
   const sortTotalSupplyPoints = await WalletUserV2.find()
     .sort({ totalSupplyPoints: -1 })
     .select(
-      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints"
+      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
 
   sortTotalSupplyPoints.map((user) => {
     lbData.bySupplyPoints.push({
       address: user.walletAddress,
-      referralPoints: user.points.referral ?? 0,
+      referralPoints: user.points?.referral ?? 0,
       totalStakePoints: user.totalStakePoints,
       totalSupplyPoints: user.totalSupplyPoints,
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
+      stakeBoost: user.boostStake ?? 1,
     });
   });
 
   const totalBorrowPoints = await WalletUserV2.find()
     .sort({ totalBorrowPoints: -1 })
     .select(
-      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints"
+      "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
 
   totalBorrowPoints.map((user) => {
     lbData.byBorrowPoints.push({
       address: user.walletAddress,
-      referralPoints: user.points.referral ?? 0,
+      referralPoints: user.points?.referral ?? 0,
       totalStakePoints: user.totalStakePoints,
       totalSupplyPoints: user.totalSupplyPoints,
       totalBorrowPoints: user.totalBorrowPoints,
       totalPoints: user.totalPoints,
+      stakeBoost: user.boostStake ?? 1,
     });
   });
 
@@ -126,9 +154,11 @@ export const updateLBWithSortKeysCache = async () => {
 };
 
 export const updateLBCache = async () => {
-  const allUsersData = await WalletUserV2.find({rank:{$exists:true}})
+  const allUsersData = await WalletUserV2.find({ rank: { $exists: true } })
     .sort({ rank: 1 })
-    .select("totalPoints totalSupplyPoints totalBorrowPoints totalStakePoints rank walletAddress points")
+    .select(
+      "totalPoints totalSupplyPoints totalBorrowPoints totalStakePoints rank walletAddress points boostStake"
+    )
     .limit(25);
 
   interface lbUserData {
@@ -138,17 +168,20 @@ export const updateLBCache = async () => {
     totalSupplyPoints: number;
     totalBorrowPoints: number;
     totalPoints: number;
+    stakeBoost: number;
   }
+
   const lbData: lbUserData[] = [];
   allUsersData.map((user) => {
     const pointsTotal = getTotalSupplyBorrowStakePoints(user);
     lbData.push({
       address: user.walletAddress,
-      referralPoints: user.points.referral ?? 0,
+      referralPoints: user.points?.referral ?? 0,
       totalStakePoints: 0,
       totalSupplyPoints: pointsTotal.totalSupplyPoints,
       totalBorrowPoints: pointsTotal.totalBorrowPoints,
       totalPoints: user.totalPoints,
+      stakeBoost: user.boostStake ?? 1,
     });
   });
 
