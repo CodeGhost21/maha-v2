@@ -5,7 +5,8 @@ import { BlastBatches } from "../../database/models/blastBatches";
 import { getBlastChallenge, getBearerToken, BlastData } from "./blast";
 import axiosRetry from "axios-retry";
 import { AnyBulkWriteOperation } from "mongodb";
-import { writeFileSync } from "fs";
+import fs from "fs";
+import path from "path";
 
 // Exponential back-off retry delay between requests
 axiosRetry(axios, {
@@ -164,15 +165,16 @@ const getUSDBWETHPoints = async (
   const url =
     "https://api.goldsky.com/api/public/project_clsk1wzatdsls01wchl2e4n0y/subgraphs/zerolend-blast-points/1.0.0/gn";
 
+  const users = userBatch.map((u: any) => `"${u.id}"`).join(",");
   const query = `{
-    usdbusers(where: {id_in: [${userBatch.map((u: any) => `"${u.id}"`)}]}) {
+    usdbusers(where: {id_in: [${users}]}, first:1000) {
       id
       balance
       debt
       lastUpdatedAt 
       accumulatedPoints
     }
-    wethusers(where: {id_in: [${userBatch.map((u: any) => `"${u.id}"`)}]}) {
+    wethusers(where: {id_in: [${users}]}, first:1000) {
       id
       balance
       debt
@@ -200,8 +202,14 @@ const getUSDBWETHPoints = async (
 
   const percentage = 100000000;
 
+  const dbUsers = await BlastUser.find({
+    walletAddress: {
+      $in: [users],
+    },
+  }).select("blastPoints walletAddress");
   // subtract from points given
   // also sub from previous give from db
+
   usdbusers.forEach((user: any) => {
     const currentPointsAccumulated =
       BigInt(user.balance) -
@@ -215,10 +223,18 @@ const getUSDBWETHPoints = async (
 
     // calculate share for user if accumulated points are +ve
     if (usdbPointsEarnedPercentage > 0) {
-      const usdbPointsEarned =
+      let usdbPointsEarned =
         Number(usdbPointsEarnedPercentage * usdbPointsTotal) / percentage;
+      const foundUser = dbUsers.find(
+        (_user) => _user.walletAddress === user.id
+      );
+      if (foundUser) {
+        usdbPointsEarned -= foundUser.blastPoints.pointsGivenUSDB;
+      }
 
-      pointsEarnedMap.set(user.id, { usdbPointsEarned });
+      if (usdbPointsEarned > 0) {
+        pointsEarnedMap.set(user.id, { usdbPointsEarned });
+      }
     }
   });
 
@@ -235,10 +251,19 @@ const getUSDBWETHPoints = async (
 
     // calculate share for user if accumulated points are +ve
     if (wethPointsEarnedPercentage > 0) {
-      const wethPointsEarned =
+      let wethPointsEarned =
         Number(wethPointsEarnedPercentage * wethPointsTotal) / percentage;
-      const usdbPointsEarned = pointsEarnedMap.get(user.id);
-      pointsEarnedMap.set(user.id, { ...usdbPointsEarned, wethPointsEarned });
+      const usdbPointsEarned = pointsEarnedMap.get(user.id) || {};
+      const foundUser = dbUsers.find(
+        (_user) => _user.walletAddress === user.id
+      );
+      if (foundUser) {
+        wethPointsEarned -= foundUser.blastPoints.pointsGivenWETH;
+      }
+
+      if (wethPointsEarned > 0) {
+        pointsEarnedMap.set(user.id, { ...usdbPointsEarned, wethPointsEarned });
+      }
     }
   });
 
@@ -409,7 +434,111 @@ export const distributeBlastPoints = async () => {
     }
 
     lastAddress = batch.data.data.users[batch.data.data.users.length - 1].id;
-    console.log("executed blast-points for batch. last address", lastAddress)
+    console.log("executed blast-points for batch. last address", lastAddress);
   } while (batch.data.data.users.length === first);
   console.log("done");
+};
+
+export const findMissedUsersForBlastPoints = async () => {
+  const blastPoints = await BlastData();
+  const usdbPointsTotal: number = blastPoints.blastUSDB;
+  const wethPointsTotal: number = blastPoints.blastWETH;
+
+  let batch;
+  let lastAddress = "0x0000000000000000000000000000000000000000";
+  const first = 1000;
+
+  const queryURL =
+    "https://api.studio.thegraph.com/query/65585/zerolend-blast-market/version/latest";
+
+  const csvFilePath = path.join(
+    __dirname,
+    "./pointsBlastCsv/blast_points_data - Sheet1.csv"
+  );
+
+  const pointsData = readBlastPointsDataFromCSV(csvFilePath);
+
+  fs.writeFileSync(
+    "missing_user_blast_points.csv",
+    "walletAddress,points to give usdb,points to give weth"
+  );
+
+  do {
+    const graphQuery = `query {
+        users(where: {id_gt: "${lastAddress}"}, first: ${first}) {
+          id
+          }
+      }`;
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    try {
+      batch = await axios.post(queryURL, { query: graphQuery }, { headers });
+    } catch (error: any) {
+      console.log("error occurred", error.message);
+      throw error;
+    }
+
+    const users = batch.data.data.users;
+
+    const unprocessedUsers = users.filter(
+      (user: any) => !pointsData.has(user.id)
+    );
+
+    if (unprocessedUsers.length) {
+      const usersShare = await getUSDBWETHPoints(
+        unprocessedUsers,
+        usdbPointsTotal,
+        wethPointsTotal
+      );
+
+      for (const [walletAddress, points] of usersShare) {
+        fs.appendFileSync(
+          "missing_user_blast_points.csv",
+          `\n${walletAddress},${points.usdbPointsEarned ?? 0},${points.wethPointsEarned ?? 0}`
+        );
+      }
+    }
+
+    lastAddress = batch.data.data.users[batch.data.data.users.length - 1].id;
+    console.log("executed blast-points for batch. last address", lastAddress);
+  } while (batch.data.data.users.length === first);
+  console.log("done");
+};
+
+const readBlastPointsDataFromCSV = (_path: string) => {
+  const data = fs.readFileSync(_path, "utf8");
+
+  // Split the data into lines
+  const lines = data.trim().split("\n");
+
+  // Create a map to store the results
+  const walletMap = new Map();
+
+  // Loop through each line of the CSV data (skipping the header)
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].split(",");
+
+    // Extract the wallet address and points
+    const walletAddress = line[0];
+    const pointsUSDB = parseFloat(line[1]);
+    const pointsWETH = parseFloat(line[2]);
+
+    // Create the value object
+    const value: any = {};
+
+    // pointsUSDB > 0 ? (value.usdb = pointsUSDB) : "";
+    // pointsWETH > 0 ? (value.weth = pointsWETH) : "";
+
+    value.usdb = pointsUSDB;
+    value.weth = pointsWETH;
+
+    // Add the wallet address and value to the map
+    // if (pointsUSDB > 0 || pointsWETH > 0) {
+    walletMap.set(walletAddress, value);
+    // }
+  }
+  return walletMap;
 };
