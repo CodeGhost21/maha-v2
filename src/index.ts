@@ -12,7 +12,6 @@ import routes from "./routes";
 import session from "express-session";
 import { totalPoints } from "./cron/totalPoints";
 import "./strategies";
-// import buyNotifBot from "./scripts/buyNotifBot";
 
 const app = express();
 const server = new http.Server(app);
@@ -42,7 +41,6 @@ const port = app.get("port");
 server.listen(port, () => console.log(`server started on port ${port}`));
 
 // notification for $ZERO buy
-// buyNotifBot()
 
 // setup LB cache
 cron.schedule("*/10 * * * *", async () => {

@@ -7,7 +7,7 @@ import axios from "axios";
 
 const getMarketCap = async () => {
   const response = await axios.get('https://api.zerolend.xyz/supply/circulating')
-  return response
+  return Math.floor(response.data)
 }
 
 const zeroTokenABI = [
@@ -252,15 +252,17 @@ export default () => {
     .setTitle("$ZERO buy notification");
 
   zero.on("Transfer", async (from, to, value, event) => {
-    if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
-      const _value = ethers.formatEther(value);
-      const marketPrice = await getPriceCoinGecko()
-      const usdValue = Number(_value) * marketPrice.zerolend
+    // if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
+    const _value = ethers.formatEther(value);
+    const marketPrice = await getPriceCoinGecko()
+    const usdValue = Number(_value) * marketPrice.zerolend
+
+    if (usdValue > 1) {
 
       const spent = `$${usdValue.toFixed(2)} (${(usdValue / marketPrice.eth).toFixed(4)} WETH)`;
-      const got = `${_value} ZERO`;
+      const got = `${Number(Number(_value).toFixed(2)).toLocaleString()} ZERO`;
       const buyer = `${to}`;
-      const price = `$${marketPrice.zerolend} (${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)`;
+      const price = `$${marketPrice.zerolend}`;//(${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)
       const marketCap = await getMarketCap()
 
       const message = `
@@ -269,7 +271,7 @@ export default () => {
        💱 Got: ${got}
        🤵‍♂️ ${buyer}
        💵 Price: ${price}
-       🧢 MCap: ${marketCap.data}\n
+       🧢 MCap: ${marketCap.toLocaleString()}\n
        Transaction: https://lineascan.build/tx/${event.log.transactionHash}
      `;
 
@@ -280,5 +282,6 @@ export default () => {
         embeds: [emb.setDescription(message)],
       });
     }
+    // }
   });
 };

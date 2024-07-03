@@ -1,5 +1,5 @@
-import { open } from "./database";
 import cron from "node-cron";
+import { open } from "./database";
 import { updateUsersRank } from "./cron/updateRank";
 
 import {
@@ -12,9 +12,11 @@ import {
 } from "./cron/dailyLpPointsChain.v2";
 import { updateLPPointsHourly } from "./cron/lpPointshourly";
 import { addToQueue, isQueueEmpty } from "./cron/queue";
+import buyNotifBot from "./scripts/buyNotifBot";
 
 // connect to database
 open();
+buyNotifBot()
 let isUpdatingPoints = false;
 console.log("starting");
 
@@ -25,22 +27,22 @@ cron.schedule(
     addToQueue(async () => {
       console.log("running lp points every 4 hours");
       // always execute linea first to calculate staking boost
-        const cronJobs = [
-          lineaPPSCron,
-          zksyncPPSCron,
-          mantaPPSCron,
-          blastPPSCron,
-          ethereumLrtPPSCron,
-          xLayerPPSCron,
-        ];
+      const cronJobs = [
+        lineaPPSCron,
+        zksyncPPSCron,
+        mantaPPSCron,
+        blastPPSCron,
+        ethereumLrtPPSCron,
+        xLayerPPSCron,
+      ];
 
-        for (const job of cronJobs) {
-          try {
-            await job();
-          } catch (error) {
-            console.error(`Error occurred in ${job.name}:`, error);
-          }
+      for (const job of cronJobs) {
+        try {
+          await job();
+        } catch (error) {
+          console.error(`Error occurred in ${job.name}:`, error);
         }
+      }
     });
   },
   { timezone: "Asia/Kolkata" }
