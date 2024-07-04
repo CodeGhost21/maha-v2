@@ -9,6 +9,10 @@ import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
 import {
   Multiplier,
   assetDenomination,
+  maxAmount,
+  maxBoost,
+  minAmount,
+  minBoost,
   zeroveDenom,
 } from "../controller/quests/constants";
 import axiosRetry from "axios-retry";
@@ -182,7 +186,12 @@ const _getSupplyBorrowStakeData = async (
           lastAddressStake
         );
         // calculate rates and update in db
-        await _calculateAndUpdateRates(reservesMap,supplyTask, borrowTask, stakeTask);
+        await _calculateAndUpdateRates(
+          reservesMap,
+          supplyTask,
+          borrowTask,
+          stakeTask
+        );
 
         // eslint-disable-next-line no-constant-condition
       } while (true);
@@ -254,12 +263,18 @@ const _getSupplyBorrowStakeData = async (
             const supplyMultiplier =
               multiplier[`${asset}Supply` as keyof Multiplier];
 
-            userData.supply[asset] = Number(data.currentATokenBalance)
+            const balanceUSDValue = Number(data.currentATokenBalance)
               ? (Number(data.currentATokenBalance) /
                   assetDenomination[`${asset}`]) *
-                Number(marketPrice[`${asset}`]) *
-                (supplyMultiplier ? supplyMultiplier : multiplier.defaultSupply)
+                Number(marketPrice[`${asset}`])
               : 0;
+            userData.supply[asset] =
+              balanceUSDValue > 2
+                ? balanceUSDValue *
+                  (supplyMultiplier
+                    ? supplyMultiplier
+                    : multiplier.defaultSupply)
+                : 0;
 
             const borrowMultiplier =
               multiplier[`${asset}Borrow` as keyof Multiplier];
@@ -420,11 +435,6 @@ const addReferralCodesToNewUsers = async () => {
 };
 
 const calculateBoost = (amount: number) => {
-  const minAmount = 0;
-  const maxAmount = 50000000;
-  const minBoost = 1;
-  const maxBoost = 2.5;
-
   // Ensure the amount is within the allowed range
   if (amount <= minAmount) {
     return minBoost;

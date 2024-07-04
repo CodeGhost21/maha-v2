@@ -30,6 +30,10 @@ export interface Multiplier {
 }
 
 export const stakeZeroMultiplier = 1.5;
+export const minAmount = 0;
+export const maxAmount = 50000000;
+export const minBoost = 1;
+export const maxBoost = 5;
 
 export const ethLrtMultiplier: Multiplier = {
   defaultSupply: 1,
