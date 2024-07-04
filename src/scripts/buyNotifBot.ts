@@ -5,9 +5,16 @@ import nconf from "nconf";
 import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
 import axios from "axios";
 
-const getMarketCap = async () => {
-  const response = await axios.get('https://api.zerolend.xyz/supply/circulating')
-  return Math.floor(response.data)
+
+export const getMarketCap = async () => {
+  try {
+    const response = await axios.get('https://api.coingecko.com/api/v3/coins/zerolend');
+    const marketCap = response.data.market_data.market_cap.usd;
+    console.log(`Ethereum Market Cap: $${marketCap}`);
+    return marketCap
+  } catch (error) {
+    console.error('Error fetching market cap:', error);
+  }
 }
 
 const zeroTokenABI = [
@@ -257,7 +264,7 @@ export default () => {
       const marketPrice = await getPriceCoinGecko()
       const usdValue = Number(_value) * marketPrice.zerolend
 
-      if (usdValue > 1) {
+      if (usdValue > 50) {
 
         const spent = `$${usdValue.toFixed(2)} (${(usdValue / marketPrice.eth).toFixed(4)} WETH)`;
         const got = `${Number(Number(_value).toFixed(2)).toLocaleString()} ZERO`;
@@ -265,8 +272,11 @@ export default () => {
         const price = `$${marketPrice.zerolend}`;//(${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)
         const marketCap = await getMarketCap()
 
+        const greenDotsCount = Math.floor(usdValue / 50);
+        const greenDots = "🟢".repeat(greenDotsCount);
+
         const message = `
-       🟢🟢🟢🟢\n
+        ${greenDots}\n
        💰 Spent: ${spent}
        💱 Got: ${got}
        🤵‍♂️ ${buyer}
