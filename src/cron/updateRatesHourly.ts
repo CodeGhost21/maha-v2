@@ -13,6 +13,7 @@ import {
   maxBoost,
   minAmount,
   minBoost,
+  minimumUSDSupplyPerAsset,
   zeroveDenom,
 } from "../controller/quests/constants";
 import axiosRetry from "axios-retry";
@@ -59,6 +60,7 @@ interface IData {
   };
 }
 
+const lastUsedMarketPrice = new Map();
 export const lpRateHourly = async (
   api: string,
   multiplier: Multiplier,
@@ -263,13 +265,20 @@ const _getSupplyBorrowStakeData = async (
             const supplyMultiplier =
               multiplier[`${asset}Supply` as keyof Multiplier];
 
+            const _marketPrice =
+              Number(marketPrice[`${asset}`]) ??
+              lastUsedMarketPrice.get(`${asset}`);
+
+            lastUsedMarketPrice.set(`${asset}`, _marketPrice);
             const balanceUSDValue = Number(data.currentATokenBalance)
               ? (Number(data.currentATokenBalance) /
                   assetDenomination[`${asset}`]) *
-                Number(marketPrice[`${asset}`])
+                _marketPrice
               : 0;
+
+            // If >= minimum supply, calculate rates else set it to 0
             userData.supply[asset] =
-              balanceUSDValue > 2
+              balanceUSDValue > minimumUSDSupplyPerAsset
                 ? balanceUSDValue *
                   (supplyMultiplier
                     ? supplyMultiplier
@@ -281,7 +290,7 @@ const _getSupplyBorrowStakeData = async (
             userData.borrow[asset] = Number(data.currentTotalDebt)
               ? (Number(data.currentTotalDebt) /
                   assetDenomination[`${asset}`]) *
-                Number(marketPrice[`${asset}`]) *
+                _marketPrice *
                 (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow)
               : 0;
 
@@ -344,7 +353,6 @@ const _calculateAndUpdateRates = async (
     const stakeReserves = reserves.stake ?? 0;
 
     // if user has zero or lp token staked give boost on supply and borrow
-    let boost = 1;
     if (stakeTask && stakeReserves) {
       const stakeKeys = Object.keys(stakeReserves);
       let amount = 0;
@@ -353,7 +361,8 @@ const _calculateAndUpdateRates = async (
           amount += stakeReserves[key];
         });
       }
-      boost = calculateBoost(amount);
+      const boost = calculateBoost(amount);
+      setObj.boostStake = boost;
     }
 
     if (supplyTask && supplyReserves) {
@@ -395,7 +404,7 @@ const _calculateAndUpdateRates = async (
       updateOne: {
         filter: { walletAddress: walletAddress.toLowerCase() },
         update: {
-          $set: { ...setObj, boostStake: boost },
+          $set: { ...setObj },
         },
         upsert: true,
       },
@@ -436,15 +445,20 @@ const addReferralCodesToNewUsers = async () => {
 
 const calculateBoost = (amount: number) => {
   // Ensure the amount is within the allowed range
-  if (amount <= minAmount) {
-    return minBoost;
-  } else if (amount >= maxAmount) {
-    return maxBoost;
-  }
+  try {
+    if (amount <= minAmount) {
+      return minBoost;
+    } else if (amount >= maxAmount) {
+      return maxBoost;
+    }
 
-  // Calculate the boost based on linear interpolation
-  const boost =
-    minBoost +
-    ((amount - minAmount) * (maxBoost - minBoost)) / (maxAmount - minAmount);
-  return boost;
+    // Calculate the boost based on linear interpolation
+    const boost =
+      minBoost +
+      ((amount - minAmount) * (maxBoost - minBoost)) / (maxAmount - minAmount);
+    return boost;
+  } catch (error) {
+    console.log(error);
+    return 1;
+  }
 };
