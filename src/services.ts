@@ -12,11 +12,9 @@ import {
 } from "./cron/dailyLpPointsChain.v2";
 import { updateLPPointsHourly } from "./cron/lpPointshourly";
 import { addToQueue, isQueueEmpty } from "./cron/queue";
-import buyNotifBot from "./scripts/buyNotifBot";
 
 // connect to database
 open();
-buyNotifBot()
 let isUpdatingPoints = false;
 console.log("starting");
 
