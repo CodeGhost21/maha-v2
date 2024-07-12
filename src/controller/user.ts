@@ -289,40 +289,6 @@ export const linkNewReferral = async (req: Request, res: Response) => {
 
     const _walletAddress = walletAddress.toLowerCase().trim();
 
-    // find user
-    const user = await WalletUserV2.findOne({
-      walletAddress: _walletAddress,
-    }).select("walletAddress id referredBy referralCode referrerCode");
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        data: {
-          error: "walletAddress not found",
-        },
-      });
-    }
-
-    // should not refer to self
-    if (user.referralCode.includes(referralCode)) {
-      return res.status(404).json({
-        success: false,
-        data: {
-          error: "cannot refer to self",
-        },
-      });
-    }
-
-    // if user is already referred by some other user, return
-    if (user.referredBy) {
-      return res.status(406).json({
-        success: false,
-        data: {
-          error: "already linked to a referral code",
-        },
-      });
-    }
-
     // find referrer
     const userReferrer = await WalletUserV2.findOne({
       referralCode: referralCode,
@@ -333,6 +299,31 @@ export const linkNewReferral = async (req: Request, res: Response) => {
         success: false,
         data: {
           error: "invalid referral code",
+        },
+      });
+    }
+
+    // should not refer to self
+    if (userReferrer.walletAddress === _walletAddress) {
+      return res.status(404).json({
+        success: false,
+        data: {
+          error: "cannot refer to self",
+        },
+      });
+    }
+
+    // find user
+    let user = await WalletUserV2.findOne({
+      walletAddress: _walletAddress,
+    }).select("walletAddress id referredBy referralCode referrerCode");
+
+    // if user is already referred by some other user, return
+    if (user && user.referredBy) {
+      return res.status(406).json({
+        success: false,
+        data: {
+          error: "already linked to a referral code",
         },
       });
     }
@@ -352,13 +343,21 @@ export const linkNewReferral = async (req: Request, res: Response) => {
       });
     }
 
-    user.referredBy = userReferrer.id;
-    user.referrerCode = userReferrer.referralCode[0];
-    await user.save();
+    let _message = "";
+    if (!user) {
+      console.log("Creating new user with wallet address", _walletAddress);
+      user = await WalletUserV2.create({
+        walletAddress: _walletAddress,
+        referredBy: userReferrer.id,
+        referrerCode: userReferrer.referralCode[0],
+      });
+      _message = "new user added and "
+    }
+
 
     res.status(200).json({
       success: true,
-      data: { message: "referral code linked successfully!" },
+      data: { message: _message + "referral code linked successfully!" },
     });
   } catch (error) {
     console.error("Error occurred in linking custom referral:", error);
