@@ -395,7 +395,7 @@ export const userInfo = async (req: Request, res: Response) => {
     try {
       const errorObj = JSON.parse(error.message);
       return res.status(errorObj.status).json(errorObj.obj);
-    } catch (error) {
+    } catch (e) {
       console.log("oops!!", error);
     }
     res
