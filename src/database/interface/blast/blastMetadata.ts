@@ -8,4 +8,6 @@ export interface IBlastMetadata {
   shares: number;
   sharePercent: number;
   timestamp: number;
+  pointsTillNowUSDB: number
+  pointsTillNowWETH: number
 }
