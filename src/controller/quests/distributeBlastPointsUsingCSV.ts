@@ -256,7 +256,7 @@ export const distributeBlastPointsFromCSV = async () => {
       "to prod api"
     );
     await sendUSDBBatch(transferBatchUSDB, headersUSDB, addressUSDB);
- 
+
     // update DB
     await BlastUser.bulkWrite(bulkOperationsUSDB);
   }
