@@ -4,7 +4,7 @@ import { getBlastChallenge, getBearerToken } from "./blast";
 import path from "path";
 import fs from "fs";
 import axiosRetry from "axios-retry";
-import { BlastUser } from "../../database/models/blastUsers";
+import { BlastUser } from "src/database/models/blastUsers";
 
 axiosRetry(axios, {
   // retries: 3, // default is 3
@@ -85,7 +85,7 @@ const sendGoldData = async (
 ) => {
   const batchId = Math.floor(Date.now());
   const requestWETH: Request = {
-    pointType: "DEVELOPER",
+    pointType: "LIQUIDITY",
     transfers: transferBatchGold,
     secondsToFinalize: 3600,
   };
@@ -115,7 +115,7 @@ export const distributeBlastGoldPointsFromCSV = async () => {
   const addressWETH = "0x53a3Aa617afE3C12550a93BA6262430010037B04";
   const challengeWETH = await getBlastChallenge(addressWETH);
   const tokenWETH = await getBearerToken(challengeWETH);
-console.log(tokenWETH)
+
   const headersWETH = {
     Authorization: `Bearer ${tokenWETH}`,
   };
@@ -126,13 +126,13 @@ console.log(tokenWETH)
   const pointsData = readBlastGoldDataFromCSV(csvFilePath);
 
   for (const [walletAddress, goldPoints] of pointsData) {
-    if (goldPoints && Number(goldPoints) >= 0.001) {
+    if (goldPoints) {
       const transferBlastGold: Transfer = {
         toAddress: walletAddress,
         points: (goldPoints as number).toFixed(6),
       };
       transferBatchBlastGold.push(transferBlastGold);
-      bulkOperationsGold.push({
+			bulkOperationsGold.push({
         updateOne: {
           filter: { walletAddress },
           update: {

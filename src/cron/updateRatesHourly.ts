@@ -42,8 +42,7 @@ axiosRetry(axios, {
       error.response?.status === 503 ||
       error.response?.status === 504 ||
       error.response?.status === 524 ||
-      error.message.toLowerCase().includes("store error") ||
-      error.code === "ECONNRESET"
+      error.message.toLowerCase().includes("store error")
     );
   },
 });
@@ -191,8 +190,8 @@ const _getSupplyBorrowStakeData = async (
         // calculate rates and update in db
         await _calculateAndUpdateRates(
           reservesMap,
-          undefined,
-          undefined,
+          supplyTask,
+          borrowTask,
           stakeTask
         );
 
@@ -364,7 +363,6 @@ const _calculateAndUpdateRates = async (
       }
       const boost = calculateBoost(amount);
       setObj.boostStake = boost;
-      walletAddress === "0x0f6e98a756a40dd050dc78959f45559f98d3289d" ? console.log("boost for", walletAddress, "=", boost) : "";
     }
 
     if (supplyTask && supplyReserves) {

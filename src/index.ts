@@ -43,7 +43,7 @@ const port = app.get("port");
 server.listen(port, () => console.log(`server started on port ${port}`));
 
 // notification for $ZERO buy
-// buyNotifBot()
+buyNotifBot()
 
 
 // setup LB cache
@@ -58,5 +58,3 @@ cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
   await totalPoints();
 });
-
-totalPoints();

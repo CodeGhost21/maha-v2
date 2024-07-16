@@ -28,17 +28,10 @@ export interface IAsset {
   stone?: number; //done
   tia?: number; //done
   wusdm?: number; //done
-  ethfi?: number; //done
-
-  frxeth?: number;
-  ineth?: number;
-  "solvbtc.m"?: number;
-  "m-btc"?:number;
-  usde?:number;
-  susde?:number;
+  ethfi?: number;//done
 }
 
-export interface IStakeAsset {
+export interface IStakeAsset{
   zero?: number;
-  lp?: number;
+  lp?:number;
 }
