@@ -62,12 +62,12 @@ export const getPriceCoinGecko = async () => {
       frxeth: data.data["frax-ether"],
       ineth: data.data["genesislrt-restaked-eth"].usd,
       "solvbtc.m": data.data["wrapped-bitcoin"].usd, // price?
-      "m-btc": data.data["m-btc"].usd,
       usde: data.data["usde"].usd,
-      susde: data.data["susde"].usd,
+      "m-btc": data.data["merlin-s-seal-btc"].usd,
+      susde: data.data["ethena-staked-usde"].usd,
     };
 
-    // console.log(priceList);
+    console.log(priceList);
 
     cache.set("coingecko:PriceList", priceList, 60 * 60);
 

@@ -240,4 +240,6 @@ export const coingeckoIds = [
   "ethena-usde",
   "ethena-staked-usde",
   "merlin-s-seal-btc",
+  "usde",
+  "ethena-staked-usde"
 ];
