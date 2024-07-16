@@ -25,7 +25,7 @@ export const getPriceCoinGecko = async () => {
       ids: coingeckoIds,
       vs_currencies: ["usd"],
     });
-
+    console.log(data.data)
     const priceList = {
       //stable coins
       usdc: 1,
@@ -47,7 +47,7 @@ export const getPriceCoinGecko = async () => {
       sweth: data.data.sweth.usd,
       weth: data.data.weth.usd,
       wokb: data.data.okb.usd,
-      cake: data.data['pancakeswap-token'].usd, //could not fetch from coingecko
+      cake: data.data["pancakeswap-token"].usd,
       mute: data.data.mute.usd,
       sword: data.data.sword.usd,
       vc: data.data.velocore.usd,
@@ -59,6 +59,12 @@ export const getPriceCoinGecko = async () => {
       wusdm: 1, //data.data["wrapped-usdm"].usd, //price not listed on coingecko
       ethfi: data.data["ether-fi"].usd,
       zerolend: data.data.zerolend.usd,
+      frxeth: data.data["frax-ether"],
+      ineth: data.data["genesislrt-restaked-eth"].usd,
+      "solvbtc.m": data.data["wrapped-bitcoin"].usd, // price?
+      "m-btc": data.data["m-btc"].usd,
+      usde: data.data["usde"].usd,
+      susde: data.data["susde"].usd,
     };
 
     // console.log(priceList);
