@@ -16,7 +16,7 @@ import {
   zksyncMultiplier,
 } from "./constants";
 import { getTotalPoints } from "../user";
-import { IAsset } from "src/database/interface/walletUser/assets";
+import { IAsset } from "../../database/interface/walletUser/assets";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -47,7 +47,7 @@ export const getPriceCoinGecko = async () => {
       sweth: data.data.sweth.usd,
       weth: data.data.weth.usd,
       wokb: data.data.okb.usd,
-      cake: 2.6, //could not fetch from coingecko
+      cake: data.data['pancakeswap-token'].usd, //could not fetch from coingecko
       mute: data.data.mute.usd,
       sword: data.data.sword.usd,
       vc: data.data.velocore.usd,
@@ -234,8 +234,8 @@ export const stakingPointsGQL = async (
       const subBatch = tempBatch.splice(0, 100);
       const graphQuery = `query {
         tokenBalances(where: {id_in:  [${subBatch.map(
-          (u) => `"${u.walletAddress}"`
-        )}]}, first: 1000) {
+        (u) => `"${u.walletAddress}"`
+      )}]}, first: 1000) {
           id
           balance_omni
           balance_omni_lp

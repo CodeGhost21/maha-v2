@@ -216,7 +216,7 @@ export const coingeckoIds = [
   "sweth",
   "weth",
   "okb",
-  // "pancakeswap",
+  "pancakeswap-token",
   "mute",
   "sword",
   "velocore",
