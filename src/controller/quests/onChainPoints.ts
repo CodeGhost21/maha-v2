@@ -62,7 +62,7 @@ export const getPriceCoinGecko = async () => {
       frxeth: data.data["frax-ether"],
       ineth: data.data["genesislrt-restaked-eth"].usd,
       "solvbtc.m": data.data["wrapped-bitcoin"].usd, // price?
-      usde: data.data["usde"].usd,
+      usde: data.data["ethena-usde"].usd,
       "m-btc": data.data["merlin-s-seal-btc"].usd,
       susde: data.data["ethena-staked-usde"].usd,
     };
