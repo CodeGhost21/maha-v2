@@ -28,7 +28,7 @@ router.get("/leaderBoard", getLeaderBoard);
 router.get("/leaderBoardWithSortKeys", getLeaderBoardWithSortKeys);
 router.use("/discord", discord);
 router.use("/twitter", twitter);
-router.use("//user", user);
+router.use("/user", user);
 router.use("/userLegacy", userLegacy);
 router.use("/blast", blast);
 router.get("/referral/openBlock", getOpensBlockData);
