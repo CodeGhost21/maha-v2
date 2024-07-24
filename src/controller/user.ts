@@ -42,7 +42,7 @@ import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPo
 import { IAsset, IStakeAsset } from "../database/interface/walletUser/assets";
 import { totalUsers } from "../cron/totalUser";
 import { totalPoints } from "../cron/totalPoints";
-import { updateLBWithSortKeysCache } from "src/cron/updateLBCache";
+import { updateLBWithSortKeysCache } from "../cron/updateLBCache";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
