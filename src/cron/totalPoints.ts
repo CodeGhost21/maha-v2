@@ -16,6 +16,7 @@ export const totalPoints = async () => {
     if (totalPoints.length > 0) {
       cache.set("tp:totalPoints", totalPoints[0].totalPoints, 60 * 60 * 1000); // Convert seconds to milliseconds
     }
+    return totalPoints[0].totalPoints;
   } catch (error) {
     console.error("Error occurred while aggregating total points:", error);
   }

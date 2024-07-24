@@ -38,8 +38,10 @@ import {
   zksyncProvider,
 } from "../utils/providers";
 import axios from "axios";
-import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
-import { IAsset, IStakeAsset } from "src/database/interface/walletUser/assets";
+import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
+import { IAsset, IStakeAsset } from "../database/interface/walletUser/assets";
+import { totalUsers } from "../cron/totalUser";
+import { totalPoints } from "../cron/totalPoints";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -351,9 +353,8 @@ export const linkNewReferral = async (req: Request, res: Response) => {
         referredBy: userReferrer.id,
         referrerCode: userReferrer.referralCode[0],
       });
-      _message = "new user added and "
+      _message = "new user added and ";
     }
-
 
     res.status(200).json({
       success: true,
@@ -494,9 +495,14 @@ export const getUsersData = async (req: Request, res: Response) => {
         },
       });
     } else {
+      const tu = await totalUsers();
+      const tp = await totalPoints();
       res.status(200).json({
-        success: false,
-        data: { error: "data is being updated, please try after some time." },
+        success: true,
+        data: {
+          totalPoints: tp || 0,
+          totalUsers: tu || 0,
+        },
       });
     }
   } catch (error) {
