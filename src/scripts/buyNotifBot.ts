@@ -4,18 +4,20 @@ import { lineaProvider } from "../utils/providers";
 import nconf from "nconf";
 import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
 import axios from "axios";
-
+import cache from "../utils/cache";
 
 export const getMarketCap = async () => {
   try {
-    const response = await axios.get('https://api.coingecko.com/api/v3/coins/zerolend');
+    const response = await axios.get(
+      "https://api.coingecko.com/api/v3/coins/zerolend"
+    );
     const marketCap = response.data.market_data.market_cap.usd;
     console.log(`Ethereum Market Cap: $${marketCap}`);
-    return marketCap
+    return marketCap;
   } catch (error) {
-    console.error('Error fetching market cap:', error);
+    console.error("Error fetching market cap:", error);
   }
-}
+};
 
 const zeroTokenABI = [
   {
@@ -261,16 +263,22 @@ export default () => {
   zero.on("Transfer", async (from, to, value, event) => {
     if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
       const _value = ethers.formatEther(value);
-      const marketPrice = await getPriceCoinGecko()
-      const usdValue = Number(_value) * marketPrice.zerolend
+      let marketPrice: any = await cache.get("coingecko:PriceList");
+      if (!marketPrice) {
+        marketPrice = await getPriceCoinGecko();
+      }
+      const usdValue = Number(_value) * marketPrice.zerolend;
 
       if (usdValue > 50) {
-
-        const spent = `$${usdValue.toFixed(2)} (${(usdValue / marketPrice.eth).toFixed(4)} WETH)`;
-        const got = `${Number(Number(_value).toFixed(2)).toLocaleString()} ZERO`;
+        const spent = `$${usdValue.toFixed(2)} (${(
+          usdValue / marketPrice.eth
+        ).toFixed(4)} WETH)`;
+        const got = `${Number(
+          Number(_value).toFixed(2)
+        ).toLocaleString()} ZERO`;
         const buyer = `${to}`;
-        const price = `$${marketPrice.zerolend}`;//(${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)
-        const marketCap = await getMarketCap()
+        const price = `$${marketPrice.zerolend}`; //(${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)
+        const marketCap = await getMarketCap();
 
         const greenDotsCount = Math.floor(usdValue / 50);
         const greenDots = "🟢".repeat(greenDotsCount);
