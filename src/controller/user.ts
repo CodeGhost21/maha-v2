@@ -42,6 +42,7 @@ import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPo
 import { IAsset, IStakeAsset } from "../database/interface/walletUser/assets";
 import { totalUsers } from "../cron/totalUser";
 import { totalPoints } from "../cron/totalPoints";
+import { updateLBWithSortKeysCache } from "src/cron/updateLBCache";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -432,14 +433,14 @@ export const getLeaderBoardWithSortKeys = async (
     const cachedData: string | undefined = cache.get(
       "lb:leaderBoardWithSortKeys"
     );
-    if (cachedData)
+    if (cachedData) {
       return res
         .status(200)
         .json({ success: true, data: JSON.parse(cachedData) });
-    res.status(200).json({
-      success: false,
-      data: { error: "data is being updated, please try after some time." },
-    });
+    } else {
+      const lbData = await updateLBWithSortKeysCache();
+      res.status(200).json({ success: true, data: JSON.parse(lbData) });
+    }
   } catch (error) {
     console.error("Error occurred while retrieving data:", error);
     res
