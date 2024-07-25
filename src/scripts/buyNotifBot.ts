@@ -259,9 +259,9 @@ export default () => {
   const emb = new MessageEmbed()
     .setColor("GREEN")
     .setTitle("$ZERO buy notification");
-
-  zero.on("Transfer", async (from, to, value, event) => {
-    if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
+  try {
+    zero.on("Transfer", async (from, to, value, event) => {
+      // if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
       const _value = ethers.formatEther(value);
       let marketPrice: any = await cache.get("coingecko:PriceList");
       if (!marketPrice) {
@@ -281,7 +281,7 @@ export default () => {
         const marketCap = await getMarketCap();
 
         const greenDotsCount = Math.floor(usdValue / 50);
-        const greenDots = "🟢".repeat(greenDotsCount);
+        const greenDots = "🟢".repeat(greenDotsCount < 100 ? greenDotsCount : 100);
 
         const message = `
         ${greenDots}\n
@@ -300,6 +300,9 @@ export default () => {
           embeds: [emb.setDescription(message)],
         });
       }
-    }
-  });
+      // }
+    });
+  } catch (e) {
+    console.log(e);
+  }
 };
