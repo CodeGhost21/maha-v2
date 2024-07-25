@@ -25,7 +25,6 @@ export const getPriceCoinGecko = async () => {
       ids: coingeckoIds,
       vs_currencies: ["usd"],
     });
-    console.log(data.data)
     const priceList = {
       //stable coins
       usdc: 1,
@@ -67,7 +66,7 @@ export const getPriceCoinGecko = async () => {
       susde: data.data["ethena-staked-usde"].usd,
     };
 
-    console.log(priceList);
+    // console.log(priceList);
 
     cache.set("coingecko:PriceList", priceList, 60 * 60);
 

@@ -12,7 +12,8 @@ export const getMarketCap = async () => {
       "https://api.coingecko.com/api/v3/coins/zerolend"
     );
     const marketCap = response.data.market_data.market_cap.usd;
-    console.log(`Ethereum Market Cap: $${marketCap}`);
+    cache.set("coingecko:marketcap", marketCap.toLocaleString(), 60 * 60)
+    console.log(`Ethereum Market Cap: $${marketCap.toLocaleString()}`);
     return marketCap;
   } catch (error) {
     console.error("Error fetching market cap:", error);
@@ -263,6 +264,8 @@ export default () => {
     zero.on("Transfer", async (from, to, value, event) => {
       // if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
       const _value = ethers.formatEther(value);
+      console.log('_value', _value);
+
       let marketPrice: any = await cache.get("coingecko:PriceList");
       if (!marketPrice) {
         marketPrice = await getPriceCoinGecko();
@@ -278,7 +281,6 @@ export default () => {
         ).toLocaleString()} ZERO`;
         const buyer = `${to}`;
         const price = `$${marketPrice.zerolend}`; //(${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)
-        const marketCap = await getMarketCap();
 
         const greenDotsCount = Math.floor(usdValue / 50);
         const greenDots = "🟢".repeat(greenDotsCount < 100 ? greenDotsCount : 100);
@@ -289,10 +291,11 @@ export default () => {
        💱 Got: ${got}
        🤵‍♂️ ${buyer}
        💵 Price: ${price}
-       🧢 MCap: ${marketCap.toLocaleString()}\n
+       🧢 MCap: ${cache.get("coingecko:marketcap")}\n
        Transaction: https://lineascan.build/tx/${event.log.transactionHash}
      `;
 
+        console.log('message', message);
         webhookClient.send({
           username: "ZERO-Buy-bot",
           avatarURL:
