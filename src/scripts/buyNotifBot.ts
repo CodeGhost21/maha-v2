@@ -264,7 +264,6 @@ export default () => {
     zero.on("Transfer", async (from, to, value, event) => {
       // if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
       const _value = ethers.formatEther(value);
-      console.log('_value', _value);
 
       let marketPrice: any = await cache.get("coingecko:PriceList");
       if (!marketPrice) {
@@ -294,8 +293,6 @@ export default () => {
        🧢 MCap: ${cache.get("coingecko:marketcap")}\n
        Transaction: https://lineascan.build/tx/${event.log.transactionHash}
      `;
-
-        console.log('message', message);
         webhookClient.send({
           username: "ZERO-Buy-bot",
           avatarURL:
