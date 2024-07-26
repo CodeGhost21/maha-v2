@@ -9,6 +9,7 @@ import {
   apiZKSync,
   assetDenomination,
   coingeckoIds,
+  IPriceList,
   mantaMultiplier,
   minSupplyAmount,
   Multiplier,
@@ -84,7 +85,7 @@ export const supplyBorrowPointsGQL = async (
   multiplier: Multiplier
 ) => {
   try {
-    let marketPrice: any = await cache.get("coingecko:PriceList");
+    let marketPrice: IPriceList = await cache.get("coingecko:PriceList") as IPriceList;
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }
@@ -227,7 +228,7 @@ export const stakingPointsGQL = async (
   multiplier: number
 ) => {
   try {
-    let marketPrice: any = await cache.get("coingecko:PriceList");
+    let marketPrice: IPriceList = await cache.get("coingecko:PriceList") as IPriceList;
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }

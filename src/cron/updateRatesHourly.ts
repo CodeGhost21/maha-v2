@@ -7,6 +7,7 @@ import { IWalletUser } from "../database/interface/walletUser/walletUser";
 
 import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
 import {
+  IPriceList,
   Multiplier,
   assetDenomination,
   maxAmount,
@@ -112,7 +113,7 @@ const _getSupplyBorrowStakeData = async (
         `blockNumber${supplyTask.substring(6)}` as keyof ICache
       ] as number) ?? 0;
   }
-  let marketPrice: any = await cache.get("coingecko:PriceList");
+  let marketPrice: IPriceList = await cache.get("coingecko:PriceList") as IPriceList;
   if (!marketPrice) {
     marketPrice = await getPriceCoinGecko();
   }
@@ -272,26 +273,26 @@ const _getSupplyBorrowStakeData = async (
             lastUsedMarketPrice.set(`${asset}`, _marketPrice);
             const balanceUSDValue = Number(data.currentATokenBalance)
               ? (Number(data.currentATokenBalance) /
-                  assetDenomination[`${asset}`]) *
-                _marketPrice
+                assetDenomination[`${asset}`]) *
+              _marketPrice
               : 0;
 
             // If >= minimum supply, calculate rates else set it to 0
             userData.supply[asset] =
               balanceUSDValue > minimumUSDSupplyPerAsset
                 ? balanceUSDValue *
-                  (supplyMultiplier
-                    ? supplyMultiplier
-                    : multiplier.defaultSupply)
+                (supplyMultiplier
+                  ? supplyMultiplier
+                  : multiplier.defaultSupply)
                 : 0;
 
             const borrowMultiplier =
               multiplier[`${asset}Borrow` as keyof Multiplier];
             userData.borrow[asset] = Number(data.currentTotalDebt)
               ? (Number(data.currentTotalDebt) /
-                  assetDenomination[`${asset}`]) *
-                _marketPrice *
-                (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow)
+                assetDenomination[`${asset}`]) *
+              _marketPrice *
+              (borrowMultiplier ? borrowMultiplier : multiplier.defaultBorrow)
               : 0;
 
             reservesMap.set(data.user.id.toLowerCase(), userData);

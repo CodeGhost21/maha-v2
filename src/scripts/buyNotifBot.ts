@@ -5,6 +5,7 @@ import nconf from "nconf";
 import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
 import axios from "axios";
 import cache from "../utils/cache";
+import { IPriceList } from "../controller/quests/constants";
 
 export const getMarketCap = async () => {
   try {
@@ -264,8 +265,7 @@ export default () => {
     zero.on("Transfer", async (from, to, value, event) => {
       if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
         const _value = ethers.formatEther(value);
-
-        let marketPrice: any = await cache.get("coingecko:PriceList");
+        let marketPrice: IPriceList = await cache.get("coingecko:PriceList") as IPriceList;
         if (!marketPrice) {
           marketPrice = await getPriceCoinGecko();
         }

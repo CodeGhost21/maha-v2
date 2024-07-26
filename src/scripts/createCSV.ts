@@ -18,7 +18,7 @@ import { SnapshotV1 } from "../database/models/snapshotv1";
 
 import cache from "../utils/cache";
 import axios from "axios";
-import { Multiplier, assetDenomination } from "../controller/quests/constants";
+import { IPriceList, Multiplier, assetDenomination } from "../controller/quests/constants";
 import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
 import { IAsset } from "../database/interface/walletUser/assets";
 import { IWalletUserModel } from "../database/models/walletUsersV2";
@@ -130,7 +130,7 @@ export const supplyBorrowPointsGQL = async (
   currentBlock: number
 ) => {
   try {
-    let marketPrice: any = await cache.get("coingecko:PriceList");
+    let marketPrice: IPriceList = await cache.get("coingecko:PriceList") as IPriceList;
     if (!marketPrice) {
       marketPrice = await getPriceCoinGecko();
     }
@@ -147,8 +147,8 @@ export const supplyBorrowPointsGQL = async (
               ]
             },
             {user_in: [${addresses.map(
-              (address) => `"${address.toLowerCase()}"`
-            )}]},
+      (address) => `"${address.toLowerCase()}"`
+    )}]},
           ]
         }
       ) {
