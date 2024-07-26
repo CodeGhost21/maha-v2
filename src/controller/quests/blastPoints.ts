@@ -218,7 +218,7 @@ const getUSDBWETHPoints = async (
     const usdbPointsEarnedPercentage = Number(
       ((BigInt(user.accumulatedPoints) + currentPointsAccumulated) *
         BigInt(percentage)) /
-        BigInt(core.totalPointsUSDB)
+      BigInt(core.totalPointsUSDB)
     );
 
     // calculate share for user if accumulated points are +ve
@@ -246,7 +246,7 @@ const getUSDBWETHPoints = async (
     const wethPointsEarnedPercentage = Number(
       ((BigInt(user.accumulatedPoints) + currentPointsAccumulated) *
         BigInt(percentage)) /
-        BigInt(core.totalPointsUSDB)
+      BigInt(core.totalPointsUSDB)
     );
 
     // calculate share for user if accumulated points are +ve
@@ -311,25 +311,25 @@ const calculateAndUpdatePositivePointsInDb = async (
 
     // if accumulated points are +ve, get points to give (points accumulated that we fetch are cumulative)
     // @dev this checks can be removed as no negative points will always be +ve here because of the checks in getUSDBWETHPoints
-    if (_pointsUSDB > 0) {
-      // subtract points given and add points pending
-      pointsToGiveUSDB =
-        _pointsUSDB -
-        (user
-          ? (user.blastPoints.pointsGivenUSDB ?? 0) -
-            (user.blastPoints.pointsPendingUSDB ?? 0)
-          : 0);
-    }
+    // if (_pointsUSDB > 0) {
+    //   // subtract points given and add points pending
+    //   pointsToGiveUSDB =
+    //     _pointsUSDB -
+    //     (user
+    //       ? (user.blastPoints.pointsGivenUSDB ?? 0) -
+    //         (user.blastPoints.pointsPendingUSDB ?? 0)
+    //       : 0);
+    // }
 
-    if (_pointsWETH > 0) {
-      // subtract points given and add points pending
-      pointsToGiveWETH =
-        _pointsWETH -
-        (user
-          ? (user.blastPoints.pointsGivenWETH ?? 0) -
-            (user.blastPoints.pointsPendingWETH ?? 0)
-          : 0);
-    }
+    // if (_pointsWETH > 0) {
+    //   // subtract points given and add points pending
+    //   pointsToGiveWETH =
+    //     _pointsWETH -
+    //     (user
+    //       ? (user.blastPoints.pointsGivenWETH ?? 0) -
+    //         (user.blastPoints.pointsPendingWETH ?? 0)
+    //       : 0);
+    // }
 
     // object to set values in db,
     const valuesToSet: any = {};

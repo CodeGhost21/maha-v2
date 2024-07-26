@@ -166,40 +166,40 @@ export const assignBlastGold = async () => {
     const transferBatch = [];
     if (batch.length > 0) {
       for (const user of batch) {
-        if (user.blastGold[`pointsPending${tokenName}`] > 0) {
-          const transfer: Transfer = {
-            toAddress: user.walletAddress,
-            points: String(user.blastGold[`pointsPending${tokenName}`]),
-          };
-          transferBatch.push(transfer);
-        }
+        // if (user.blastGold[`pointsPending${tokenName}`] > 0) {
+        //   const transfer: Transfer = {
+        //     toAddress: user.walletAddress,
+        //     points: String(user.blastGold[`pointsPending${tokenName}`]),
+        //   };
+        //   transferBatch.push(transfer);
+        // }
       }
-      console.log(transferBatch.length);
+      // console.log(transferBatch.length);
 
-      const request: Request = {
-        pointType: "DEVELOPER",
-        transfers: transferBatch,
-        secondsToFinalize: 3600,
-      };
-      console.log(request);
+      // const request: Request = {
+      //   pointType: "DEVELOPER",
+      //   transfers: transferBatch,
+      //   secondsToFinalize: 3600,
+      // };
+      // console.log(request);
 
-      const url = `${baseUrl}/v1/contracts/${addressWETH}/batches/${batchId}`;
-      const headers = {
-        Authorization: `Bearer ${tokenUSDB}`,
-      };
-      try {
-        const response = await axios.put(url, request, { headers });
-        console.log(response.data);
-        if (response.data.success) {
-          //saving batch
-          await BlastBatches.create({
-            batchId,
-            batch: transferBatch,
-          });
-        }
-      } catch (e: any) {
-        console.log(e.response.data);
-      }
+      // const url = `${baseUrl}/v1/contracts/${addressWETH}/batches/${batchId}`;
+      // const headers = {
+      //   Authorization: `Bearer ${tokenUSDB}`,
+      // };
+      // try {
+      //   const response = await axios.put(url, request, { headers });
+      //   console.log(response.data);
+      //   if (response.data.success) {
+      //     //saving batch
+      //     await BlastBatches.create({
+      //       batchId,
+      //       batch: transferBatch,
+      //     });
+      //   }
+      // } catch (e: any) {
+      //   console.log(e.response.data);
+      // }
 
       skip += batchSize;
       batchId += 1;
