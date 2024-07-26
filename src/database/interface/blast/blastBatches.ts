@@ -4,5 +4,6 @@ export type Transfer = {
 };
 export interface IBlastBatches {
   batchId: string;
+  executed: boolean;
   batch: Transfer[];
 }

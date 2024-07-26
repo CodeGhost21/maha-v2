@@ -4,7 +4,8 @@ import { Transfer } from "../interface/blast/blastBatches";
 export const BlastBatchesSchema = new Schema(
   {
     batchId: { type: String },
-    batch: { type: [] as Transfer[]},
+    executed: { type: Boolean, default: false },
+    batch: { type: [] as Transfer[] },
   },
   { timestamps: true }
 );

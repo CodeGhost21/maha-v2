@@ -1,13 +1,20 @@
 export interface IBlastMetadata {
-  pointsGiven: number;
   pointsGivenUSDB: number;
   pointsGivenWETH: number;
-  pointsPending: number;
-  pointsPendingUSDB: number;
-  pointsPendingWETH: number;
+
+  pointsEarnedUSDB: number;
+  pointsEarnedWETH: number;
+
+  sharesPendingUSDB: number;
+  sharesPendingWETH: number;
+  sharesPreviousUSDB: number;
+  sharesPreviousWETH: number;
+  sharesTillNowUSDB: number;
+  sharesTillNowWETH: number;
+
   shares: number;
   sharePercent: number;
   timestamp: number;
-  pointsTillNowUSDB: number
-  pointsTillNowWETH: number
+  pointsTillNowUSDB: number;
+  pointsTillNowWETH: number;
 }
