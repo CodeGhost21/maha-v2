@@ -38,8 +38,11 @@ import {
   zksyncProvider,
 } from "../utils/providers";
 import axios from "axios";
-import { IWalletUserPoints } from "src/database/interface/walletUser/walletUserPoints";
-import { IAsset, IStakeAsset } from "src/database/interface/walletUser/assets";
+import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
+import { IAsset, IStakeAsset } from "../database/interface/walletUser/assets";
+import { totalUsers } from "../cron/totalUser";
+import { totalPoints } from "../cron/totalPoints";
+import { updateLBWithSortKeysCache } from "../cron/updateLBCache";
 
 const accessTokenSecret = nconf.get("JWT_SECRET");
 
@@ -289,40 +292,6 @@ export const linkNewReferral = async (req: Request, res: Response) => {
 
     const _walletAddress = walletAddress.toLowerCase().trim();
 
-    // find user
-    const user = await WalletUserV2.findOne({
-      walletAddress: _walletAddress,
-    }).select("walletAddress id referredBy referralCode referrerCode");
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        data: {
-          error: "walletAddress not found",
-        },
-      });
-    }
-
-    // should not refer to self
-    if (user.referralCode.includes(referralCode)) {
-      return res.status(404).json({
-        success: false,
-        data: {
-          error: "cannot refer to self",
-        },
-      });
-    }
-
-    // if user is already referred by some other user, return
-    if (user.referredBy) {
-      return res.status(406).json({
-        success: false,
-        data: {
-          error: "already linked to a referral code",
-        },
-      });
-    }
-
     // find referrer
     const userReferrer = await WalletUserV2.findOne({
       referralCode: referralCode,
@@ -333,6 +302,31 @@ export const linkNewReferral = async (req: Request, res: Response) => {
         success: false,
         data: {
           error: "invalid referral code",
+        },
+      });
+    }
+
+    // should not refer to self
+    if (userReferrer.walletAddress === _walletAddress) {
+      return res.status(404).json({
+        success: false,
+        data: {
+          error: "cannot refer to self",
+        },
+      });
+    }
+
+    // find user
+    let user = await WalletUserV2.findOne({
+      walletAddress: _walletAddress,
+    }).select("walletAddress id referredBy referralCode referrerCode");
+
+    // if user is already referred by some other user, return
+    if (user && user.referredBy) {
+      return res.status(406).json({
+        success: false,
+        data: {
+          error: "already linked to a referral code",
         },
       });
     }
@@ -352,13 +346,20 @@ export const linkNewReferral = async (req: Request, res: Response) => {
       });
     }
 
-    user.referredBy = userReferrer.id;
-    user.referrerCode = userReferrer.referralCode[0];
-    await user.save();
+    let _message = "";
+    if (!user) {
+      console.log("Creating new user with wallet address", _walletAddress);
+      user = await WalletUserV2.create({
+        walletAddress: _walletAddress,
+        referredBy: userReferrer.id,
+        referrerCode: userReferrer.referralCode[0],
+      });
+      _message = "new user added and ";
+    }
 
     res.status(200).json({
       success: true,
-      data: { message: "referral code linked successfully!" },
+      data: { message: _message + "referral code linked successfully!" },
     });
   } catch (error) {
     console.error("Error occurred in linking custom referral:", error);
@@ -396,7 +397,7 @@ export const userInfo = async (req: Request, res: Response) => {
     try {
       const errorObj = JSON.parse(error.message);
       return res.status(errorObj.status).json(errorObj.obj);
-    } catch (error) {
+    } catch (e) {
       console.log("oops!!", error);
     }
     res
@@ -432,14 +433,14 @@ export const getLeaderBoardWithSortKeys = async (
     const cachedData: string | undefined = cache.get(
       "lb:leaderBoardWithSortKeys"
     );
-    if (cachedData)
+    if (cachedData) {
       return res
         .status(200)
         .json({ success: true, data: JSON.parse(cachedData) });
-    res.status(200).json({
-      success: false,
-      data: { error: "data is being updated, please try after some time." },
-    });
+    } else {
+      const lbData = await updateLBWithSortKeysCache();
+      res.status(200).json({ success: true, data: JSON.parse(lbData) });
+    }
   } catch (error) {
     console.error("Error occurred while retrieving data:", error);
     res
@@ -495,9 +496,14 @@ export const getUsersData = async (req: Request, res: Response) => {
         },
       });
     } else {
+      const tu = await totalUsers();
+      const tp = await totalPoints();
       res.status(200).json({
-        success: false,
-        data: { error: "data is being updated, please try after some time." },
+        success: true,
+        data: {
+          totalPoints: tp || 0,
+          totalUsers: tu || 0,
+        },
       });
     }
   } catch (error) {

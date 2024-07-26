@@ -16,7 +16,7 @@ import {
   zksyncMultiplier,
 } from "./constants";
 import { getTotalPoints } from "../user";
-import { IAsset } from "src/database/interface/walletUser/assets";
+import { IAsset } from "../../database/interface/walletUser/assets";
 const CoinGeckoClient = new CoinGecko();
 
 export const getPriceCoinGecko = async () => {
@@ -25,7 +25,6 @@ export const getPriceCoinGecko = async () => {
       ids: coingeckoIds,
       vs_currencies: ["usd"],
     });
-
     const priceList = {
       //stable coins
       usdc: 1,
@@ -47,7 +46,7 @@ export const getPriceCoinGecko = async () => {
       sweth: data.data.sweth.usd,
       weth: data.data.weth.usd,
       wokb: data.data.okb.usd,
-      cake: 2.6, //could not fetch from coingecko
+      cake: data.data["pancakeswap-token"].usd,
       mute: data.data.mute.usd,
       sword: data.data.sword.usd,
       vc: data.data.velocore.usd,
@@ -59,6 +58,12 @@ export const getPriceCoinGecko = async () => {
       wusdm: 1, //data.data["wrapped-usdm"].usd, //price not listed on coingecko
       ethfi: data.data["ether-fi"].usd,
       zerolend: data.data.zerolend.usd,
+      frxeth: data.data["frax-ether"],
+      ineth: data.data["genesislrt-restaked-eth"].usd,
+      "solvbtc.m": data.data["wrapped-bitcoin"].usd, // price?
+      usde: data.data["ethena-usde"].usd,
+      "m-btc": data.data["merlin-s-seal-btc"].usd,
+      susde: data.data["ethena-staked-usde"].usd,
     };
 
     // console.log(priceList);
@@ -234,8 +239,8 @@ export const stakingPointsGQL = async (
       const subBatch = tempBatch.splice(0, 100);
       const graphQuery = `query {
         tokenBalances(where: {id_in:  [${subBatch.map(
-          (u) => `"${u.walletAddress}"`
-        )}]}, first: 1000) {
+        (u) => `"${u.walletAddress}"`
+      )}]}, first: 1000) {
           id
           balance_omni
           balance_omni_lp

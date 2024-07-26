@@ -1,7 +1,6 @@
 import { getTotalSupplyBorrowStakePoints } from "../controller/user";
 import { WalletUserV2 } from "../database/models/walletUsersV2";
 import cache from "../utils/cache";
-import { totalPoints } from "./totalPoints";
 
 interface LBData {
   byTotalPoints: LBUserData[];
@@ -159,6 +158,7 @@ export const updateLBWithSortKeysCache = async () => {
 
   const data = JSON.stringify(lbData);
   cache.set("lb:leaderBoardWithSortKeys", data, 60 * 60);
+  return data;
 };
 
 export const updateLBCache = async () => {

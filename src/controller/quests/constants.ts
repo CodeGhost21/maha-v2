@@ -30,7 +30,11 @@ export interface Multiplier {
 }
 
 export const stakeZeroMultiplier = 1.5;
-
+export const minAmount = 0;
+export const maxAmount = 50000000; /// 50M
+export const minBoost = 1;
+export const maxBoost = 5;
+export const minimumUSDSupplyPerAsset = 10; // $10
 export const ethLrtMultiplier: Multiplier = {
   defaultSupply: 1,
   defaultBorrow: 4,
@@ -172,7 +176,7 @@ export const assetDenomination = {
   usdc: 1e6, //done
   usdt: 1e6, //done
   usdb: 1e18, //done
-  lusd: 1e18, //no
+  lusd: 1e18, //
   busd: 1e18, //done
   dai: 1e18, //done
   mai: 1e18, //done
@@ -189,16 +193,23 @@ export const assetDenomination = {
   weth: 1e18, //done
   wokb: 1e18, //done
   cake: 1e18, //done
-  mute: 1e18, //no
+  mute: 1e18, //
   sword: 1e18, //done
-  vc: 1e18, //no
-  wsteth: 1e18, //no
+  vc: 1e18, //
+  wsteth: 1e18, //
   unieth: 1e18, //done
   manta: 1e18, //done
   stone: 1e18, //done
-  tia: 1e18, //no
+  tia: 1e18, //
   wusdm: 1e18, //done
   ethfi: 1e18,
+
+  frxeth: 1e18,
+  ineth: 1e18,
+  "solvbtc.m": 1e18, // price?
+  "m-btc": 1e18,
+  usde: 1e18,
+  susde: 1e18,
 };
 
 export const coingeckoIds = [
@@ -212,7 +223,7 @@ export const coingeckoIds = [
   "sweth",
   "weth",
   "okb",
-  // "pancakeswap",
+  "pancakeswap-token",
   "mute",
   "sword",
   "velocore",
@@ -224,6 +235,11 @@ export const coingeckoIds = [
   "wrapped-usdm",
   "ether-fi",
   "zerolend",
+  "frax-ether",
+  "genesislrt-restaked-eth",
+  "ethena-usde",
+  "ethena-staked-usde",
+  "merlin-s-seal-btc",
 ];
 
 

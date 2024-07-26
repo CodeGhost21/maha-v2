@@ -1,5 +1,5 @@
-import { open } from "./database";
 import cron from "node-cron";
+import { open } from "./database";
 import { updateUsersRank } from "./cron/updateRank";
 
 import {

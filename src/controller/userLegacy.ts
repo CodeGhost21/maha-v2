@@ -99,7 +99,7 @@ export const getUserTotalPoints = async (req: Request, res: Response) => {
       return res
         .status(404)
         .json({ success: false, data: { error: "no data found" } });
-    console.log(user, user.totalPointsV2);
+    // console.log(user, user.totalPointsV2);
     res.status(200).json({
       success: true,
       data: { totalPoints: user.totalPointsV2 || 0, points: user.points },

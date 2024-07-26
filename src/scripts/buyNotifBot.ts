@@ -4,11 +4,21 @@ import { lineaProvider } from "../utils/providers";
 import nconf from "nconf";
 import { getPriceCoinGecko } from "../controller/quests/onChainPoints";
 import axios from "axios";
+import cache from "../utils/cache";
 
-const getMarketCap = async () => {
-  const response = await axios.get('https://api.zerolend.xyz/supply/circulating')
-  return response
-}
+export const getMarketCap = async () => {
+  try {
+    const response = await axios.get(
+      "https://api.coingecko.com/api/v3/coins/zerolend"
+    );
+    const marketCap = response.data.market_data.market_cap.usd;
+    cache.set("coingecko:marketcap", marketCap.toLocaleString(), 60 * 60)
+    console.log(`Ethereum Market Cap: $${marketCap.toLocaleString()}`);
+    return marketCap;
+  } catch (error) {
+    console.error("Error fetching market cap:", error);
+  }
+};
 
 const zeroTokenABI = [
   {
@@ -250,35 +260,49 @@ export default () => {
   const emb = new MessageEmbed()
     .setColor("GREEN")
     .setTitle("$ZERO buy notification");
+  try {
+    zero.on("Transfer", async (from, to, value, event) => {
+      if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
+        const _value = ethers.formatEther(value);
 
-  zero.on("Transfer", async (from, to, value, event) => {
-    if (from === "0xb88261e0DBAAc1564f1c26D78781F303EC7D319B") {
-      const _value = ethers.formatEther(value);
-      const marketPrice = await getPriceCoinGecko()
-      const usdValue = Number(_value) * marketPrice.zerolend
+        let marketPrice: any = await cache.get("coingecko:PriceList");
+        if (!marketPrice) {
+          marketPrice = await getPriceCoinGecko();
+        }
+        const usdValue = Number(_value) * marketPrice.zerolend;
 
-      const spent = `$${usdValue.toFixed(2)} (${(usdValue / marketPrice.eth).toFixed(4)} WETH)`;
-      const got = `${_value} ZERO`;
-      const buyer = `${to}`;
-      const price = `$${marketPrice.zerolend} (${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)`;
-      const marketCap = await getMarketCap()
+        if (usdValue > 50) {
+          const spent = `$${usdValue.toFixed(2)} (${(
+            usdValue / marketPrice.eth
+          ).toFixed(4)} WETH)`;
+          const got = `${Number(
+            Number(_value).toFixed(2)
+          ).toLocaleString()} ZERO`;
+          const buyer = `${to}`;
+          const price = `$${marketPrice.zerolend}`; //(${(marketPrice.zerolend / marketPrice.eth).toFixed(4)} WETH)
 
-      const message = `
-       🟢🟢🟢🟢\n
+          const greenDotsCount = Math.floor(usdValue / 50);
+          const greenDots = "🟢".repeat(greenDotsCount < 100 ? greenDotsCount : 100);
+
+          const message = `
+        ${greenDots}\n
        💰 Spent: ${spent}
        💱 Got: ${got}
        🤵‍♂️ ${buyer}
        💵 Price: ${price}
-       🧢 MCap: ${marketCap.data}\n
+       🧢 MCap: ${cache.get("coingecko:marketcap")}\n
        Transaction: https://lineascan.build/tx/${event.log.transactionHash}
      `;
-
-      webhookClient.send({
-        username: "ZERO-Buy-bot",
-        avatarURL:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4KPJ9jv03VeOT1ORvwAMyFfs53CCay4mDfQ1cJETiHFQQgH3xO7fRyeQ4dw&s",
-        embeds: [emb.setDescription(message)],
-      });
-    }
-  });
+          webhookClient.send({
+            username: "ZERO-Buy-bot",
+            avatarURL:
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4KPJ9jv03VeOT1ORvwAMyFfs53CCay4mDfQ1cJETiHFQQgH3xO7fRyeQ4dw&s",
+            embeds: [emb.setDescription(message)],
+          });
+        }
+      }
+    });
+  } catch (e) {
+    console.log(e);
+  }
 };

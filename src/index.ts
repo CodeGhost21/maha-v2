@@ -12,7 +12,7 @@ import routes from "./routes";
 import session from "express-session";
 import { totalPoints } from "./cron/totalPoints";
 import "./strategies";
-// import buyNotifBot from "./scripts/buyNotifBot";
+import buyNotifBot, { getMarketCap } from "./scripts/buyNotifBot";
 
 const app = express();
 const server = new http.Server(app);
@@ -42,7 +42,8 @@ const port = app.get("port");
 server.listen(port, () => console.log(`server started on port ${port}`));
 
 // notification for $ZERO buy
-// buyNotifBot()
+buyNotifBot()
+getMarketCap()
 
 // setup LB cache
 cron.schedule("*/10 * * * *", async () => {
@@ -55,4 +56,5 @@ cron.schedule("*/10 * * * *", async () => {
 cron.schedule("0 * * * *", async () => {
   console.log("updating totalPoints every hour");
   await totalPoints();
+  await getMarketCap()
 });
