@@ -225,3 +225,6 @@ export const coingeckoIds = [
   "ether-fi",
   "zerolend",
 ];
+
+
+export const blastApiBaseURL = "https://waitlist-api.prod.blast.io";

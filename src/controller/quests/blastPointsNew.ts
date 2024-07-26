@@ -3,41 +3,8 @@ import { BlastUserPhase2 } from "../../database/models/blastUsersPhase2";
 import { BlastData, getBearerToken, getBlastChallenge } from "./blast";
 import { BlastBatches } from "../../database/models/blastBatches";
 import assert from "assert";
-
-interface User {
-  id: string;
-  debt: string;
-  balance: string;
-  accumulatedPoints: string;
-  lastUpdatedAt: number;
-}
-
-interface Core {
-  totalPointsUSDB: string;
-  id: string;
-  totalPointsWETH: string;
-}
-
-interface ResponseData {
-  wethusers: User[];
-  usdbusers: User[];
-  core: Core;
-}
-
-const baseUrl = "https://waitlist-api.prod.blast.io";
-
-type PointType = "LIQUIDITY" | "DEVELOPER";
-
-type Transfer = {
-  toAddress: string;
-  points: string;
-};
-
-type Request = {
-  pointType: PointType;
-  transfers: Transfer[];
-  secondsToFinalize?: number | null;
-};
+import { User, ResponseData } from "../interface/blast";
+import { blastApiBaseURL } from "./constants";
 
 const calculateAccumulatedPoints = (
   balance: string,
@@ -53,7 +20,7 @@ const calculateAccumulatedPoints = (
   const usdbPointsEarnedPercentage = Number(
     ((BigInt(accumulatedPoints) + currentPointsAccumulated) *
       BigInt(percentage)) /
-      BigInt(totalPoints)
+    BigInt(totalPoints)
   );
 
   if (usdbPointsEarnedPercentage > 0) {
@@ -156,7 +123,7 @@ const getPointsTillNow = async (users: any) => {
   return pointsEarnedMap;
 };
 
-export const saveBlastUserShares = async () => {
+const saveBlastUserShares = async () => {
   const first = 1000;
   let batch;
   let lastAddress = "0x0000000000000000000000000000000000000000";
@@ -201,12 +168,12 @@ export const saveBlastUserShares = async () => {
               [`blastPoints.sharesPendingUSDB`]: Math.max(
                 0,
                 Number(share.usdbCurrentShares ?? 0) -
-                  Number(share.usdbPreviousShares ?? 0)
+                Number(share.usdbPreviousShares ?? 0)
               ),
               [`blastPoints.sharesPendingWETH`]: Math.max(
                 0,
                 Number(share.wethCurrentShares ?? 0) -
-                  Number(share.wethPreviousShares ?? 0)
+                Number(share.wethPreviousShares ?? 0)
               ),
             },
           },
@@ -222,7 +189,7 @@ export const saveBlastUserShares = async () => {
   console.log("done");
 };
 
-export const saveBlastUserPoints = async () => {
+const saveBlastUserPoints = async () => {
   const blastPoints = await BlastData();
   const usdbPointsTotal: number = blastPoints.blastUSDB;
   const wethPointsTotal: number = blastPoints.blastWETH;
@@ -276,7 +243,7 @@ export const saveBlastUserPoints = async () => {
   console.log("finished point calculation");
 };
 
-export const createBlastBatches = async () => {
+const createBlastBatches = async () => {
   const batchId = Math.floor(Date.now() / 1000 / 86400);
 
   const blastUsersEarned = await BlastUserPhase2.find({
@@ -339,7 +306,7 @@ export const createBlastBatches = async () => {
   console.log("finished preparing batches");
 };
 
-export const executeBlastBatches = async () => {
+const executeBlastBatches = async () => {
   const batchId = Math.floor(Date.now() / 1000 / 86400);
 
   const addressUSDB = "0x23A58cbe25E36e26639bdD969B0531d3aD5F9c34";
@@ -379,7 +346,7 @@ export const executeBlastBatches = async () => {
   if (batchUSDB && !batchUSDB.executed) {
     const subbatchesCount = batchUSDB.batch.length / 2000;
     for (let i = 0; i < subbatchesCount; i++) {
-      const urlUSDB = `${baseUrl}/v1/contracts/${addressUSDB}/batches/${batchId}_usdb_${i}`;
+      const urlUSDB = `${blastApiBaseURL}/v1/contracts/${addressUSDB}/batches/${batchId}_usdb_${i}`;
       const responseUSDB = await axios.put(
         urlUSDB,
         {
@@ -433,7 +400,7 @@ export const executeBlastBatches = async () => {
     const subbatchesCount = batchWETH.batch.length / 2000;
 
     for (let i = 0; i < subbatchesCount; i++) {
-      const urlWETH = `${baseUrl}/v1/contracts/${addressWETH}/batches/${batchId}_weth_${i}`;
+      const urlWETH = `${blastApiBaseURL}/v1/contracts/${addressWETH}/batches/${batchId}_weth_${i}`;
       const res = await axios.put(
         urlWETH,
         {
@@ -482,3 +449,22 @@ export const executeBlastBatches = async () => {
 
   console.log("finished uploading batch", batchId);
 };
+
+export const main = async () => {
+  try {
+    //calculate blast user shares
+    await saveBlastUserShares()
+
+    //calculate blast user points
+    await saveBlastUserPoints()
+
+    //create blast batches
+    await createBlastBatches()
+
+    //execute blastBatches
+    await executeBlastBatches()
+  }
+  catch (error: any) {
+    throw new Error(`Error in blast points distribution ${error}`)
+  }
+}
