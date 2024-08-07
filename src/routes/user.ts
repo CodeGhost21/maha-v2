@@ -19,9 +19,9 @@ import {
   // getLPData,
   userInfo,
   getCurrentPoints,
-  getCurrentTotalPointsWithPPS,
+  // getCurrentTotalPointsWithPPS,
 } from "../controller/user";
-router.get("/userCurrentPoints", getCurrentTotalPointsWithPPS);
+// router.get("/userCurrentPoints", getCurrentTotalPointsWithPPS);
 router.post("/login", walletVerify);
 router.get("/userInfo", userInfo);
 router.get("/totalReferrals", getTotalReferralOfUsers);

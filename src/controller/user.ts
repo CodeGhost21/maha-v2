@@ -4,39 +4,12 @@ import { NextFunction, Request, Response } from "express";
 import nconf from "nconf";
 import { ethers } from "ethers";
 import * as jwt from "jsonwebtoken";
-import {
-  IWalletUserModel,
-  WalletUserV2,
-} from "../database/models/walletUsersV2";
+import { IWalletUserModel, WalletUser } from "../database/models/walletUsers";
 import { SiweMessage } from "../siwe/lib/client";
 import BadRequestError from "../errors/BadRequestError";
 import cache from "../utils/cache";
 import { UserPointTransactions } from "../database/models/userPointTransactions";
-import { userLpData, supplyBorrowPointsGQL } from "./quests/onChainPoints";
-import {
-  apiBlast,
-  apiEth,
-  apiLinea,
-  apiManta,
-  apiXLayer,
-  apiZKSync,
-  blastMultiplier,
-  ethLrtMultiplier,
-  lineaMultiplier,
-  mantaMultiplier,
-  minSupplyAmount,
-  referralPercent,
-  xlayerMultiplier,
-  zksyncMultiplier,
-} from "./quests/constants";
-import {
-  blastProvider,
-  ethLrtProvider,
-  lineaProvider,
-  mantaProvider,
-  xLayerProvider,
-  zksyncProvider,
-} from "../utils/providers";
+import { referralPercent } from "./quests/constants";
 import axios from "axios";
 import { IWalletUserPoints } from "../database/interface/walletUser/walletUserPoints";
 import { IAsset, IStakeAsset } from "../database/interface/walletUser/assets";
@@ -52,7 +25,7 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
   try {
     const user = await _verifyAndGetUser(
       walletAddress,
-      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy"
+      "points pointsPerSecond pointsUpdateTimestamp referredBy"
     );
 
     const currentPoints = await _getCurrentPoints(user);
@@ -71,67 +44,67 @@ export const getCurrentPoints = async (req: Request, res: Response) => {
   }
 };
 
-export const getCurrentTotalPointsWithPPS = async (
-  req: Request,
-  res: Response
-) => {
-  const walletAddress = req.query.address?.toString();
+// export const getCurrentTotalPointsWithPPS = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   const walletAddress = req.query.address?.toString();
 
-  try {
-    const user = await _verifyAndGetUser(
-      walletAddress,
-      "points pointsPerSecond pointsPerSecondUpdateTimestamp referredBy boostStake totalSupplyPoints totalBorrowPoints"
-    );
+//   try {
+//     const user = await _verifyAndGetUser(
+//       walletAddress,
+//       "points pointsPerSecond pointsUpdateTimestamp referredBy boostStake totalSupplyPoints totalBorrowPoints"
+//     );
 
-    if (!user.pointsPerSecondUpdateTimestamp) {
-      throw new Error("pointsPerSecondUpdateTimestamp not available");
-    }
+//     if (!user.pointsUpdateTimestamp) {
+//       throw new Error("pointsUpdateTimestamp not available");
+//     }
 
-    const currentPoints = await _getCurrentPoints(user);
-    const boost = user.boostStake ?? 1;
+//     const currentPoints = await _getCurrentPoints(user);
+//     const boost = user.boostStake ?? 1;
 
-    const currentPointsProcessed = getTotalSupplyBorrowStakePoints({
-      points: currentPoints,
-    } as IWalletUserModel);
+//     const currentPointsProcessed = getTotalSupplyBorrowStakePoints({
+//       points: currentPoints,
+//     } as IWalletUserModel);
 
-    const currentSupplyPoints =
-      currentPointsProcessed.totalSupplyPoints <= 0
-        ? user.totalSupplyPoints
-        : currentPointsProcessed.totalSupplyPoints;
-    const currentBorrowPoints =
-      currentPointsProcessed.totalBorrowPoints <= 0
-        ? user.totalBorrowPoints
-        : currentPointsProcessed.totalBorrowPoints;
+//     const currentSupplyPoints =
+//       currentPointsProcessed.totalSupplyPoints <= 0
+//         ? user.totalSupplyPoints
+//         : currentPointsProcessed.totalSupplyPoints;
+//     const currentBorrowPoints =
+//       currentPointsProcessed.totalBorrowPoints <= 0
+//         ? user.totalBorrowPoints
+//         : currentPointsProcessed.totalBorrowPoints;
 
-    const totalPoints = currentSupplyPoints + currentBorrowPoints; /*  +
-      currentPointsProcessed.totalStakePoints */
+//     const totalPoints = currentSupplyPoints + currentBorrowPoints; /*  +
+//       currentPointsProcessed.totalStakePoints */
 
-    const { totalSum, supplySum, borrowSum /* , stakeSum */ } =
-      _sumPointsPerSecond(user.pointsPerSecond);
+//     const { totalSum, supplySum, borrowSum /* , stakeSum */ } =
+//       _sumPointsPerSecond(user.pointsPerSecond);
 
-    const returnData = {
-      totalCurrentSupplyPointsPerSec: supplySum * boost,
-      totalCurrentBorrowPointsPerSec: borrowSum * boost,
-      totalCurrentStakingPointsPerSec: 0 /* stakeSum */,
-      totalCurrentPointsPerSec: totalSum,
-      totalCurrentSupplyPoints: currentSupplyPoints,
-      totalCurrentBorrowPoints: currentBorrowPoints,
-      totalCurrentStakingPoints: 0 /*  currentPointsProcessed.totalStakePoints */,
-      totalCurrentPoints: totalPoints,
-    };
-    res.status(200).json({ success: true, data: { ...returnData } });
-  } catch (error: any) {
-    try {
-      const errorObj = JSON.parse(error.message);
-      return res.status(errorObj.status).json(errorObj.obj);
-    } catch (_error: any) {
-      console.log("oops!!", error);
-    }
-    res
-      .status(500)
-      .json({ success: false, data: { error: "Internal server error" } });
-  }
-};
+//     const returnData = {
+//       totalCurrentSupplyPointsPerSec: supplySum * boost,
+//       totalCurrentBorrowPointsPerSec: borrowSum * boost,
+//       totalCurrentStakingPointsPerSec: 0 /* stakeSum */,
+//       totalCurrentPointsPerSec: totalSum,
+//       totalCurrentSupplyPoints: currentSupplyPoints,
+//       totalCurrentBorrowPoints: currentBorrowPoints,
+//       totalCurrentStakingPoints: 0 /*  currentPointsProcessed.totalStakePoints */,
+//       totalCurrentPoints: totalPoints,
+//     };
+//     res.status(200).json({ success: true, data: { ...returnData } });
+//   } catch (error: any) {
+//     try {
+//       const errorObj = JSON.parse(error.message);
+//       return res.status(errorObj.status).json(errorObj.obj);
+//     } catch (_error: any) {
+//       console.log("oops!!", error);
+//     }
+//     res
+//       .status(500)
+//       .json({ success: false, data: { error: "Internal server error" } });
+//   }
+// };
 
 export const _generateReferralCode = () => {
   const characters =
@@ -164,8 +137,8 @@ export const walletVerify = async (
     }
 
     //assign role
-    const role = await userLpData(address);
-    const user = await WalletUserV2.findOne({
+    const role = ""; //await userLpData(address);
+    const user = await WalletUser.findOne({
       walletAddress: address,
     }).select("id");
 
@@ -176,10 +149,10 @@ export const walletVerify = async (
       return res.json({ success: true, user });
     }
 
-    const usersCount = await WalletUserV2.count();
+    const usersCount = await WalletUser.count();
     const referralCode = _generateReferralCode();
 
-    const newUser = await WalletUserV2.create({
+    const newUser = await WalletUser.create({
       walletAddress: address,
       rank: usersCount + 1,
       epoch: getEpoch(),
@@ -189,7 +162,7 @@ export const walletVerify = async (
 
     // referred by user added to user model
     if (req.body.referredByCode !== "") {
-      const referrer = await WalletUserV2.findOne(
+      const referrer = await WalletUser.findOne(
         {
           referralCode: req.body.referredByCode,
         },
@@ -219,7 +192,7 @@ export const addCustomReferral = async (req: Request, res: Response) => {
         data: { error: "bad request" },
       });
     }
-    const user = await WalletUserV2.findOne({
+    const user = await WalletUser.findOne({
       walletAddress: _walletAddress,
     }).select("referralCode");
 
@@ -261,7 +234,7 @@ export const addCustomReferral = async (req: Request, res: Response) => {
 
     referralCodes?.push(referralCode);
 
-    await WalletUserV2.updateOne(
+    await WalletUser.updateOne(
       { walletAddress: _walletAddress },
       { $set: { referralCode: referralCodes } }
     );
@@ -293,7 +266,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     const _walletAddress = walletAddress.toLowerCase().trim();
 
     // find referrer
-    const userReferrer = await WalletUserV2.findOne({
+    const userReferrer = await WalletUser.findOne({
       referralCode: referralCode,
     }).select("walletAddress id referralCode");
 
@@ -317,7 +290,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     }
 
     // find user
-    let user = await WalletUserV2.findOne({
+    let user = await WalletUser.findOne({
       walletAddress: _walletAddress,
     }).select("walletAddress id referredBy referralCode referrerCode");
 
@@ -349,7 +322,7 @@ export const linkNewReferral = async (req: Request, res: Response) => {
     let _message = "";
     if (!user) {
       console.log("Creating new user with wallet address", _walletAddress);
-      user = await WalletUserV2.create({
+      user = await WalletUser.create({
         walletAddress: _walletAddress,
         referredBy: userReferrer.id,
         referrerCode: userReferrer.referralCode[0],
@@ -472,7 +445,7 @@ export const getTotalUsers = async (req: Request, res: Response) => {
 
 export const getTotalReferralOfUsers = async (req: Request, res: Response) => {
   const user = req.user as IWalletUserModel;
-  const totalReferrals = await WalletUserV2.find({
+  const totalReferrals = await WalletUser.find({
     referredBy: user.id,
   }).select("totalPointsV2 walletAddress ");
 
@@ -542,12 +515,12 @@ export const getUserReferralData = async (req: Request, res: Response) => {
       success: false,
       message: "please provide referral code",
     });
-  const walletUser: IWalletUserModel = (await WalletUserV2.findOne({
+  const walletUser: IWalletUserModel = (await WalletUser.findOne({
     referralCode: referralCode,
     isDeleted: false,
   })) as IWalletUserModel;
   if (walletUser) {
-    const totalReferrals = await WalletUserV2.find({
+    const totalReferrals = await WalletUser.find({
       referredBy: walletUser.id,
       isDeleted: false,
     });
@@ -565,7 +538,7 @@ export const getUserReferralData = async (req: Request, res: Response) => {
 export const getReferralUsers = async (req: Request, res: Response) => {
   try {
     const user = req.user as IWalletUserModel;
-    const referralUsers = await WalletUserV2.find({
+    const referralUsers = await WalletUser.find({
       referredBy: user.id,
     })
       // .sort({
@@ -578,44 +551,6 @@ export const getReferralUsers = async (req: Request, res: Response) => {
     res.json({ success: true, referralUsers });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-export const galxeLPCheck = async (req: Request, res: Response) => {
-  const walletAddress: string = req.query.address as string;
-  let success = false;
-
-  try {
-    const mantaData = await supplyBorrowPointsGQL(
-      apiManta,
-      [{ walletAddress } as IWalletUserModel],
-      mantaProvider,
-      mantaMultiplier
-    );
-
-    const zksyncData = await supplyBorrowPointsGQL(
-      apiZKSync,
-      [{ walletAddress } as IWalletUserModel],
-      zksyncProvider,
-      zksyncMultiplier
-    );
-
-    const mantaSupply = mantaData.supply.get(walletAddress);
-    const zksyncSupply = zksyncData.supply.get(walletAddress);
-
-    const mantaPoints = getTotalPoints(mantaSupply);
-    const zksyncPoints = getTotalPoints(zksyncSupply);
-
-    if (mantaPoints > minSupplyAmount || zksyncPoints > minSupplyAmount) {
-      success = true;
-    }
-    res.json({
-      is_ok: success,
-    });
-  } catch (error) {
-    res.json({
-      is_ok: success,
-    });
   }
 };
 
@@ -635,75 +570,75 @@ export const getUserTransactions = async (req: Request, res: Response) => {
   res.json({ success: true, transactions });
 };
 
-export const getLPData = async (req: Request, res: Response) => {
-  try {
-    const walletAddress: string = req.query.walletAddress as string;
-    console.log(walletAddress);
+// export const getLPData = async (req: Request, res: Response) => {
+//   try {
+//     const walletAddress: string = req.query.walletAddress as string;
+//     console.log(walletAddress);
 
-    if (walletAddress && ethers.isAddress(walletAddress)) {
-      const lpData = await getLpDataForAddress(walletAddress);
-      res.json({
-        success: true,
-        ...lpData,
-      });
-    } else {
-      res.json({
-        success: false,
-        message: "Wallet address not provided or is incorrect",
-      });
-    }
-  } catch (e) {
-    console.log(e);
-  }
-};
+//     if (walletAddress && ethers.isAddress(walletAddress)) {
+//       const lpData = await getLpDataForAddress(walletAddress);
+//       res.json({
+//         success: true,
+//         ...lpData,
+//       });
+//     } else {
+//       res.json({
+//         success: false,
+//         message: "Wallet address not provided or is incorrect",
+//       });
+//     }
+//   } catch (e) {
+//     console.log(e);
+//   }
+// };
 
-const getLpDataForAddress = async (walletAddress: string) => {
-  const mantaData = await supplyBorrowPointsGQL(
-    apiManta,
-    [{ walletAddress } as IWalletUserModel],
-    mantaProvider,
-    mantaMultiplier
-  );
-  const zksyncData = await supplyBorrowPointsGQL(
-    apiZKSync,
-    [{ walletAddress } as IWalletUserModel],
-    zksyncProvider,
-    zksyncMultiplier
-  );
-  const blastData = await supplyBorrowPointsGQL(
-    apiBlast,
-    [{ walletAddress } as IWalletUserModel],
-    blastProvider,
-    blastMultiplier
-  );
-  const lineaData = await supplyBorrowPointsGQL(
-    apiLinea,
-    [{ walletAddress } as IWalletUserModel],
-    lineaProvider,
-    lineaMultiplier
-  );
-  const ethereumLrtData = await supplyBorrowPointsGQL(
-    apiEth,
-    [{ walletAddress } as IWalletUserModel],
-    ethLrtProvider,
-    ethLrtMultiplier
-  );
-  const xlayerData = await supplyBorrowPointsGQL(
-    apiXLayer,
-    [{ walletAddress } as IWalletUserModel],
-    xLayerProvider,
-    xlayerMultiplier
-  );
+// const getLpDataForAddress = async (walletAddress: string) => {
+//   const mantaData = await supplyBorrowPointsGQL(
+//     apiManta,
+//     [{ walletAddress } as IWalletUserModel],
+//     mantaProvider,
+//     mantaMultiplier
+//   );
+//   const zksyncData = await supplyBorrowPointsGQL(
+//     apiZKSync,
+//     [{ walletAddress } as IWalletUserModel],
+//     zksyncProvider,
+//     zksyncMultiplier
+//   );
+//   const blastData = await supplyBorrowPointsGQL(
+//     apiBlast,
+//     [{ walletAddress } as IWalletUserModel],
+//     blastProvider,
+//     blastMultiplier
+//   );
+//   const lineaData = await supplyBorrowPointsGQL(
+//     apiLinea,
+//     [{ walletAddress } as IWalletUserModel],
+//     lineaProvider,
+//     lineaMultiplier
+//   );
+//   const ethereumLrtData = await supplyBorrowPointsGQL(
+//     apiEth,
+//     [{ walletAddress } as IWalletUserModel],
+//     ethLrtProvider,
+//     ethLrtMultiplier
+//   );
+//   const xlayerData = await supplyBorrowPointsGQL(
+//     apiXLayer,
+//     [{ walletAddress } as IWalletUserModel],
+//     xLayerProvider,
+//     xlayerMultiplier
+//   );
 
-  return {
-    zksyncData,
-    mantaData,
-    xlayerData,
-    ethereumLrtData,
-    blastData,
-    lineaData,
-  };
-};
+//   return {
+//     zksyncData,
+//     mantaData,
+//     xlayerData,
+//     ethereumLrtData,
+//     blastData,
+//     lineaData,
+//   };
+// };
 
 export const getTotalPoints = (supplyOrBorrowObject: any) => {
   let totalPoints = 0;
@@ -713,50 +648,50 @@ export const getTotalPoints = (supplyOrBorrowObject: any) => {
   return totalPoints;
 };
 
-export const getTotalSupplyBorrowStakePoints = (user: IWalletUserModel) => {
-  // get supply points for all chains and their assets
-  const points = user.points;
-  const mantaSupply = points.supplyManta || {};
-  const zksyncSupply = points.supplyZkSync || {};
-  const xlayerSupply = points.supplyXLayer || {};
-  const ethereumLrtSupply = points.supplyEthereumLrt || {};
-  const blastSupply = points.supplyBlast || {};
-  const lineaSupply = points.supplyLinea || {};
+// export const getTotalSupplyBorrowStakePoints = (user: IWalletUserModel) => {
+//   // get supply points for all chains and their assets
+//   const points = user.points;
+//   const mantaSupply = points.supplyManta || {};
+//   const zksyncSupply = points.supplyZkSync || {};
+//   const xlayerSupply = points.supplyXLayer || {};
+//   const ethereumLrtSupply = points.supplyEthereumLrt || {};
+//   const blastSupply = points.supplyBlast || {};
+//   const lineaSupply = points.supplyLinea || {};
 
-  // get borrow points for all chains and their assets
-  const mantaBorrow = points.borrowManta || {};
-  const zksyncBorrow = points.borrowZkSync || {};
-  const xlayerBorrow = points.borrowXLayer || {};
-  const ethereumLrtBorrow = points.borrowEthereumLrt || {};
-  const blastBorrow = points.borrowBlast || {};
-  const lineaBorrow = points.borrowLinea || {};
+//   // get borrow points for all chains and their assets
+//   const mantaBorrow = points.borrowManta || {};
+//   const zksyncBorrow = points.borrowZkSync || {};
+//   const xlayerBorrow = points.borrowXLayer || {};
+//   const ethereumLrtBorrow = points.borrowEthereumLrt || {};
+//   const blastBorrow = points.borrowBlast || {};
+//   const lineaBorrow = points.borrowLinea || {};
 
-  const totalSupplyPoints =
-    getTotalPoints(mantaSupply) +
-    getTotalPoints(zksyncSupply) +
-    getTotalPoints(xlayerSupply) +
-    getTotalPoints(ethereumLrtSupply) +
-    getTotalPoints(blastSupply) +
-    getTotalPoints(lineaSupply);
-  const totalBorrowPoints =
-    getTotalPoints(mantaBorrow) +
-    getTotalPoints(zksyncBorrow) +
-    getTotalPoints(xlayerBorrow) +
-    getTotalPoints(ethereumLrtBorrow) +
-    getTotalPoints(blastBorrow) +
-    getTotalPoints(lineaBorrow);
+//   const totalSupplyPoints =
+//     getTotalPoints(mantaSupply) +
+//     getTotalPoints(zksyncSupply) +
+//     getTotalPoints(xlayerSupply) +
+//     getTotalPoints(ethereumLrtSupply) +
+//     getTotalPoints(blastSupply) +
+//     getTotalPoints(lineaSupply);
+//   const totalBorrowPoints =
+//     getTotalPoints(mantaBorrow) +
+//     getTotalPoints(zksyncBorrow) +
+//     getTotalPoints(xlayerBorrow) +
+//     getTotalPoints(ethereumLrtBorrow) +
+//     getTotalPoints(blastBorrow) +
+//     getTotalPoints(lineaBorrow);
 
-  let totalStakePoints = 0;
-  if (user.points.stakeLinea) {
-    totalStakePoints = 0;
-  }
+//   let totalStakePoints = 0;
+//   if (user.points.stakeLinea) {
+//     totalStakePoints = 0;
+//   }
 
-  return {
-    totalSupplyPoints,
-    totalBorrowPoints,
-    totalStakePoints,
-  };
-};
+//   return {
+//     totalSupplyPoints,
+//     totalBorrowPoints,
+//     totalStakePoints,
+//   };
+// };
 
 export const getOpensBlockData = async (req: Request, res: Response) => {
   const cachedData = cache.get(`xp:openApi`);
@@ -799,7 +734,7 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
 
   if (user.referredBy) {
     try {
-      referredByUser = await WalletUserV2.findOne({
+      referredByUser = await WalletUser.findOne({
         _id: user.referredBy,
       }).select("id");
     } catch (error) {
@@ -809,7 +744,7 @@ const _getCurrentPoints = async (user: IWalletUserModel) => {
 
   const previousPoints = user.points ?? {};
   const pointsPerSecond = user.pointsPerSecond;
-  const pppUpdateTimestamp = user.pointsPerSecondUpdateTimestamp;
+  const pppUpdateTimestamp = user.pointsUpdateTimestamp;
   const boost = user.boostStake ?? 1;
 
   const lpList = Object.keys(pointsPerSecond) as Array<keyof IWalletUserPoints>;
@@ -880,7 +815,7 @@ const _verifyAndGetUser = async (
     throw Error(JSON.stringify(errorObj));
   }
 
-  const user = await WalletUserV2.findOne({
+  const user = await WalletUser.findOne({
     walletAddress: walletAddress.toLowerCase().trim(),
   }).select(fields);
 

@@ -1,5 +1,5 @@
-import { getTotalSupplyBorrowStakePoints } from "../controller/user";
-import { WalletUserV2 } from "../database/models/walletUsersV2";
+// import { getTotalSupplyBorrowStakePoints } from "../controller/user";
+import { WalletUser } from "../database/models/walletUsers";
 import cache from "../utils/cache";
 
 interface LBData {
@@ -31,7 +31,7 @@ export const updateLBWithSortKeysCache = async () => {
     byStakeBoost: [],
   };
 
-  const sortKeyTotalPoints = await WalletUserV2.find({
+  const sortKeyTotalPoints = await WalletUser.find({
     totalPoints: { $exists: true },
   })
     .sort({ totalPoints: -1 })
@@ -53,13 +53,13 @@ export const updateLBWithSortKeysCache = async () => {
     });
   });
 
-  const sortKeyReferralPoints = await WalletUserV2.find()
+  const sortKeyReferralPoints = await WalletUser.find()
     .sort({ "points.referral": -1 })
     .select(
       "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
-    
+
   sortKeyReferralPoints.map((user) => {
     lbData.byReferralPoints.push({
       address: user.walletAddress,
@@ -73,7 +73,7 @@ export const updateLBWithSortKeysCache = async () => {
     });
   });
 
-  /* const sortTotalStakePoints = await WalletUserV2.find()
+  /* const sortTotalStakePoints = await WalletUser.find()
     .sort({ totalStakePoints: -1 })
     .select(
       "totalPoints walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints"
@@ -93,14 +93,14 @@ export const updateLBWithSortKeysCache = async () => {
 
   lbData.byStakePoints = [{} as LBUserData];
 
-  const sortStakeBoost = await WalletUserV2.find()
+  const sortStakeBoost = await WalletUser.find()
     .sort({ boostStake: -1 })
     .select(
       "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
     )
     .limit(25);
-    console.log(sortStakeBoost)
-  
+  console.log(sortStakeBoost);
+
   sortStakeBoost.map((user) => {
     lbData.byStakeBoost.push({
       address: user.walletAddress,
@@ -114,9 +114,7 @@ export const updateLBWithSortKeysCache = async () => {
     });
   });
 
-
-
-  const sortTotalSupplyPoints = await WalletUserV2.find()
+  const sortTotalSupplyPoints = await WalletUser.find()
     .sort({ totalSupplyPoints: -1 })
     .select(
       "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
@@ -136,7 +134,7 @@ export const updateLBWithSortKeysCache = async () => {
     });
   });
 
-  const totalBorrowPoints = await WalletUserV2.find()
+  const totalBorrowPoints = await WalletUser.find()
     .sort({ totalBorrowPoints: -1 })
     .select(
       "totalPoints rank walletAddress points totalStakePoints totalSupplyPoints totalBorrowPoints boostStake"
@@ -161,40 +159,40 @@ export const updateLBWithSortKeysCache = async () => {
   return data;
 };
 
-export const updateLBCache = async () => {
-  const allUsersData = await WalletUserV2.find({ rank: { $exists: true } })
-    .sort({ rank: 1 })
-    .select(
-      "totalPoints totalSupplyPoints totalBorrowPoints totalStakePoints rank walletAddress points boostStake"
-    )
-    .limit(25);
+// export const updateLBCache = async () => {
+//   const allUsersData = await WalletUser.find({ rank: { $exists: true } })
+//     .sort({ rank: 1 })
+//     .select(
+//       "totalPoints totalSupplyPoints totalBorrowPoints totalStakePoints rank walletAddress points boostStake"
+//     )
+//     .limit(25);
 
-  interface lbUserData {
-    address: string;
-    referralPoints: number;
-    totalStakePoints: number;
-    totalSupplyPoints: number;
-    totalBorrowPoints: number;
-    totalPoints: number;
-    stakeBoost: number;
-    rank:number;
-  }
+//   interface lbUserData {
+//     address: string;
+//     referralPoints: number;
+//     totalStakePoints: number;
+//     totalSupplyPoints: number;
+//     totalBorrowPoints: number;
+//     totalPoints: number;
+//     stakeBoost: number;
+//     rank: number;
+//   }
 
-  const lbData: lbUserData[] = [];
-  allUsersData.map((user) => {
-    const pointsTotal = getTotalSupplyBorrowStakePoints(user);
-    lbData.push({
-      address: user.walletAddress,
-      referralPoints: user.points?.referral ?? 0,
-      totalStakePoints: 0,
-      totalSupplyPoints: pointsTotal.totalSupplyPoints,
-      totalBorrowPoints: pointsTotal.totalBorrowPoints,
-      totalPoints: user.totalPoints,
-      stakeBoost: user.boostStake ?? 1,
-      rank: user.rank,
-    });
-  });
+//   const lbData: lbUserData[] = [];
+//   allUsersData.map((user) => {
+//     const pointsTotal = getTotalSupplyBorrowStakePoints(user);
+//     lbData.push({
+//       address: user.walletAddress,
+//       referralPoints: user.points?.referral ?? 0,
+//       totalStakePoints: 0,
+//       totalSupplyPoints: pointsTotal.totalSupplyPoints,
+//       totalBorrowPoints: pointsTotal.totalBorrowPoints,
+//       totalPoints: user.totalPoints,
+//       stakeBoost: user.boostStake ?? 1,
+//       rank: user.rank,
+//     });
+//   });
 
-  const data = JSON.stringify(lbData);
-  cache.set("lb:leaderBoard", data, 60 * 60);
-};
+//   const data = JSON.stringify(lbData);
+//   cache.set("lb:leaderBoard", data, 60 * 60);
+// };

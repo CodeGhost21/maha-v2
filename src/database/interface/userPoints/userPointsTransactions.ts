@@ -1,4 +1,4 @@
-import { IWalletUserModel } from "../../models/walletUsersV2";
+import { IWalletUserModel } from "../../models/walletUsers";
 
 export interface IUserPointTransactions {
   userId: IWalletUserModel;

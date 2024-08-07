@@ -6,8 +6,8 @@ import axios from "axios";
 import urlJoin from "../utils/url-join";
 import {
   IWalletUserModel,
-  WalletUserV2,
-} from "../database/models/walletUsersV2";
+  WalletUser,
+} from "../database/models/walletUsers";
 import { checkGuildMember } from "../output/discord";
 import { points } from "./quests/constants";
 import { assignPoints } from "./quests/assignPoints";
@@ -39,17 +39,17 @@ const clientSecret = nconf.get("DISCORD_CLIENT_SECRET");
 export const requestToken = async (req: Request, res: Response) => {
   res.redirect(
     `https://discord.com/oauth2/authorize?response_type=code&` +
-      `client_id=${clientID}&scope=identify&redirect_uri` +
-      `=${encodeURIComponent(callbackURL)}`
+    `client_id=${clientID}&scope=identify&redirect_uri` +
+    `=${encodeURIComponent(callbackURL)}`
   );
 };
 
 router.get("/callback", passport.authenticate("discord"), async (req, res) => {
   const reqUser = req.user as any;
-  const user = await WalletUserV2.findById(req.query.state).select(
+  const user = await WalletUser.findById(req.query.state).select(
     "points id totalPoints referredBy epoch"
   );
-  const discordUser = await WalletUserV2.findOne({
+  const discordUser = await WalletUser.findOne({
     discordId: req.query.state,
   }).select("id");
 
@@ -120,7 +120,7 @@ export const registerUser = async (
       throw new BadRequestError("Invalid Discord token. Try logging again");
 
     // check if there is an existing user
-    const existingUser = await WalletUserV2.findOne({
+    const existingUser = await WalletUser.findOne({
       discordId: data.id,
     });
     if (existingUser)

@@ -1,7 +1,7 @@
 import {
   IWalletUserModel,
-  WalletUserV2,
-} from "../../database/models/walletUsersV2";
+  WalletUser,
+} from "../../database/models/walletUsers";
 import { UserPointTransactions } from "../../database/models/userPointTransactions";
 import { referralPercent } from "./constants";
 import { AnyBulkWriteOperation } from "mongodb";
@@ -44,7 +44,7 @@ export const assignPoints = async (
   let newMessage = message;
 
   if (user.referredBy) {
-    const referredByUser = await WalletUserV2.findOne({
+    const referredByUser = await WalletUser.findOne({
       _id: user.referredBy,
     }).select("points id");
     if (referredByUser) {
@@ -76,7 +76,7 @@ export const assignPoints = async (
               totalPoints: referralPoints,
             },
             $set: {
-              ["pointsPerSecondUpdateTimestamp.referral"]: Date.now(),
+              ["pointsUpdateTimestamp.referral"]: Date.now(),
             },
           },
         },
@@ -107,7 +107,7 @@ export const assignPoints = async (
         },
         $set: {
           epoch: epoch || user.epoch,
-          [`pointsPerSecondUpdateTimestamp.${taskId}`]: Date.now(),
+          [`pointsUpdateTimestamp.${taskId}`]: Date.now(),
         },
       },
     },
@@ -116,7 +116,7 @@ export const assignPoints = async (
     userBulkWrites,
     pointsBulkWrites,
     execute: async () => {
-      await WalletUserV2.bulkWrite(userBulkWrites);
+      await WalletUser.bulkWrite(userBulkWrites);
       await UserPointTransactions.bulkWrite(pointsBulkWrites);
     },
   };
@@ -142,7 +142,6 @@ export const assignPointsPerSecondToBatch = async (
         (pointsData.stake ? pointsData.stake.has(user.walletAddress) : false)
     )
     .forEach((user) => {
-
       const latestPointsSupply = pointsData.supply.get(user.walletAddress);
       const latestPointsBorrow = pointsData.borrow.get(user.walletAddress);
 
@@ -201,7 +200,7 @@ export const assignPointsPerSecondToBatch = async (
   return {
     userBulkWrites,
     execute: async () => {
-      await WalletUserV2.bulkWrite(userBulkWrites);
+      await WalletUser.bulkWrite(userBulkWrites);
     },
   };
 };

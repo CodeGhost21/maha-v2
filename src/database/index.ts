@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import nconf from "nconf";
 
 mongoose.set("strictQuery", false);
-mongoose.set("debug", false);
+mongoose.set("debug", true);
 
 export const open = () => {
   return new Promise<void>((resolve) => {

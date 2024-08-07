@@ -2,17 +2,9 @@ import cron from "node-cron";
 import { open } from "./database";
 import { updateUsersRank } from "./cron/updateRank";
 
-import {
-  mantaPPSCron,
-  zksyncPPSCron,
-  lineaPPSCron,
-  ethereumLrtPPSCron,
-  blastPPSCron,
-  xLayerPPSCron,
-} from "./cron/dailyLpPointsChain.v2";
+import { mahaPPSCron } from "./cron/dailyLpPointsChain.v2";
 import { updateLPPointsHourly } from "./cron/lpPointshourly";
 import { addToQueue, isQueueEmpty } from "./cron/queue";
-import { main as blastPoints } from "./controller/quests/blastPointsNew";
 // connect to database
 open();
 let isUpdatingPoints = false;
@@ -25,14 +17,7 @@ cron.schedule(
     addToQueue(async () => {
       console.log("running lp points every 4 hours");
       // always execute linea first to calculate staking boost
-      const cronJobs = [
-        lineaPPSCron,
-        zksyncPPSCron,
-        mantaPPSCron,
-        blastPPSCron,
-        ethereumLrtPPSCron,
-        xLayerPPSCron,
-      ];
+      const cronJobs = [mahaPPSCron];
 
       for (const job of cronJobs) {
         try {
@@ -74,14 +59,5 @@ cron.schedule(
   { timezone: "Asia/Kolkata" }
 );
 
-// -------------  blast points -----------------
-cron.schedule(
-  "05 10 * * *",
-  async () => {
-    addToQueue(async () => {
-      console.log("distrubute blast points  10:05 am");
-      await blastPoints();
-    });
-  },
-  { timezone: "Asia/Kolkata" }
-);
+// mahaPPSCron();
+updateLPPointsHourly();

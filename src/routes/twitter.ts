@@ -28,7 +28,7 @@ router.get(
   "/callback",
   passport.authenticate("twitter"),
   async (req: any, res) => {
-    // const user: any = await WalletUserV2.findOne({ _id: req.query.state });
+    // const user: any = await WalletUser.findOne({ _id: req.query.state });
     // console.log("mongo user ", user);
     // console.log("twitterId", req.user.id);
 

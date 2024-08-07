@@ -19,8 +19,8 @@ import { UserPointTransactions } from "../database/models/userPointTransactions"
 import _ from "underscore";
 import {
   IWalletUserModel,
-  WalletUserV2,
-} from "../database/models/walletUsersV2";
+  WalletUser,
+} from "../database/models/walletUsers";
 import { getEpoch } from "../utils/epoch";
 
 // const _processBatch = async (userBatch: IWalletUserModel[], epoch: number) => {
@@ -260,7 +260,7 @@ import { getEpoch } from "../utils/epoch";
 //     }
 
 //     // once all the db operators are accumulated; write into the DB
-//     await WalletUserV2.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
+//     await WalletUser.bulkWrite(_.flatten(tasks.map((r) => r.userBulkWrites)));
 //     await UserPointTransactions.bulkWrite(
 //       _.flatten(tasks.map((r) => r.pointsBulkWrites))
 //     );
@@ -285,7 +285,7 @@ import { getEpoch } from "../utils/epoch";
 //         epoch: { $ne: epoch },
 //       };
 
-//   const users = await WalletUserV2.find(query)
+//   const users = await WalletUser.find(query)
 //     .limit(count)
 //     .skip(from)
 //     .select(["walletAddress"]);
@@ -315,7 +315,7 @@ import { getEpoch } from "../utils/epoch";
 //   lock = true;
 
 //   try {
-//     const count = await WalletUserV2.count({});
+//     const count = await WalletUser.count({});
 //     await _updateLPRate(0, count, migrate);
 //   } catch (error) {
 //     console.log("cron failed beacuse of", error);

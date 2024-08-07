@@ -1,6 +1,6 @@
 import { IAppRequest } from "../utils/interfaces";
 import { Response, NextFunction } from "express";
-import { WalletUserV2 } from "../database/models/walletUsersV2";
+import { WalletUser } from "../database/models/walletUsers";
 import cache from "../utils/cache";
 import jwt from "jsonwebtoken";
 import nconf from "nconf";
@@ -29,7 +29,7 @@ async function deserializeUser(
 
     if (!user) {
       // Fetch user data from the database if not found in cache
-      user = await WalletUserV2.findById(payload.id);
+      user = await WalletUser.findById(payload.id);
       console.log("non cache data", user);
 
       if (!user) {
@@ -39,7 +39,7 @@ async function deserializeUser(
       // Cache the user data
       cache.set(userIdKey, user, CACHE_EXPIRATION_SECONDS);
     } else {
-      user = WalletUserV2.hydrate(user);
+      user = WalletUser.hydrate(user);
     }
     // Attach user data to the request
     request.user = user;

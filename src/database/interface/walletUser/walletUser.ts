@@ -18,6 +18,6 @@ export interface IWalletUser {
   points: IWalletUserPoints;
   // pointsUpdateTimestamp: IWalletUserPoints;
   pointsPerSecond: IWalletUserPoints;
-  pointsPerSecondUpdateTimestamp: IWalletUserPoints;
+  pointsUpdateTimestamp: IWalletUserPoints;
   epochs: IEpoch;
 }
